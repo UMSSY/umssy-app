@@ -9,7 +9,14 @@ import { Button } from '@/components/ui/button';
 import { PassQr } from './pass-qr';
 import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
-import { Calendar, MapPin, Check, Clock, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Check, Clock, Layers, Loader2 } from 'lucide-react';
+import {
+  formatSessionPosition,
+  getNextSession,
+  getSortedSessions,
+  toSessionSchedule,
+} from '../utils/event-sessions';
+import { EventSessionsList } from './event-sessions-list';
 import {
   formatRegistrationDate,
   getEffectiveRegistrationStatus,
@@ -49,7 +56,14 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
     date: detail.date,
     startTime: detail.startTime,
     endTime: detail.endTime,
+    sessions: detail.sessions,
   });
+  // En talleres multisesión se muestra la sesión en curso o la próxima; el QR es el mismo.
+  const sessions = getSortedSessions(detail);
+  const nextSession = sessions.length > 1
+    ? getNextSession(sessions) ?? sessions[sessions.length - 1]
+    : null;
+  const shown = nextSession ? toSessionSchedule(nextSession) : detail;
   const effectiveStatus = getEffectiveRegistrationStatus(
     detail.status,
     timing.isPast,
@@ -77,13 +91,19 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
           <div className="flex min-w-0 items-center gap-2 text-sm text-surface/85">
             <Calendar className="size-4 shrink-0 opacity-80" />
             <span className="min-w-0 [overflow-wrap:anywhere] break-words">
-              {formatRegistrationDate(detail.date)}
+              {formatRegistrationDate(shown.date)}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-surface/85">
             <Clock className="size-4 shrink-0" aria-hidden="true" />
-            <span>{formatRegistrationTimeRange(detail.startTime, detail.endTime)}</span>
+            <span>{formatRegistrationTimeRange(shown.startTime, shown.endTime)}</span>
           </div>
+          {nextSession && (
+            <div className="flex items-center gap-2 text-sm text-surface/85">
+              <Layers className="size-4 shrink-0" aria-hidden="true" />
+              <span>{formatSessionPosition(sessions, nextSession)}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex min-w-0 items-center gap-2 text-sm text-surface/85">
@@ -98,7 +118,7 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
 
         <div className="flex flex-col gap-2">
           <div className="flex min-h-[220px] items-center justify-center rounded-xl bg-surface p-6 shadow-inner">
-            {!accessToken ? (
+            {!accessToken && !savedQrToken ? (
               <p role="alert">Inicia sesión para consultar el pase.</p>
             ) : pass.isPending && !savedQrToken ? (
               <div className="flex flex-col items-center gap-2 text-ink/70">
@@ -156,6 +176,11 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
           </div>
         </div>
       </Card>
+      {nextSession && (
+        <Card className="rounded-lg border-border bg-surface p-5 shadow-none">
+          <EventSessionsList sessions={sessions} titleId="pass-sessions-title" />
+        </Card>
+      )}
     </div>
   );
 }

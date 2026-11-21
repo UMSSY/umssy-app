@@ -1,3 +1,5 @@
+import type { EventSession } from './event-session.types';
+
 export interface ManagedWorkshop {
   id: string;
   title: string;
@@ -6,4 +8,5 @@ export interface ManagedWorkshop {
   endTime: string;
   location: string | null;
   coverUrl?: string | null;
+  sessions?: EventSession[];
 }

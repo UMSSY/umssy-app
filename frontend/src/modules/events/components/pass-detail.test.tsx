@@ -12,10 +12,11 @@ import { PassDetail } from './pass-detail';
 vi.mock('../services/registrations.service', () => ({ registrationsService: { getPass: vi.fn() } }));
 const pass = { id: 'pass-1', eventName: 'React', date: '2026-11-20', startTime: '09:00', endTime: '12:00', location: 'Aula 1', status: 'Confirmada' };
 beforeEach(async () => {
+  vi.useFakeTimers({ now: new Date('2026-11-19T12:00:00Z'), toFake: ['Date'] });
   vi.mocked(registrationsService.getPass).mockReset();
   await saveAccessToken("owner-token");
 });
-afterEach(() => { cleanup(); clearAccessToken(); });
+afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 
 describe('Private pass detail', () => {
   it('describes a real persistent QR without the illustrative Sprint 1 legend', async () => {
@@ -57,6 +58,14 @@ describe('Private pass detail', () => {
     const secondQr = await screen.findByRole('img', { name: 'Código QR del pase' });
 
     expect(secondQr.outerHTML).not.toBe(firstQr.outerHTML);
+  });
+
+  it('shows the saved QR without a session and without contacting the server', async () => {
+    clearAccessToken();
+    renderWithQuery(<PassDetail registration={pass} offlineQrToken={'c'.repeat(64)} />);
+    expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+    expect(screen.queryByText('Inicia sesión para consultar el pase.')).not.toBeInTheDocument();
+    expect(registrationsService.getPass).not.toHaveBeenCalled();
   });
 
   it('does not request a private pass without authentication', () => {

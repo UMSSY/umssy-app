@@ -17,7 +17,7 @@ export interface ProposalCover {
   previewUrl: string;
 }
 
-export type ProposalErrors = Partial<Record<keyof ProposalValues | 'cover', string>>;
+export type ProposalErrors = Partial<Record<keyof ProposalValues | 'cover' | 'additionalSessions', string>>;
 
 export interface CreatedProposal {
   id: string;

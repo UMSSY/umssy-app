@@ -129,15 +129,11 @@ export async function seedAttendanceQaFixtures(
       },
     },
   });
-  await tx.eventAttendance.upsert({
-    where: { registrationId: ATTENDANCE_QA_CASES.duplicate.registrationId },
-    update: {
-      checkedInAt: now,
-      checkedInById: owner.id,
-      checkedInOffline: false,
-      syncedAt: null,
-    },
-    create: {
+  await tx.eventAttendance.deleteMany({
+    where: { registrationId: { in: [ATTENDANCE_QA_CASES.duplicate.registrationId] } },
+  });
+  await tx.eventAttendance.create({
+    data: {
       registrationId: ATTENDANCE_QA_CASES.duplicate.registrationId,
       checkedInAt: now,
       checkedInById: owner.id,

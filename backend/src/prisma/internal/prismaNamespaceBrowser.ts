@@ -81,8 +81,13 @@ export const ModelName = {
   AppointmentDocument: 'AppointmentDocument',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
+  AppointmentNotificationEvent: 'AppointmentNotificationEvent',
+  AppointmentNotificationChannel: 'AppointmentNotificationChannel',
+  AppointmentNotificationStatus: 'AppointmentNotificationStatus',
+  AppointmentNotification: 'AppointmentNotification',
   EventCategory: 'EventCategory',
   Event: 'Event',
+  EventSession: 'EventSession',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
   JobOffer: 'JobOffer',
@@ -97,6 +102,7 @@ export const ModelName = {
   AccessRequest: 'AccessRequest',
   MentorParticipationRequest: 'MentorParticipationRequest',
   MentorSlotOffer: 'MentorSlotOffer',
+  MentorCapacitySetting: 'MentorCapacitySetting',
   ActivationOtp: 'ActivationOtp',
   MessageStatus: 'MessageStatus',
   ConnectionRequestStatus: 'ConnectionRequestStatus',
@@ -117,6 +123,7 @@ export const ModelName = {
   SurveyQuestionType: 'SurveyQuestionType',
   SurveyTargetAudience: 'SurveyTargetAudience',
   Survey: 'Survey',
+  SurveyAlertConfig: 'SurveyAlertConfig',
   SurveyQuestion: 'SurveyQuestion',
   SurveyQuestionOption: 'SurveyQuestionOption',
   SurveyResponse: 'SurveyResponse',
@@ -500,6 +507,8 @@ export const AppointmentScalarFieldEnum = {
   rejectionReason: 'rejectionReason',
   meetingUrl: 'meetingUrl',
   cancelledById: 'cancelledById',
+  cancellationReason: 'cancellationReason',
+  cancelledAt: 'cancelledAt',
   requestedAt: 'requestedAt',
   respondedAt: 'respondedAt',
   createdAt: 'createdAt',
@@ -553,6 +562,56 @@ export const AppointmentHistoryScalarFieldEnum = {
 export type AppointmentHistoryScalarFieldEnum = (typeof AppointmentHistoryScalarFieldEnum)[keyof typeof AppointmentHistoryScalarFieldEnum]
 
 
+export const AppointmentNotificationEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationEventScalarFieldEnum = (typeof AppointmentNotificationEventScalarFieldEnum)[keyof typeof AppointmentNotificationEventScalarFieldEnum]
+
+
+export const AppointmentNotificationChannelScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationChannelScalarFieldEnum = (typeof AppointmentNotificationChannelScalarFieldEnum)[keyof typeof AppointmentNotificationChannelScalarFieldEnum]
+
+
+export const AppointmentNotificationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationStatusScalarFieldEnum = (typeof AppointmentNotificationStatusScalarFieldEnum)[keyof typeof AppointmentNotificationStatusScalarFieldEnum]
+
+
+export const AppointmentNotificationScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  recipientId: 'recipientId',
+  eventId: 'eventId',
+  channelId: 'channelId',
+  statusId: 'statusId',
+  attempts: 'attempts',
+  lastError: 'lastError',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationScalarFieldEnum = (typeof AppointmentNotificationScalarFieldEnum)[keyof typeof AppointmentNotificationScalarFieldEnum]
+
+
 export const EventCategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -593,6 +652,19 @@ export const EventScalarFieldEnum = {
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
+export const EventSessionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  location: 'location',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventSessionScalarFieldEnum = (typeof EventSessionScalarFieldEnum)[keyof typeof EventSessionScalarFieldEnum]
+
+
 export const EventRegistrationScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
@@ -611,6 +683,7 @@ export type EventRegistrationScalarFieldEnum = (typeof EventRegistrationScalarFi
 export const EventAttendanceScalarFieldEnum = {
   id: 'id',
   registrationId: 'registrationId',
+  sessionId: 'sessionId',
   checkedInAt: 'checkedInAt',
   checkedInById: 'checkedInById',
   checkedInOffline: 'checkedInOffline',
@@ -794,6 +867,15 @@ export const MentorSlotOfferScalarFieldEnum = {
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
+
+
+export const MentorCapacitySettingScalarFieldEnum = {
+  id: 'id',
+  percentage: 'percentage',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorCapacitySettingScalarFieldEnum = (typeof MentorCapacitySettingScalarFieldEnum)[keyof typeof MentorCapacitySettingScalarFieldEnum]
 
 
 export const ActivationOtpScalarFieldEnum = {
@@ -1043,11 +1125,28 @@ export const SurveyScalarFieldEnum = {
   closesAt: 'closesAt',
   statusId: 'statusId',
   createdById: 'createdById',
+  closingSoonNotifiedAt: 'closingSoonNotifiedAt',
+  closedNotifiedAt: 'closedNotifiedAt',
+  lastReminderSentAt: 'lastReminderSentAt',
+  publishedNotifiedPeriod: 'publishedNotifiedPeriod',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type SurveyScalarFieldEnum = (typeof SurveyScalarFieldEnum)[keyof typeof SurveyScalarFieldEnum]
+
+
+export const SurveyAlertConfigScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  isEnabled: 'isEnabled',
+  threshold: 'threshold',
+  questionIds: 'questionIds',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyAlertConfigScalarFieldEnum = (typeof SurveyAlertConfigScalarFieldEnum)[keyof typeof SurveyAlertConfigScalarFieldEnum]
 
 
 export const SurveyQuestionScalarFieldEnum = {

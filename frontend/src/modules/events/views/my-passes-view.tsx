@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { OFFLINE_PASSES_TEXTS } from "../constants/offline-passes.constants";
 import { usePassesViewState } from "../hooks/use-passes-view-state";
-import { useCancelRegistration } from "../hooks/use-cancel-registration";
+import { useCancelRegistration } from '@/modules/event-registrations';
 import { OfflineStatusBanner } from "../components/offline-status-banner";
 import { NoOfflineCopyState } from "../components/no-offline-copy-state";
 import { RequestFeedback } from "../components/request-feedback";
@@ -21,10 +21,8 @@ import { CancelRegistrationDialog } from "../components/cancel-registration-dial
 import { RegistrationCancelledBanner } from "../components/registration-cancelled-banner";
 import { useMyPassesHistory } from "../hooks/use-my-passes";
 import { getHistoryErrorMessage } from "../utils/get-history-error-message";
-import {
-  getRegistrationEventTimestamp,
-  isConfirmedRegistrationStatus,
-} from "../utils/registration-format";
+import { isConfirmedRegistrationStatus } from "../utils/registration-format";
+import { getScheduleBounds } from "../utils/event-sessions";
 
 import type { MyPassesViewProps } from '../types/my-passes-view-props.types';
 
@@ -47,14 +45,15 @@ export function MyPassesView({
   const historyUnavailable = activeTab === "history" && !isOnline;
   const [now, setNow] = useState(Date.now);
   const currentRegistrations = registrations.filter((registration) => {
-    const closesAt = getRegistrationEventTimestamp(registration.date, registration.endTime);
+    // Un taller multisesión sigue vigente hasta el fin de su última sesión.
+    const closesAt = getScheduleBounds(registration).endsAt;
     return !Number.isFinite(closesAt) || now < closesAt;
   });
   const cancelTarget = cancelTargetId
     ? currentRegistrations.find((item) => item.id === cancelTargetId) ?? null
     : null;
   const cancelTargetStart = cancelTarget
-    ? getRegistrationEventTimestamp(cancelTarget.date, cancelTarget.startTime)
+    ? getScheduleBounds(cancelTarget).startsAt
     : Number.NaN;
   const canCancelTarget = Boolean(
     cancelTarget &&
@@ -65,7 +64,7 @@ export function MyPassesView({
 
   useEffect(() => {
     const deadlines = registrations
-      .map((registration) => getRegistrationEventTimestamp(registration.date, registration.endTime))
+      .map((registration) => getScheduleBounds(registration).endsAt)
       .filter((closesAt) => Number.isFinite(closesAt) && closesAt > now);
     if (canCancelTarget && Number.isFinite(cancelTargetStart) && cancelTargetStart > now) {
       deadlines.push(cancelTargetStart);
@@ -155,6 +154,7 @@ export function MyPassesView({
                     endTime={item.endTime}
                     status={item.status}
                     location={item.location}
+                    sessions={item.sessions}
                     registrationId={item.id}
                     onOpenChat={onOpenWorkshopChat}
                     chatDisabledReason={offlineReason}

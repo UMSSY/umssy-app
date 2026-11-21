@@ -38,7 +38,7 @@ describe('attendanceCheckInService', () => {
       });
       await expect(
         attendanceCheckInService.checkIn(EVENT_ID, REFERENCE, signal),
-      ).resolves.toBe(result);
+      ).resolves.toEqual({ result, sessionId: null });
       expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
         `/events/${EVENT_ID}/attendances/check-ins`,
         { reference: REFERENCE },
@@ -113,5 +113,24 @@ describe('attendanceCheckInService', () => {
         attendanceCheckInService.checkIn(EVENT_ID, REFERENCE),
       ).rejects.toThrow('Invalid attendance response');
     }
+  });
+
+  it('sends the selected session and returns the registered session', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({
+      status: 201,
+      data: {
+        statusCode: 201,
+        ok: true,
+        data: { result: 'registered', checkedInAt: '2026-11-16T14:00:00.000Z', sessionId: 'session-2' },
+      },
+    });
+    await expect(
+      attendanceCheckInService.checkIn(EVENT_ID, REFERENCE, undefined, undefined, 'session-2'),
+    ).resolves.toEqual({ result: 'registered', sessionId: 'session-2' });
+    expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
+      `/events/${EVENT_ID}/attendances/check-ins`,
+      { reference: REFERENCE, sessionId: 'session-2' },
+      expect.any(Object),
+    );
   });
 });

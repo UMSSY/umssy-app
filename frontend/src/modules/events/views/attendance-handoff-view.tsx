@@ -15,6 +15,7 @@ import {
   formatRegistrationTime,
 } from '../utils/registration-format';
 import { AttendanceMobileScanner } from '../components/attendance-mobile-scanner';
+import { formatSessionCount, formatSessionDateRange, getSortedSessions } from '../utils/event-sessions';
 import type { AttendanceHandoffViewProps } from '../types/attendance-handoff-view-props.types';
 
 const subscribeViewport = (callback: () => void) => {
@@ -50,6 +51,8 @@ export function AttendanceHandoffView({
     : '';
   const [now, setNow] = useState(Date.now);
   const workshop = workshops.find((item) => item.id === workshopId);
+  const sessions = workshop ? getSortedSessions(workshop) : [];
+  const isMultiSession = sessions.length > 1;
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -88,9 +91,15 @@ export function AttendanceHandoffView({
           <Card className="gap-2 border-border bg-surface p-5">
             <h2 className="font-semibold text-ink">{workshop.title}</h2>
             <p className="text-sm text-text-secondary">
-              {formatRegistrationDate(workshop.eventDate)} ·{' '}
-              {formatRegistrationTime(workshop.startTime)} –{' '}
-              {formatRegistrationTime(workshop.endTime)}
+              {isMultiSession ? (
+                `${formatSessionDateRange(sessions)} · ${formatSessionCount(sessions.length)}`
+              ) : (
+                <>
+                  {formatRegistrationDate(workshop.eventDate)} ·{' '}
+                  {formatRegistrationTime(workshop.startTime)} –{' '}
+                  {formatRegistrationTime(workshop.endTime)}
+                </>
+              )}
             </p>
             <p className="text-sm text-text-secondary">
               {workshop.location?.trim() || 'Lugar por confirmar'}
@@ -128,7 +137,7 @@ export function AttendanceHandoffView({
           </Card>
           {isMobile && (
             <div className="lg:hidden">
-              <AttendanceMobileScanner workshopId={workshopId} />
+              <AttendanceMobileScanner workshopId={workshopId} sessions={sessions} />
             </div>
           )}
         </>

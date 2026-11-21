@@ -1,7 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { frontendBaseUrl } from '../../mail/helpers/frontend-url.js';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';
-import { readFile } from 'node:fs/promises';
+import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
+import type { NotificationMailContent } from '../types/notification-mail-content.type.js';
+import type { NotificationMailRenderer } from '../types/notification-mail-renderer.type.js';
+import type { NotificationRecipientDelivery } from '../types/notification-recipient-delivery.type.js';
+import { buildRecipientName } from '../utils/build-recipient-name.js';
+import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
+import { truncateNotificationText } from '../utils/truncate-notification-text.js';
 
 @Injectable()
 export class MailDispatcherService {
@@ -17,41 +25,66 @@ export class MailDispatcherService {
     title: string,
     body: string,
     actionUrl: string,
-  ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (userIds.length === 0) return 'skipped';
-
-    let successCount = 0;
-    let failedCount = 0;
-
-    const templatePath = new URL('../../mail/mjml/notification.mjml', import.meta.url);
-const mjmlContent = await readFile(templatePath, 'utf8');
+    renderMail?: NotificationMailRenderer,
+  ): Promise<ChannelDispatchResult> {
+    const deliveries: NotificationRecipientDelivery[] = [];
+    let genericTemplate: Promise<string> | undefined;
+    const loadGenericTemplate = () =>
+      (genericTemplate ??= loadMailTemplate('notification'));
+    const genericTitle = truncateNotificationText(title);
+    const genericBody = truncateNotificationText(body);
+    const absoluteActionUrl = this.toAbsoluteActionUrl(actionUrl);
 
     for (const userId of userIds) {
       try {
-        const email = await this.userLookupRepository.findEmailByUserId(userId);
-        if (!email) continue;
+        const contact = await this.userLookupRepository.findContactByUserId(userId);
+        if (!contact?.email) {
+          deliveries.push({ recipientId: userId, channel: 'email', status: 'skipped' });
+          continue;
+        }
+
+        const content: NotificationMailContent = renderMail
+          ? await renderMail({
+              recipientName: buildRecipientName(contact.firstName, contact.lastName),
+              actionUrl,
+            })
+          : {
+              mjml: await loadGenericTemplate(),
+              subject: genericTitle,
+              text: `${genericBody}\n\nVer en UMSSY: ${absoluteActionUrl}`,
+              values: { title: genericTitle, body: genericBody, actionUrl: absoluteActionUrl },
+            };
 
         await this.mailService.send({
-          to: email,
-          subject: title,
-          text: body,
-          mjml: mjmlContent,
-          values: {
-            title: title,
-            body: body,
-            actionUrl: actionUrl,
-          },
+          to: contact.email,
+          subject: content.subject,
+          text: content.text,
+          mjml: content.mjml,
+          values: content.values,
         });
-        successCount++;
+        deliveries.push({ recipientId: userId, channel: 'email', status: 'sent' });
       } catch (error) {
-        failedCount++;
+        deliveries.push({ recipientId: userId, channel: 'email', status: 'failed' });
         this.logger.error(`Error enviando correo al usuario ${userId}`, error);
       }
     }
 
-    if (successCount > 0 && failedCount === 0) return 'sent';
-    if (successCount > 0 && failedCount > 0) return 'partial';
-    if (successCount === 0 && failedCount > 0) return 'failed';
-    return 'skipped';
+    return {
+      status: summarizeChannelStatus(
+        deliveries.filter((delivery) => delivery.status === 'sent').length,
+        deliveries.filter((delivery) => delivery.status === 'failed').length,
+      ),
+      deliveries,
+    };
+  }
+
+  private toAbsoluteActionUrl(actionUrl: string): string {
+    const base = new URL(`${frontendBaseUrl()}/`);
+    try {
+      const resolved = new URL(actionUrl || '/', base);
+      return resolved.origin === base.origin ? resolved.toString() : base.toString();
+    } catch {
+      return base.toString();
+    }
   }
 }

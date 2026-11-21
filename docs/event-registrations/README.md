@@ -7,6 +7,7 @@ The backend manages workshop registrations, cancellation, proposal support, priv
 ## Main flows and business rules
 
 - A `titulado` can register for an eligible published workshop. Cancellation is logical, not deletion. Reactivation keeps the registration ID and issues a new QR token, invalidating the old one.
+- Cancellation from the workshop detail or My Passes uses the same registration mutation. After a successful server response, the client removes the saved QR from the current account's IndexedDB snapshot before reporting success and invalidates the related queries.
 - The default `GET /event-registrations/me` scope lists current confirmed registrations. `scope=finished` returns finished registrations as a paginated history. Finished workshops leave the current-pass view at closing time; history does not claim the participant attended.
 - A pass can be viewed offline only after it was loaded and saved online. Registration, cancellation and attendance check-in require a network connection.
 - The authenticated `titulado` who created a published workshop may check in participants. The backend validates role, ownership, workshop, confirmed registration, cancellation state and server-side time window. It accepts a `v1:` QR token, the 64-character token or a registration UUID as a manual reference. A short manual code is not implemented.

@@ -6,7 +6,12 @@ import {
   PUSH_NOTIFICATION_ICON,
   PUSH_TEXT_MAX_LENGTH,
 } from '../constants/push-notification.constants.js';
+import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
 import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
+import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
+
+const PUSH_TTL_SECONDS = 24 * 60 * 60;
+const PUSH_URGENCY = 'high';
 
 @Injectable()
 export class PushDispatcherService implements OnModuleInit {
@@ -39,15 +44,16 @@ export class PushDispatcherService implements OnModuleInit {
     actionUrl: string,
     groupKey?: string,
     notificationIds?: ReadonlyMap<string, string>,
-  ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (userIds.length === 0) return 'skipped';
+  ): Promise<ChannelDispatchResult> {
+    if (userIds.length === 0) return { status: 'skipped', deliveries: [] };
 
     const subscriptions =
       await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
-    if (subscriptions.length === 0) return 'skipped';
 
     let successCount = 0;
     let failedCount = 0;
+    const sentUserIds = new Set<string>();
+    const failedUserIds = new Set<string>();
 
     const basePayload: PushNotificationPayload = {
       title: title.substring(0, PUSH_TEXT_MAX_LENGTH),
@@ -74,10 +80,13 @@ export class PushDispatcherService implements OnModuleInit {
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
           JSON.stringify(pushPayload),
+          { TTL: PUSH_TTL_SECONDS, urgency: PUSH_URGENCY },
         );
         successCount++;
+        sentUserIds.add(sub.userId);
       } catch (error: unknown) {
         failedCount++;
+        failedUserIds.add(sub.userId);
         const statusCode = this.getStatusCode(error);
         const subscriptionRemoved = statusCode === 404 || statusCode === 410;
         if (subscriptionRemoved) {
@@ -96,10 +105,18 @@ export class PushDispatcherService implements OnModuleInit {
       }
     }
 
-    if (successCount > 0 && failedCount === 0) return 'sent';
-    if (successCount > 0 && failedCount > 0) return 'partial';
-    if (successCount === 0 && failedCount > 0) return 'failed';
-    return 'skipped';
+    return {
+      status: summarizeChannelStatus(successCount, failedCount),
+      deliveries: userIds.map((recipientId) => ({
+        recipientId,
+        channel: 'push',
+        status: sentUserIds.has(recipientId)
+          ? 'sent'
+          : failedUserIds.has(recipientId)
+            ? 'failed'
+            : 'skipped',
+      })),
+    };
   }
 
   private logDeliveryFailure(

@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import type { EventItem } from '../types/event-item.types';
-import { getRegistrationEventTimestamp } from '../utils/registration-format';
+import { getScheduleBounds } from '../utils/event-sessions';
+import type { EventSession } from '../types/event-session.types';
 
 export function useEventTiming(event: {
   date: string;
   startTime?: string;
   endTime: string;
+  sessions?: EventSession[];
 }) {
   const [now, setNow] = useState(Date.now);
-  const startsAt = getRegistrationEventTimestamp(event.date, event.startTime ?? '');
-  const endsAt = getRegistrationEventTimestamp(event.date, event.endTime);
+  // Con sesiones, el taller empieza en la primera y termina al cerrar la última.
+  const { startsAt, endsAt } = getScheduleBounds(event);
   const hasValidStart = Number.isFinite(startsAt);
   const hasStarted = hasValidStart && now >= startsAt;
   const isPast = Number.isFinite(endsAt) && now >= endsAt;

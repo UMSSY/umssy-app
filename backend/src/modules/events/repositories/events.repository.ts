@@ -19,6 +19,11 @@ import {
   VOTING_STATUS_TITLES,
 } from '../constants/events.constants.js';
 
+const EVENT_SESSIONS_SELECT = {
+  select: { id: true, startsAt: true, endsAt: true, location: true },
+  orderBy: [{ startsAt: 'asc' }, { id: 'asc' }],
+} satisfies Prisma.Event$sessionsArgs;
+
 function buildSelect(userId?: string): Prisma.EventSelect {
   return {
     coverMimeType: true,
@@ -38,6 +43,7 @@ function buildSelect(userId?: string): Prisma.EventSelect {
     status: { select: { title: true } },
     origin: { select: { title: true } },
     category: { select: { id: true, name: true } },
+    sessions: EVENT_SESSIONS_SELECT,
     _count: {
       select: {
         registrations: {
@@ -80,15 +86,30 @@ export class EventsRepository {
         endTime: true,
         location: true,
         coverMimeType: true,
+        sessions: EVENT_SESSIONS_SELECT,
       },
       orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
     });
   }
 
-  findManagedWorkshop(eventId: string, userId: string, tx: Prisma.TransactionClient = this.prisma) {
+  findManagedWorkshop(
+    eventId: string,
+    userId: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
     return tx.event.findFirst({
-      where: { id: eventId, createdById: userId, status: { title: PUBLISHED_STATUS_TITLE } },
-      select: { id: true, eventDate: true, startTime: true, endTime: true },
+      where: {
+        id: eventId,
+        createdById: userId,
+        status: { title: PUBLISHED_STATUS_TITLE },
+      },
+      select: {
+        id: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        sessions: { select: { id: true, startsAt: true, endsAt: true } },
+      },
     });
   }
 
@@ -184,13 +205,35 @@ export class EventsRepository {
     event: RegistrationScheduleEvent,
     registeredEventIds: string[],
   ) {
+    const legacyOverlap: Prisma.EventWhereInput = {
+      eventDate: event.eventDate,
+      startTime: { lt: event.endTime },
+      endTime: { gt: event.startTime },
+    };
+    const ownSessions = event.sessions ?? [];
+    // Se comparan sesiones contra sesiones, no el rango completo entre la primera y la última.
+    const overlap: Prisma.EventWhereInput = ownSessions.length
+      ? {
+          OR: [
+            {
+              sessions: {
+                some: {
+                  OR: ownSessions.map((session) => ({
+                    startsAt: { lt: session.endsAt },
+                    endsAt: { gt: session.startsAt },
+                  })),
+                },
+              },
+            },
+            { sessions: { none: {} }, ...legacyOverlap },
+          ],
+        }
+      : legacyOverlap;
     return tx.event.findFirst({
       where: {
         id: { in: registeredEventIds, not: event.id },
         status: { title: PUBLISHED_STATUS_TITLE },
-        eventDate: event.eventDate,
-        startTime: { lt: event.endTime },
-        endTime: { gt: event.startTime },
+        ...overlap,
       },
       select: { id: true },
     });
@@ -208,6 +251,7 @@ export class EventsRepository {
         eventDate: true,
         startTime: true,
         endTime: true,
+        sessions: { select: { startsAt: true, endsAt: true } },
         status: { select: { title: true } },
       },
     });

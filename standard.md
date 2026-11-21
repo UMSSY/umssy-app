@@ -26,15 +26,13 @@ Branches of type `chore` are reserved exclusively for the DevOps team.
 
 The project adopts Conventional Commits with influences from the Angular standard.
 
-Allowed types: `docs`, `feat`, `fix`, `perf`, `refactor`, `test`, `build`, `chore`.
+Allowed types: docs, feat, fix, perf, refactor, test, build, chore.
 
-```text
 feat: message
 feat(frontend): message
-feat(scope module or function): <message less than 50 chars>
-```
+feat(scope module or function): <message>
 
-The message after the colon must be fewer than 50 characters. When a scope is provided, it identifies the module or function.
+When a scope is provided, it identifies the module or function.
 
 **Strict restriction:** Any commit containing direct changes to continuous integration (CI) will be rejected.
 
@@ -110,7 +108,8 @@ Endpoints must follow REST conventions.
 | --- | --- | --- |
 | Git Standards | PRs into `develop`, `main`, or `epic/**` | Validates all commits against Conventional Commits (allowed type, format, and a blank line before the body); validates branch names; validates the integration flow (`main` only from `develop`; `develop` only from `epic/*`, `hotfix/devops-*`, and DevOps branches; an `epic/*` cannot receive a merge from another `epic/*`); blocks direct PRs from group branches (`<type>/grupo-N-...`) into `develop`; and blocks changes to `.github/`, `.husky/`, `scripts/`, `backend/scripts/`, frontend and backend `package.json`, and Vitest, ESLint, Prettier, and tsconfig configuration outside DevOps branches (the “CI Files” check). |
 | CI Backend | PRs with changes in `backend/` | Installs dependencies, generates the Prisma client, runs the linter (oxlint), the standards linter (names, index files, and exceptions), tests with coverage, and the build. |
-| CI Frontend | PRs with changes in `frontend/` | Runs ESLint, tests with coverage, and the build. ESLint checks file and folder names, the absence of emojis, Tailwind class order and usage, the prohibition on importing Radix or Base UI outside `src/components/ui/`, and warns about native `<button>`, `<input>`, and `<select>` elements outside that folder. |
+| CI Frontend | PRs with changes in `frontend/` | Runs ESLint, tests with coverage, and the build. ESLint checks file and folder names, the absence of emojis, Tailwind class order and usage, and imports of Radix or Base UI. It reports prohibited native JSX elements as errors under the [frontend UI rules](frontend/standard.md#24-shadcn-and-base-ui-rules). |
+| [CI Database](.github/workflows/ci-database.yml) | PRs into `develop`, `main`, or `epic/**` that change database files or related configuration | Validates the Prisma schema, applies migrations to a temporary PostgreSQL database, checks that the resulting database matches the schema, generates Prisma Client, and validates production catalog and administrator seeds and development seeds. |
 | Husky | Before each commit | Lints only staged files (lint-staged) and validates the commit message using the same script as CI. It can be skipped with `--no-verify`, but CI checks again. |
 | Sync Develop to Epics | Every push to `develop` | Merges `develop` into all `epic/*` branches. If there is a conflict, it aborts that merge and reports it; the conflict must be resolved manually. |
 | Deployment | Pushes to `develop`, `main`, or epics with deployment enabled | See 1.11. |
@@ -119,7 +118,7 @@ Endpoints must follow REST conventions.
 
 **Required review (CODEOWNERS):** DevOps reviews `README.md`, `.github/`, `.husky/`, `scripts/`, `backend/scripts/`, frontend and backend `package.json`, and Vitest and ESLint configuration. The Database team reviews `/backend/prisma/`.
 
-**Planned automation:** PR checks for migrations and seeds against a temporary database, and a deprecated-code rule for frontend and backend.
+**Planned automation:** A deprecated-code rule for frontend and backend.
 
 ### 1.11 Continuous Deployment
 
@@ -143,7 +142,7 @@ Each environment has its own Kubernetes namespace and PostgreSQL database inside
 
 ### 2.1 Language
 
-- **English:** Variables, functions, classes, interfaces, files, folders, branches, commits, and database entities.
+- **English:** Variables, functions, classes, interfaces, files, folders, branches, commits, database entities, and documentation (`docs/`).
 - **Spanish:** Interface text (messages, labels, buttons, modals, alerts) and code comments.
 - Mark pending work with `TODO: <message>`.
 - Do not use emojis anywhere.
@@ -183,7 +182,7 @@ File names follow the `name.type.ts` pattern.
 | `.request.ts` / `.schema.ts` | Input Zod schema |
 | `.response.ts`, `.types.ts`, `.enum.ts` | Contracts, types, and enumerations |
 | `.constants.ts` | Module constants |
-| `.exception.ts` | One exception per file; class name ends with `Exception` |
+| `.exception.ts` | One exception per file in `exceptions/`; class name ends with `Exception` |
 | `.seed.ts` | Initial data |
 | `.spec.ts` / `.e2e-spec.ts` | Unit and integration tests |
 
@@ -235,13 +234,16 @@ When a new GitHub task is created (Frontend, Backend, or General), the form requ
 
 ## 4. DOCUMENTATION STANDARDS
 
+- All documentation in `docs/` must be written in English (not in Spanish).
 - Every module must have one README at `docs/<module>/README.md`, matching its directory name in `src/modules/`. This requirement applies to all modules. Document the complete module, including its backend and frontend responsibilities, in the same README; do not separate documentation by application layer.
+- Creating additional documentation files inside `backend/` or `frontend/` is prohibited, except for `backend/prisma/README.md`.
+- Preserve existing root `README` and general standard files.
 - Each module README must document its purpose, key flows, business rules, dependencies, and main endpoints it exposes or consumes.
 - Changes to a module must include corresponding updates to its documentation. Deprecation documentation is not required.
 - Architecture, database relationships, and key flows must be represented with Mermaid diagrams inside the relevant READMEs. Sequence diagrams must use Mermaid `sequenceDiagram`; standalone diagrams or images do not replace the required embedded diagrams.
 - Every documentation README must include a **Sprint History** section. Documenting Sprint 3 functionality is mandatory; documenting Sprints 1 and 2 is optional.
 - Database documentation must live in `backend/prisma/README.md`, alongside `schema.prisma`, and follow the backend database documentation standard.
-- Never add HU or epic references in the documentation
+- Never add HU or epic references in the documentation.
 
 ## 5. APPENDICES
 

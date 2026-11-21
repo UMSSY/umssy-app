@@ -1,4 +1,5 @@
 import { updateSessionOfflinePasses } from '../utils/offline-passes-store';
+import { removeOfflinePass } from '@/shared/services/storage/remove-offline-pass';
 import type { PassData } from '../types/pass-data.types';
 import type { Registration } from '../types/registration.types';
 
@@ -22,6 +23,7 @@ export async function saveOfflinePass(
     endTime: pass.endTime,
     location: pass.location,
     status: pass.status,
+    ...(pass.sessions && { sessions: pass.sessions }),
   };
   await updateSessionOfflinePasses(accessToken, signal, (snapshot, userId) => ({
     userId,
@@ -52,7 +54,7 @@ export async function reconcileOfflinePasses(
       const passes = snapshot.passes.flatMap((pass) => {
         const live = current.get(pass.id);
         if (!live) return [];
-        const { eventName, date, startTime, endTime, location } = live;
+        const { eventName, date, startTime, endTime, location, sessions } = live;
         return [
           {
             id: pass.id,
@@ -63,6 +65,7 @@ export async function reconcileOfflinePasses(
             startTime,
             endTime,
             location,
+            ...(sessions && { sessions }),
           },
         ];
       });
@@ -73,17 +76,4 @@ export async function reconcileOfflinePasses(
   return Boolean(updated && removed);
 }
 
-export async function removeOfflinePass(
-  registrationId: string,
-  accessToken: string,
-  signal?: AbortSignal,
-): Promise<void> {
-  await updateSessionOfflinePasses(accessToken, signal, (snapshot) => {
-    if (!snapshot?.passes.some(({ id }) => id === registrationId)) return;
-    return {
-      ...snapshot,
-      savedAt: new Date().toISOString(),
-      passes: snapshot.passes.filter(({ id }) => id !== registrationId),
-    };
-  });
-}
+export { removeOfflinePass };

@@ -5,11 +5,13 @@ import { useQuery } from '@tanstack/react-query';
 import { profileService } from '@/modules/profile';
 import { getAccessToken, subscribeAccessToken } from '@/shared/services/storage/access-token-storage';
 import { useEventCategories } from '@/modules/event-categories';
-import { EMPTY_PROPOSAL } from '../constants/proposal.constants';
+import { EMPTY_PROPOSAL, PROPOSAL_MAX_ADDITIONAL_SESSIONS } from '../constants/proposal.constants';
 import { useCreateProposal } from './use-create-proposal';
 import { proposalDraftStorage } from '../services/proposal-draft-storage';
 import { readProposalCover } from '../utils/read-proposal-cover';
 import { validateProposal } from '../utils/proposal-validation';
+import { hasProposalSessionErrors, validateProposalSessions } from '../utils/proposal-session-validation';
+import type { ProposalSession } from '../types/proposal-session.types';
 import type { CreatedProposal, ProposalCover, ProposalValues } from '../types/proposal.types';
 
 export function useProposalForm() {
@@ -18,6 +20,7 @@ export function useProposalForm() {
   const profile = useQuery({ queryKey: ['session-profile', token], queryFn: () => profileService.getProfile(), enabled: Boolean(token), retry: false });
   const tutor = [profile.data?.firstName, profile.data?.lastName].filter(Boolean).join(' ').trim();
   const [values, setValues] = useState<ProposalValues>({ ...EMPTY_PROPOSAL });
+  const [sessions, setSessions] = useState<ProposalSession[]>([]);
   const locations = useRef({ presencial: '', virtual: '' });
   const activeModality = useRef<ProposalValues['modality']>(EMPTY_PROPOSAL.modality);
   const [cover, setCover] = useState<ProposalCover | null>(null);
@@ -45,7 +48,7 @@ export function useProposalForm() {
       locations.current = { presencial: '', virtual: '', ...draft?.locations };
       activeModality.current = draft?.values.modality ?? EMPTY_PROPOSAL.modality;
       locations.current[activeModality.current] = draft?.values.location ?? '';
-      setReviewing(false); setValues(draft?.values ?? { ...EMPTY_PROPOSAL }); setCover(restoredCover);
+      setReviewing(false); setValues(draft?.values ?? { ...EMPTY_PROPOSAL }); setSessions(draft?.sessions ?? []); setCover(restoredCover);
       operation.current = draft?.operationKey ? { key: draft.operationKey, token } : null;
     }).catch(() => { if (!cancelled) setDraftWarning('No se pudo recuperar el borrador guardado en este navegador.'); })
       .finally(() => { if (!cancelled) setDraftOwner(owner); });
@@ -53,17 +56,19 @@ export function useProposalForm() {
   }, [owner, token]);
   useEffect(() => {
     if (!owner || draftOwner !== owner || created || draftCompleted.current) return;
-    const hasContent = Boolean(locations.current.presencial || locations.current.virtual) || Boolean(cover) || Object.keys(EMPTY_PROPOSAL).some(key => values[key as keyof ProposalValues] !== EMPTY_PROPOSAL[key as keyof ProposalValues]);
+    const hasContent = Boolean(locations.current.presencial || locations.current.virtual) || Boolean(cover) || sessions.length > 0 || Object.keys(EMPTY_PROPOSAL).some(key => values[key as keyof ProposalValues] !== EMPTY_PROPOSAL[key as keyof ProposalValues]);
     const saving = hasContent
-      ? proposalDraftStorage.save(owner, { values, locations: { ...locations.current }, file: cover?.file ?? null, operationKey: operation.current?.key ?? null })
+      ? proposalDraftStorage.save(owner, { values, sessions, locations: { ...locations.current }, file: cover?.file ?? null, operationKey: operation.current?.key ?? null })
       : proposalDraftStorage.remove(owner);
     void saving
       .catch(() => setDraftWarning('No se pudo guardar el borrador en este navegador. Mantén esta página abierta para conservarlo.'));
-  }, [owner, draftOwner, values, cover, pending, created]);
+  }, [owner, draftOwner, values, sessions, cover, pending, created]);
   useEffect(() => () => { if (cover) URL.revokeObjectURL(cover.previewUrl); }, [cover]);
 
   const validation = validateProposal(values, cover?.file ?? null, categories.categories.map(({ id }) => id));
   const errors = { ...Object.fromEntries(Object.entries(validation).filter(([key]) => submitted || (key !== 'cover' && touched[key] && Boolean(values[key as keyof ProposalValues]?.trim())))), ...serverErrors };
+  const sessionErrors = validateProposalSessions({ eventDate: values.eventDate, startTime: values.startTime, endTime: values.endTime }, sessions);
+  const invalidSessions = hasProposalSessionErrors(sessionErrors);
   function touch(key: string) { if (key === 'cover') return; setTouched(previous => ({ ...previous, [key]: true })); }
   const unavailable = !token || !tutor || profile.isError || categories.isLoading || Boolean(categories.error) || !categories.categories.length || Boolean(owner && draftOwner !== owner);
 
@@ -81,26 +86,39 @@ export function useProposalForm() {
     } else setValues(previous => ({ ...previous, [key]: value }));
   }
   function changeCover(next: ProposalCover | null) { edit(); setCover(next); }
+  function addSession() {
+    if (sending.current || sessions.length >= PROPOSAL_MAX_ADDITIONAL_SESSIONS) return;
+    edit(); setSessions(previous => [...previous, { eventDate: '', startTime: values.startTime, endTime: values.endTime }]);
+  }
+  function changeSession(index: number, key: keyof ProposalSession, value: string) {
+    if (sending.current) return;
+    edit(); setSessions(previous => previous.map((session, position) => position === index ? { ...session, [key]: value } : session));
+  }
+  function removeSession(index: number) {
+    if (sending.current) return;
+    edit(); setSessions(previous => previous.filter((_, position) => position !== index));
+  }
   function review() {
     setSubmitted(true); creation.reset();
-    if (unavailable || coverBusy || Object.keys(validation).length) return false;
+    if (unavailable || coverBusy || Object.keys(validation).length || invalidSessions) return false;
     setReviewing(true); return true;
   }
   async function confirm() {
-    if (sending.current || unavailable || coverBusy || !cover || Object.keys(validation).length) return;
+    if (sending.current || unavailable || coverBusy || !cover || Object.keys(validation).length || invalidSessions) return;
     sending.current = true; creation.reset();
     if (!operation.current || operation.current.token !== token) operation.current = { key: crypto.randomUUID(), token };
     try {
-      const result = await creation.mutateAsync({ values, cover: cover.file, operationKey: operation.current.key, accessToken: token });
+      const result = await creation.mutateAsync({ values, sessions, cover: cover.file, operationKey: operation.current.key, accessToken: token });
       if (getAccessToken() !== token) return;
       draftCompleted.current = true;
       if (owner) await proposalDraftStorage.remove(owner).catch(() => setDraftWarning('La propuesta se guardó, pero no se pudo limpiar el borrador local.'));
       locations.current = { presencial: '', virtual: '' }; activeModality.current = EMPTY_PROPOSAL.modality;
-      setCreated(result); setReviewing(false); setValues({ ...EMPTY_PROPOSAL }); setCover(null); setSubmitted(false); setTouched({}); operation.current = null;
+      setCreated(result); setReviewing(false); setValues({ ...EMPTY_PROPOSAL }); setSessions([]); setCover(null); setSubmitted(false); setTouched({}); operation.current = null;
     } catch {
       return;
     } finally { sending.current = false; }
   }
-  return { values, cover, touch, change, changeCover, coverBusy, setCoverBusy, errors, categories, profile, tutor,
+  return { values, cover, touch, change, changeCover, coverBusy,
+    sessions, sessionErrors: submitted ? sessionErrors : [], addSession, changeSession, removeSession, canAddSession: sessions.length < PROPOSAL_MAX_ADDITIONAL_SESSIONS, setCoverBusy, errors, categories, profile, tutor,
     draftWarning, restoring: Boolean(owner && draftOwner !== owner), reviewing, closeReview: () => { if (!sending.current) setReviewing(false); }, review, confirm, pending, unavailable, message, created };
 }

@@ -2,7 +2,7 @@ import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { registrationsService } from "@/modules/event-registrations";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventDetailPanel } from "./event-detail-panel";
 import type { EventDetail } from "../types/event-detail.types";
@@ -253,5 +253,25 @@ describe("EventDetailPanel", () => {
     expect(screen.getByRole('button', { name: 'Preinscribirme/Apoyar propuesta' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Inscribirme' })).not.toBeInTheDocument();
     expect(screen.queryByText('Cupos')).not.toBeInTheDocument();
+  });
+
+  it('lists every session of a multi-session workshop in order', () => {
+    render(<EventDetailPanel event={{ ...event, sessions: [
+      { id: 's2', startsAt: '2026-12-03T13:00:00.000Z', endsAt: '2026-12-03T15:00:00.000Z', location: null },
+      { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+    ] }} />);
+    const list = screen.getByRole('region', { name: 'Sesiones' });
+    const items = within(list).getAllByRole('listitem');
+    expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent('martes, 1 de diciembre');
+    expect(items[0]).toHaveTextContent('09:00 - 11:00 hrs');
+    expect(items[1]).toHaveTextContent('jueves, 3 de diciembre');
+    expect(screen.getByText(/^1s?[–-]s?3 de diciembre$/)).toBeInTheDocument();
+  });
+
+  it('keeps the single date and schedule without a session list', () => {
+    render(<EventDetailPanel event={{ ...event, sessions: [] }} />);
+    expect(screen.queryByRole('region', { name: 'Sesiones' })).not.toBeInTheDocument();
+    expect(screen.getByText('09:00 - 12:00 hrs')).toBeInTheDocument();
   });
 });
