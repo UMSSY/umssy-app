@@ -85,17 +85,7 @@ describe("useCloseJobOffer", () => {
 
     expect(toast.success).toHaveBeenCalledWith(
       CLOSE_JOB_OFFER_TEXT.success,
-      expect.objectContaining({
-        position: "top-center",
-        duration: 5000,
-        richColors: true,
-        closeButton: true,
-        style: expect.objectContaining({
-          background: "#f0fdf4",
-          color: "#166534",
-          border: "1px solid #bbf7d0",
-        }),
-      }),
+      TOAST_OPTIONS,
     );
 
     expect(invalidateQueries).toHaveBeenCalledWith({

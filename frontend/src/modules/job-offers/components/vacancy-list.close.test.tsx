@@ -184,13 +184,8 @@ describe("VacancyList - cierre manual HU12", () => {
     ).toBeInTheDocument();
 
     expect(toast.success).toHaveBeenCalledWith(
-        CLOSE_JOB_OFFER_TEXT.success,
-        expect.objectContaining({
-            position: "top-center",
-            duration: 5000,
-            richColors: true,
-            closeButton: true,
-        }),
+      CLOSE_JOB_OFFER_TEXT.success,
+      { position: "top-center", duration: 5000 },
     );
 
     expect(getOffers).toHaveBeenCalledTimes(2);

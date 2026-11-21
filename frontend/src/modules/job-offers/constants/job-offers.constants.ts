@@ -186,14 +186,3 @@ export const CLOSE_JOB_OFFER_TEXT = {
   server: "No se pudo completar el cierre de la vacante. Inténtalo más tarde.",
   notClosable: "La vacante ya se encuentra cerrada o dejó de estar publicada.",
 } as const;
-
-export const CLOSE_SUCCESS_TOAST_OPTIONS = {
-  ...TOAST_OPTIONS,
-  richColors: true,
-  closeButton: true,
-  style: {
-    background: "#f0fdf4",
-    color: "#166534",
-    border: "1px solid #bbf7d0",
-  },
-} as const;
