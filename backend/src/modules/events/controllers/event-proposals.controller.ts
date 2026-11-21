@@ -36,7 +36,7 @@ export class EventProposalsController {
       limits: {
         fileSize: 5 * 1024 * 1024,
         files: 1,
-        fields: 9,
+        fields: 10,
         fieldSize: 10000,
       },
     }),

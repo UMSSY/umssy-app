@@ -8,6 +8,14 @@ const INBOX_TYPE_FILTER = {
   code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] },
 };
 
+const DEDUPLICATED_GROUP_PREFIXES = ['radar:', 'mentor-slot-offer:'];
+
+function isDeduplicatedGroup(groupKey?: string): groupKey is string {
+  return DEDUPLICATED_GROUP_PREFIXES.some((prefix) =>
+    groupKey?.startsWith(prefix),
+  );
+}
+
 @Injectable()
 export class NotificationsRepository {
   constructor(
@@ -26,7 +34,7 @@ export class NotificationsRepository {
       groupKey?: string;
     }[],
   ): Promise<CreatedNotification[]> {
-    if (!data.some((item) => item.groupKey?.startsWith('radar:'))) {
+    if (!data.some((item) => isDeduplicatedGroup(item.groupKey))) {
       return this.prisma.notification.createManyAndReturn({
         data,
         select: { id: true, recipientId: true },
@@ -35,8 +43,8 @@ export class NotificationsRepository {
     return this.prisma.$transaction(async (tx) => {
       const created: CreatedNotification[] = [];
       for (const item of data) {
-        if (item.groupKey?.startsWith('radar:')) {
-          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${item.recipientId + ':' + item.groupKey}, 0))`;
+        if (isDeduplicatedGroup(item.groupKey)) {
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${item.recipientId + ':' + item.groupKey}, 0))`;
           const existing = await tx.notification.findFirst({
             where: {
               recipientId: item.recipientId,
@@ -56,6 +64,22 @@ export class NotificationsRepository {
       }
       return created;
     });
+  }
+
+  async hasGroupedNotification(
+    recipientId: string,
+    typeCode: string,
+    groupKey: string,
+  ): Promise<boolean> {
+    const notification = await this.prisma.notification.findFirst({
+      where: {
+        recipientId,
+        groupKey,
+        type: { code: typeCode },
+      },
+      select: { id: true },
+    });
+    return notification !== null;
   }
 
   findByType(userId: string, typeCode: string) {

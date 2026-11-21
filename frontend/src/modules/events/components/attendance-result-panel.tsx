@@ -40,6 +40,7 @@ export function AttendanceResultPanel({ state, onDismiss }: AttendanceResultPane
         <Icon aria-hidden="true" className={`mx-auto mb-4 size-14 ${content.color} ${verifying ? 'animate-spin' : ''}`} />
         <h2 ref={headingRef} tabIndex={-1} id="attendance-result-title" className="text-xl font-bold text-ink outline-none">{content.title}</h2>
         <p id="attendance-result-description" className="mt-2 text-sm text-text-secondary">{content.description}</p>
+        {(state.kind === 'registered' || state.kind === 'duplicate') && state.sessionLabel && <p className="mt-2 text-sm font-semibold text-ink first-letter:uppercase">{state.sessionLabel}</p>}
         {!verifying && <div className="mt-6 space-y-2">
           <Button type="button" className="w-full" onClick={onDismiss}><ScanLine aria-hidden="true" />{state.kind === 'invalid' || state.kind === 'error' ? 'Escanear nuevamente' : 'Escanear siguiente'}</Button>
           {state.kind === 'registered' && <Button type="button" variant="outline" disabled title="Registro del taller próximamente" className="w-full">Ver registro del taller</Button>}

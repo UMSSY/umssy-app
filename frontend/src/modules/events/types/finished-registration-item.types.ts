@@ -1,3 +1,5 @@
+import type { EventSession } from './event-session.types';
+
 export interface FinishedRegistrationItem {
   id: string;
   title: string;
@@ -5,4 +7,5 @@ export interface FinishedRegistrationItem {
   startTime: string;
   endTime: string;
   location: string | null;
+  sessions?: EventSession[];
 }

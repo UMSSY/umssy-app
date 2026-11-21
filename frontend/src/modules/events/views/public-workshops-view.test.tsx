@@ -52,4 +52,14 @@ describe("Public workshops", () => {
   expect(await screen.findByRole("heading",{name:"No pudimos abrir este taller"})).toBeInTheDocument();
   expect(screen.getByRole("link",{name:"Todos los talleres"})).toHaveAttribute("href","/workshops");
  });
+
+  it("shows the session schedule of a multi-session public workshop", async () => {
+    vi.spyOn(eventsService,"getEvent").mockResolvedValue({ ...event, sessions: [
+      { id: 's2', startsAt: '2026-12-03T13:00:00.000Z', endsAt: '2026-12-03T15:00:00.000Z', location: null },
+      { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+    ] });
+    render(<PublicWorkshopDetailView id={event.id} />);
+    expect(await screen.findByText("2 sesiones")).toBeInTheDocument();
+    expect(screen.getByRole("region",{name:"Sesiones"})).toHaveTextContent("jueves, 3 de diciembre");
+  });
 });

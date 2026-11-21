@@ -15,6 +15,11 @@ export function getProposalError(error: unknown): ProposalError {
         if (typeof value === 'string') fields[key] = value;
         else if (value !== null && typeof value === 'object' && 'message' in value && typeof value.message === 'string') fields[key] = value.message;
       }
+      // El backend informa las sesiones como additionalSessions o additionalSessions.N.campo.
+      const session: unknown = Array.isArray(errors)
+        ? errors.find((error: unknown) => error !== null && typeof error === 'object' && 'field' in error && typeof error.field === 'string' && error.field.startsWith('additionalSessions'))
+        : undefined;
+      if (session !== null && typeof session === 'object' && 'message' in session && typeof session.message === 'string') fields.additionalSessions = session.message;
     }
     const code = body && typeof body === 'object' && 'code' in body ? String(body.code) : '';
     const coverMessages: Record<string, string> = {

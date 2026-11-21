@@ -12,6 +12,7 @@ const state = {
   pending: false, restoring: false, created: null, draftWarning: null, cover: null,
   changeCover: vi.fn(), setCoverBusy: vi.fn(), coverBusy: false, message: null,
   reviewing: false, closeReview: vi.fn(), confirm: vi.fn(), review: vi.fn(), unavailable: false,
+  sessions: [], sessionErrors: [], addSession: vi.fn(), changeSession: vi.fn(), removeSession: vi.fn(), canAddSession: true,
 };
 beforeEach(() => { vi.clearAllMocks(); vi.useFakeTimers({ now: new Date('2026-10-24T12:00:00Z'), toFake: ['Date'] }); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });

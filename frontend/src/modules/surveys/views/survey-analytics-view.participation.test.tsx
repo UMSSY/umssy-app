@@ -13,6 +13,7 @@ import type { SurveyParticipation } from "../types/survey-participation.types";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const STATISTICS = buildStatistics({ totalResponses: 48 });
 const REMINDER_RESULT = {
@@ -176,7 +177,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     const dialog = await openAlerts(user);
 
     expect(within(dialog).getByRole("switch", { name: "Activar alertas" })).toBeChecked();
-    expect(within(dialog).getByRole("spinbutton", { name: "Umbral de cambio" })).toHaveValue(10);
+    expect(within(dialog).getByRole("textbox", { name: "Umbral de cambio" })).toHaveValue("10");
     expect(within(dialog).getByText("1 de 2")).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Marcar todas" }));
@@ -192,13 +193,13 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await renderLoaded();
     const dialog = await openAlerts(user);
 
-    const threshold = within(dialog).getByRole("spinbutton", { name: "Umbral de cambio" });
+    const threshold = within(dialog).getByRole("textbox", { name: "Umbral de cambio" });
     await user.clear(threshold);
     await user.type(threshold, "60");
     await user.click(within(dialog).getByRole("button", { name: "Desmarcar todas" }));
     await user.click(within(dialog).getByRole("button", { name: "Guardar" }));
 
-    expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.thresholdError)).toBeInTheDocument();
+    expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.thresholdMax)).toBeInTheDocument();
     expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.questionsError)).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
   });
@@ -241,6 +242,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await renderLoaded();
     const dialog = await openAlerts(user);
 
+    await user.click(within(dialog).getByRole("checkbox", { name: /¿Qué competencias usas/ }));
     await user.click(within(dialog).getByRole("button", { name: "Guardar" }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(SURVEY_ALERTS_TEXT.saveError, expect.anything()));

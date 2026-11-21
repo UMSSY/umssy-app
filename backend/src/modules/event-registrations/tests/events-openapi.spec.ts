@@ -57,9 +57,9 @@ describe('events OpenAPI contracts', () => {
           (example) => ('value' in example ? (example.value as { code: string }).code : undefined),
         );
       expect(exampleCodes('403')).toEqual(['FORBIDDEN_ROLE', 'ATTENDANCE_ACCESS_DENIED']);
-      expect(exampleCodes('422')).toEqual(['ATTENDANCE_PASS_INVALID', 'ATTENDANCE_PASS_CANCELLED']);
+      expect(exampleCodes('422')).toEqual(['ATTENDANCE_PASS_INVALID', 'ATTENDANCE_PASS_CANCELLED', 'ATTENDANCE_SESSION_INVALID']);
       expect(JSON.stringify(errorContent('403')?.schema)).toContain('"enum":["FORBIDDEN_ROLE","ATTENDANCE_ACCESS_DENIED"]');
-      expect(JSON.stringify(errorContent('422')?.schema)).toContain('"enum":["ATTENDANCE_PASS_INVALID","ATTENDANCE_PASS_CANCELLED"]');
+      expect(JSON.stringify(errorContent('422')?.schema)).toContain('"enum":["ATTENDANCE_PASS_INVALID","ATTENDANCE_PASS_CANCELLED","ATTENDANCE_SESSION_INVALID"]');
       expect(managed?.operationId).toBe('getManagedWorkshops');
       expect(managed?.responses['200']).toHaveProperty('headers.Cache-Control');
       expect(JSON.stringify(managed?.responses['401'])).toContain(API_ERROR);

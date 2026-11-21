@@ -23,7 +23,7 @@ describe("proposal creation mutation", () => {
     const invalidate = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateProposal('session-a'), { wrapper });
     await act(async () => { await result.current.mutateAsync(variables); });
-    expect(proposalsService.create).toHaveBeenCalledWith(variables.values, variables.cover, 'operation', 'session-a');
+    expect(proposalsService.create).toHaveBeenCalledWith(variables.values, variables.cover, 'operation', 'session-a', undefined);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['event-proposals'] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['events'] });
   });
