@@ -101,12 +101,6 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
     ],
   },
   {
-    label: 'Notificaciones de encuestas',
-    icon: Bell,
-    href: '/surveys',
-    roles: getRouteRoles('/surveys'),
-  },
-  {
     label: 'Mi empresa',
     icon: Building2,
     activePathPatterns: [

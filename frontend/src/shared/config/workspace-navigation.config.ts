@@ -1,5 +1,4 @@
 import {
-  Bell,
   BookOpen,
   BriefcaseBusiness,
   Building2,
@@ -252,13 +251,6 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
     icon: MessageCircle,
     area: 'community',
     keywords: 'chat mensajes conversaciones',
-  },
-  {
-    label: 'Notificaciones de encuestas',
-    href: '/surveys',
-    icon: Bell,
-    area: 'community',
-    keywords: 'encuestas formularios cuestionarios responder pendientes',
   },
   {
     label: 'Talleres disponibles',

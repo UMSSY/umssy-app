@@ -4,6 +4,8 @@ import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
 import { surveyNotificationsService } from "../services/survey-notifications.service";
 import { PendingSurveysBadge } from "./pending-surveys-badge";
 
+vi.mock("../hooks/use-can-answer-surveys", () => ({ useCanAnswerSurveys: () => true }));
+
 describe("PendingSurveysBadge", () => {
   afterEach(() => {
     cleanup();

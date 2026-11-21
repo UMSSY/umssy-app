@@ -1,7 +1,8 @@
 import type { SurveyNotificationStatus } from "../types/survey-notification-status.types";
 
-export const SURVEY_NOTIFICATIONS_PATH = "/surveys";
-export const SURVEY_NOTIFICATIONS_LABEL = "Notificaciones de encuestas";
+export const SURVEY_ANSWER_PATH = "/surveys";
+export const SURVEY_NOTIFICATIONS_PATH = "/notifications?filter=SURVEYS";
+export const SURVEY_NOTIFICATIONS_LABEL = "Notificaciones de Encuestas";
 
 export const EMPTY_STATE_RAY_CLASSES = [
   "-left-7 top-1/2 -translate-y-1/2",

@@ -67,6 +67,7 @@ export function AppSidebar({
                 pathname={pathname}
                 className={itemClassName}
                 badge={itemBadges?.[item.label]}
+                childBadges={itemBadges}
               />
             ))}
           </SidebarMenu>

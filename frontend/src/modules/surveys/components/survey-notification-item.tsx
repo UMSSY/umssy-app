@@ -4,7 +4,7 @@ import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { SURVEY_STATUS_LABELS, SURVEY_STATUS_MESSAGES, SURVEY_STATUS_TONES, SURVEY_NOTIFICATIONS_PATH } from "../constants/survey-notifications.constants";
+import { SURVEY_STATUS_LABELS, SURVEY_STATUS_MESSAGES, SURVEY_STATUS_TONES, SURVEY_ANSWER_PATH } from "../constants/survey-notifications.constants";
 import type { SurveyNotificationItemProps } from "../types/survey-notification-item-props.types";
 import { formatSurveyDate } from "../utils/format-survey-date";
 
@@ -16,7 +16,7 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   const renderAction = () => {
     if (isPending) {
       return (
-        <Link href={`${SURVEY_NOTIFICATIONS_PATH}/${id}`} className={cn(buttonVariants({ variant: "default" }), "w-full")}>
+        <Link href={`${SURVEY_ANSWER_PATH}/${id}`} className={cn(buttonVariants({ variant: "default" }), "w-full")}>
           <FileClock data-icon="inline-start" aria-hidden="true" />
           {"Responder encuesta"}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />

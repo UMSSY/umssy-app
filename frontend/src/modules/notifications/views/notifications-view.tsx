@@ -14,6 +14,7 @@ import {
   useUnreadNotificationsCount,
 } from "../hooks/use-notifications";
 import type { NotificationInboxFilter } from "../types/notification-inbox-filter.types";
+import type { NotificationsViewProps } from "../types/notifications-view-props.types";
 import type { NotificationResponse } from "../types/notification-response.types";
 import { getNotificationCategory } from "../utils/get-notification-category";
 import { groupNotificationsByDate } from "../utils/group-notifications-by-date";
@@ -27,7 +28,7 @@ function isValidInboxFilter(value: string | null): value is NotificationInboxFil
   return value !== null && (NOTIFICATION_INBOX_FILTERS as readonly string[]).includes(value);
 }
 
-export function NotificationsView() {
+export function NotificationsView({ filterSections }: NotificationsViewProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
@@ -166,6 +167,8 @@ export function NotificationsView() {
           {unreadCount} sin leer
         </span>
       </div>
+
+      {filterSections?.[activeFilter]}
 
       {isLoading ? (
         <div aria-busy="true" className="flex flex-col gap-3">
