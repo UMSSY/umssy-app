@@ -136,6 +136,18 @@ The inbox stays owned by this module; other domains can add content to it withou
 
 The other filters, the notification list, read state and link resolution are not affected.
 
+### Shared inbox components and routes
+
+The module exposes in `index.ts` the visual pieces of the inbox and the route of each filter, so the sections that other domains add look the same and stay connected to the menu:
+
+| Public export | Use |
+| --- | --- |
+| `NotificationCard` | Card presentation: unread/pending dot, icon, title, description (`line-clamp-2`), date and an `action` slot. `NotificationItem` uses it with the "open and mark as read" button; surveys uses it with "Responder encuesta" |
+| `NotificationsInboxLoading` | Loading rows built with the shared `Skeleton` (`rows`, 4 by default) |
+| `NotificationsInboxEmpty` | Empty state with the `icon`, `title` and `description` of each section |
+| `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications?filter=SURVEYS`...), used by the sidebar, the filter tabs and surveys |
+| `NOTIFICATION_INBOX_FILTER_LABELS` | Filter labels; surveys keys its sidebar badge with `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`, so renaming the menu entry does not disconnect the counter |
+
 ## Sprint History
 
 ### Sprint 3
@@ -149,6 +161,7 @@ The other filters, the notification list, read state and link resolution are not
 - Optional `channels` in `notify()` to deliver or retry specific channels.
 - Push is sent with TTL and high urgency; push subscriptions are reassigned to the account that registers them.
 - Optional `filterSections` slot in `NotificationsView` and sub-item badges in the sidebar, so surveys shows its list and pending count inside the "Notificaciones de Encuestas" filter (single inbox).
+- Shared inbox components (`NotificationCard`, `NotificationsInboxLoading`, `NotificationsInboxEmpty`) and filter routes (`getNotificationInboxPath`) exported for the sections of other domains.
 
 - Central publication notices retain the exact Radar snapshot reference and support historical navigation.
 - Concurrent duplicate prevention per recipient and snapshot, with central ownership of listing and read state.
