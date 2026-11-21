@@ -60,17 +60,36 @@ describe('UserSkillRepository', () => {
     expect(transaction).not.toHaveBeenCalled();
   });
 
-  it('loads only manually selected skills into the editable list', async () => {
+  it('loads only manual and experience-linked skills, including legacy evidence', async () => {
     const records = [
-      { skill: { id: skillId, name: 'Python', isCustom: false } },
-      { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
+      {
+        skill: { id: skillId, name: 'Python', isCustom: false },
+        source: 'manual',
+        evidenceRefs: [],
+      },
+      {
+        skill: { id: detectedSkillId, name: 'HTML5', isCustom: false },
+        source: 'nlp',
+        evidenceRefs: [{ type: 'work-experience', id: 'exp-1' }],
+      },
+      {
+        skill: { id: otherSkillId, name: 'SQL', isCustom: false },
+        source: 'nlp',
+        evidenceRefs: ['work_experience:exp-old'],
+      },
+      {
+        skill: { id: 'cv-skill', name: 'React', isCustom: false },
+        source: 'nlp',
+        evidenceRefs: [{ type: 'cv', id: 'cv-1' }],
+      },
     ];
     userSkill.findMany.mockResolvedValue(records);
 
-    await expect(repository.findByUserId(userId)).resolves.toBe(records);
-
+    await expect(repository.findByUserId(userId)).resolves.toEqual(
+      records.slice(0, 3),
+    );
     expect(userSkill.findMany).toHaveBeenCalledWith({
-      where: { userId, source: 'manual' },
+      where: { userId },
       orderBy: { skill: { name: 'asc' } },
       select,
     });
@@ -78,13 +97,17 @@ describe('UserSkillRepository', () => {
 
   it('adds the new manual skills in a single transaction', async () => {
     const records = [
-      { skill: { id: skillId, name: 'Python', isCustom: false } },
+      {
+        skill: { id: skillId, name: 'Python', isCustom: false },
+        source: 'manual',
+        evidenceRefs: [],
+      },
     ];
     userSkill.findMany.mockResolvedValue(records);
 
     await expect(
       repository.replaceForUser(userId, [skillId, otherSkillId]),
-    ).resolves.toBe(records);
+    ).resolves.toEqual(records);
     expect(transaction).toHaveBeenCalledOnce();
     expect(tx.userSkill.createMany).toHaveBeenCalledWith({
       data: [
