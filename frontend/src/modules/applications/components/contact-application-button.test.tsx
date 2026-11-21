@@ -34,15 +34,16 @@ describe("ContactApplicationButton", () => {
     expect(onContact).not.toHaveBeenCalled();
   });
 
-  it("blocks the button while the chat of another application is being opened", () => {
-    render(
-      <ContactApplicationButton
-        application={buildApplication({ id: "application-8" })}
-        contactingId="application-7"
-        onContact={vi.fn()}
-      />,
-    );
+  it("keeps the button of another application enabled while a chat is being opened", () => {
+    const onContact = vi.fn();
+    const application = buildApplication({ id: "application-8" });
+    render(<ContactApplicationButton application={application} contactingId="application-7" onContact={onContact} />);
 
-    expect(screen.getByRole("button", { name: "Contactar" })).toBeDisabled();
+    const button = screen.getByRole("button", { name: "Contactar" });
+    fireEvent.click(button);
+
+    expect(button).toBeEnabled();
+    expect(button).toHaveAttribute("aria-busy", "false");
+    expect(onContact).toHaveBeenCalledWith(application);
   });
 });
