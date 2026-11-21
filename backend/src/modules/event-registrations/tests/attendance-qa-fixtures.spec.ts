@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { assertAttendanceWindow } from '../utils/assert-attendance-window.js';
 import {
   ATTENDANCE_QA_CASES,
   ATTENDANCE_QA_EVENT_IDS,
@@ -83,26 +84,63 @@ describe('HU-08-12 attendance QA fixtures', () => {
     expect(result.events).toEqual(ATTENDANCE_QA_EVENT_IDS);
     expect(result.schedule.attendanceOpensHoursBefore).toBe(2);
     expect(sundayPrimary).toMatchObject({
+      title: 'Taller de visualización de datos con Power BI',
       eventDate: new Date('2026-11-22T00:00:00.000Z'),
       startTime: new Date('1970-01-01T20:00:00.000Z'),
-      endTime: new Date('1970-01-01T23:59:59.999Z'),
+      endTime: new Date('1970-01-01T23:00:00.000Z'),
       statusId: 'published-id',
       createdById: ownerId,
     });
     expect(sundaySecond).toMatchObject({
+      title: 'Taller de gestión ágil de proyectos con Scrum',
       eventDate: new Date('2026-11-22T00:00:00.000Z'),
       startTime: new Date('1970-01-01T21:00:00.000Z'),
     });
     expect(monday).toMatchObject({
+      title: 'Taller de desarrollo de aplicaciones web con React',
       eventDate: new Date('2026-11-23T00:00:00.000Z'),
       startTime: new Date('1970-01-01T10:00:00.000Z'),
       endTime: new Date('1970-01-01T12:00:00.000Z'),
     });
     expect(saturday).toMatchObject({
+      title: 'Taller de comunicación efectiva para equipos de trabajo',
       eventDate: new Date('2026-11-21T00:00:00.000Z'),
       startTime: new Date('1970-01-01T10:00:00.000Z'),
       endTime: new Date('1970-01-01T12:00:00.000Z'),
     });
+    expect(() =>
+      assertAttendanceWindow(
+        sundayPrimary!,
+        new Date('2026-11-22T22:00:00.000Z'), // 18:00 in Bolivia, two hours early.
+      ),
+    ).not.toThrow();
+    expect(() =>
+      assertAttendanceWindow(
+        sundayPrimary!,
+        new Date('2026-11-22T21:59:59.999Z'),
+      ),
+    ).toThrowError(expect.objectContaining({ statusCode: 409 }));
+    expect(() =>
+      assertAttendanceWindow(
+        sundaySecond!,
+        new Date('2026-11-22T23:00:00.000Z'), // 19:00 in Bolivia, two hours early.
+      ),
+    ).not.toThrow();
+    expect(() =>
+      assertAttendanceWindow(
+        sundaySecond!,
+        new Date('2026-11-22T22:59:59.999Z'),
+      ),
+    ).toThrowError(expect.objectContaining({ statusCode: 409 }));
+    expect(() =>
+      assertAttendanceWindow(monday!, new Date('2026-11-23T12:00:00.000Z')),
+    ).not.toThrow();
+    expect(() =>
+      assertAttendanceWindow(monday!, new Date('2026-11-23T11:59:59.999Z')),
+    ).toThrowError(expect.objectContaining({ statusCode: 409 }));
+    expect(() =>
+      assertAttendanceWindow(saturday!, new Date('2026-11-21T16:00:00.000Z')),
+    ).toThrowError(expect.objectContaining({ statusCode: 409 }));
     expect(registrations.size).toBe(6);
     expect(
       registrations.get(ATTENDANCE_QA_CASES.valid.registrationId),

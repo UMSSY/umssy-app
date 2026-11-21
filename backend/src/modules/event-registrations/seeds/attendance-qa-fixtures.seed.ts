@@ -81,17 +81,17 @@ function scheduledEvent(
   eventDate: Date,
   startTime: string,
   endTime: string,
+  location: string,
 ) {
   return {
     id,
     title,
-    description:
-      'Taller ficticio para pruebas de registro de asistencia HU-08-12.',
-    instructorName: 'Equipo QA',
+    description: 'Sesión práctica con ejercicios guiados y material de apoyo.',
+    instructorName: 'Ing. Carlos Mendoza',
     eventDate,
     startTime: timeOfDay(startTime),
     endTime: timeOfDay(endTime),
-    location: 'Aula QA',
+    location,
     capacity: 30,
     supportThreshold: 0,
   };
@@ -140,31 +140,35 @@ export async function seedAttendanceQaFixtures(
   const events = {
     sundayPrimary: scheduledEvent(
       ATTENDANCE_QA_EVENT_IDS.sundayPrimary,
-      '[QA HU12] Domingo - registro y resultados QR',
+      'Taller de visualización de datos con Power BI',
       sunday,
       '20:00:00.000',
-      '23:59:59.999',
+      '23:00:00.000',
+      'Laboratorio de Innovación, Edificio A',
     ),
     sundaySecond: scheduledEvent(
       ATTENDANCE_QA_EVENT_IDS.sundaySecond,
-      '[QA HU12] Domingo - segundo taller',
+      'Taller de gestión ágil de proyectos con Scrum',
       sunday,
       '21:00:00.000',
-      '23:59:59.999',
+      '23:00:00.000',
+      'Sala de reuniones, Edificio B',
     ),
     monday: scheduledEvent(
       ATTENDANCE_QA_EVENT_IDS.monday,
-      '[QA HU12] Lunes - ventana futura',
+      'Taller de desarrollo de aplicaciones web con React',
       monday,
       '10:00:00.000',
       '12:00:00.000',
+      'Laboratorio de computación, Edificio C',
     ),
     saturdayClosed: scheduledEvent(
       ATTENDANCE_QA_EVENT_IDS.saturdayClosed,
-      '[QA HU12] Sábado - taller finalizado',
+      'Taller de comunicación efectiva para equipos de trabajo',
       saturday,
       '10:00:00.000',
       '12:00:00.000',
+      'Aula de capacitación, Edificio A',
     ),
   };
 
