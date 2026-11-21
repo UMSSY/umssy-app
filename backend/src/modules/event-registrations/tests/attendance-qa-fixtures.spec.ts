@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   ATTENDANCE_QA_CASES,
-  ATTENDANCE_QA_EVENT_ID,
+  ATTENDANCE_QA_EVENT_IDS,
   ATTENDANCE_QA_INVALID_REFERENCE,
   seedAttendanceQaFixtures,
 } from '../seeds/attendance-qa-fixtures.seed.js';
@@ -67,24 +67,43 @@ function setup() {
 }
 
 describe('HU-08-12 attendance QA fixtures', () => {
-  it('creates a published workshop for today in Bolivia and all four scannable outcomes', async () => {
+  it('creates Saturday, Sunday and Monday workshops with four attendance outcomes', async () => {
     const { tx, registrations, attendances, eventUpsert, ownerId } = setup();
-    const now = new Date('2026-11-17T02:30:00.000Z'); // 16 Nov, 22:30 in Bolivia.
+    const now = new Date('2026-11-21T21:00:00.000Z'); // Saturday, 17:00 in Bolivia.
     const result = await seedAttendanceQaFixtures(tx as never, now);
-    expect(result.eventId).toBe(ATTENDANCE_QA_EVENT_ID);
-    expect(eventUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: ATTENDANCE_QA_EVENT_ID },
-        create: expect.objectContaining({
-          eventDate: new Date('2026-11-16T00:00:00.000Z'),
-          startTime: new Date('1970-01-01T00:00:00.000Z'),
-          endTime: new Date('1970-01-01T23:59:59.999Z'),
-          statusId: 'published-id',
-          createdById: ownerId,
-        }),
-      }),
+    const eventsById = new Map(
+      eventUpsert.mock.calls.map(([call]) => [call.create.id, call.create]),
     );
-    expect(registrations.size).toBe(3);
+    const sundayPrimary = eventsById.get(ATTENDANCE_QA_EVENT_IDS.sundayPrimary);
+    const sundaySecond = eventsById.get(ATTENDANCE_QA_EVENT_IDS.sundaySecond);
+    const monday = eventsById.get(ATTENDANCE_QA_EVENT_IDS.monday);
+    const saturday = eventsById.get(ATTENDANCE_QA_EVENT_IDS.saturdayClosed);
+
+    expect(result.eventId).toBe(ATTENDANCE_QA_EVENT_IDS.sundayPrimary);
+    expect(result.events).toEqual(ATTENDANCE_QA_EVENT_IDS);
+    expect(result.schedule.attendanceOpensHoursBefore).toBe(2);
+    expect(sundayPrimary).toMatchObject({
+      eventDate: new Date('2026-11-22T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T20:00:00.000Z'),
+      endTime: new Date('1970-01-01T23:59:59.999Z'),
+      statusId: 'published-id',
+      createdById: ownerId,
+    });
+    expect(sundaySecond).toMatchObject({
+      eventDate: new Date('2026-11-22T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T21:00:00.000Z'),
+    });
+    expect(monday).toMatchObject({
+      eventDate: new Date('2026-11-23T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T10:00:00.000Z'),
+      endTime: new Date('1970-01-01T12:00:00.000Z'),
+    });
+    expect(saturday).toMatchObject({
+      eventDate: new Date('2026-11-21T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T10:00:00.000Z'),
+      endTime: new Date('1970-01-01T12:00:00.000Z'),
+    });
+    expect(registrations.size).toBe(6);
     expect(
       registrations.get(ATTENDANCE_QA_CASES.valid.registrationId),
     ).toMatchObject({ statusId: 'Confirmada', cancelledAt: null });
@@ -98,21 +117,19 @@ describe('HU-08-12 attendance QA fixtures', () => {
     expect(
       attendances.get(ATTENDANCE_QA_CASES.duplicate.registrationId),
     ).toMatchObject({ checkedInById: ownerId, checkedInAt: now });
-    const references = Object.values(result.references);
-    expect(new Set(references).size).toBe(4);
-    for (const reference of references)
-      expect(reference).toMatch(/^v1:[a-f0-9]{64}$/);
+    expect(Object.values(result.references)).toHaveLength(7);
     expect(result.references.invalid).toBe(ATTENDANCE_QA_INVALID_REFERENCE);
-    expect(references.slice(0, 3)).not.toContain(
-      ATTENDANCE_QA_INVALID_REFERENCE,
-    );
+    for (const [name, reference] of Object.entries(result.references)) {
+      if (name === 'invalid') continue;
+      expect(reference).toMatch(/^v1:[a-f0-9]{64}$/);
+    }
   });
 
-  it('preserves QR tokens and restores fixture states when run again', async () => {
+  it('preserves QR tokens and resets the fixture states when run again', async () => {
     const { tx, registrations, attendances } = setup();
     const first = await seedAttendanceQaFixtures(
       tx as never,
-      new Date('2026-11-16T14:00:00.000Z'),
+      new Date('2026-11-21T21:00:00.000Z'),
     );
     attendances.set(ATTENDANCE_QA_CASES.valid.registrationId, {
       checkedInAt: new Date(),
@@ -126,7 +143,7 @@ describe('HU-08-12 attendance QA fixtures', () => {
       'Confirmada';
     const second = await seedAttendanceQaFixtures(
       tx as never,
-      new Date('2026-11-16T15:00:00.000Z'),
+      new Date('2026-11-21T22:00:00.000Z'),
     );
     expect(second.references).toEqual(first.references);
     expect(attendances.has(ATTENDANCE_QA_CASES.valid.registrationId)).toBe(
