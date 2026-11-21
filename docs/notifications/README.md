@@ -106,7 +106,7 @@ All require JWT (any role). The WebSocket authenticates with `handshake.auth.tok
 
 ### Exported service
 
-`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), and [radar-integration](../radar-integration/README.md).
+`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), and [radar-integration](../radar-integration/README.md).
 
 ## Dependencies
 
@@ -115,7 +115,7 @@ All require JWT (any role). The WebSocket authenticates with `handshake.auth.tok
 | Uses      | [mail](../mail/README.md)                                                                  | `MailService.send`, `loadMailTemplate('notification')` and `frontendBaseUrl()` for the generic email |
 | Uses      | [users](../users/README.md)                                                                | `findEmailById`, `findContactById` (recipient name and email)                      |
 | Uses      | auth                                                                                       | Session to authenticate the WebSocket                                              |
-| Used by   | [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [radar-integration](../radar-integration/README.md) | Sending domain notifications |
+| Used by   | [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), [radar-integration](../radar-integration/README.md) | Sending domain notifications |
 
 ## Data
 
@@ -140,6 +140,7 @@ The frontend does not call `notify()`: the domain that owns the event does. User
 
 - Central publication notices retain the exact Radar snapshot reference and support historical navigation.
 - Concurrent duplicate prevention per recipient and snapshot, with central ownership of listing and read state.
+- Mentor slot offers use `hasGroupedNotification` as a durable preflight for `mentor-slot-offer:<offerId>` and avoid routine repeated `notify()` calls. Recipient/type/group creation is still serialized as the race-safe second defense, so concurrent workers receive at most one newly created recipient to dispatch.
 
 ## Radar publication integration
 

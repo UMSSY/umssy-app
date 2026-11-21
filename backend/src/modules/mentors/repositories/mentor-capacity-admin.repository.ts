@@ -5,7 +5,12 @@ import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { readMentorCapacity } from './mentor-capacity.queries.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
 
-const pageResult = <T>(items: T[], totalItems: number, page: number, limit: number) => ({
+const pageResult = <T>(
+  items: T[],
+  totalItems: number,
+  page: number,
+  limit: number,
+) => ({
   items,
   totalItems,
   page,

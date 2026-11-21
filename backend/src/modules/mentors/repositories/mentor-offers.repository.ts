@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
-import type { MentorOfferRecord } from '../types/mentor-offer.types.js';
+import type {
+  MentorOfferNotificationCandidate,
+  MentorOfferRecord,
+} from '../types/mentor-offer.types.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { readMentorEligibility } from './mentor-capacity.queries.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
@@ -16,6 +19,14 @@ export class MentorOffersRepository {
     return tx
       ? reconcileMentorOffers(tx)
       : withMentorCapacityLock(this.prisma, reconcileMentorOffers);
+  }
+  findNotifiableOffers() {
+    return this.prisma.$queryRaw<MentorOfferNotificationCandidate[]>`
+      SELECT id, user_id AS "userId", expires_at AS "expiresAt"
+      FROM mentor_slot_offers
+      WHERE status = 'OFFERED' AND expires_at > clock_timestamp()
+      ORDER BY offered_at ASC, id ASC
+    `;
   }
   async findLockedOffer(
     userId: string,
