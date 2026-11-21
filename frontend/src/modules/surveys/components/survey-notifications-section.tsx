@@ -46,7 +46,7 @@ function SurveyNotificationsList() {
   };
 
   return (
-    <Card role="region" aria-labelledby="survey-list-title" className="gap-0 py-0">
+    <Card role="region" aria-labelledby="survey-list-title" className="@container gap-0 py-0">
       <CardHeader className="flex flex-wrap items-center gap-3 py-4">
         <FileCheck className="size-6 text-accent" strokeWidth={1.5} aria-hidden="true" />
         <CardTitle id="survey-list-title" className="text-ink">

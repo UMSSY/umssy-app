@@ -34,19 +34,23 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   };
 
   return (
-    <li className="flex min-w-0 flex-col gap-4 p-4 sm:px-6 md:min-h-27 md:flex-row md:items-center md:gap-3">
-      <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", tone)}>
-        <FileCheck className="size-6" strokeWidth={1.5} aria-hidden="true" />
+    <li className="flex min-w-0 flex-col gap-4 p-4 sm:px-6 @3xl:min-h-27 @3xl:flex-row @3xl:items-center @3xl:gap-3">
+      <div className="flex min-w-0 flex-1 items-start gap-3 @3xl:items-center">
+        <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", tone)}>
+          <FileCheck className="size-6" strokeWidth={1.5} aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1">
+          <h3 className="text-lg font-semibold break-words text-ink">{title}</h3>
+          <p className="text-sm break-words text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
+          {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
+        </div>
       </div>
-      <div className="min-w-0 flex-1 space-y-1">
-        <h3 className="text-lg font-semibold [overflow-wrap:anywhere] text-ink">{title}</h3>
-        <p className="text-sm [overflow-wrap:anywhere] text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
-        {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
+      <div className="flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:gap-4">
+        <time dateTime={publishedAt} className="text-sm whitespace-nowrap text-text-secondary @3xl:w-24 @3xl:text-right">
+          {formatSurveyDate(publishedAt)}
+        </time>
+        <div className="w-full whitespace-nowrap @3xl:w-52">{renderAction()}</div>
       </div>
-      <time dateTime={publishedAt} className="shrink-0 text-sm text-text-secondary md:mr-4 md:w-24 md:text-right">
-        {formatSurveyDate(publishedAt)}
-      </time>
-      <div className="w-full shrink-0 md:w-52">{renderAction()}</div>
     </li>
   );
 }
