@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import {
+  EVENT_SORT_OPTIONS,
   MAX_PAGE_SIZE,
   MAX_SEARCH_LENGTH,
 } from '../constants/events.constants.js';
@@ -20,6 +21,7 @@ export const GetEventsSchema = z.object({
     .guid({ message: 'categoryId debe ser un UUID válido' })
     .optional(),
   statusId: z.guid({ message: 'statusId debe ser un UUID válido' }).optional(),
+  sort: z.enum(EVENT_SORT_OPTIONS).optional(),
   search: z
     .string()
     .trim()

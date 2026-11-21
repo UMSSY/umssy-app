@@ -9,7 +9,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { EventsService } from '../services/events.service.js';
+import { EventsCatalogService } from '../services/events-catalog.service.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
+import { EVENT_SORT_OPTIONS } from '../constants/events.constants.js';
 import {
   GetEventsSchema,
   MAX_PAGE_SIZE,
@@ -22,7 +24,10 @@ import type { AuthenticatedRequest } from '../../../common/types/authenticated-r
 @Controller('events')
 @UseGuards(OptionalJwtAuthGuard)
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly eventsCatalogService: EventsCatalogService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -63,6 +68,13 @@ export class EventsController {
     type: String,
     description: 'UUID del estado para filtrar',
   })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    enum: EVENT_SORT_OPTIONS,
+    description:
+      'popular ordena por inscritos confirmados; recommended ordena por afinidad con el perfil',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de eventos obtenida exitosamente',
@@ -72,7 +84,7 @@ export class EventsController {
     @Query(new ZodValidationPipe(GetEventsSchema)) query: GetEventsPayload,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.eventsService.findAll(query, req.user?.id);
+    return this.eventsCatalogService.findAll(query, req.user?.id);
   }
 
   @Get(':id')

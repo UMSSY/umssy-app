@@ -32,6 +32,24 @@ const buildListResponse = (
 });
 
 describe('useEvents with filters', () => {
+  it('sends the requested order and keeps it in the query key', async () => {
+    vi.mocked(eventsService.getEvents).mockResolvedValue(
+      buildListResponse(),
+    );
+
+    renderHook(() =>
+      useEvents({ search: '', categoryId: null, sort: 'recommended' }),
+    );
+
+    await waitFor(() => {
+      expect(eventsService.getEvents).toHaveBeenCalledWith(
+        { page: 1, includeProposals: true, limit: 50, sort: 'recommended' },
+        expect.any(AbortSignal),
+        null,
+      );
+    });
+  });
+
   it('sends search and categoryId when filters are provided', async () => {
     vi.mocked(eventsService.getEvents).mockResolvedValue(
       buildListResponse(),

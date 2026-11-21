@@ -4,4 +4,5 @@ export interface EventsListResponse {
   data: EventItem[];
   page: number;
   offset: number;
+  isProfileComplete?: boolean;
 }
