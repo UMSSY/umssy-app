@@ -9,7 +9,7 @@ import {
 } from "@/modules/request-review";
 import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
-import { REJECTION_REASON_SHORT_LABELS, STICKY_CELL_CLASSES, STICKY_HEAD_CLASSES, TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES, USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES } from "../constants/report-table.constants";
+import { REJECTION_REASON_SHORT_LABELS, TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES, USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES } from "../constants/report-table.constants";
 import type { RejectedUsersTableProps } from "../types/rejected-users-table-props.types";
 import { TableScrollHint } from "./table-scroll-hint";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
@@ -39,7 +39,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
 
     return users.map((user) => (
       <TableRow key={user.id} className="group border-border hover:bg-surface-soft">
-        <TableCell className={`${CELL_CLASSES} ${STICKY_CELL_CLASSES} text-ink`}>{user.fullName}</TableCell>
+        <TableCell className={`${CELL_CLASSES} text-ink`}>{user.fullName}</TableCell>
         <TableCell className={CELL_CLASSES}>{user.email}</TableCell>
         <TableCell className={CELL_CLASSES}>{ROLE_LABELS[user.userType] ?? user.userType}</TableCell>
         <TableCell className={`${CELL_CLASSES} tabular-nums`}>{user.identifier}</TableCell>
@@ -67,7 +67,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
         <Table className="min-w-225 text-left text-base">
           <TableHeader className="bg-surface-soft">
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead scope="col" className={`${HEAD_CLASSES} ${STICKY_HEAD_CLASSES}`}>Usuario</TableHead>
+              <TableHead scope="col" className={`${HEAD_CLASSES}`}>Usuario</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Correo</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Tipo de Usuario</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Identificador</TableHead>

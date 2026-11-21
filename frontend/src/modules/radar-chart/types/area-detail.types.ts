@@ -1,35 +1,8 @@
-export type AreaId =
-  | "desarrollo"
-  | "cloud-devops"
-  | "data-ai"
-  | "qa"
-  | "ciberseguridad"
-  | "gobernanza-ti";
-
-export type AreaLevel = "Bajo" | "Medio" | "Alto" | "Experto";
-
-export interface Course {
-  id: string;
-  name: string;
-  institution: string;
-  year: number;
-}
-
-export interface Certification {
-  id: string;
-  name: string;
-  issuer: string;
-  year: number;
-  credentialId?: string;
-}
-
-export interface ExperienceItem {
-  id: string;
-  role: string;
-  company: string;
-  durationYears: number;
-  description?: string;
-}
+import type { AreaId } from './area-id.types';
+import type { AreaLevel } from './area-level.types';
+import type { Course } from './course.types';
+import type { Certification } from './certification.types';
+import type { ExperienceItem } from './experience-item.types';
 
 export interface AreaDetail {
   id: AreaId;

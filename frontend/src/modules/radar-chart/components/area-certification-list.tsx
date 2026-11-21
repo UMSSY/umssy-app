@@ -1,8 +1,10 @@
-import { Award } from "lucide-react";
-import type { AreaCertificationListProps } from "../types/area-detail-components.types";
-import { AreaEmptyState } from "./area-empty-state";
+import { Award } from 'lucide-react';
+import type { AreaCertificationListProps } from '../types/area-certification-list-props.types';
+import { AreaEmptyState } from './area-empty-state';
 
-export function AreaCertificationList({ certifications }: AreaCertificationListProps) {
+export function AreaCertificationList({
+  certifications,
+}: AreaCertificationListProps) {
   return (
     <div className="min-w-0">
       <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
@@ -18,9 +20,14 @@ export function AreaCertificationList({ certifications }: AreaCertificationListP
               key={certification.id}
               className="flex min-w-0 gap-2.5 rounded-lg border border-border bg-surface p-3"
             >
-              <Award className="mt-0.5 size-4 shrink-0 text-ink-soft" aria-hidden="true" />
+              <Award
+                className="mt-0.5 size-4 shrink-0 text-ink-soft"
+                aria-hidden="true"
+              />
               <div className="min-w-0 break-words">
-                <p className="text-sm font-medium text-ink">{certification.name}</p>
+                <p className="text-sm font-medium text-ink">
+                  {certification.name}
+                </p>
                 <p className="text-xs text-text-secondary">
                   {`${certification.issuer} · ${certification.year}`}
                 </p>

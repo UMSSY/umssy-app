@@ -9,6 +9,8 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Card } from "@/components/ui/card";
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";
+import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
+import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
 import {
   HIGH_AFFINITY_THRESHOLD,
   JOB_MATCHING_MESSAGES,
@@ -22,7 +24,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
   const locationUrl = getSafeMapsUrl(job.locationUrl);
 
   return (
-    <Card className="h-full gap-3 p-4">
+    <Card className={cn(VACANCY_CARD_CLASS, "h-full gap-3 p-4")}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
@@ -41,6 +43,10 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
           ) : null}
         </div>
       </div>
+      <VacancyDateBadges
+        publishedAt={job.publishedAt}
+        expiresAt={job.expiresAt}
+      />
       {job.skills.length > 0 ? (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold tracking-wide text-text-secondary uppercase">
@@ -73,7 +79,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
             rel="noopener noreferrer"
             className={cn(
               buttonVariants({ variant: "link" }),
-              "h-auto gap-1 p-0 text-ink",
+              "h-auto gap-1 p-0",
             )}
           >
             <MapPin className="size-3.5" aria-hidden="true" />
@@ -85,7 +91,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
           href={`${JOBS_ROUTE}/${job.jobOfferId}`}
           className={cn(
             buttonVariants({ variant: "link" }),
-            "ml-auto h-auto p-0 font-bold text-ink",
+            "ml-auto h-auto p-0 font-bold",
           )}
         >
           {JOB_MATCHING_MESSAGES.viewJob}

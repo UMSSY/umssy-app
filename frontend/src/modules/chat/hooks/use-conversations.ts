@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 import type {
@@ -20,6 +20,7 @@ import { setStoredConversationUnreadCount } from "../services/message-storage";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 
 const PAGE_SIZE = 10;
+const CONVERSATIONS_QUERY_KEY = ["chat", "conversations"] as const;
 
 export function useConversations() {
   const ui = useMessagingUi();
@@ -45,10 +46,9 @@ export function useConversations() {
     useState<string | null>(null);
 
   const queryClient = useQueryClient();
-  const queryKey = ["chat", "conversations"];
 
   const query = useQuery({
-    queryKey,
+    queryKey: CONVERSATIONS_QUERY_KEY,
     queryFn: () => getConversations(),
   });
 
@@ -60,17 +60,25 @@ export function useConversations() {
   const isLoading = query.isFetching;
   const isError = query.isError && !query.isFetching;
 
-  function setConversationsData(
-    update: (current: Conversation[]) => Conversation[],
-  ) {
-    queryClient.setQueryData<Conversation[]>(
-      queryKey,
-      (current) => update(current ?? []),
-    );
-  }
+  const setConversationsData = useCallback(
+    (update: (current: Conversation[]) => Conversation[]) => {
+      queryClient.setQueryData<Conversation[]>(
+        CONVERSATIONS_QUERY_KEY,
+        (current) => update(current ?? []),
+      );
+    },
+    [queryClient],
+  );
 
   const startMutation = useMutation({
-    mutationFn: (id: string) => getOrCreateConversation(id),
+    mutationFn: (params: { id: string; context?: { contextType?: string; contextId?: string } } | string) => {
+      if (typeof params === 'string') {
+        return getOrCreateConversation(params);
+      }
+      return params.context
+        ? getOrCreateConversation(params.id, params.context)
+        : getOrCreateConversation(params.id);
+    },
   });
 
   const readMutation = useMutation({
@@ -202,6 +210,19 @@ export function useConversations() {
     setKeptInUnreadId(null);
   };
 
+  useEffect(() => {
+    if (!selectedId) return;
+    const current = conversationsData.find((item) => item.id === selectedId);
+    if (current && current.unreadCount > 0) {
+      readMutation.mutate(selectedId);
+      setConversationsData((prev) =>
+        prev.map((item) =>
+          item.id === selectedId ? { ...item, unreadCount: 0 } : item,
+        ),
+      );
+    }
+  }, [selectedId, conversationsData, readMutation, setConversationsData]);
+
   const simulateIncomingMessage = (
     conversationId: string,
     newContent: string,
@@ -292,22 +313,33 @@ export function useConversations() {
 
   const startConversationWithContact = async (
     contactUser: User,
+    context?: { contextType?: string; contextId?: string },
   ) => {
     if (pendingContactId) return;
 
-    const alreadyInList =
-      findExistingConversationByContact(contactUser.id);
+    if (context?.contextId) {
+      const existingByContext = conversationsData.find(
+        (c) => c.contextId === context.contextId,
+      );
+      if (existingByContext) {
+        handleSelectConversation(existingByContext);
+        return;
+      }
+    } else {
+      const alreadyInList =
+        findExistingConversationByContact(contactUser.id);
 
-    if (alreadyInList) {
-      handleSelectConversation(alreadyInList);
-      return;
+      if (alreadyInList && !alreadyInList.contextId) {
+        handleSelectConversation(alreadyInList);
+        return;
+      }
     }
 
     setPendingContactId(contactUser.id);
 
     try {
       const conversation =
-        await startMutation.mutateAsync(contactUser.id);
+        await startMutation.mutateAsync({ id: contactUser.id, context });
 
       setConversationsData((prev) => {
         const exists = prev.some(
@@ -323,6 +355,26 @@ export function useConversations() {
     } finally {
       setPendingContactId(null);
     }
+  };
+
+  const openContextualConversation = async (
+    contactId: string,
+    context: { contextType: string; contextId: string },
+  ) => {
+    const existing = conversationsData.find(
+      (c) => c.contextId === context.contextId,
+    );
+    if (existing) {
+      handleSelectConversation(existing);
+      return existing;
+    }
+    const conversation = await getOrCreateConversation(contactId, context);
+    setConversationsData((prev) => {
+      const exists = prev.some((item) => item.id === conversation.id);
+      return exists ? prev : [conversation, ...prev];
+    });
+    setSelectedId(conversation.id);
+    return conversation;
   };
 
   return {
@@ -347,5 +399,6 @@ export function useConversations() {
     setConversationBlocked,
     findExistingConversationByContact,
     startConversationWithContact,
+    openContextualConversation,
   };
 }

@@ -72,7 +72,7 @@ describe("RejectedUsersReportView", () => {
     expect(screen.getByRole("heading", { name: "Usuarios rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Descargar" })).toBeDefined();
     expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
     await waitFor(() => {
@@ -139,8 +139,9 @@ describe("RejectedUsersReportView", () => {
       );
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
-    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", search: "" });
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    await user.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
+    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", search: "", format: "csv" });
   });
 
   it("navega a la última página", async () => {
@@ -355,15 +356,16 @@ describe("RejectedUsersReportView", () => {
     renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan", "Mostrando 1-1 de 1 usuarios");
 
-    fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
 
-    const exportingButton = screen.getByRole("button", { name: "Exportando..." }) as HTMLButtonElement;
+    const exportingButton = screen.getByRole("button", { name: "Descargando..." }) as HTMLButtonElement;
     expect(exportingButton.disabled).toBe(true);
-    expect(exportSpy).toHaveBeenCalledWith({ search: "juan" });
+    expect(exportSpy).toHaveBeenCalledWith({ search: "juan", format: "csv" });
 
     resolveExport({ file, fileName: "usuarios-rechazados-2026-10-03.csv" });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "Descargar" })).toBeDefined();
     });
     expect(downloadSpy).toHaveBeenCalledWith(file, "usuarios-rechazados-2026-10-03.csv");
     expect(screen.queryByRole("alert")).toBeNull();
@@ -379,7 +381,8 @@ describe("RejectedUsersReportView", () => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
 
     await waitFor(() =>
       expect(toastErrorSpy).toHaveBeenCalledWith("No se pudo exportar el reporte. Inténtalo de nuevo.", expect.any(Object)),

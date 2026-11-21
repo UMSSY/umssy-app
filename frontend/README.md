@@ -1,3 +1,5 @@
+the project have standard too, you can read in: **[Frontend Standards](./standard.md)**
+
 ## Local Environment Setup
 
 Node.js 22 and pnpm 12.4.2 are required. From the repository root, install
@@ -101,3 +103,4 @@ pnpm dlx shadcn@latest add card
 ```
 
 Components are added to `src/components/ui/`. You can browse all available components at [ui.shadcn.com/docs/components](https://ui.shadcn.com/docs/components).
+

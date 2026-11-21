@@ -10,7 +10,7 @@ import { ReportSearchInput } from "../components/report-search-input";
 import { ReportTableFooter } from "../components/report-table-footer";
 import { ReportTypeFilter } from "../components/report-type-filter";
 import { useReportHistory } from "../hooks/use-report-history";
-import type { ReportType } from "../types/generated-report.types";
+import type { ReportType } from "../types/report-type.types";
 
 export function ReportHistoryView() {
   const [currentPage, setCurrentPage] = useState(1);

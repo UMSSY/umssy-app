@@ -52,6 +52,9 @@ export class AvailabilityRepository {
         appointments: {
           none: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
         },
+        NOT: {
+          appointments: { some: { cancelledById: mentorId } },
+        },
       },
       orderBy: { startAt: 'asc' },
       include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,

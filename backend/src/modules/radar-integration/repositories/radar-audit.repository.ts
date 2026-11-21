@@ -2,12 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
 import type { CertificationDocumentMetadata } from '../../certification-documents/types/certification-document-metadata.type.js';
+import { RadarDocumentSourceType } from '../constants/radar-document-source-type.enum.js';
 
 type AuditClient = PrismaService | Prisma.TransactionClient;
 
 @Injectable()
 export class RadarAuditRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findActiveCertificationVerification(
+    userId: string,
+    id: string,
+    client: AuditClient,
+  ) {
+    return client.radarDocumentVerification.findFirst({
+      where: {
+        sourceTypeEntry: { title: RadarDocumentSourceType.CERTIFICATION },
+        sourceId: id,
+        userId,
+        active: true,
+      },
+      select: { id: true },
+    });
+  }
 
   async saveDocumentMetadata(
     userId: string,

@@ -1,21 +1,38 @@
 import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+
+import { EventsService } from '../../events/services/events.service.js';
+
+const eventFilter = {
+  status: { title: 'Publicado' },
+  OR: [
+    { eventDate: { gt: new Date('2026-10-23T00:00:00Z') } },
+    {
+      eventDate: new Date('2026-10-23T00:00:00Z'),
+      endTime: { gt: new Date('1970-01-01T08:00:00Z') },
+    },
+  ],
+};
 
 describe('EventRegistrationsService', () => {
   const findMany = vi.fn();
   let repository: EventRegistrationsService;
 
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-23T12:00:00Z'));
     findMany.mockReset();
     repository = new EventRegistrationsService(
       new EventRegistrationsRepository({
         eventRegistration: { findMany },
       } as unknown as PrismaService),
-      {} as never,
+      new EventsService({} as never),
     );
   });
+
+  afterEach(() => vi.useRealTimers());
 
   it('consulta por userId con el select y orden esperados', async () => {
     findMany.mockResolvedValue([]);
@@ -27,7 +44,7 @@ describe('EventRegistrationsService', () => {
         userId: 'user-1',
         cancelledAt: null,
         status: { title: 'Confirmada' },
-        event: { status: { title: 'Publicado' } },
+        event: eventFilter,
       },
       select: {
         id: true,
@@ -64,7 +81,7 @@ describe('EventRegistrationsService', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          event: { status: { title: 'Publicado' } },
+          event: eventFilter,
         }),
       }),
     );

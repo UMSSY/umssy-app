@@ -19,6 +19,8 @@ function offer(skills: string[], description: string): JobMatchRecord {
   return {
     id: 'offer-1',
     createdAt: new Date('2026-11-01T00:00:00Z'),
+    publishedAt: new Date('2026-11-01T00:00:00Z'),
+    expiresAt: new Date('2026-12-01T00:00:00Z'),
     title: 'DevOps',
     description,
     locationUrl: 'https://maps.google.com/?q=x',

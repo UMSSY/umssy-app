@@ -1,3 +1,4 @@
+
 import { withMentorIntake } from './mentor-intake.service.js';
 import { Injectable } from '@nestjs/common';
 import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
@@ -25,6 +26,7 @@ export class MentorParticipationService {
         data,
         (transaction) => this.create(userId, data, undefined, transaction),
       );
+
     const result = await this.repository.createRequest(
       userId,
       data.technicalAreaIds,
@@ -35,6 +37,7 @@ export class MentorParticipationService {
     switch (result.result) {
       case 'CREATED':
         return result.request;
+
       case 'ALREADY_EXISTS':
       case 'OFFER_EXISTS':
         throw new MentorParticipationException(
@@ -72,7 +75,14 @@ export class MentorParticipationService {
     return this.repository.findMyHistory(userId);
   }
 
-  async updatePreferences(userId: string, data: CreateMentorParticipationDto) {
+  findMyHistoryPaginated(userId: string, page: number, limit: number) {
+    return this.repository.findMyHistoryPaginated(userId, page, limit);
+  }
+
+  async updatePreferences(
+    userId: string,
+    data: CreateMentorParticipationDto,
+  ) {
     const result = await this.repository.updatePreferences(
       userId,
       data.technicalAreaIds,

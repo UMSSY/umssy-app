@@ -67,6 +67,8 @@ export class ConversationMapper {
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount: 0,
       isBlockedByMe: false,
+      contextType: 'EVENTO',
+      contextId: conversation.event.id,
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }
@@ -109,6 +111,8 @@ export class ConversationMapper {
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount,
       isBlockedByMe,
+      contextType: conversation.contextType ?? null,
+      contextId: conversation.contextId ?? null,
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }

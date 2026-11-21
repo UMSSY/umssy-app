@@ -7,4 +7,5 @@ export interface CreateAppointmentData {
   statusId: string;
   orientationTypeId: string;
   message?: string | null;
+  meetingUrl: string;
 }

@@ -54,6 +54,13 @@ describe("Button", () => {
     expect(button.className).toContain("bg-critical-action")
   })
 
+  it("renders the success variant with its class", () => {
+    render(<Button variant="success">Confirmar</Button>)
+    const button = screen.getByRole("button", { name: "Confirmar" })
+    expect(button.className).toContain("bg-success")
+    expect(button.className).toContain("hover:bg-success-hover")
+  })
+
   it("renders the small size with its class", () => {
     render(<Button size="sm">Pequeño</Button>)
     const button = screen.getByRole("button", { name: "Pequeño" })

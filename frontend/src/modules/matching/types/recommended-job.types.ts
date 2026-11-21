@@ -4,6 +4,8 @@ export interface RecommendedJob {
   companyName: string;
   modality: string;
   locationUrl?: string;
+  publishedAt: string;
+  expiresAt: string | null;
   score: number;
   matchedSkills: string[];
   skills: string[];

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../../../common/prisma/prisma.module.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
@@ -20,7 +21,11 @@ describe('CvModule', () => {
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [CvModule, PrismaModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        CvModule,
+        PrismaModule,
+      ],
     })
       .overrideProvider(PrismaService)
       .useValue({})

@@ -22,6 +22,7 @@ import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useCareers } from "../hooks/use-careers";
 import { useSurveyBuilder } from "../hooks/use-survey-builder";
 import { useUnsavedChangesGuard } from "../hooks/use-unsaved-changes-guard";
+import { openOfflineRoute } from "@/shared/services/offline-navigation";
 import type { SurveyFieldName } from "../types/survey-field-name.types";
 import type { SurveyEditorProps } from "../types/survey-editor-props.types";
 import type { SurveyValidationError } from "../types/survey-validation-error.types";
@@ -189,7 +190,8 @@ export function SurveyEditor({
     clearPendingHref();
     clearAutosave();
     builder.markSaved();
-    router.push(target);
+    if (navigator.onLine === false) void openOfflineRoute(target);
+    else router.push(target);
   };
 
   const resetDrag = () => {

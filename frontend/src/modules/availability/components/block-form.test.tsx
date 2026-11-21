@@ -21,7 +21,7 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>, day: string, s
 
 async function selectTime(user: ReturnType<typeof userEvent.setup>, label: RegExp, value: string) {
   await user.click(screen.getByLabelText(label))
-  await user.click(await screen.findByRole("option", { name: value }))
+  await user.click(await screen.findByRole("option", { name: new RegExp(`^${value}`) }))
 }
 
 describe("BlockForm", () => {
@@ -64,15 +64,15 @@ describe("BlockForm", () => {
     expect(screen.getByRole("button", { name: /jueves, 8 de octubre de 2026/ })).toBeEnabled()
   })
 
-  it("ofrece inicios de 07:00 a 21:30 y fines de 07:30 a 22:00 cada 30 minutos en una lista compacta", async () => {
+  it("ofrece inicios de 07:00 a 20:30 y fines de 07:30 a 22:00 cada 30 minutos en una lista compacta", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByLabelText(/Hora de inicio/))
     const starts = (await screen.findAllByRole("option")).map((option) => option.textContent)
-    expect(starts).toHaveLength(30)
+    expect(starts).toHaveLength(28)
     expect(starts[0]).toBe("07:00")
     expect(starts[1]).toBe("07:30")
-    expect(starts.at(-1)).toBe("21:30")
+    expect(starts.at(-1)).toBe("20:30")
     expect(screen.getByRole("listbox").closest('[data-slot="select-content"]')).toHaveClass("max-h-[min(200px,var(--available-height))]")
     await user.keyboard("{Escape}")
 
@@ -94,30 +94,59 @@ describe("BlockForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("no muestra las horas de fin iguales o anteriores a la de inicio", async () => {
+  it("solo ofrece fines cada 1 h 30 desde el inicio, con la cantidad de bloques", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
-    await selectTime(user, /Hora de inicio/, "20:00")
+    await selectTime(user, /Hora de inicio/, "10:00")
     await user.click(screen.getByLabelText(/Hora de fin/))
 
-    await screen.findAllByRole("option")
-    expect(screen.queryByRole("option", { name: "18:00" })).not.toBeInTheDocument()
-    expect(screen.queryByRole("option", { name: "20:00" })).not.toBeInTheDocument()
-    expect(screen.getByRole("option", { name: "20:30" })).toBeInTheDocument()
+    const ends = (await screen.findAllByRole("option")).map((option) => option.textContent)
+    expect(ends).toEqual([
+      "11:301 bloque",
+      "13:002 bloques",
+      "14:303 bloques",
+      "16:004 bloques",
+      "17:305 bloques",
+      "19:006 bloques",
+      "20:307 bloques",
+      "22:008 bloques",
+    ])
   })
 
-  it("no muestra las horas de inicio iguales o posteriores a la de fin", async () => {
+  it("al elegir el inicio propone el fin de un bloque de 1 h 30", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
-    await selectTime(user, /Hora de fin/, "12:00")
+    await selectTime(user, /Hora de inicio/, "10:00")
+
+    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("11:30")
+    expect(screen.getByText(/Se creará 1 bloque: 10:00 – 11:30\./)).toBeInTheDocument()
+  })
+
+  it("muestra los bloques que se crearán y avisa el borrador", async () => {
+    const onDraftChange = vi.fn()
+    const { user } = renderForm({ onDraftChange })
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "10:00", "14:30")
+
+    expect(
+      screen.getByText(/Se crearán 3 bloques: 10:00 – 11:30, 11:30 – 13:00 y 13:00 – 14:30\./),
+    ).toBeInTheDocument()
+    expect(onDraftChange).toHaveBeenLastCalledWith({
+      startAt: "2026-10-13T14:00:00.000Z",
+      endAt: "2026-10-13T18:30:00.000Z",
+    })
+  })
+
+  it("no ofrece inicios que no dejan lugar a 1 h 30 antes de las 22:00", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
     await user.click(screen.getByLabelText(/Hora de inicio/))
 
-    await screen.findAllByRole("option")
-    expect(screen.queryByRole("option", { name: "12:00" })).not.toBeInTheDocument()
-    expect(screen.queryByRole("option", { name: "15:00" })).not.toBeInTheDocument()
-    expect(screen.getByRole("option", { name: "11:30" })).toBeInTheDocument()
+    expect(await screen.findByRole("option", { name: "20:30" })).toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "21:00" })).not.toBeInTheDocument()
   })
 
   it("con la fecha de hoy no muestra las horas de inicio y fin que ya pasaron", async () => {
@@ -150,7 +179,7 @@ describe("BlockForm", () => {
   it("limpia las horas elegidas si al cambiar a hoy ya pasaron", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "08:00", "09:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "08:00", "09:30")
     await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
 
     expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("--:--")
@@ -160,17 +189,17 @@ describe("BlockForm", () => {
   it("mantiene las horas elegidas si al cambiar de fecha siguen siendo válidas", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:30")
     await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
 
     expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
-    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("16:00")
+    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("16:30")
   })
 
   it("muestra el error de inicio pasado si la hora pasa con el formulario abierto", async () => {
     const { onSubmit, user } = renderForm()
 
-    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "11:00")
+    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "12:00")
     vi.setSystemTime(new Date("2026-10-08T14:45:00Z"))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
@@ -182,10 +211,9 @@ describe("BlockForm", () => {
   it("limpia el error del campo cuando el usuario lo corrige", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "11:00")
+    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "12:00")
     vi.setSystemTime(new Date("2026-10-08T14:45:00Z"))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
-    await selectTime(user, /Hora de fin/, "12:00")
     await selectTime(user, /Hora de inicio/, "11:00")
 
     expect(screen.queryByText("La hora de inicio ya pasó")).not.toBeInTheDocument()
@@ -194,7 +222,7 @@ describe("BlockForm", () => {
   it("no deselecciona la fecha al volver a hacer clic sobre ella", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:30")
     await user.click(screen.getByRole("button", { name: /martes, 13 de octubre de 2026/ }))
 
     expect(screen.getByLabelText(/Fecha/)).toHaveValue("Martes 13 de octubre de 2026")
@@ -212,29 +240,29 @@ describe("BlockForm", () => {
   it("envía el bloque en UTC cuando es válido", async () => {
     const { onSubmit, user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
     expect(onSubmit).toHaveBeenCalledWith({
       startAt: "2026-10-13T22:00:00.000Z",
-      endAt: "2026-10-14T00:00:00.000Z",
+      endAt: "2026-10-13T23:30:00.000Z",
     })
   })
 
   it("Cancelar llama a onCancel sin enviar el formulario", async () => {
     const { onSubmit, onCancel, user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("button", { name: "Cancelar" }))
 
     expect(onCancel).toHaveBeenCalledTimes(1)
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("en modo edición permite cambiar las horas y conserva el día original de solo lectura", async () => {
+  it("en modo edición cambia el inicio, ajusta solo el fin a 1 h 30 y conserva el día de solo lectura", async () => {
     const { onSubmit, user } = renderForm({
       mode: "edit",
-      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
+      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-13T23:30:00.000Z" },
     })
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
@@ -242,25 +270,26 @@ describe("BlockForm", () => {
     expect(screen.getByLabelText(/Día/)).toHaveAttribute("readonly")
     expect(screen.getByText("Martes 13 de octubre")).toBeInTheDocument()
     expect(screen.getByLabelText(/Desde/)).toHaveTextContent("18:00")
-    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("20:00")
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("19:30")
     expect(screen.queryByText(/Horario en hora de Bolivia/)).not.toBeInTheDocument()
 
     await user.type(screen.getByLabelText(/Día/), "15102026")
     expect(screen.getByLabelText(/Día/)).toHaveValue("13/10/2026")
     await selectTime(user, /Desde/, "17:00")
-    await selectTime(user, /Hasta/, "19:00")
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("18:30")
+    expect(screen.getByLabelText(/Hasta/)).toBeDisabled()
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
 
     expect(onSubmit).toHaveBeenCalledWith({
       startAt: "2026-10-13T21:00:00.000Z",
-      endAt: "2026-10-13T23:00:00.000Z",
+      endAt: "2026-10-13T22:30:00.000Z",
     })
   })
 
   it("en modo edición muestra el chip rosa y el borde de tarjeta, oculta el calendario y pinta el botón rojo", () => {
     renderForm({
       mode: "edit",
-      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
+      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-13T23:30:00.000Z" },
     })
 
     expect(screen.getByText("Martes 13 de octubre")).toHaveClass("bg-interaction")
@@ -285,7 +314,7 @@ describe("BlockForm", () => {
   it("no muestra la casilla de repetición en modo edición", () => {
     renderForm({
       mode: "edit",
-      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
+      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-13T23:30:00.000Z" },
     })
 
     expect(screen.queryByText("Repetir cada semana")).not.toBeInTheDocument()
@@ -301,7 +330,7 @@ describe("BlockForm", () => {
   it("marcar la casilla muestra el calendario de Repetir hasta", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
 
     expect(screen.getByRole("group", { name: "Repetir hasta" })).toBeInTheDocument()
@@ -310,7 +339,7 @@ describe("BlockForm", () => {
   it("exige elegir la fecha límite si la repetición está activa", async () => {
     const { onSubmit, user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
@@ -321,7 +350,7 @@ describe("BlockForm", () => {
   it("envía repeatWeekly y repeatUntil cuando se marca la casilla y se elige la fecha límite", async () => {
     const { onSubmit, user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
     const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
     await user.click(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" }))
@@ -329,7 +358,7 @@ describe("BlockForm", () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       startAt: "2026-10-13T22:00:00.000Z",
-      endAt: "2026-10-14T00:00:00.000Z",
+      endAt: "2026-10-13T23:30:00.000Z",
       repeatWeekly: true,
       repeatUntil: "2026-10-20",
     })
@@ -338,7 +367,7 @@ describe("BlockForm", () => {
   it("desmarcar la casilla oculta y limpia la fecha límite elegida", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
     const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
     await user.click(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" }))
@@ -357,7 +386,7 @@ describe("BlockForm", () => {
   it("limpia la fecha límite elegida si la nueva fecha del bloque ya no la admite", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
     await user.click(
       within(screen.getByRole("group", { name: "Repetir hasta" })).getByRole("button", {
@@ -379,7 +408,7 @@ describe("BlockForm", () => {
   it("el calendario de Repetir hasta deshabilita los días anteriores al bloque", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
     const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
 
@@ -389,7 +418,7 @@ describe("BlockForm", () => {
   it("el calendario de Repetir hasta solo habilita desde los 7 días del bloque (al menos una repetición real)", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "19:30")
     await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
     const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
 

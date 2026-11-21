@@ -30,7 +30,9 @@ describe('HU8: validación del destinatario', () => {
     const conversationMapper = {} as ConversationMapper;
 
     const chatRolePolicyService = {
-      assertCanCommunicate: vi.fn(),
+       assertCanCommunicate: vi
+        .fn()
+        .mockResolvedValue({ hasValidatedApplication: false }),
     } as unknown as ChatRolePolicyService;
 
     const educationsService = {

@@ -6,6 +6,7 @@ export interface UseSkillsResult {
   selectedSkills: SkillItem[];
   isLoading: boolean;
   isSaving: boolean;
+  hasUnsavedChanges: boolean;
   hasLoadError: boolean;
   feedback: Feedback | null;
   addSkill: (skill: SkillItem) => void;

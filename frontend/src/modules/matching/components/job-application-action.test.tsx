@@ -87,7 +87,7 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
     expect(screen.getByText("¡Postulación enviada!")).toBeInTheDocument();
     expect(dialog).toHaveTextContent("DevOps Senior");
     expect(dialog).toHaveTextContent("TechBolivia");
-    expect(dialog).toHaveTextContent("10 nov 2026");
+    expect(dialog).toHaveTextContent("10/11/2026");
     expect(dialog).toHaveTextContent("En revisión");
   });
 
@@ -119,7 +119,7 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
     expect(
       await screen.findByRole("button", { name: "Ya te postulaste" }),
     ).toBeDisabled();
-    expect(screen.getByText(/Postulaste el 10 nov 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/Postulaste el 10\/11\/2026/)).toBeInTheDocument();
     expect(mockedService.apply).not.toHaveBeenCalled();
   });
 

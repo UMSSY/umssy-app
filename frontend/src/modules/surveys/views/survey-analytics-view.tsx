@@ -3,22 +3,32 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "cn";
-import { ArrowLeft, BarChart3, Download, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, BarChart3, BellRing, Download, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { ExportSuccessToast } from "@/modules/reports";
+import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { downloadFile } from "@/shared/utils/download-file";
+import { SendSurveyReminderDialog } from "../components/send-survey-reminder-dialog";
+import { SurveyAlertsDialog } from "../components/survey-alerts-dialog";
 import { SurveyAnalyticsHeader } from "../components/survey-analytics-header";
 import { SurveyPeriodFilter } from "../components/survey-period-filter";
 import { SurveyQuestionResultCard } from "../components/survey-question-result-card";
+import { SurveyResponseRateCard } from "../components/survey-response-rate-card";
 import { SurveyStatisticsSkeleton } from "../components/survey-statistics-skeleton";
 import { SurveyStatisticsSummary } from "../components/survey-statistics-summary";
+import { SURVEY_ALERTS_TEXT, SURVEY_PARTICIPATION_TEXT } from "../constants/survey-participation.constants";
 import { SURVEY_STATISTICS_TEXT } from "../constants/survey-statistics.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useSurveyStatistics } from "../hooks/use-survey-statistics";
 import { useExportSurveyReport } from "../hooks/use-export-survey-report";
+import { useSurveyAlertConfig } from "../hooks/use-survey-alert-config";
+import { useSurveyParticipation } from "../hooks/use-survey-participation";
+import type { SurveyAlertConfigPayload } from "../types/survey-alert-config-payload.types";
 import type { SurveyAnalyticsViewProps } from "../types/survey-analytics-view-props.types";
+import { formatReminderResult } from "../utils/format-reminder-result";
+import { toSurveyAlertQuestions } from "../utils/to-survey-alert-questions";
 
 export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   const [period, setPeriod] = useState<string | undefined>(undefined);
@@ -26,6 +36,16 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   const report = useExportSurveyReport(id, period);
   const isGeneratingPdf = report.isPending;
   const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
+  const {
+    participation,
+    hasParticipationError,
+    sendReminders,
+    isSendingReminder,
+    refetch: refetchParticipation,
+  } = useSurveyParticipation(id);
+  const alertConfig = useSurveyAlertConfig(id);
 
   useEffect(() => {
     if (!successMessage) return;
@@ -46,6 +66,37 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         richColors: true,
       });
     }
+  };
+
+  const handleConfirmReminder = async () => {
+    if (!participation?.canSendReminder || isSendingReminder) return;
+    try {
+      const { data } = await sendReminders();
+      setIsReminderDialogOpen(false);
+      toast.success(formatReminderResult(data), { duration: 4000, closeButton: true });
+    } catch (error) {
+      setIsReminderDialogOpen(false);
+      toast.error(getApiErrorDetail(error) ?? SURVEY_PARTICIPATION_TEXT.reminderError, {
+        duration: 4000,
+        closeButton: true,
+        richColors: true,
+      });
+    }
+  };
+
+  const handleSaveAlerts = async (payload: SurveyAlertConfigPayload) => {
+    try {
+      await alertConfig.saveConfig(payload);
+      setIsAlertsOpen(false);
+      toast.success(SURVEY_ALERTS_TEXT.saved, { duration: 4000, closeButton: true });
+    } catch {
+      toast.error(SURVEY_ALERTS_TEXT.saveError, { duration: 4000, closeButton: true, richColors: true });
+    }
+  };
+
+  const handleRefresh = () => {
+    void refetch();
+    void refetchParticipation();
   };
 
   const careerName = statistics?.career?.title ?? "Todas las carreras";
@@ -75,6 +126,18 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
     return (
       <>
+        {participation && (
+          <SurveyResponseRateCard
+            participation={participation}
+            isSendingReminder={isSendingReminder}
+            onSendReminder={() => setIsReminderDialogOpen(true)}
+          />
+        )}
+        {hasParticipationError && (
+          <p role="alert" className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+            {SURVEY_PARTICIPATION_TEXT.loadError}
+          </p>
+        )}
         <SurveyStatisticsSummary statistics={statistics} />
 
         <section
@@ -139,7 +202,18 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => void refetch()}
+              onClick={() => setIsAlertsOpen(true)}
+              disabled={!statistics}
+              className="cursor-pointer gap-1.5 border-primary text-xs text-primary hover:text-primary"
+            >
+              <BellRing className="size-3.5" aria-hidden="true" />
+              {SURVEY_ALERTS_TEXT.trigger}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
               disabled={isRefreshing}
               className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
             >
@@ -205,6 +279,28 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
         {renderResults()}
       </main>
+
+      <SurveyAlertsDialog
+        open={isAlertsOpen}
+        onOpenChange={setIsAlertsOpen}
+        questions={toSurveyAlertQuestions(statistics?.questions)}
+        config={alertConfig.config}
+        isLoading={alertConfig.isLoading}
+        hasError={alertConfig.hasError}
+        isSaving={alertConfig.isSaving}
+        onSave={handleSaveAlerts}
+      />
+
+      {participation && (
+        <SendSurveyReminderDialog
+          open={isReminderDialogOpen}
+          pendingCount={participation.pendingCount}
+          audienceLabel={participation.audienceLabel}
+          isSending={isSendingReminder}
+          onOpenChange={setIsReminderDialogOpen}
+          onConfirm={() => void handleConfirmReminder()}
+        />
+      )}
 
       <ExportSuccessToast message={successMessage} />
     </div>

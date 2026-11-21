@@ -29,12 +29,13 @@ const token = jwt.sign({
 const result = {
   percentage: 0,
   sections: [
-    { id: 'contact', weight: 20, isCompleted: false },
+    { id: 'contact', weight: 15, isCompleted: false },
     { id: 'presentation', weight: 15, isCompleted: false },
-    { id: 'education', weight: 20, isCompleted: false },
-    { id: 'work-experience', weight: 20, isCompleted: false },
+    { id: 'education', weight: 15, isCompleted: false },
+    { id: 'work-experience', weight: 15, isCompleted: false },
     { id: 'skills', weight: 15, isCompleted: false },
     { id: 'certifications', weight: 10, isCompleted: false },
+    { id: 'cv', weight: 15, isCompleted: false },
   ],
 };
 

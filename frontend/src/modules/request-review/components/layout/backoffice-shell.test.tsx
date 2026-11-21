@@ -20,6 +20,11 @@ vi.mock("../../hooks/use-backoffice-user", async () => {
     useBackofficeUser: () => ({ fullName: "Personal administrativo", role: getRolesLabel(useAuth().roles) }),
   };
 });
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
+}));
 
 const tokenFor = (roleTag: string) => `h.${btoa(JSON.stringify({ sub: "u1", roleTag }))}.s`;
 

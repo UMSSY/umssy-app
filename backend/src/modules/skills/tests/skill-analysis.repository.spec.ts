@@ -14,6 +14,7 @@ describe('SkillAnalysisRepository', () => {
     userSkill: { findMany: vi.fn() },
   };
   const client = {
+    $executeRaw: vi.fn(),
     userSkill: {
       findMany: vi.fn(),
       deleteMany: vi.fn(),

@@ -1,0 +1,46 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { EDUCATION_FEEDBACK_MESSAGES } from '../constants/education-feedback.constants';
+import { EDUCATIONS_QUERY_KEY } from '../constants/education-query-keys.constants';
+import { educationsService } from '../services/educations.service';
+
+export function useEducations({
+  forGuide = false,
+}: { forGuide?: boolean } = {}) {
+  const queryClient = useQueryClient();
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+  const queryKey = EDUCATIONS_QUERY_KEY;
+  const query = useQuery({
+    queryKey,
+    staleTime: forGuide ? 30_000 : undefined,
+    queryFn: async ({ signal }) => {
+      signal.throwIfAborted();
+      const items = await educationsService.getEducations();
+      return items;
+    },
+  });
+  async function reload() {
+    if (!mountedRef.current) return;
+    await queryClient.cancelQueries({ queryKey, exact: true });
+    await query.refetch();
+  }
+  return {
+    educations: query.data ?? [],
+    isLoading: forGuide
+      ? query.isPending || (query.isError && query.isFetching)
+      : query.isFetching,
+    error:
+      query.isError && !query.isFetching
+        ? EDUCATION_FEEDBACK_MESSAGES.loadError
+        : null,
+    reload,
+  };
+}

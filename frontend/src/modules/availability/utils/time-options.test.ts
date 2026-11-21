@@ -11,19 +11,21 @@ describe("time-options", () => {
     expect(getPastTimeLimit("", NOW)).toBeNull()
   })
 
-  it("deshabilita como inicio las horas pasadas, las que no son anteriores al fin y las 22:00", () => {
+  it("deshabilita como inicio las horas pasadas y las que no dejan lugar a 1 h 30 antes de las 22:00", () => {
     expect(isStartTimeDisabled("10:00", { ...NO_LIMITS, pastLimit: "10:10" })).toBe(true)
     expect(isStartTimeDisabled("10:30", { ...NO_LIMITS, pastLimit: "10:10" })).toBe(false)
-    expect(isStartTimeDisabled("12:00", { ...NO_LIMITS, endTime: "12:00" })).toBe(true)
-    expect(isStartTimeDisabled("11:30", { ...NO_LIMITS, endTime: "12:00" })).toBe(false)
+    expect(isStartTimeDisabled("20:30", NO_LIMITS)).toBe(false)
+    expect(isStartTimeDisabled("21:00", NO_LIMITS)).toBe(true)
     expect(isStartTimeDisabled("22:00", NO_LIMITS)).toBe(true)
   })
 
-  it("deshabilita como fin las horas pasadas, las que no son posteriores al inicio y las 07:00", () => {
+  it("deshabilita como fin las horas pasadas, las 07:00 y las que no cierran bloques de 1 h 30", () => {
     expect(isEndTimeDisabled("10:00", { ...NO_LIMITS, pastLimit: "10:10" })).toBe(true)
     expect(isEndTimeDisabled("10:30", { ...NO_LIMITS, pastLimit: "10:10" })).toBe(false)
     expect(isEndTimeDisabled("09:00", { ...NO_LIMITS, startTime: "09:00" })).toBe(true)
-    expect(isEndTimeDisabled("09:30", { ...NO_LIMITS, startTime: "09:00" })).toBe(false)
+    expect(isEndTimeDisabled("10:00", { ...NO_LIMITS, startTime: "09:00" })).toBe(true)
+    expect(isEndTimeDisabled("10:30", { ...NO_LIMITS, startTime: "09:00" })).toBe(false)
+    expect(isEndTimeDisabled("12:00", { ...NO_LIMITS, startTime: "09:00" })).toBe(false)
     expect(isEndTimeDisabled("07:00", NO_LIMITS)).toBe(true)
   })
 })

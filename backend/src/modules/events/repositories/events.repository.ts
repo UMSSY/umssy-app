@@ -66,6 +66,32 @@ function buildSelect(userId?: string): Prisma.EventSelect {
 export class EventsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findManaged(userId: string) {
+    return this.prisma.event.findMany({
+      where: {
+        createdById: userId,
+        status: { title: PUBLISHED_STATUS_TITLE },
+      },
+      select: {
+        id: true,
+        title: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        location: true,
+        coverMimeType: true,
+      },
+      orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
+    });
+  }
+
+  findManagedWorkshop(eventId: string, userId: string, tx: Prisma.TransactionClient = this.prisma) {
+    return tx.event.findFirst({
+      where: { id: eventId, createdById: userId, status: { title: PUBLISHED_STATUS_TITLE } },
+      select: { id: true, eventDate: true, startTime: true, endTime: true },
+    });
+  }
+
   async expireOverdueProposals(now: Date): Promise<number> {
     const expiredStatus = await this.prisma.eventStatus.findUnique({
       where: { title: EXPIRED_STATUS_TITLE },

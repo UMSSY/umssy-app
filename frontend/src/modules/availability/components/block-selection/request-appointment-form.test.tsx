@@ -216,3 +216,9 @@ describe("RequestAppointmentForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 })
+
+it("muestra el área del radar y prepara el contexto en el mensaje", () => {
+  render(<RequestAppointmentForm selectedArea="QA" orientationTypes={[]} isLoadingTopics={false} isSubmitting={false} onSubmit={vi.fn()} onDirtyChange={vi.fn()} />);
+  expect(screen.getByRole("note")).toHaveTextContent("QA");
+  expect(screen.getByRole("textbox", { name: messageLabel })).toHaveValue("Busco orientación en QA. ");
+});

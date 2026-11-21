@@ -12,3 +12,13 @@ export const PROFILE_ERROR_MESSAGES_BY_STATUS: Record<number, string> = {
   401: "Tu sesión no es válida. Inicia sesión nuevamente.",
   404: "No encontramos tu perfil o la ciudad elegida. Recarga la página.",
 };
+export const NOTIFICATION_PREFERENCES_MESSAGES = {
+  loading: "Cargando tus preferencias de notificaciones...",
+  loadError: "No se pudieron cargar tus preferencias de notificaciones. Recarga la página para intentarlo de nuevo.",
+  saveError: "No se pudo guardar tu preferencia. Inténtalo de nuevo.",
+  saved: {
+    push: "Listo: recibirás tus notificaciones en el celular (Push).",
+    email: "Listo: recibirás tus notificaciones solo por correo.",
+    "in-app": "Listo: recibirás tus notificaciones solo dentro de la app.",
+  },
+} as const;

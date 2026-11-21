@@ -1,14 +1,18 @@
 import { MessageMapper } from './mappers/message.mapper.js';
 
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
 import { EventRegistrationsModule } from '../event-registrations/event-registrations.module.js';
+import { EventsModule } from '../events/events.module.js';
 import { EducationsModule } from '../educations/educations.module.js';
 import { SkillsModule } from '../skills/skills.module.js';
 import { UsersModule } from '../users/users.module.js';
+import { ApplicationsModule } from '../applications/applications.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
+import { ChatVisibilityService } from './services/chat-visibility.service.js';
 
 import { ChatRolePolicyService } from './services/chat-role-policy.service.js';
 
@@ -55,9 +59,12 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     JwtAuthModule,
     AuthModule,
     EventRegistrationsModule,
+    EventsModule,
     EducationsModule,
     SkillsModule,
     UsersModule,
+    forwardRef(() => ApplicationsModule),
+    forwardRef(() => NotificationsModule),
   ],
   controllers: [
     UserSearchController,
@@ -88,6 +95,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     EventRoomService,
     ConnectionRequestService,
     BlockService,
+    ChatVisibilityService,
     ConversationRepository,
     ConversationParticipantRepository,
     MessageRepository,
@@ -112,6 +120,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     EventRoomService,
     ConversationMapper,
     BlockService,
+    ChatVisibilityService,
   ],
 })
 export class ChatModule {}

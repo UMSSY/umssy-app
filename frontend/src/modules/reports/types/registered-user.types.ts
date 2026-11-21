@@ -1,6 +1,5 @@
-import type { DocumentType } from "@/modules/access-request";
+import type { DocumentType } from "@/modules/access-requests";
 import type { RoleTag } from "@/modules/auth";
-import type { PaginatedData } from "@/shared/types/api-response.types";
 
 export interface RegisteredUser {
   id: string;
@@ -10,29 +9,4 @@ export interface RegisteredUser {
   identifier: string;
   documentType: DocumentType | null;
   registeredAt: string;
-}
-
-export type AcademicPeriod = `${"I" | "II"}-${number}`;
-
-export interface RegisteredUsersParams {
-  page: number;
-  limit: number;
-  userType?: RoleTag;
-  period?: AcademicPeriod;
-  search?: string;
-  snapshotAt?: string;
-}
-
-export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period" | "search">;
-
-export interface ExportedFile {
-  file: Blob;
-  fileName: string;
-}
-
-export interface RegisteredUsersState {
-  requestKey: string;
-  result?: PaginatedData<RegisteredUser>;
-  errorMessage?: string;
-  hasConnectionError?: boolean;
 }

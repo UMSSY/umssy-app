@@ -17,6 +17,8 @@ import type { CertificationDocumentMetadata } from '../types/certification-docum
 
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+import { CertificationDocumentVersionConflictException } from '../exceptions/certification-document-version-conflict.exception.js';
 
 @Injectable()
 export class CertificationDocumentsService {
@@ -64,11 +66,14 @@ export class CertificationDocumentsService {
     userId: string,
     id: string,
     file: MulterFile | undefined,
+    expectedVersion?: string,
   ): Promise<CertificationResponse> {
     await this.getOwnedOrFail(userId, id);
 
     const prepared = this.prepare(file);
     await this.transactions.run(async (context) => {
+      if (expectedVersion)
+        await this.requireCurrentVersion(userId, id, expectedVersion, context);
       await this.documentsRepository.save(id, prepared.content, context);
       await this.audit.saveDocumentMetadata(
         userId,
@@ -101,7 +106,11 @@ export class CertificationDocumentsService {
     );
   }
 
-  async remove(userId: string, id: string): Promise<void> {
+  async remove(
+    userId: string,
+    id: string,
+    expectedVersion?: string,
+  ): Promise<void> {
     await this.getOwnedOrFail(userId, id);
 
     if (!(await this.documentsRepository.hasDocument(id))) {
@@ -109,10 +118,28 @@ export class CertificationDocumentsService {
     }
 
     await this.transactions.run(async (context) => {
+      if (expectedVersion)
+        await this.requireCurrentVersion(userId, id, expectedVersion, context);
       await this.documentsRepository.remove(id, context);
       await this.audit.saveDocumentMetadata(userId, id, null, context);
     });
     await this.skillsAnalysis.refreshAfterChange(userId);
+  }
+
+  private async requireCurrentVersion(
+    userId: string,
+    id: string,
+    expectedVersion: string,
+    context: TransactionContext,
+  ): Promise<void> {
+    await this.documentsRepository.lockOwnedCertification(id, userId, context);
+    const current = await this.audit.findActiveCertificationVerification(
+      userId,
+      id,
+      context,
+    );
+    if (current?.id !== expectedVersion)
+      throw new CertificationDocumentVersionConflictException();
   }
 
   private async getOwnedOrFail(

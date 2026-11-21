@@ -8,12 +8,14 @@ import type { ProfileCityResponse } from '../responses/profile-city.response.js'
 import type { ProfileResponse } from '../responses/profile.response.js';
 import { CityCatalogService } from './city-catalog.service.js';
 
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 @Injectable()
 export class ProfileService {
   constructor(
     private readonly profileRepository: ProfileRepository,
     private readonly cityCatalogService: CityCatalogService,
     private readonly profileMapper: ProfileMapper,
+    private readonly events: ProfileSkillsEvents,
   ) {}
 
   async getProfile(userId: string): Promise<ProfileResponse> {
@@ -44,6 +46,7 @@ export class ProfileService {
     await this.ensureProfileExists(userId);
 
     const record = await this.profileRepository.update(userId, request);
+    await this.events.sourceChanged(userId);
     return this.profileMapper.toResponse(record);
   }
 

@@ -1,0 +1,127 @@
+import type { MentorParticipationRequest } from '../types/mentor-participation-request.types';
+import type { MentorCapacity } from '../types/mentor-capacity.types';
+import type { MentorParticipationPreferences } from '../types/mentor-participation-preferences.types';
+import type { MyMentorParticipation } from '../types/my-mentor-participation.types';
+import type {
+  MentorParticipationHistory,
+  MentorParticipationHistoryPage,
+} from '../types/mentor-participation-history.types';
+import {
+  clearMentorIntakeIntentions,
+  withMentorIntakeKey,
+} from '@/shared/services/mentor-intake-idempotency';
+import { apiClient } from '@/shared/services/api-client';
+import type { ApiResponse } from '@/shared/types/api-response.types';
+
+const BASE_PATH = '/mentor-participation/requests';
+
+export const mentorParticipationService = {
+  async getMyParticipation(
+    signal?: AbortSignal,
+  ): Promise<MyMentorParticipation> {
+    const response = await apiClient.get<ApiResponse<MyMentorParticipation>>(
+      '/mentors/me/participation',
+      { signal },
+    );
+    const result = response.data.data;
+    const validItems = (
+      items: unknown,
+    ): items is { id: string; name: string }[] =>
+      Array.isArray(items) &&
+      items.every(
+        (item: unknown) =>
+          typeof item === 'object' &&
+          item !== null &&
+          'id' in item &&
+          typeof item.id === 'string' &&
+          'name' in item &&
+          typeof item.name === 'string',
+      );
+    if (
+      !result ||
+      !['ACTIVE', 'DEACTIVATED', 'NEVER'].includes(result.status) ||
+      !validItems(result.areas) ||
+      !validItems(result.orientations)
+    ) {
+      throw new Error('Respuesta de participación inválida');
+    }
+    return result;
+  },
+
+  async capacity(): Promise<MentorCapacity> {
+    const response =
+      await apiClient.get<ApiResponse<MentorCapacity>>('/mentors/capacity');
+    return response.data.data;
+  },
+
+  async confirm(offerId: string): Promise<void> {
+    await apiClient.post(`/mentors/offers/${offerId}/confirm`);
+    await clearMentorIntakeIntentions().catch(() => {});
+  },
+
+  async leave(): Promise<void> {
+    await apiClient.post('/mentors/me/leave');
+    await clearMentorIntakeIntentions().catch(() => {});
+  },
+
+  async getCurrent(): Promise<MentorParticipationRequest | null> {
+    const response = await apiClient.get<
+      ApiResponse<MentorParticipationRequest | null>
+    >(`${BASE_PATH}/me`);
+
+    return response.data.data;
+  },
+
+  async getHistory(signal?: AbortSignal): Promise<MentorParticipationHistory> {
+    const response = await apiClient.get<
+      ApiResponse<MentorParticipationHistory>
+    >(`${BASE_PATH}/me/history`, { signal });
+
+    return response.data.data;
+  },
+
+  async getHistoryPaginated(
+    page: number,
+    limit: number,
+    signal?: AbortSignal,
+  ): Promise<MentorParticipationHistoryPage> {
+    const response = await apiClient.get<
+      ApiResponse<MentorParticipationHistoryPage>
+    >(`${BASE_PATH}/me/history`, {
+      params: { page, limit },
+      signal,
+    });
+
+    return response.data.data;
+  },
+
+  async create(
+    preferences: MentorParticipationPreferences,
+  ): Promise<MentorParticipationRequest> {
+    return withMentorIntakeKey('request', preferences, async (key) => {
+      const response = await apiClient.post<
+        ApiResponse<MentorParticipationRequest>
+      >(BASE_PATH, preferences, { headers: { 'Idempotency-Key': key } });
+      return response.data.data;
+    });
+  },
+
+  async update(
+    preferences: MentorParticipationPreferences,
+  ): Promise<MentorParticipationRequest> {
+    const response = await apiClient.patch<
+      ApiResponse<MentorParticipationRequest>
+    >(`${BASE_PATH}/me`, preferences);
+
+    return response.data.data;
+  },
+
+  async cancel(): Promise<MentorParticipationRequest> {
+    const response = await apiClient.delete<
+      ApiResponse<MentorParticipationRequest>
+    >(`${BASE_PATH}/me`);
+
+    await clearMentorIntakeIntentions(['request']).catch(() => {});
+    return response.data.data;
+  },
+};

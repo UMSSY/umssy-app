@@ -14,11 +14,14 @@ import type { JobMatchRecord } from '../types/job-match.types.js';
 const USER_ID = '0b9f8a52-3c1d-4e7a-9d55-6f1c2a8b7e10';
 const JOB_OFFER_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 const NO_PROFILE = { career: null, experienceYears: 0 };
+const PUBLISHED_AT = new Date('2026-11-10T15:00:00.000Z');
+const EXPIRES_AT = new Date('2026-11-25T03:59:59.000Z');
 
 interface VacancyOptions {
   careers?: string[];
   minExperienceYears?: number | null;
   others?: string[];
+  expiresAt?: Date | null;
 }
 
 function vacancyRecord(
@@ -29,6 +32,8 @@ function vacancyRecord(
     id: JOB_OFFER_ID,
     title: 'DevOps Senior',
     description: 'Infraestructura en la nube.',
+    publishedAt: PUBLISHED_AT,
+    expiresAt: options.expiresAt === undefined ? EXPIRES_AT : options.expiresAt,
     locationUrl: 'https://maps.google.com/?q=x',
     requiredCareers: options.careers ?? [],
     minExperienceYears: options.minExperienceYears ?? null,
@@ -82,6 +87,8 @@ describe('JobMatchService', () => {
       companyName: 'TechBolivia',
       modality: 'Remoto',
       description: 'Infraestructura en la nube.',
+      publishedAt: '2026-11-10T15:00:00.000Z',
+      expiresAt: '2026-11-25T03:59:59.000Z',
       score: 67,
       hasPendingRequirements: true,
       requirements: [
@@ -89,6 +96,19 @@ describe('JobMatchService', () => {
         { name: 'Docker', status: 'Cumple', category: 'skill' },
         { name: 'Terraform', status: 'Pendiente', category: 'skill' },
       ],
+    });
+  });
+
+  it('devuelve la expiración en null cuando la vacante no vence', async () => {
+    repository.findPublishedById.mockResolvedValue(
+      vacancyRecord(['Docker'], { expiresAt: null }),
+    );
+
+    await expect(
+      service.getMatch(USER_ID, JOB_OFFER_ID),
+    ).resolves.toMatchObject({
+      publishedAt: '2026-11-10T15:00:00.000Z',
+      expiresAt: null,
     });
   });
 

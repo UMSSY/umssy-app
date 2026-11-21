@@ -43,3 +43,15 @@ export function toRejectedUserCsvRow(user: RejectedUserResponse): string[] {
     formatReportDate(user.registeredAt),
   ];
 }
+
+export function toReportUserPdfRow(
+  user: RegisteredUserResponse | RejectedUserResponse,
+): string[] {
+  return [
+    user.fullName,
+    user.email,
+    USER_TYPE_LABELS[user.userType],
+    toDocumentLabel(user.documentType),
+    formatReportDate(user.registeredAt),
+  ];
+}

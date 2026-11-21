@@ -63,6 +63,13 @@ describe('JobOfferMatchRepository', () => {
     });
   });
 
+  it('pide las fechas de publicación y de expiración de la vacante', () => {
+    expect(JOB_MATCH_SELECT).toMatchObject({
+      publishedAt: true,
+      expiresAt: true,
+    });
+  });
+
   it('pide los requisitos de la vacante: carreras, años mínimos y otros', () => {
     expect(JOB_MATCH_SELECT).toMatchObject({
       requiredCareers: true,

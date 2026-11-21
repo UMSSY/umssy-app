@@ -3,6 +3,7 @@ import type { JobMatchDetailViewProps } from "../types/job-match-detail-view-pro
 
 import Link from "next/link";
 import { PageHeading } from "@/shared/components/layout";
+import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
 import { isApiError } from "@/shared/services/api-client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,6 +37,13 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
         <PageHeading
           title={data.title}
           description={`${data.companyName} · ${data.modality}`}
+        />
+      ) : null}
+
+      {data ? (
+        <VacancyDateBadges
+          publishedAt={data.publishedAt}
+          expiresAt={data.expiresAt}
         />
       ) : null}
 

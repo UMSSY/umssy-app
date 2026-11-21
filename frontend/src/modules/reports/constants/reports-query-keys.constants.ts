@@ -1,5 +1,5 @@
 import type { RoleTag } from "@/modules/auth";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 
 export const REPORTS_QUERY_KEYS = {
   all: ["reports"] as const,

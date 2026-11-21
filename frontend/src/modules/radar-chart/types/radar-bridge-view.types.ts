@@ -1,11 +1,11 @@
-import type { Epic2Skill } from "./epic2-skill.types";
-import type { Epic2RadarSource } from "./epic2-radar-source.types";
-import type { RadarAreaScore } from "./radar-profile.types";
+import type { Epic2Skill } from './epic2-skill.types';
+import type { Epic2RadarSource } from './epic2-radar-source.types';
+import type { RadarAreaScore } from './radar-area-score.types';
 
 export interface RadarBridgeView {
-  processingStatus?: "ready" | "pending" | "error";
+  processingStatus?: 'ready' | 'pending' | 'error';
   userId: string;
-  status: Epic2RadarSource["status"];
+  status: Epic2RadarSource['status'];
   version: number;
   updatedAt: string | null;
   dictionaryVersion: string | null;

@@ -1,3 +1,4 @@
+import { resolveMentorAreas } from '../constants/radar-mentor-areas.constants.js';
 import { Prisma } from '../../../prisma/client.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
@@ -27,7 +28,7 @@ export function directoryPredicate(
   if (filters.area)
     conditions.push(Prisma.sql`EXISTS (
     SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
-    WHERE mta.mentor_id = u.id AND ta.name = ${filters.area}
+    WHERE mta.mentor_id = u.id AND ta.name IN (${Prisma.join(resolveMentorAreas(filters.area))})
   )`);
   if (filters.orientation)
     conditions.push(Prisma.sql`EXISTS (
@@ -38,6 +39,12 @@ export function directoryPredicate(
     conditions.push(Prisma.sql`(
       strpos(${normalized(Prisma.sql`u.first_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
       OR strpos(${normalized(Prisma.sql`u.last_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
+      OR strpos(${normalized(Prisma.sql`COALESCE(u.headline, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
+      OR strpos(${normalized(Prisma.sql`COALESCE(u.about_me, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
+      OR EXISTS (SELECT 1 FROM work_experiences we WHERE we.user_id = u.id
+        AND strpos(${normalized(Prisma.sql`we.position`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0)
+      OR EXISTS (SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
+        WHERE mta.mentor_id = u.id AND strpos(${normalized(Prisma.sql`ta.name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0)
     )`);
   }
   return Prisma.join(conditions, ' AND ');
