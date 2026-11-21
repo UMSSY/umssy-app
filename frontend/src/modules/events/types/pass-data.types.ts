@@ -1,4 +1,6 @@
 
+import type { EventSession } from './event-session.types';
+
 export interface PassData {
   id: string;
   qrToken: string;
@@ -8,4 +10,5 @@ export interface PassData {
   endTime: string;
   location: string | null;
   status: string;
+  sessions?: EventSession[];
 }

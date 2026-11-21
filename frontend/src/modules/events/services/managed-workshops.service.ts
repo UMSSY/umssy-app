@@ -4,6 +4,7 @@ import { BEARER_PREFIX } from '@/shared/constants/auth.constants';
 import { readArray, readNullableString, readRecord, readString } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import type { ManagedWorkshop } from '../types/managed-workshop.types';
+import { parseRegistrationSessions } from '@/modules/event-registrations';
 
 function parseManagedWorkshop(value: unknown): ManagedWorkshop {
   const row = readRecord(value);
@@ -15,6 +16,7 @@ function parseManagedWorkshop(value: unknown): ManagedWorkshop {
     endTime: readString(row.endTime),
     location: readNullableString(row.location),
     coverUrl: readNullableString(row.coverUrl),
+    ...(row.sessions !== undefined && { sessions: parseRegistrationSessions(row.sessions) }),
   };
 }
 

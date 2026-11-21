@@ -125,4 +125,25 @@ describe('backend response validation', () => {
     expect(() => parseRegistration(null)).toThrow();
     expect(() => parseRegistration({ id: '1' })).toThrow();
   });
+
+  it('reads workshop sessions and tolerates responses without them', () => {
+    expect(parseEventItem(event)).not.toHaveProperty('sessions');
+    expect(parseEventItem({ ...event, sessions: [] }).sessions).toEqual([]);
+    expect(
+      parseEventItem({
+        ...event,
+        sessions: [{ id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z' }],
+      }).sessions,
+    ).toEqual([{ id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null }]);
+    expect(() => parseEventItem({ ...event, sessions: [{ id: 's1' }] })).toThrow();
+  });
+
+  it('reads registration sessions only when the response includes them', () => {
+    const registration = { id: 'r1', eventName: 'React', date: '2026-12-02', startTime: '09:00', endTime: '12:00', location: 'Aula', status: 'Confirmada' };
+    expect(parseRegistration(registration)).not.toHaveProperty('sessions');
+    expect(
+      parseRegistration({ ...registration, sessions: [{ id: 's1', startsAt: '2026-12-02T13:00:00.000Z', endsAt: '2026-12-02T16:00:00.000Z', location: null }] }).sessions,
+    ).toHaveLength(1);
+    expect(() => parseRegistration({ ...registration, sessions: [{ id: 's1' }] })).toThrow();
+  });
 });

@@ -12,6 +12,8 @@ import {
 } from '../utils/event-card';
 import { formatVotingDeadline, getEventDisplayStatus } from '../utils/event-display-status';
 import { formatEventLocation } from '../utils/format-event-location';
+import { formatSessionDateRange, getSortedSessions } from '../utils/event-sessions';
+import { EventSessionsList } from './event-sessions-list';
 import { DetailRow } from './detail-row';
 import { hasValidEventCapacity } from '../utils/has-valid-event-capacity';
 import { WorkshopCover } from './workshop-cover';
@@ -42,6 +44,8 @@ export function EventDetailPanel({
   const { enrolledCount, capacity, progressPercentage, isFull } =
     calculateEventCapacityStatus(event);
   const availableSpots = event.availableSpots;
+  const sessions = getSortedSessions(event);
+  const isMultiSession = sessions.length > 1;
 
   return (
     <aside
@@ -115,16 +119,26 @@ export function EventDetailPanel({
           Modalidad: {event.modality.title}
         </p>
         <dl className="space-y-2 border-b border-border pb-4">
-          <DetailRow
-            icon={CalendarDays}
-            label="Fecha"
-            value={formatEventDate(event.eventDate)}
-          />
-          <DetailRow
-            icon={Clock3}
-            label="Horario"
-            value={formatTimeRange(event.startTime, event.endTime)}
-          />
+          {isMultiSession ? (
+            <DetailRow
+              icon={CalendarDays}
+              label="Fechas"
+              value={formatSessionDateRange(sessions)}
+            />
+          ) : (
+            <>
+              <DetailRow
+                icon={CalendarDays}
+                label="Fecha"
+                value={formatEventDate(event.eventDate)}
+              />
+              <DetailRow
+                icon={Clock3}
+                label="Horario"
+                value={formatTimeRange(event.startTime, event.endTime)}
+              />
+            </>
+          )}
           <DetailRow
             icon={MapPin}
             label={
@@ -140,6 +154,13 @@ export function EventDetailPanel({
             value={event.instructorName?.trim() || "Por confirmar"}
           />
         </dl>
+
+        {isMultiSession && (
+          <EventSessionsList
+            sessions={sessions}
+            titleId="event-sessions-title"
+          />
+        )}
 
         <section
           aria-labelledby="event-description-title"

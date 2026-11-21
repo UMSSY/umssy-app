@@ -1,7 +1,7 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import type { PassData } from '../types/pass-data.types';
 export type { PassData } from '../types/pass-data.types';
-import { registrationsService as registrationApi } from '@/modules/event-registrations';
+import { registrationsService as registrationApi, parseRegistrationSessions } from '@/modules/event-registrations';
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { readRecord, readString, readNullableString } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
@@ -74,6 +74,9 @@ export const registrationsService = {
       endTime: readString(event.endTime),
       location: readNullableString(event.location),
       status,
+      ...(event.sessions !== undefined && {
+        sessions: parseRegistrationSessions(event.sessions),
+      }),
     };
     // A blocked browser store should not prevent showing a valid online pass.
     if (saveCopy) await saveOfflinePass(pass, token, signal).catch(() => {});

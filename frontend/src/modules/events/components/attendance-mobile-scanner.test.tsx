@@ -10,13 +10,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AttendanceMobileScanner } from './attendance-mobile-scanner';
 import { attendanceCheckInService } from '../services/attendance-check-in.service';
+import type { EventSession } from '../types/event-session.types';
 
 const WORKSHOP_ID = '914f52b0-47f0-49b0-925a-d6783861693a';
 const QR = `v1:${'a'.repeat(64)}`;
 
-function renderScanner() {
+function renderScanner(sessions?: EventSession[]) {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
-  return render(<QueryClientProvider client={queryClient}><AttendanceMobileScanner workshopId={WORKSHOP_ID} /></QueryClientProvider>);
+  return render(<QueryClientProvider client={queryClient}><AttendanceMobileScanner workshopId={WORKSHOP_ID} sessions={sessions} /></QueryClientProvider>);
 }
 
 vi.mock('./attendance-qr-camera', () => ({
@@ -47,7 +48,7 @@ afterEach(() => {
 
 describe('entrada de asistencia', () => {
   it('sends one QR to the selected workshop, pauses while verifying and resumes after success', async () => {
-    let finish!: (value: 'registered') => void;
+    let finish!: (value: { result: 'registered'; sessionId: null }) => void;
     vi.mocked(attendanceCheckInService.checkIn).mockReturnValue(
       new Promise((resolve) => {
         finish = resolve;
@@ -65,8 +66,10 @@ describe('entrada de asistencia', () => {
       WORKSHOP_ID,
       'a'.repeat(64),
       expect.any(AbortSignal),
+      undefined,
+      undefined,
     ));
-    await act(async () => finish('registered'));
+    await act(async () => finish({ result: 'registered', sessionId: null }));
     expect(screen.getByRole('dialog')).toHaveTextContent(
       'Asistencia registrada',
     );
@@ -77,7 +80,7 @@ describe('entrada de asistencia', () => {
   });
 
   it('accepts a registration UUID and rejects scripts or unsupported short codes before sending', async () => {
-    vi.mocked(attendanceCheckInService.checkIn).mockResolvedValue('duplicate');
+    vi.mocked(attendanceCheckInService.checkIn).mockResolvedValue({ result: 'duplicate', sessionId: null });
     renderScanner();
     const input = screen.getByRole('textbox', {
       name: 'Ingresar referencia manualmente',
@@ -105,6 +108,8 @@ describe('entrada de asistencia', () => {
       WORKSHOP_ID,
       registrationId,
       expect.any(AbortSignal),
+      undefined,
+      undefined,
     );
     expect(input).toHaveValue('');
   });
@@ -127,4 +132,29 @@ describe('entrada de asistencia', () => {
     expect(screen.getByRole('dialog')).not.toHaveTextContent(QR);
   });
 
+
+  it('selects the session in progress, sends it and shows the registered session', async () => {
+    vi.useFakeTimers({ now: new Date('2026-12-09T14:00:00.000Z'), toFake: ['Date'] });
+    const sessions = [
+      { id: 'session-1', startsAt: '2026-12-02T13:00:00.000Z', endsAt: '2026-12-02T16:00:00.000Z', location: null },
+      { id: 'session-2', startsAt: '2026-12-09T13:00:00.000Z', endsAt: '2026-12-09T16:00:00.000Z', location: null },
+    ];
+    vi.mocked(attendanceCheckInService.checkIn).mockResolvedValue({ result: 'registered', sessionId: 'session-2' });
+    renderScanner(sessions);
+    expect(screen.getByRole('combobox', { name: 'Sesión' })).toHaveValue('session-2');
+    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
+    await waitFor(() => expect(screen.getByRole('dialog')).toHaveTextContent('Sesión 2 · miércoles, 9 de diciembre'));
+    expect(attendanceCheckInService.checkIn).toHaveBeenCalledWith(
+      WORKSHOP_ID,
+      'a'.repeat(64),
+      expect.any(AbortSignal),
+      undefined,
+      'session-2',
+    );
+  });
+
+  it('hides the session selector for single-session workshops', () => {
+    renderScanner([{ id: 'session-1', startsAt: '2026-12-02T13:00:00.000Z', endsAt: '2026-12-02T16:00:00.000Z', location: null }]);
+    expect(screen.queryByRole('combobox', { name: 'Sesión' })).not.toBeInTheDocument();
+  });
 });

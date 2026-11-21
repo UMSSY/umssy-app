@@ -13,6 +13,25 @@ export function isProposalTime(value: string): boolean {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
 }
 
+export function getProposalDateError(value: string): string | null {
+  const invalid = value ? 'Ingresa una fecha válida.' : 'Selecciona la fecha del taller.';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return invalid;
+  const date = new Date(`${value}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const minDate = new Date(today);
+  minDate.setDate(today.getDate() + 10);
+
+  const maxDate = new Date(today);
+  maxDate.setMonth(today.getMonth() + 6);
+
+  if (Number.isNaN(date.getTime()) || [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-') !== value) return invalid;
+  if (date < minDate) return `Elige una fecha desde el ${minDate.toLocaleDateString('es-BO')}.`;
+  if (date > maxDate) return `Elige una fecha hasta el ${maxDate.toLocaleDateString('es-BO')}.`;
+  return null;
+}
+
 export function validateProposal(values: ProposalValues, cover: File | null, categoryIds: readonly string[]): ProposalErrors {
   const errors: ProposalErrors = {};
 
@@ -33,27 +52,8 @@ export function validateProposal(values: ProposalValues, cover: File | null, cat
   if (!values.categoryId) errors.categoryId = 'Selecciona una categoría.';
   else if (!categoryIds.includes(values.categoryId)) errors.categoryId = 'Esta categoría ya no está disponible. Elige otra.';
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate)) {
-    errors.eventDate = values.eventDate ? 'Ingresa una fecha válida.' : 'Selecciona la fecha del taller.';
-  } else {
-    const date = new Date(`${values.eventDate}T00:00:00`);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const minDate = new Date(today);
-    minDate.setDate(today.getDate() + 10);
-
-    const maxDate = new Date(today);
-    maxDate.setMonth(today.getMonth() + 6);
-
-    if (Number.isNaN(date.getTime()) || [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-') !== values.eventDate) {
-      errors.eventDate = values.eventDate ? 'Ingresa una fecha válida.' : 'Selecciona la fecha del taller.';
-    } else if (date < minDate) {
-      errors.eventDate = `Elige una fecha desde el ${minDate.toLocaleDateString('es-BO')}.`;
-    } else if (date > maxDate) {
-      errors.eventDate = `Elige una fecha hasta el ${maxDate.toLocaleDateString('es-BO')}.`;
-    }
-  }
+  const dateError = getProposalDateError(values.eventDate);
+  if (dateError) errors.eventDate = dateError;
 
   if (!isProposalTime(values.startTime)) errors.startTime = values.startTime ? 'Usa una hora de 24 horas, como 14:30.' : 'Selecciona la hora de inicio.';
   if (!isProposalTime(values.endTime)) errors.endTime = values.endTime ? 'Usa una hora de 24 horas, como 14:30.' : 'Selecciona la hora de finalización.';

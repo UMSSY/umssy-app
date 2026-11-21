@@ -1,3 +1,5 @@
+import type { EventSession } from './event-session.types';
+
 export interface PassCardProps {
   title: string;
   date: string;
@@ -13,4 +15,5 @@ export interface PassCardProps {
   onCancelRegistration?: (registrationId: string) => void;
   cancelDisabledReason?: string;
   isAvailableOffline?: boolean;
+  sessions?: EventSession[];
 }
