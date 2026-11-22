@@ -67,10 +67,31 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
   const processedErrorRef = useRef<boolean>(false);
 
   useEffect(() => {
+    const restore = (event: PageTransitionEvent) => {
+      if (event.persisted) setPendingProvider(null);
+    };
+    window.addEventListener("pageshow", restore);
+    return () => window.removeEventListener("pageshow", restore);
+  }, []);
+
+  useEffect(() => {
     const rawSearchParams =
       searchParams ??
       (typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null);
     if (!rawSearchParams) {
+      return;
+    }
+
+    const githubResult = rawSearchParams.get("github_connection");
+    if (githubResult && !processedErrorRef.current) {
+      processedErrorRef.current = true;
+      const url = new URL(window.location.href);
+      url.searchParams.delete("github_connection");
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+      setFeedback({
+        type: githubResult === "success" ? "success" : "error",
+        message: githubResult === "success" ? PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess("GitHub") : githubResult === "cancelled" ? PORTFOLIO_ACCOUNT_MESSAGES.userCancelled : githubResult === "conflict" ? PORTFOLIO_ACCOUNT_MESSAGES.conflictError : PORTFOLIO_ACCOUNT_MESSAGES.genericError,
+      });
       return;
     }
 
@@ -95,7 +116,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
       return;
     }
 
-    if (code && provider && processedCodeRef.current !== code) {
+    if (code && provider === "gitlab" && processedCodeRef.current !== code) {
       processedCodeRef.current = code;
       cleanUrlParams();
       setPendingProvider(provider);
@@ -107,7 +128,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
             setFeedback({
               type: "success",
               message: PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess(
-                provider === "github" ? "GitHub" : "GitLab",
+                "GitLab",
               ),
             });
           },
@@ -130,7 +151,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
     setFeedback(null);
     setPendingProvider(provider);
     startOAuth.mutate(
-      { provider, state: provider },
+      { provider, ...(provider === "gitlab" ? { state: provider } : {}) },
       {
         onError: () => {
           setPendingProvider(null);

@@ -172,12 +172,18 @@ export class PortfolioController {
     description: 'Unsupported social provider',
   })
   getOAuthUrl(
+    @CurrentUserId() userId: string,
     @Param('provider', { schema: portfolioProviderParamSchema })
     provider: PortfolioProvider,
     @Query({ schema: oauthUrlQuerySchema })
     query: OAuthUrlQueryRequest,
   ): OAuthUrlResponse {
-    return this.socialOAuthService.getAuthorizationUrl(provider, query.state);
+    return this.socialOAuthService.getAuthorizationUrl(
+      provider,
+      query.state,
+      userId,
+      query.challenge,
+    );
   }
 
   @Post('oauth/:provider/callback')
@@ -207,6 +213,8 @@ export class PortfolioController {
       userId,
       provider,
       request.code,
+      request.state,
+      request.verifier,
     );
   }
 

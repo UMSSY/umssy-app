@@ -18,6 +18,8 @@ import {
   useStartPortfolioOAuth,
 } from "./use-portfolio-accounts";
 
+vi.mock("../utils/github-oauth", () => ({ prepareGithubAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
+
 vi.mock("../services/portfolio-accounts.service", () => ({
   portfolioAccountsService: {
     getSocialAccounts: vi.fn(),
@@ -71,7 +73,7 @@ describe("use-portfolio-accounts hooks", () => {
   describe("useStartPortfolioOAuth", () => {
     it("fetches authorization url and assigns it to window location", async () => {
       const mockUrlResponse: PortfolioOAuthUrlResponse = {
-        url: "https://github.com/login/oauth/authorize?client_id=123",
+        url: "https://github.com/login/oauth/authorize?client_id=123&state=github-test-state",
       };
       vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce(
         mockUrlResponse,
@@ -88,7 +90,8 @@ describe("use-portfolio-accounts hooks", () => {
 
       expect(portfolioAccountsService.getOAuthAuthorizationUrl).toHaveBeenCalledWith(
         "github",
-        "github",
+        undefined,
+        "test-challenge",
       );
       expect(assignSpy).toHaveBeenCalledWith(mockUrlResponse.url);
     });

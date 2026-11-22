@@ -1,4 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+} from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { PortfolioProviderEnum } from '../enums/portfolio-provider.enum.js';
 import { ExternalProviderUnavailableException } from '../exceptions/external-provider-unavailable.exception.js';
@@ -24,24 +34,50 @@ export class SocialOAuthService {
   getAuthorizationUrl(
     provider: PortfolioProvider,
     state?: string,
+    userId?: string,
+    challenge?: string,
   ): OAuthUrlResponse {
     if (provider === PortfolioProviderEnum.GITHUB) {
       const clientId = (
         this.configService.get<string>('GITHUB_CLIENT_ID') ?? ''
       ).trim();
-      const redirectUri = (
-        this.configService.get<string>('GITHUB_CALLBACK_URL') ?? ''
-      ).trim();
+      const redirectUri = this.githubCallbackUrl();
+      const secret = this.githubStateSecret();
+      if (
+        !clientId ||
+        !this.configService.get<string>('GITHUB_CLIENT_SECRET')?.trim()
+      ) {
+        throw new ServiceUnavailableException(
+          'La conexión con GitHub no está configurada.',
+        );
+      }
+      if (!userId || !challenge || !/^[A-Za-z0-9_-]{43}$/.test(challenge)) {
+        throw new BadRequestException(
+          'No se pudo iniciar la conexión segura con GitHub.',
+        );
+      }
+      const payload = Buffer.from(
+        JSON.stringify({
+          userId,
+          challenge,
+          expires: Date.now() + 10 * 60_000,
+          nonce: randomBytes(32).toString('base64url'),
+        }),
+      ).toString('base64url');
+      const signature = createHmac('sha256', secret)
+        .update(payload)
+        .digest('base64url');
 
       const params = new URLSearchParams({
         client_id: clientId,
         scope: 'read:user',
+        state: `${payload}.${signature}`,
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
+        prompt: 'select_account',
       });
       if (redirectUri) {
         params.set('redirect_uri', redirectUri);
-      }
-      if (state) {
-        params.set('state', (state ?? '').trim());
       }
       return {
         url: `https://github.com/login/oauth/authorize?${params.toString()}`,
@@ -79,8 +115,12 @@ export class SocialOAuthService {
     userId: string,
     provider: PortfolioProvider,
     code: string,
+    state?: string,
+    verifier?: string,
   ): Promise<SocialAccountResponse> {
-    const profile = await this.exchangeCodeForProfile(provider, code);
+    if (provider === PortfolioProviderEnum.GITHUB)
+      this.verifyGithubState(userId, state, verifier);
+    const profile = await this.exchangeCodeForProfile(provider, code, verifier);
     const account = await this.socialAccountRepository.upsertAccount({
       userId,
       provider,
@@ -95,9 +135,10 @@ export class SocialOAuthService {
   private async exchangeCodeForProfile(
     provider: PortfolioProvider,
     code: string,
+    verifier?: string,
   ): Promise<ExternalUserProfile> {
     if (provider === PortfolioProviderEnum.GITHUB) {
-      return this.exchangeGitHub(code);
+      return this.exchangeGitHub(code, verifier);
     }
     if (provider === PortfolioProviderEnum.GITLAB) {
       return this.exchangeGitLab(code);
@@ -105,34 +146,135 @@ export class SocialOAuthService {
     throw new UnsupportedPortfolioProviderException(provider);
   }
 
-  private async exchangeGitHub(code: string): Promise<ExternalUserProfile> {
+  private githubCallbackUrl(): string {
+    const explicit = this.configService
+      .get<string>('GITHUB_CALLBACK_URL')
+      ?.trim();
+    if (explicit) return explicit;
+    const frontend = this.configService.get<string>('FRONTEND_URL')?.trim();
+    if (frontend) {
+      try {
+        const origin = new URL(frontend);
+        if (
+          !['http:', 'https:'].includes(origin.protocol) ||
+          origin.origin !== frontend.replace(/\/$/, '')
+        )
+          throw new Error('invalid origin');
+        return `${origin.origin}/oauth/github/callback`;
+      } catch {
+        throw new ServiceUnavailableException(
+          'Configure la URL de retorno de GitHub.',
+        );
+      }
+    }
+    const origins = (this.configService.get<string>('CORS_ORIGIN') ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    if (origins.length !== 1)
+      throw new ServiceUnavailableException(
+        'Configure la URL de retorno de GitHub.',
+      );
+    try {
+      const origin = new URL(origins[0]);
+      if (
+        !['http:', 'https:'].includes(origin.protocol) ||
+        origin.origin !== origins[0].replace(/\/$/, '')
+      )
+        throw new Error('invalid origin');
+      return `${origin.origin}/oauth/github/callback`;
+    } catch {
+      throw new ServiceUnavailableException(
+        'Configure la URL de retorno de GitHub.',
+      );
+    }
+  }
+
+  private githubStateSecret(): string {
+    const secret = this.configService.get<string>('JWT_SECRET')?.trim();
+    if (!secret)
+      throw new ServiceUnavailableException(
+        'La conexión con GitHub no está configurada.',
+      );
+    return secret;
+  }
+
+  private verifyGithubState(
+    userId: string,
+    state?: string,
+    verifier?: string,
+  ): void {
+    const invalid = () =>
+      new BadRequestException(
+        'La autorización de GitHub es inválida o ha expirado.',
+      );
+    if (!state || !verifier || !/^[A-Za-z0-9_-]{43,128}$/.test(verifier))
+      throw invalid();
+    const parts = state.split('.');
+    if (
+      parts.length !== 2 ||
+      !/^[A-Za-z0-9_-]+$/.test(parts[0]) ||
+      !/^[A-Za-z0-9_-]{43}$/.test(parts[1])
+    )
+      throw invalid();
+    const actual = Buffer.from(parts[1], 'base64url');
+    const expected = createHmac('sha256', this.githubStateSecret())
+      .update(parts[0])
+      .digest();
+    if (actual.length !== expected.length || !timingSafeEqual(actual, expected))
+      throw invalid();
+    try {
+      const payload = JSON.parse(
+        Buffer.from(parts[0], 'base64url').toString('utf8'),
+      ) as { userId?: unknown; challenge?: unknown; expires?: unknown };
+      const challenge = createHash('sha256')
+        .update(verifier)
+        .digest('base64url');
+      if (
+        payload.userId !== userId ||
+        payload.challenge !== challenge ||
+        typeof payload.expires !== 'number' ||
+        payload.expires < Date.now()
+      )
+        throw invalid();
+    } catch {
+      throw invalid();
+    }
+  }
+
+  private async exchangeGitHub(
+    code: string,
+    verifier?: string,
+  ): Promise<ExternalUserProfile> {
     const clientId = (
       this.configService.get<string>('GITHUB_CLIENT_ID') ?? ''
     ).trim();
     const clientSecret = (
       this.configService.get<string>('GITHUB_CLIENT_SECRET') ?? ''
     ).trim();
-    const redirectUri = (
-      this.configService.get<string>('GITHUB_CALLBACK_URL') ?? ''
-    ).trim();
+    const redirectUri = this.githubCallbackUrl();
 
     let tokenResponse: Response;
     try {
-      tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'User-Agent': 'UMSSY-App',
+      tokenResponse = await fetch(
+        'https://github.com/login/oauth/access_token',
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'UMSSY-App',
+          },
+          body: JSON.stringify({
+            client_id: clientId,
+            client_secret: clientSecret,
+            code: (code ?? '').trim(),
+            code_verifier: verifier,
+            ...(redirectUri ? { redirect_uri: redirectUri } : {}),
+          }),
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         },
-        body: JSON.stringify({
-          client_id: clientId,
-          client_secret: clientSecret,
-          code: (code ?? '').trim(),
-          ...(redirectUri ? { redirect_uri: redirectUri } : {}),
-        }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      });
+      );
     } catch {
       throw new ExternalProviderUnavailableException(
         'El servicio de GitHub no está disponible temporalmente',
@@ -321,4 +463,3 @@ export class SocialOAuthService {
     };
   }
 }
-

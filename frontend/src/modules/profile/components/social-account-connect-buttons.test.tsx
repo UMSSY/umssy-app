@@ -6,7 +6,6 @@ import { portfolioAccountsService } from "../services/portfolio-accounts.service
 import { assignWindowLocation } from "../utils/assign-window-location";
 import { SocialAccountConnectButtons } from "./social-account-connect-buttons";
 import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
-import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
 import type { PortfolioOAuthUrlResponse } from "../types/portfolio-oauth-url-response.types";
 
 let currentSearchParams = new URLSearchParams();
@@ -14,6 +13,8 @@ let currentSearchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useSearchParams: () => currentSearchParams,
 }));
+
+vi.mock("../utils/github-oauth", () => ({ prepareGithubAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
 
 vi.mock("../utils/assign-window-location", () => ({
   assignWindowLocation: vi.fn(),
@@ -67,7 +68,7 @@ describe("SocialAccountConnectButtons", () => {
   });
 
   it.each([
-    { provider: "github", label: "GitHub", url: "https://github.com/login/oauth/authorize?client_id=github-id" },
+    { provider: "github", label: "GitHub", url: "https://github.com/login/oauth/authorize?client_id=github-id&state=github-test-state" },
     { provider: "gitlab", label: "GitLab", url: "https://gitlab.com/oauth/authorize?client_id=gitlab-id" },
   ])("requests the $label authorization URL and redirects on the same tab (CA-2)", async ({ provider, label, url }) => {
     const mockAuthUrl: PortfolioOAuthUrlResponse = {
@@ -83,7 +84,8 @@ describe("SocialAccountConnectButtons", () => {
     await waitFor(() => {
       expect(portfolioAccountsService.getOAuthAuthorizationUrl).toHaveBeenCalledWith(
         provider,
-        provider,
+        provider === "github" ? undefined : provider,
+        ...(provider === "github" ? ["test-challenge"] : []),
       );
       expect(assignWindowLocation).toHaveBeenCalledWith(mockAuthUrl.url);
     });
@@ -146,25 +148,10 @@ describe("SocialAccountConnectButtons", () => {
   });
 
   it("processes returning oauth code, exchanges code, and shows success message (CA-2, CA-7)", async () => {
-    currentSearchParams = new URLSearchParams("provider=github&code=oauth-valid-code");
-    const connectedResponse: PortfolioConnectedAccountResponse = {
-      id: "acc-1",
-      provider: "github",
-      username: "valeriaquispe",
-      profileUrl: "https://github.com/valeriaquispe",
-      connected: true,
-    };
-    vi.mocked(portfolioAccountsService.completeOAuthCallback).mockResolvedValueOnce(
-      connectedResponse,
-    );
-
+    currentSearchParams = new URLSearchParams("github_connection=success");
     render(<SocialAccountConnectButtons />);
 
-    await waitFor(() => {
-      expect(portfolioAccountsService.completeOAuthCallback).toHaveBeenCalledWith("github", {
-        code: "oauth-valid-code",
-      });
-    });
+    expect(portfolioAccountsService.completeOAuthCallback).not.toHaveBeenCalled();
 
     expect(
       await screen.findByText("Cuenta de GitHub vinculada exitosamente."),
@@ -212,6 +199,17 @@ describe("SocialAccountConnectButtons", () => {
     expect(
       await screen.findByText(PORTFOLIO_ACCOUNT_MESSAGES.genericError),
     ).toBeInTheDocument();
+  });
+
+  it("allows retrying when the browser returns from an authorization page", async () => {
+    vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce({
+      url: "https://github.com/login/oauth/authorize?client_id=github-id&state=github-test-state",
+    });
+    render(<SocialAccountConnectButtons />);
+    fireEvent.click(await screen.findByRole("button", { name: "Conectar con GitHub" }));
+    await waitFor(() => expect(assignWindowLocation).toHaveBeenCalled());
+    fireEvent(window, new PageTransitionEvent("pageshow", { persisted: true }));
+    expect(await screen.findByRole("button", { name: "Conectar con GitHub" })).toBeEnabled();
   });
 
   it("opens confirmation dialog when clicking disconnect and cancels without calling service", async () => {
