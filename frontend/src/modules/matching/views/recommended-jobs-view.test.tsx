@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RecommendedJobsView } from "./recommended-jobs-view";
 import { useRecommendedJobs } from "../hooks/use-recommended-jobs";
 
+vi.mock("../hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
+
 vi.mock("../hooks/use-recommended-jobs", () => ({
   useRecommendedJobs: vi.fn(),
 }));

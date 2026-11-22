@@ -38,6 +38,7 @@ export * from "./types/match-score.types";
 export { RecommendedJobsView } from "./views/recommended-jobs-view";
 export { JobMatchDetailView } from "./views/job-match-detail-view";
 export { JobApplicationAction } from "./components/job-application-action";
+export { AppliedJobChip } from "./components/applied-job-chip";
 export { JOB_APPLICATION_QUERY_KEYS } from "./constants/job-application.constants";
 export type { JobMatch } from "./types/job-match.types";
 export type { JobRequirement } from "./types/job-requirement.types";
