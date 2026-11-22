@@ -24,6 +24,8 @@ export const HISTORY_EVENT_IDS = {
   boundary: '66666666-6666-6666-6666-000000000015',
   future: '66666666-6666-6666-6666-000000000016',
   boundarySession: '66666666-6666-6666-6666-000000000017',
+  fixedBoundary: '66666666-6666-6666-6666-000000000018',
+  fixedBoundarySession: '66666666-6666-6666-6666-000000000019',
 } as const;
 
 const historyLocation =
@@ -78,6 +80,16 @@ export function buildHistoryEventScenarios(now: Date) {
       location: 'Aula de demostración, UMSS',
       startsAt: boundaryStart,
       endsAt: boundaryEnd,
+    },
+    fixedBoundary: {
+      id: HISTORY_EVENT_IDS.fixedBoundary,
+      title: 'Taller de cierre controlado del 22 de noviembre',
+      eventDate: new Date('2026-11-22T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T19:20:00.000Z'),
+      endTime: new Date('1970-01-01T20:00:00.000Z'),
+      location: 'Aula de demostración, UMSS',
+      startsAt: new Date('2026-11-22T23:20:00.000Z'),
+      endsAt: new Date('2026-11-23T00:00:00.000Z'),
     },
     future: {
       id: HISTORY_EVENT_IDS.future,

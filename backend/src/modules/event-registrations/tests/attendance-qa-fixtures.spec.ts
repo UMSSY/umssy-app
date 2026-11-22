@@ -68,6 +68,10 @@ function setup() {
 }
 
 describe('HU-08-12 attendance QA fixtures', () => {
+  it('keeps the account without passes out of attendance fixtures', () => {
+    expect(Object.values(ATTENDANCE_QA_CASES).every((fixture) => fixture.email !== 'sinpases@umss.edu.bo')).toBe(true);
+  });
+
   it('creates Saturday, Sunday and Monday workshops with four attendance outcomes', async () => {
     const { tx, registrations, attendances, eventUpsert, ownerId } = setup();
     const now = new Date('2026-11-21T21:00:00.000Z'); // Saturday, 17:00 in Bolivia.

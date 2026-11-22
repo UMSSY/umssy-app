@@ -65,6 +65,15 @@ export async function seedHistoryScenarioRegistrations(
         qrToken: randomBytes(32).toString('hex'),
       }),
     ),
+    {
+      id: registrationId(17),
+      eventId: HISTORY_EVENT_IDS.fixedBoundary,
+      userId: primaryUserId,
+      statusId: confirmed.id,
+      registeredAt: new Date('2026-11-20T12:00:00.000Z'),
+      cancelledAt: null,
+      qrToken: randomBytes(32).toString('hex'),
+    },
   ];
   await tx.eventRegistration.createMany({
     data: registrationData,
