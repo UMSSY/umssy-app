@@ -19,4 +19,5 @@ export type NotificationPayloadMap = {
   [NotificationType.NEW_JOB_APPLICANT]: { jobTitle: string; applicantName: string; applicantCount: number };
   [NotificationType.EVENT_STARTING_SOON]: { eventName: string; time: string };
   [NotificationType.ACCESS_REQUEST_APPROVED]: { studentName: string };
+  [NotificationType.APPLICATION_STATUS_CHANGED]: { vacancyTitle: string; companyName: string; newStatus: string };
 };

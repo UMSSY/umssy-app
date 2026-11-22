@@ -23,6 +23,7 @@ export async function seedNotificationTypes(
     { code: 'NEW_JOB_APPLICANT', name: 'Nuevo postulante en una vacante', sendsPush: true, sendsEmail: true },
     { code: 'EVENT_STARTING_SOON', name: 'Evento por comenzar', sendsPush: true, sendsEmail: false },
     { code: 'ACCESS_REQUEST_APPROVED', name: 'Solicitud de acceso aprobada', sendsPush: true, sendsEmail: true },
+    { code: 'APPLICATION_STATUS_CHANGED', name: 'Actualización de postulación', sendsPush: true, sendsEmail: true },
   ];
 
   for (const { code, ...channels } of notificationTypes) {

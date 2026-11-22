@@ -18,6 +18,7 @@ export const NOTIFICATION_ACTION_LABELS: Record<NotificationType, string> = {
   NEW_JOB_APPLICANT: "Ver postulantes",
   EVENT_STARTING_SOON: "Ver evento",
   ACCESS_REQUEST_APPROVED: "Ver perfil",
+  APPLICATION_STATUS_CHANGED: 'Ver postulación',
 };
 
 export const DEFAULT_NOTIFICATION_ACTION_LABEL = "Ver detalle";
