@@ -22,6 +22,7 @@ import { useCvExtraction } from '../hooks/use-cv-extraction';
 import { useCvFeedback } from '../hooks/use-cv-feedback';
 import { useCvViewer } from '../hooks/use-cv-viewer';
 import type { SavedCv } from '../types/saved-cv.types';
+import { getCvContactErrors } from '../utils/get-cv-contact-errors';
 import { getCvErrorMessage } from '../utils/get-cv-error-message';
 import { isCvFileRejection } from '../utils/is-cv-file-rejection';
 import { validateCvFile } from '../utils/validate-cv-file';
@@ -322,6 +323,11 @@ export function DocumentsCvContent({
         extraction={cvExtraction.extraction}
         available={cvExtraction.available}
         selection={cvExtraction.selection}
+        contactErrors={getCvContactErrors(
+          profile,
+          cvExtraction.extraction,
+          cvExtraction.selection,
+        )}
         errorMessage={cvExtraction.errorMessage}
         canRetry={cvExtraction.isRetryable}
         onRetry={cvExtraction.retry}

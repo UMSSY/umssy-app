@@ -579,6 +579,11 @@ describe("DocumentsCvView", () => {
     await user.clear(firstName);
     await user.type(firstName, "Vale");
     await user.click(within(dialog).getByRole("checkbox", { name: "Incluir Correo personal" }));
+
+    expect(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" })).toBeDisabled();
+    expect(within(dialog).getByText(/Para aplicar tu contacto revisa: Correo personal/)).toBeVisible();
+
+    await user.click(within(dialog).getByRole("checkbox", { name: "Incluir Correo personal" }));
     await user.click(within(dialog).getByRole("tab", { name: "Formación académica (1)" }));
     await user.click(within(dialog).getByRole("checkbox", { name: "Incluir sección Formación académica" }));
     await user.click(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" }));
@@ -589,7 +594,7 @@ describe("DocumentsCvView", () => {
       lastName: "Quispe",
       cityId: "city-cbba",
       phone: "70000000",
-      personalEmail: "",
+      personalEmail: "valeria@mail.com",
     });
     expect(profileService.updatePresentation).toHaveBeenCalledWith({
       headline: "Ingeniera de Sistemas",
@@ -598,6 +603,29 @@ describe("DocumentsCvView", () => {
     expect(educationsService.createEducation).not.toHaveBeenCalled();
     expect(skillsService.addSkills).toHaveBeenCalledWith(["skill-ts"]);
     expect(screen.getByText("Se aplicaron los datos seleccionados a tu perfil.")).toBeVisible();
+  });
+
+  it("asks for the missing city before applying the contact and lets the user skip the contact", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    vi.mocked(profileService.getProfile).mockResolvedValue({ ...PROFILE, city: null });
+    vi.mocked(educationsService.createEducation).mockResolvedValue({ id: "edu-1", ...SAVED_EDUCATION });
+    vi.mocked(documentsService.extractCvData).mockResolvedValue({ ...REVIEW_EXTRACTION, cvId: "cv-1" });
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
+    const dialog = await screen.findByRole("dialog", { name: "Revisar datos extraídos del CV" });
+    await within(dialog).findByRole("textbox", { name: "Nombres" });
+
+    expect(within(dialog).getByText(/Para aplicar tu contacto revisa: Ciudad de residencia/)).toBeVisible();
+    expect(within(dialog).getByRole("combobox", { name: "Ciudad de residencia" })).toHaveAttribute("aria-invalid", "true");
+    expect(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" })).toBeDisabled();
+
+    await user.click(within(dialog).getByRole("checkbox", { name: "Incluir sección Contacto" }));
+    await user.click(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(profileService.updatePersonalInfo).not.toHaveBeenCalled();
   });
 
   it("keeps the review open and tells what was not applied when a save fails", async () => {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
+import { CV_CONTACT_FIELDS, CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
 import { documentsService } from "../services/documents.service";
 import type { CvApplyResult } from "../types/cv-apply-result.types";
 import type { CvExtractedContact } from "../types/cv-extracted-contact.types";
@@ -68,8 +68,15 @@ export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptio
       setSelection((current) => toggleCvSelectionItem(current, section, item)),
     toggleSection: (section: CvExtractionSection) =>
       setSelection((current) => toggleCvSection(current, available, section)),
-    updateContact: (changes: Partial<CvExtractedContact>) =>
-      updateExtraction((current) => ({ ...current, contact: { ...current.contact, ...changes } })),
+    updateContact: (changes: Partial<CvExtractedContact>) => {
+      updateExtraction((current) => ({ ...current, contact: { ...current.contact, ...changes } }));
+      setSelection((current) =>
+        CV_CONTACT_FIELDS.filter((field) => field in changes).reduce(
+          (selected, field) => selectCvSelectionItem(selected, "contact", field),
+          current,
+        ),
+      );
+    },
     updatePresentation: (changes: Partial<CvExtractedPresentation>) =>
       updateExtraction((current) => ({ ...current, presentation: { ...current.presentation, ...changes } })),
     updateEducation: (index: number, changes: Partial<CvExtractedEducation>) => {

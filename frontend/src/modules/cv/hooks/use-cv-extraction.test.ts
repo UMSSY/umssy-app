@@ -149,6 +149,16 @@ describe("useCvExtraction", () => {
     expect(result.current.selection.experience).toEqual([0]);
   });
 
+  it("selects the contact fields that the user completes", async () => {
+    const { result } = await renderExtracted();
+
+    act(() => result.current.updateContact({ cityId: "city-cbba", location: "Cochabamba" }));
+    act(() => result.current.updateContact({ cityId: "city-lpz" }));
+
+    expect(result.current.selection.contact.filter((field) => field === "cityId")).toEqual(["cityId"]);
+    expect(result.current.extraction?.contact.cityId).toBe("city-lpz");
+  });
+
   it("exposes a spanish error when the extraction fails", async () => {
     vi.mocked(documentsService.extractCvData).mockRejectedValue({ response: { status: 500 } });
     const { result } = renderHook(() => useCvExtraction());

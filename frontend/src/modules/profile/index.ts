@@ -20,6 +20,7 @@ export type { Feedback } from './types/feedback.types';
 export type { PersonalInfoValues } from './types/personal-info-values.types';
 export type { ProfileResponse } from './types/profile-response.types';
 export { toPersonalInfoValues } from './utils/to-personal-info-values';
+export { validatePersonalInfo } from './utils/validate-personal-info';
 export type { FeedbackType } from './types/feedback-type.types';
 export { profileService } from './services/profile.service';
 

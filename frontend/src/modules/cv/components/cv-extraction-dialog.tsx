@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  CV_CONTACT_FIELD_LABELS,
   CV_EXTRACTION_FALLBACK_TEXTS,
   CV_EXTRACTION_SECTION_LABELS,
   CV_EXTRACTION_SECTIONS,
@@ -27,6 +28,7 @@ import type { CvExtractionDialogProps } from "../types/cv-extraction-dialog-prop
 import { countCvSelection } from "../utils/count-cv-selection";
 import { isCvHeadlineMissing } from "../utils/is-cv-headline-missing";
 import { isCvSectionFullySelected } from "../utils/is-cv-section-fully-selected";
+import { listCvContactReviewFields } from "../utils/list-cv-contact-review-fields";
 import { CvContactReview } from "./cv-contact-review";
 import { CvEducationReview } from "./cv-education-review";
 import { CvExtractionFallback } from "./cv-extraction-fallback";
@@ -41,6 +43,7 @@ export function CvExtractionDialog({
   extraction,
   available,
   selection,
+  contactErrors = {},
   errorMessage = null,
   canRetry = false,
   isApplying = false,
@@ -59,7 +62,13 @@ export function CvExtractionDialog({
   const matches = extraction ? matchRecords(extraction) : null;
   const isHeadlineMissing = isCvHeadlineMissing(extraction, selection);
   const isBusy = isExtracting || isApplying;
-  const canApply = !isBusy && extraction !== null && countCvSelection(selection) > 0 && !isHeadlineMissing;
+  const missingContactFields = listCvContactReviewFields([], contactErrors);
+  const canApply =
+    !isBusy &&
+    extraction !== null &&
+    countCvSelection(selection) > 0 &&
+    !isHeadlineMissing &&
+    missingContactFields.length === 0;
   const isEmpty = extraction !== null && countCvSelection(available) === 0;
   const failed = applyReport?.failed ?? [];
   const applied = applyReport?.applied ?? [];
@@ -109,6 +118,16 @@ export function CvExtractionDialog({
               </AlertDescription>
             </Alert>
           ) : null}
+          {!isExtracting && !errorMessage && extraction && !isEmpty && missingContactFields.length > 0 ? (
+            <Alert className="mb-4">
+              <AlertTitle>Completa tus datos de contacto</AlertTitle>
+              <AlertDescription>
+                {`Para aplicar tu contacto revisa: ${missingContactFields
+                  .map((field) => CV_CONTACT_FIELD_LABELS[field])
+                  .join(", ")}. Hazlo en la pestaña Contacto o desmarca Contacto.`}
+              </AlertDescription>
+            </Alert>
+          ) : null}
           {!isExtracting && !errorMessage && extraction && !isEmpty ? (
             <Tabs defaultValue={CV_EXTRACTION_SECTIONS[0]}>
               <TabsList aria-label="Secciones del CV" className="h-auto flex-wrap">
@@ -130,7 +149,8 @@ export function CvExtractionDialog({
                     {section === "contact" ? (
                       <CvContactReview
                         contact={extraction.contact}
-                        fields={available.contact}
+                        fields={listCvContactReviewFields(available.contact, contactErrors)}
+                        errors={contactErrors}
                         selected={selection.contact}
                         onToggle={(field) => onToggleItem("contact", field)}
                         onChange={onContactChange}

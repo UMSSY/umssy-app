@@ -116,6 +116,17 @@ describe('CvExtractionDialog', () => {
     vi.clearAllMocks();
   });
 
+  it('blocks the apply button and shows what the contact still needs', async () => {
+    const { user } = renderDialog({ contactErrors: { phone: 'Este campo es obligatorio.' } });
+    const dialog = await screen.findByRole('dialog', { name: 'Revisar datos extraídos del CV' });
+
+    expect(within(dialog).getByText(/Para aplicar tu contacto revisa: Teléfono/)).toBeVisible();
+    expect(within(dialog).getByRole('button', { name: 'Aplicar a mi perfil' })).toBeDisabled();
+    await user.click(within(dialog).getByRole('tab', { name: 'Contacto (4)' }));
+    expect(within(dialog).getByText('Este campo es obligatorio.')).toBeVisible();
+    expect(within(dialog).getByRole('textbox', { name: 'Teléfono' })).toHaveAttribute('aria-invalid', 'true');
+  });
+
   it('labels the records that are already in the profile', async () => {
     vi.mocked(educationsService.getEducations).mockResolvedValueOnce([
       {
