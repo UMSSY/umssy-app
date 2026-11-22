@@ -130,7 +130,7 @@ export function ParticipationView({
   const { currentUserId: authUserId, refreshRoles } = useAuth();
   const { currentUserId } = useCurrentUserId();
   const { clearAllDrafts } = useMentorProfileDraft();
-  const { technicalAreas } = useMentorshipCatalogs();
+  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -297,6 +297,16 @@ export function ParticipationView({
   const resolveTechnicalAreaNames = (ids: string[]) =>
     ids.map(
       (id) => technicalAreaNamesById.get(id) ?? 'Área no disponible',
+    );
+
+  const orientationNamesById = new Map(
+    orientationTypes.map((orientation) => [orientation.id, orientation.name]),
+  );
+
+  const resolveOrientationNames = (ids: string[]) =>
+    ids.map(
+      (id) =>
+        orientationNamesById.get(id) ?? 'Orientación no disponible',
     );
 
   // Vista previa del perfil desde Mi participación.
@@ -750,6 +760,12 @@ export function ParticipationView({
               <div id="mentor-request-history-details">
                 <MentorRequestHistoryDetails
                   request={selectedHistoryRequest}
+                  technicalAreaNames={resolveTechnicalAreaNames(
+                    selectedHistoryRequest.technicalAreaIds,
+                  )}
+                  orientationNames={resolveOrientationNames(
+                    selectedHistoryRequest.orientationTypeIds,
+                  )}
                   onClose={() => setSelectedHistoryId(null)}
                 />
               </div>
