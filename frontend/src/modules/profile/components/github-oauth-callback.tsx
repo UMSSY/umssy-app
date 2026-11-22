@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { completeGithubOAuth } from '../utils/complete-github-oauth';
 
-// Session restoration can remount this page while the same exchange is running.
 let pendingExchange: Promise<string> | null = null;
 
 export function GithubOAuthCallback() {

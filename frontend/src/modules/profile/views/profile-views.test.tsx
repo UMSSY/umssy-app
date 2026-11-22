@@ -7,6 +7,11 @@ import type { ProfileResponse } from "../types/profile-response.types";
 import { PersonalInfoView } from "./personal-info-view";
 import { PresentationView } from "./presentation-view";
 
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock("../services/profile-photo.service", () => ({
   profilePhotoService: {
     getPhoto: vi.fn().mockResolvedValue(null),

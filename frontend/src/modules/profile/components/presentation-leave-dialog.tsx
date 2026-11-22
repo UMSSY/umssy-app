@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useProfileGuide } from '../contexts/profile-guide-context';
+import { useUnsavedChangesGuard } from '@/shared/hooks/use-unsaved-changes-guard';
 import type { PresentationLeaveDialogProps } from '../types/presentation-leave-dialog-props.types';
 
 export function PresentationLeaveDialog({
@@ -21,20 +21,20 @@ export function PresentationLeaveDialog({
   onSave,
   onDiscard,
 }: PresentationLeaveDialogProps) {
-  const registerGuard = useProfileGuide()?.registerReviewGuard;
-  const [navigate, setNavigate] = useState<(() => void) | null>(null);
-
-  useLayoutEffect(() => {
-    if (!dirty && !isSaving) return;
-    return registerGuard?.((proceed) => {
-      if (!isSaving) setNavigate(() => proceed);
-    });
-  }, [dirty, isSaving, registerGuard]);
+  const router = useRouter();
+  const { pendingHref, pendingAction, clearPendingHref, clearPendingAction } =
+    useUnsavedChangesGuard(dirty || isSaving);
+  const navigate =
+    pendingAction ?? (pendingHref ? () => router.push(pendingHref) : null);
+  function clearNavigation() {
+    clearPendingHref();
+    clearPendingAction();
+  }
 
   async function saveAndLeave() {
     if (isSaving || !navigate) return;
     const saved = await onSave();
-    setNavigate(null);
+    clearNavigation();
     if (saved) navigate();
   }
 
@@ -42,10 +42,13 @@ export function PresentationLeaveDialog({
     <AlertDialog
       open={navigate !== null}
       onOpenChange={(open) => {
-        if (!open && !isSaving) setNavigate(null);
+        if (!open && !isSaving) clearNavigation();
       }}
     >
-      <AlertDialogContent finalFocus={returnFocus} className="data-[size=default]:sm:max-w-xl">
+      <AlertDialogContent
+        finalFocus={returnFocus}
+        className="data-[size=default]:sm:max-w-xl"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>¿Deseas salir de esta sección?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -62,13 +65,17 @@ export function PresentationLeaveDialog({
             disabled={isSaving}
             onClick={() => {
               onDiscard();
-              setNavigate(null);
+              clearNavigation();
               navigate?.();
             }}
           >
             Descartar cambios
           </AlertDialogAction>
-          <AlertDialogAction variant="brand" disabled={isSaving} onClick={saveAndLeave}>
+          <AlertDialogAction
+            variant="brand"
+            disabled={isSaving}
+            onClick={saveAndLeave}
+          >
             {isSaving ? 'Guardando…' : 'Guardar cambios'}
           </AlertDialogAction>
         </AlertDialogFooter>

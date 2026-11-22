@@ -22,6 +22,8 @@ The module uses TanStack Query and the centralized HTTP client. It integrates pr
 
 ## Flows and rules
 
+CV changes can trigger profile skill analysis and completeness updates. NLP-detected skills count toward the profile's skills section only when their name and evidence are valid; historical rows without evidence remain excluded from the visible skill list. See [Skills](../skills/README.md).
+
 ```mermaid
 sequenceDiagram
   actor Owner as Profile owner
