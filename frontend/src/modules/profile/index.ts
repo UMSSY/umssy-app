@@ -11,6 +11,7 @@ export { ProfilePageLayout } from './components/profile-page-layout';
 export { ProfileCompletenessProgress } from './components/profile-completeness-progress';
 export { SectionCard } from './components/section-card';
 export { SocialAccountConnectButtons } from './components/social-account-connect-buttons';
+export { GithubOAuthCallback } from './components/github-oauth-callback';
 export { PortfolioProjectCard } from './components/portfolio-project-card';
 export { PortfolioProfileSection } from './components/portfolio-profile-section';
 export { PortfolioSelectionDialog } from './components/portfolio-selection-dialog';
