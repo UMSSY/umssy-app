@@ -30,16 +30,17 @@ import { ActivateParticipationModal } from '../components/participation/activate
 import { DeactivateParticipationModal } from '../components/participation/deactivate-participation-modal';
 import { MentorRequestHistoryDetails } from '../components/participation/mentor-request-history-details';
 import { MentorRequestHistoryEmptyState } from '../components/participation/mentor-request-history-empty-state';
+import { MentorRequestStatusBadge } from '../components/participation/mentor-request-status-badge';
 import { useParticipation } from '../hooks/use-participation';
 import {
   participationErrorCode,
   participationErrorMessage,
 } from '../utils/participation-error';
-import { getMentorRequestStatusLabel } from '../utils/mentor-request-status';
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
   useMentorProfileDraft,
+  useMentorshipCatalogs,
 } from '@/modules/mentorship';
 import { useCurrentUserId } from '@/modules/mentorship';
 import { MentorProfilePreview } from '@/modules/mentorship';
@@ -67,7 +68,7 @@ const notifySuccess = (message: string) => {
   });
 };
 
-const formatRequestDate = (date: string) => {
+const formatRequestDateTime = (date: string) => {
   const parsedDate = new Date(date);
 
   if (Number.isNaN(parsedDate.getTime())) {
@@ -75,13 +76,31 @@ const formatRequestDate = (date: string) => {
   }
 
   return new Intl.DateTimeFormat('es-BO', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
+    dateStyle: 'medium',
+    timeStyle: 'short',
   }).format(parsedDate);
 };
 
-const REQUEST_STATUS_STYLE = 'border-border bg-surface-soft text-ink';
+const formatRequestDateParts = (date: string) => {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return {
+      day: '--',
+      monthYear: 'Fecha no disponible',
+    };
+  }
+
+  return {
+    day: new Intl.DateTimeFormat('es-BO', {
+      day: '2-digit',
+    }).format(parsedDate),
+    monthYear: new Intl.DateTimeFormat('es-BO', {
+      month: 'short',
+      year: 'numeric',
+    }).format(parsedDate),
+  };
+};
 
 const getHistoryErrorMessage = (error: unknown) => {
   if (isAxiosError(error)) {
@@ -111,6 +130,7 @@ export function ParticipationView({
   const { currentUserId: authUserId, refreshRoles } = useAuth();
   const { currentUserId } = useCurrentUserId();
   const { clearAllDrafts } = useMentorProfileDraft();
+  const { technicalAreas } = useMentorshipCatalogs();
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -269,6 +289,15 @@ export function ParticipationView({
 
   const selectedHistoryRequest =
     historyItems.find((item) => item.id === selectedHistoryId) ?? null;
+
+  const technicalAreaNamesById = new Map(
+    technicalAreas.map((area) => [area.id, area.name]),
+  );
+
+  const resolveTechnicalAreaNames = (ids: string[]) =>
+    ids.map(
+      (id) => technicalAreaNamesById.get(id) ?? 'Área no disponible',
+    );
 
   // Vista previa del perfil desde Mi participación.
   if (isPreviewOpen && isActive && state && currentUserId) {
@@ -558,7 +587,7 @@ export function ParticipationView({
                 isChangingHistoryPage ? 'opacity-60' : 'opacity-100'
               }`}
             >
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
                 <caption className="sr-only">
                   Historial de solicitudes de cupo como mentor
                 </caption>
@@ -566,74 +595,111 @@ export function ParticipationView({
                 <thead className="border-b bg-muted/50">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Fecha de solicitud
+                      Fecha
                     </th>
+
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Estado
+                      Solicitud
                     </th>
+
                     <th scope="col" className="px-4 py-3 font-medium">
                       Áreas técnicas
                     </th>
+
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Orientaciones
+                      Estado
                     </th>
+
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Acciones
+                      Fecha y hora de registro
+                    </th>
+
+                    <th
+                      scope="col"
+                      className="px-4 py-3 text-right font-medium"
+                    >
+                      Acción
                     </th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y">
-                  {historyItems.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3">
-                        {formatRequestDate(item.createdAt)}
-                      </td>
+                  {historyItems.map((item) => {
+                    const dateParts = formatRequestDateParts(item.createdAt);
+                    const areaNames = resolveTechnicalAreaNames(
+                      item.technicalAreaIds,
+                    );
 
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${REQUEST_STATUS_STYLE}`}
-                        >
-                          {getMentorRequestStatusLabel(item.status)}
-                        </span>
-                      </td>
+                    return (
+                      <tr
+                        key={item.id}
+                        className="align-middle transition-colors hover:bg-muted/30"
+                      >
+                        <td className="p-4">
+                          <div className="min-w-[88px]">
+                            <span className="block text-lg leading-none font-semibold">
+                              {dateParts.day}
+                            </span>
 
-                      <td className="px-4 py-3">
-                        {item.technicalAreaIds.length}
-                      </td>
+                            <span className="mt-1 block text-xs text-muted-foreground capitalize">
+                              {dateParts.monthYear}
+                            </span>
+                          </div>
+                        </td>
 
-                      <td className="px-4 py-3">
-                        {item.orientationTypeIds.length}
-                      </td>
+                        <td className="p-4">
+                          <p className="min-w-[190px] font-medium">
+                            Solicitud de cupo como mentor
+                          </p>
+                        </td>
 
-                      <td className="px-4 py-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          disabled={isChangingHistoryPage}
-                          aria-expanded={selectedHistoryId === item.id}
-                          aria-controls="mentor-request-history-details"
-                          onClick={() =>
-                            setSelectedHistoryId((current) =>
-                              current === item.id ? null : item.id,
-                            )
-                          }
-                        >
-                          {selectedHistoryId === item.id
-                            ? 'Ocultar detalles'
-                            : 'Ver detalles'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="p-4">
+                          <div className="flex max-w-[280px] flex-wrap gap-1.5">
+                            {areaNames.map((name, index) => (
+                              <span
+                                key={`${item.id}-area-${index}`}
+                                className="rounded-md bg-muted px-2 py-1 text-xs text-foreground"
+                              >
+                                {name}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+
+                        <td className="p-4">
+                          <MentorRequestStatusBadge status={item.status} />
+                        </td>
+
+                        <td className="p-4 text-muted-foreground">
+                          <span className="whitespace-nowrap">
+                            {formatRequestDateTime(item.createdAt)}
+                          </span>
+                        </td>
+
+                        <td className="p-4 text-right">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={isChangingHistoryPage}
+                            aria-expanded={selectedHistoryId === item.id}
+                            aria-controls="mentor-request-history-details"
+                            onClick={() =>
+                              setSelectedHistoryId((current) =>
+                                current === item.id ? null : item.id,
+                              )
+                            }
+                          >
+                            {selectedHistoryId === item.id
+                              ? 'Ocultar detalle'
+                              : 'Ver detalle'}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-
-            <p className="text-xs text-muted-foreground">
-              Las columnas de áreas técnicas y orientaciones muestran la
-              cantidad seleccionada en cada solicitud.
-            </p>
 
             {totalHistoryPages > 1 && (
               <nav
