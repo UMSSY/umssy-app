@@ -199,12 +199,12 @@ export function PendingParticipation({
       )}
 
       <section className="space-y-5 rounded-lg border border-border bg-surface p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-1 items-start gap-3">
+        <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-start md:justify-between">
+          <div className="flex min-w-0 items-start gap-3 md:flex-1 md:basis-64">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-notice text-notice-foreground">
               <UsersRound className="size-6" aria-hidden="true" />
             </div>
-            <div className="space-y-1">
+            <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-bold text-ink">Estado de participación</h2>
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-notice px-2 py-1 text-xs font-semibold text-notice-foreground">
@@ -221,7 +221,7 @@ export function PendingParticipation({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 md:shrink-0">
             <Button
               variant="outline"
               onClick={() => {
@@ -246,9 +246,9 @@ export function PendingParticipation({
 
         <div className="space-y-5 border-t border-border pt-5">
           <section className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="font-bold text-ink">Áreas técnicas</h3>
-              <Button variant="outline" onClick={openEdit}>
+              <Button variant="outline" onClick={openEdit} className="h-auto min-h-9 max-w-full py-2 whitespace-normal">
                 <Pencil className="size-4" aria-hidden="true" />
                 Editar áreas técnicas
               </Button>
@@ -267,9 +267,9 @@ export function PendingParticipation({
           </section>
 
           <section className="space-y-3 border-t border-border pt-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="font-bold text-ink">Tipos de orientación</h3>
-              <Button variant="outline" onClick={openEdit}>
+              <Button variant="outline" onClick={openEdit} className="h-auto min-h-9 max-w-full py-2 whitespace-normal">
                 <Pencil className="size-4" aria-hidden="true" />
                 Editar tipos de orientación
               </Button>
