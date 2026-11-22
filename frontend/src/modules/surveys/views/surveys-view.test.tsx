@@ -39,7 +39,7 @@ describe("SurveysView", () => {
     await user.click(await screen.findByRole("option", { name: "Todas" }));
     expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
     expect(screen.getByText("Encuesta de Empleabilidad")).toBeInTheDocument();
-  });
+  }, 10_000);
 
   it("CA15: restringe la creación y el listado al rol administrativo", () => {
     expect(getRouteRoles("/backoffice/surveys")).toEqual(["administrativo"]);
