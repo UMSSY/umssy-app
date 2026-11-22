@@ -6,6 +6,8 @@ import { CV_EMPTY_EXTRACTION_SELECTION } from '../constants/cv-extraction.consta
 import type { CvExtraction } from '../types/cv-extraction.types';
 import type { CvExtractionDialogProps } from '../types/cv-extraction-dialog-props.types';
 import type { CvExtractionSelection } from '../types/cv-extraction-selection.types';
+import { educationsService } from '@/modules/educations/services/educations.service';
+import { workExperienceService } from '@/modules/work-experience/services/work-experience.service';
 import { CvExtractionDialog } from './cv-extraction-dialog';
 
 vi.mock('@/modules/profile/services/profile.service', () => ({
@@ -16,8 +18,13 @@ vi.mock('@/modules/profile/services/profile.service', () => ({
   },
 }));
 
+vi.mock('@/modules/work-experience/services/work-experience.service', () => ({
+  workExperienceService: { getWorkExperiences: vi.fn().mockResolvedValue([]) },
+}));
+
 vi.mock('@/modules/educations/services/educations.service', () => ({
   educationsService: {
+    getEducations: vi.fn().mockResolvedValue([]),
     getInstitutions: vi
       .fn()
       .mockResolvedValue([
@@ -107,6 +114,52 @@ describe('CvExtractionDialog', () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+  });
+
+  it('blocks the apply button and shows what the contact still needs', async () => {
+    const { user } = renderDialog({ contactErrors: { phone: 'Este campo es obligatorio.' } });
+    const dialog = await screen.findByRole('dialog', { name: 'Revisar datos extraídos del CV' });
+
+    expect(within(dialog).getByText(/Para aplicar tu contacto revisa: Teléfono/)).toBeVisible();
+    expect(within(dialog).getByRole('button', { name: 'Aplicar a mi perfil' })).toBeDisabled();
+    await user.click(within(dialog).getByRole('tab', { name: 'Contacto (4)' }));
+    expect(within(dialog).getByText('Este campo es obligatorio.')).toBeVisible();
+    expect(within(dialog).getByRole('textbox', { name: 'Teléfono' })).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('labels the records that are already in the profile', async () => {
+    vi.mocked(educationsService.getEducations).mockResolvedValueOnce([
+      {
+        id: '11111111-1111-4111-8111-111111111111',
+        institution: 'Universidad Mayor de San Simón (UMSS)',
+        degree: 'Licenciatura en Ingeniería de Sistemas',
+        startDate: '2014-01-01',
+        endDate: null,
+        description: null,
+        createdAt: '2026-11-01T00:00:00.000Z',
+        updatedAt: '2026-11-01T00:00:00.000Z',
+      },
+    ]);
+    vi.mocked(workExperienceService.getWorkExperiences).mockResolvedValueOnce([
+      {
+        id: '22222222-2222-4222-8222-222222222222',
+        companyName: 'Empresa SRL',
+        position: 'Desarrollador Backend',
+        startDate: '2021-03-15',
+        endDate: null,
+        isCurrent: true,
+        description: 'APIs REST',
+      },
+    ]);
+    const { user } = renderDialog();
+    const dialog = await screen.findByRole('dialog', { name: 'Revisar datos extraídos del CV' });
+
+    await user.click(within(dialog).getByRole('tab', { name: 'Formación académica (1)' }));
+    expect(await within(dialog).findByText('Ya en tu perfil')).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole('tab', { name: 'Experiencia laboral (1)' }));
+    expect(await within(dialog).findByText('Se actualizará')).toBeInTheDocument();
+    expect(within(dialog).queryByText('Ya en tu perfil')).not.toBeInTheDocument();
   });
 
   it('organizes the extracted data by section with the number of detected items', async () => {
