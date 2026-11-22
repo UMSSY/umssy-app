@@ -12,6 +12,10 @@ vi.mock("../hooks/use-recommended-jobs", () => ({
   useRecommendedJobs: vi.fn(),
 }));
 
+vi.mock("../components/job-alert-preference-selector", () => ({
+  JobAlertPreferenceSelector: () => null,
+}));
+
 const mockedUseRecommendedJobs = vi.mocked(useRecommendedJobs);
 
 const JOBS: RecommendedJob[] = [

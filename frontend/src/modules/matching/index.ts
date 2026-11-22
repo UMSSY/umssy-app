@@ -48,3 +48,6 @@ export type { RequirementStatus } from "./types/requirement-status.types";
 export { skillsAnalysisService } from "./services/skills-analysis.service";
 export type { DetectedSkill } from "./types/detected-skill.types";
 export type { SkillsAnalysisResult } from "./types/skills-analysis-result.types";
+export { JobAlertPreferenceSelector } from "./components/job-alert-preference-selector";
+export type { JobAlertMode } from "./types/job-alert-mode.types";
+export type { JobAlertPreference } from "./types/job-alert-preference.types";

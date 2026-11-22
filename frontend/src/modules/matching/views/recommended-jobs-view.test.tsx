@@ -11,6 +11,10 @@ vi.mock("../hooks/use-recommended-jobs", () => ({
   useRecommendedJobs: vi.fn(),
 }));
 
+vi.mock("../components/job-alert-preference-selector", () => ({
+  JobAlertPreferenceSelector: () => <div data-testid="job-alert-preference-selector" />,
+}));
+
 const mockedUseRecommendedJobs = vi.mocked(useRecommendedJobs);
 
 const refetch = vi.fn();
@@ -55,6 +59,14 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
 
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
     expect(screen.queryByText("Vacante de prueba")).not.toBeInTheDocument();
+  });
+
+  it("HU-15: shows the alert preference selector even when the profile is incomplete", () => {
+    setQueryState({ data: { isProfileComplete: false, items: [] } });
+
+    render(<RecommendedJobsView />);
+
+    expect(screen.getByTestId("job-alert-preference-selector")).toBeInTheDocument();
   });
 
   it("shows an error and allows retrying", () => {
