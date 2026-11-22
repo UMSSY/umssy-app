@@ -9,7 +9,6 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/shared/contexts/auth-context';
@@ -31,6 +30,7 @@ import { DeactivateParticipationModal } from '../components/participation/deacti
 import { MentorRequestHistoryDetails } from '../components/participation/mentor-request-history-details';
 import { MentorRequestHistoryEmptyState } from '../components/participation/mentor-request-history-empty-state';
 import { MentorRequestStatusBadge } from '../components/participation/mentor-request-status-badge';
+import { MentorRequestHistoryPagination } from '../components/participation/mentor-request-history-pagination';
 import { useParticipation } from '../hooks/use-participation';
 import {
   participationErrorCode,
@@ -283,7 +283,6 @@ export function ParticipationView({
   const totalHistoryRequests = history.data?.total ?? 0;
   const totalHistoryPages = Math.max(1, history.data?.totalPages ?? 1);
   const currentHistoryPage = history.data?.page ?? historyPage;
-  const historyStartIndex = (currentHistoryPage - 1) * HISTORY_PAGE_SIZE;
   const isChangingHistoryPage =
     history.isFetching && history.data !== undefined;
 
@@ -613,10 +612,6 @@ export function ParticipationView({
                     </th>
 
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Áreas técnicas
-                    </th>
-
-                    <th scope="col" className="px-4 py-3 font-medium">
                       Estado
                     </th>
 
@@ -636,9 +631,6 @@ export function ParticipationView({
                 <tbody className="divide-y">
                   {historyItems.map((item) => {
                     const dateParts = formatRequestDateParts(item.createdAt);
-                    const areaNames = resolveTechnicalAreaNames(
-                      item.technicalAreaIds,
-                    );
 
                     return (
                       <tr
@@ -661,19 +653,6 @@ export function ParticipationView({
                           <p className="min-w-[190px] font-medium">
                             Solicitud de cupo como mentor
                           </p>
-                        </td>
-
-                        <td className="p-4">
-                          <div className="flex max-w-[280px] flex-wrap gap-1.5">
-                            {areaNames.map((name, index) => (
-                              <span
-                                key={`${item.id}-area-${index}`}
-                                className="rounded-md bg-muted px-2 py-1 text-xs text-foreground"
-                              >
-                                {name}
-                              </span>
-                            ))}
-                          </div>
                         </td>
 
                         <td className="p-4">
@@ -711,50 +690,15 @@ export function ParticipationView({
               </table>
             </div>
 
-            {totalHistoryPages > 1 && (
-              <nav
-                aria-label="Paginación del historial de solicitudes"
-                className="flex flex-wrap items-center justify-between gap-3 border-t pt-4"
-              >
-                <p role="status" className="text-sm text-muted-foreground">
-                  Mostrando {historyStartIndex + 1}–
-                  {Math.min(
-                    historyStartIndex + historyItems.length,
-                    totalHistoryRequests,
-                  )}{' '}
-                  de {totalHistoryRequests} solicitudes.
-                </p>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={currentHistoryPage === 1 || history.isFetching}
-                    onClick={() => changeHistoryPage(currentHistoryPage - 1)}
-                  >
-                    <ChevronLeft aria-hidden="true" className="size-4" />
-                    Anterior
-                  </Button>
-
-                  <span className="px-2 text-sm font-medium" aria-live="polite">
-                    Página {currentHistoryPage} de {totalHistoryPages}
-                  </span>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={
-                      currentHistoryPage >= totalHistoryPages ||
-                      history.isFetching
-                    }
-                    onClick={() => changeHistoryPage(currentHistoryPage + 1)}
-                  >
-                    Siguiente
-                    <ChevronRight aria-hidden="true" className="size-4" />
-                  </Button>
-                </div>
-              </nav>
-            )}
+            <MentorRequestHistoryPagination
+              currentPage={currentHistoryPage}
+              totalPages={totalHistoryPages}
+              totalRequests={totalHistoryRequests}
+              pageSize={HISTORY_PAGE_SIZE}
+              visibleItems={historyItems.length}
+              isLoading={history.isFetching}
+              onPageChange={changeHistoryPage}
+            />
 
             {selectedHistoryRequest && !isChangingHistoryPage && (
               <div id="mentor-request-history-details">
