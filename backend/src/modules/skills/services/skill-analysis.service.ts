@@ -11,7 +11,7 @@ import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 import { toUserSkillSummary } from '../mappers/user-skill-summary.mapper.js';
 import type { UserSkillSummaryResponse } from '../responses/user-skill-summary.response.js';
 import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
-import { validateSkillName } from '../../nlp/utils/validate-skill-name.js';
+import { isVisibleNlpSkill } from '../../nlp/utils/is-visible-nlp-skill.js';
 
 @Injectable()
 export class SkillAnalysisService {
@@ -23,13 +23,11 @@ export class SkillAnalysisService {
 
   async hasProfileSkills(userId: string): Promise<boolean> {
     const rows = await this.repository.findProfileSkillRows(userId);
-    // Retained NLP history can lack evidence and is hidden by the radar mapper.
     return rows.some(
       (row) =>
         row.source === USER_SKILL_SOURCES.manual ||
         (row.source === USER_SKILL_SOURCES.nlp &&
-          validateSkillName(row.skill.name).isValid &&
-          parseEvidenceRefs(row.evidenceRefs).length > 0),
+          isVisibleNlpSkill(row.skill.name, row.evidenceRefs)),
     );
   }
 

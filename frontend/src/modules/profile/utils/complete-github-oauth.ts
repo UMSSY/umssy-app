@@ -4,6 +4,7 @@ import {
   getAccessToken,
 } from '@/shared/services/storage/access-token-storage';
 import { portfolioAccountsService } from '../services/portfolio-accounts.service';
+import { takeGithubOAuthAttempt } from './github-oauth-storage';
 
 export async function completeGithubOAuth(
   params: URLSearchParams,
@@ -12,11 +13,7 @@ export async function completeGithubOAuth(
   const state = params.get('state');
   const error = params.get('error');
   try {
-    const stored = sessionStorage.getItem('umssy.github.oauth');
-    sessionStorage.removeItem('umssy.github.oauth');
-    const pending: { state?: unknown; verifier?: unknown } | null = stored
-      ? JSON.parse(stored)
-      : null;
+    const pending = takeGithubOAuthAttempt();
     if (
       !state ||
       pending?.state !== state ||
