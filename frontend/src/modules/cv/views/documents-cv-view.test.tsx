@@ -11,6 +11,7 @@ import type { ProfileResponse } from "@/modules/profile";
 import { profileService } from "@/modules/profile/services/profile.service";
 import { educationsService } from "@/modules/educations/services/educations.service";
 import { skillsService } from "@/modules/skills/services/skills.service";
+import { workExperienceService } from "@/modules/work-experience/services/work-experience.service";
 import { documentsService } from "../services/documents.service";
 import type { CvPage } from "../types/cv-page.types";
 import type { CvExtraction } from "../types/cv-extraction.types";
@@ -59,7 +60,17 @@ vi.mock("@/modules/skills/services/skills.service", () => ({
 }));
 
 vi.mock("@/modules/educations/services/educations.service", () => ({
-  educationsService: { getInstitutions: vi.fn(), getDegrees: vi.fn(), createEducation: vi.fn() },
+  educationsService: {
+    getInstitutions: vi.fn(),
+    getDegrees: vi.fn(),
+    getEducations: vi.fn(),
+    createEducation: vi.fn(),
+    updateEducation: vi.fn(),
+  },
+}));
+
+vi.mock("@/modules/work-experience/services/work-experience.service", () => ({
+  workExperienceService: { getWorkExperiences: vi.fn(), createWorkExperience: vi.fn(), updateWorkExperience: vi.fn() },
 }));
 
 const PDF_TYPE = "application/pdf";
@@ -97,6 +108,15 @@ const REVIEW_EXTRACTION: CvExtraction = {
     },
   ],
   skills: [{ skillId: "skill-ts", name: "TypeScript" }],
+};
+const SAVED_EDUCATION = {
+  institution: "Universidad Mayor de San Simón (UMSS)",
+  degree: "Licenciatura en Ingeniería de Sistemas",
+  startDate: "2014-01-01",
+  endDate: "2019-01-01",
+  description: null,
+  createdAt: "2026-11-01T00:00:00.000Z",
+  updatedAt: "2026-11-01T00:00:00.000Z",
 };
 const CV_SIZE_IN_BYTES = 1258291;
 const UPLOAD_DATE = new Date(2026, 8, 20);
@@ -185,6 +205,8 @@ describe("DocumentsCvView", () => {
     vi.mocked(profileService.updatePresentation).mockResolvedValue(PROFILE);
     vi.mocked(educationsService.getInstitutions).mockResolvedValue([]);
     vi.mocked(educationsService.getDegrees).mockResolvedValue([]);
+    vi.mocked(educationsService.getEducations).mockResolvedValue([]);
+    vi.mocked(workExperienceService.getWorkExperiences).mockResolvedValue([]);
     vi.mocked(skillsService.getMySkills).mockResolvedValue([{ id: "skill-sql", name: "SQL" }]);
     vi.mocked(skillsService.saveMySkills).mockResolvedValue([]);
     vi.mocked(skillsService.addSkills).mockResolvedValue([]);
@@ -595,6 +617,56 @@ describe("DocumentsCvView", () => {
     expect(within(dialog).getByRole("checkbox", { name: "Incluir sección Contacto" })).not.toBeChecked();
     await user.click(within(dialog).getByRole("tab", { name: "Formación académica (1)" }));
     expect(within(dialog).getByRole("checkbox", { name: "Incluir sección Formación académica" })).toBeChecked();
+  });
+
+  it("leaves unselected an education that is already in the profile and does not create it again", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    vi.mocked(educationsService.getEducations).mockResolvedValue([{ id: "edu-1", ...SAVED_EDUCATION }]);
+    vi.mocked(documentsService.extractCvData).mockResolvedValue({ ...REVIEW_EXTRACTION, cvId: "cv-1" });
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
+    const dialog = await screen.findByRole("dialog", { name: "Revisar datos extraídos del CV" });
+    await within(dialog).findByRole("textbox", { name: "Nombres" });
+    await user.click(within(dialog).getByRole("tab", { name: "Formación académica (1)" }));
+
+    expect(await within(dialog).findByText("Ya en tu perfil")).toBeInTheDocument();
+    expect(within(dialog).getByRole("checkbox", { name: "Incluir sección Formación académica" })).not.toBeChecked();
+
+    await user.click(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(educationsService.createEducation).not.toHaveBeenCalled();
+    expect(educationsService.updateEducation).not.toHaveBeenCalled();
+  });
+
+  it("updates the saved education when only its dates changed", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    vi.mocked(educationsService.getEducations).mockResolvedValue([
+      { id: "edu-1", ...SAVED_EDUCATION, startDate: "2014-01-15" },
+    ]);
+    vi.mocked(educationsService.updateEducation).mockResolvedValue({ id: "edu-1", ...SAVED_EDUCATION });
+    vi.mocked(documentsService.extractCvData).mockResolvedValue({ ...REVIEW_EXTRACTION, cvId: "cv-1" });
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
+    const dialog = await screen.findByRole("dialog", { name: "Revisar datos extraídos del CV" });
+    await within(dialog).findByRole("textbox", { name: "Nombres" });
+    await user.click(within(dialog).getByRole("tab", { name: "Formación académica (1)" }));
+
+    expect(await within(dialog).findByText("Se actualizará")).toBeInTheDocument();
+    expect(within(dialog).getByRole("checkbox", { name: "Incluir sección Formación académica" })).toBeChecked();
+
+    await user.click(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(educationsService.createEducation).not.toHaveBeenCalled();
+    expect(educationsService.updateEducation).toHaveBeenCalledWith(
+      "edu-1",
+      expect.objectContaining({ startDate: "2014-01-01", endDate: "2019-01-01" }),
+    );
   });
 
   it("applies nothing when the review is cancelled", async () => {

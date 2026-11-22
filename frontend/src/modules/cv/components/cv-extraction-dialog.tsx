@@ -22,6 +22,7 @@ import {
   CV_REVIEW_TEXTS,
 } from "../constants/cv-extraction.constants";
 import { CV_APPLY_TEXTS } from "../constants/cv-apply.constants";
+import { useCvRecordMatcher } from "../hooks/use-cv-record-matcher";
 import type { CvExtractionDialogProps } from "../types/cv-extraction-dialog-props.types";
 import { countCvSelection } from "../utils/count-cv-selection";
 import { isCvHeadlineMissing } from "../utils/is-cv-headline-missing";
@@ -54,6 +55,8 @@ export function CvExtractionDialog({
   onApply,
   onClose,
 }: CvExtractionDialogProps) {
+  const matchRecords = useCvRecordMatcher();
+  const matches = extraction ? matchRecords(extraction) : null;
   const isHeadlineMissing = isCvHeadlineMissing(extraction, selection);
   const isBusy = isExtracting || isApplying;
   const canApply = !isBusy && extraction !== null && countCvSelection(selection) > 0 && !isHeadlineMissing;
@@ -144,6 +147,7 @@ export function CvExtractionDialog({
                       <CvEducationReview
                         educations={extraction.educations}
                         selected={selection.education}
+                        matchStatuses={(matches?.education ?? []).map(({ status }) => status)}
                         onToggle={(index) => onToggleItem("education", index)}
                         onChange={onEducationChange}
                       />
@@ -152,6 +156,7 @@ export function CvExtractionDialog({
                       <CvWorkExperienceReview
                         workExperiences={extraction.workExperiences}
                         selected={selection.experience}
+                        matchStatuses={(matches?.experience ?? []).map(({ status }) => status)}
                         onToggle={(index) => onToggleItem("experience", index)}
                         onChange={onWorkExperienceChange}
                       />

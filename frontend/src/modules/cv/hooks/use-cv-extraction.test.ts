@@ -5,6 +5,16 @@ import { documentsService } from "../services/documents.service";
 import type { CvExtraction } from "../types/cv-extraction.types";
 import { useCvExtraction } from "./use-cv-extraction";
 
+vi.mock("@/modules/work-experience/services/work-experience.service", () => ({
+  workExperienceService: { getWorkExperiences: vi.fn().mockResolvedValue([]) },
+}));
+vi.mock("@/modules/educations/services/educations.service", () => ({
+  educationsService: {
+    getEducations: vi.fn().mockResolvedValue([]),
+    getInstitutions: vi.fn().mockResolvedValue([]),
+    getDegrees: vi.fn().mockResolvedValue([]),
+  },
+}));
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     extractCvData: vi.fn(),
@@ -121,6 +131,22 @@ describe("useCvExtraction", () => {
     expect(result.current.extraction?.educations[0].degree).toBe("Ingeniería");
     expect(result.current.extraction?.workExperiences[0]).toMatchObject({ isCurrent: false, endDate: "2023-01-01" });
     expect(result.current.available.contact).toEqual(["firstName", "lastName", "email"]);
+  });
+
+  it("selects an education or experience as soon as the user edits it", async () => {
+    const { result } = await renderExtracted();
+
+    act(() => result.current.toggleItem("education", 0));
+    act(() => result.current.toggleItem("experience", 0));
+    expect(result.current.selection.education).toEqual([]);
+    expect(result.current.selection.experience).toEqual([]);
+
+    act(() => result.current.updateEducation(0, { startDate: "2014-01-20" }));
+    act(() => result.current.updateWorkExperience(0, { startDate: "2021-03-20" }));
+    act(() => result.current.updateWorkExperience(0, { description: "APIs" }));
+
+    expect(result.current.selection.education).toEqual([0]);
+    expect(result.current.selection.experience).toEqual([0]);
   });
 
   it("exposes a spanish error when the extraction fails", async () => {
