@@ -69,12 +69,9 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
     renderBody: (p) => truncate(`Se detectaron cambios significativos en la encuesta "${p.surveyTitle}".`),
   },
 
-  [NotificationType.APPLICATION_STATUS_CHANGED]: {
-    renderTitle: () => 'Actualización de postulación',
-    renderBody: (p) =>
-      truncate(
-        `Tu postulación a ${p.vacancyTitle} en ${p.companyName} cambió a: ${p.newStatus}.`,
-      ),
+  [NotificationType.JOB_OFFER_PUBLISHED]: {
+    renderTitle: () => 'Nueva vacante publicada',
+    renderBody: (p) => truncate(`${p.companyName} ha publicado: ${p.jobTitle}.`),
   },
 
   [NotificationType.NEW_JOB_APPLICANT]: {
