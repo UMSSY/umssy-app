@@ -78,7 +78,6 @@ export function JobAlertPreferenceSelector() {
                   <RadioGroupItem
                     value={value}
                     disabled={isLocked}
-                    aria-label={label}
                     aria-describedby={isLocked ? JOB_ALERT_SKILLS_NOTICE_ID : undefined}
                     className="mt-0.5"
                   />

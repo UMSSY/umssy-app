@@ -22,7 +22,6 @@ export function useJobAlertPreference() {
     onSuccess: (preference) => {
       queryClient.setQueryData(JOB_ALERT_PREFERENCE_QUERY_KEY, preference);
     },
-    
     onError: (error) => {
       toast.error(getApiErrorDetail(error) ?? JOB_ALERT_MESSAGES.saveError);
       return queryClient.invalidateQueries({ queryKey: JOB_ALERT_PREFERENCE_QUERY_KEY });

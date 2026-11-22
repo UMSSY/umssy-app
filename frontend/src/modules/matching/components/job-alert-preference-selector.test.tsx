@@ -13,9 +13,9 @@ vi.mock("../services/job-alert-preference.service", () => ({
 
 const mockedService = vi.mocked(jobAlertPreferenceService);
 
-const ALL_OPTION = "Todas las vacantes";
-const MATCHING_OPTION = "Solo las que coinciden con mi perfil";
-const HIGH_OPTION = "Solo las de alta afinidad";
+const ALL_OPTION = /^Todas las vacantes/;
+const MATCHING_OPTION = /^Solo las que coinciden con mi perfil/;
+const HIGH_OPTION = /^Solo las de alta afinidad/;
 const SKILLS_NOTICE = "Para activar estas opciones, añade al menos una habilidad a tu perfil.";
 
 const WITH_SKILLS: JobAlertPreference = { mode: "ALL", savedMode: "ALL", canFilterByProfile: true };
