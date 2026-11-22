@@ -7,7 +7,6 @@ import { seedEvents } from '../seeds/events.seed.js';
 import {
   EVENT_PASS_LIFECYCLE_FIXTURES,
   REGISTRATION_CANCELLATION_FIXTURES,
-  getUpcomingPassSchedule,
   seedEventPassLifecycleEvents,
 } from '../seeds/event-pass-lifecycle-fixtures.seed.js';
 import {
@@ -62,41 +61,7 @@ describe('seedEvents', () => {
     }
   });
 
-  it('starts the active pass five minutes after the seed and closes it one minute later', async () => {
-    const now = new Date('2026-10-25T02:00:20.123Z');
-    const schedule = getUpcomingPassSchedule(now);
-    const startMinute =
-      schedule.startTime.getUTCHours() * 60 +
-      schedule.startTime.getUTCMinutes();
-    const closeMinute =
-      schedule.endTime.getUTCHours() * 60 + schedule.endTime.getUTCMinutes();
-
-    expect(schedule.eventDate.toISOString().slice(0, 10)).toBe('2026-10-24');
-    expect(startMinute).toBe(22 * 60 + 5);
-    expect(closeMinute - startMinute).toBe(1);
-    expect(
-      Date.UTC(
-        2026,
-        9,
-        24,
-        schedule.startTime.getUTCHours() + 4,
-        schedule.startTime.getUTCMinutes(),
-        schedule.startTime.getUTCSeconds(),
-        schedule.startTime.getUTCMilliseconds(),
-      ),
-    ).toBe(now.getTime() + 5 * 60_000);
-  });
-
-  it('keeps the active one-minute schedule on the same event day around midnight', () => {
-    const schedule = getUpcomingPassSchedule(
-      new Date('2026-10-25T03:59:30.000Z'),
-    );
-    expect(schedule.eventDate.toISOString().slice(0, 10)).toBe('2026-10-25');
-    expect(schedule.startTime.toISOString()).toBe('1970-01-01T00:04:30.000Z');
-    expect(schedule.endTime.toISOString()).toBe('1970-01-01T00:05:30.000Z');
-  });
-
-  it('creates recognizable lifecycle passes with dates based on Bolivia time', async () => {
+  it('seeds the active database workshop on Monday November 23 from 08:00 to 23:00', async () => {
     const upsert = vi.fn().mockResolvedValue({});
     const count = await seedEventPassLifecycleEvents(
       { event: { upsert } } as never,
@@ -114,15 +79,15 @@ describe('seedEvents', () => {
     expect(upsert).toHaveBeenCalledTimes(2);
     const [active, finished] = upsert.mock.calls.map(([args]) => args);
     expect(active.where.id).toBe('fb69db6e-ded6-4eed-85ef-6135cf88fad4');
-    expect(active.create.title).toBe('[QA 08.5] Pase vigente');
+    expect(active.create.title).toBe('taller de base de datos');
     expect(active.create.eventDate.toISOString().slice(0, 10)).toBe(
-      '2026-10-24',
+      '2026-11-23',
     );
     expect(active.create.startTime.toISOString()).toBe(
-      '1970-01-01T22:05:00.000Z',
+      '1970-01-01T08:00:00.000Z',
     );
     expect(active.create.endTime.toISOString()).toBe(
-      '1970-01-01T22:06:00.000Z',
+      '1970-01-01T23:00:00.000Z',
     );
     expect(finished.where.id).toBe('66f39ba1-ebc1-42b9-9169-e773f2eb3d2b');
     expect(finished.create.title).toBe('[QA 08.5] Pase finalizado por horario');
