@@ -59,6 +59,7 @@ import {
   profileGuideStorage,
 } from '../services/profile-guide-storage';
 import type { ProfileGuideProviderProps } from '../types/profile-guide-provider-props.types';
+import type { ProfileReviewGuard } from '../types/profile-review-guard.type';
 import type { ProfileGuideSession } from '../types/profile-guide-session.types';
 import type { ProfileCompletenessSectionId } from '../types/profile-completeness-section-id.types';
 import type { ProfileGuideStepDirection } from '../types/profile-guide-step-direction.types';
@@ -108,6 +109,13 @@ function ProfileGuideSessionProvider({
   const [editorVersion, setEditorVersion] = useState(0);
   const [showPending, setShowPending] = useState(false);
   const [bubbleOpen, setBubbleOpen] = useState(false);
+  const reviewGuardRef = useRef<ProfileReviewGuard | null>(null);
+  const registerReviewGuard = useCallback((guard: ProfileReviewGuard) => {
+    reviewGuardRef.current = guard;
+    return () => {
+      if (reviewGuardRef.current === guard) reviewGuardRef.current = null;
+    };
+  }, []);
   const [discardOpen, setDiscardOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -318,8 +326,8 @@ function ProfileGuideSessionProvider({
     [],
   );
   const contextValue = useMemo(
-    () => ({ isEnabled: enabled, isComplete, hasFinished, start: openGuide }),
-    [enabled, isComplete, hasFinished, openGuide],
+    () => ({ isEnabled: enabled, isComplete, hasFinished, start: openGuide, registerReviewGuard }),
+    [enabled, isComplete, hasFinished, openGuide, registerReviewGuard],
   );
 
   return (
@@ -364,7 +372,9 @@ function ProfileGuideSessionProvider({
                 onClick={() => {
                   if (isComplete) {
                     setBubbleOpen(false);
-                    router.push('/profile');
+                    const navigate = () => router.push('/profile');
+                    if (reviewGuardRef.current) reviewGuardRef.current(navigate);
+                    else navigate();
                   } else start();
                 }}
               >
