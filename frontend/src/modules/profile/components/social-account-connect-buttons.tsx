@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Check, ExternalLink, FolderGit2, GitBranch, Loader2 } from "lucide-react";
+import { Check, ExternalLink, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { isApiError } from "@/shared/services/api-client";
 import { FeedbackMessage } from "./feedback-message";
@@ -67,10 +67,31 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
   const processedErrorRef = useRef<boolean>(false);
 
   useEffect(() => {
+    const restore = (event: PageTransitionEvent) => {
+      if (event.persisted) setPendingProvider(null);
+    };
+    window.addEventListener("pageshow", restore);
+    return () => window.removeEventListener("pageshow", restore);
+  }, []);
+
+  useEffect(() => {
     const rawSearchParams =
       searchParams ??
       (typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null);
     if (!rawSearchParams) {
+      return;
+    }
+
+    const githubResult = rawSearchParams.get("github_connection");
+    if (githubResult && !processedErrorRef.current) {
+      processedErrorRef.current = true;
+      const url = new URL(window.location.href);
+      url.searchParams.delete("github_connection");
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+      setFeedback({
+        type: githubResult === "success" ? "success" : "error",
+        message: githubResult === "success" ? PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess("GitHub") : githubResult === "cancelled" ? PORTFOLIO_ACCOUNT_MESSAGES.userCancelled : githubResult === "conflict" ? PORTFOLIO_ACCOUNT_MESSAGES.conflictError : PORTFOLIO_ACCOUNT_MESSAGES.genericError,
+      });
       return;
     }
 
@@ -95,7 +116,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
       return;
     }
 
-    if (code && provider && processedCodeRef.current !== code) {
+    if (code && provider === "gitlab" && processedCodeRef.current !== code) {
       processedCodeRef.current = code;
       cleanUrlParams();
       setPendingProvider(provider);
@@ -107,7 +128,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
             setFeedback({
               type: "success",
               message: PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess(
-                provider === "github" ? "GitHub" : "GitLab",
+                "GitLab",
               ),
             });
           },
@@ -130,7 +151,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
     setFeedback(null);
     setPendingProvider(provider);
     startOAuth.mutate(
-      { provider, state: provider },
+      { provider, ...(provider === "gitlab" ? { state: provider } : {}) },
       {
         onError: () => {
           setPendingProvider(null);
@@ -169,12 +190,8 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
   };
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <Label className="text-[12.5px] font-semibold text-ink">
-        {PORTFOLIO_ACCOUNT_MESSAGES.sectionTitle}
-      </Label>
-      <FeedbackMessage feedback={feedback} />
-      <div className="flex flex-col gap-2.5">
+    <div role="group" aria-label={PORTFOLIO_ACCOUNT_MESSAGES.sectionTitle} className={cn("flex min-w-0 flex-col gap-2", className)}>
+      <div className="grid min-w-0 grid-cols-2 gap-2">
         {PORTFOLIO_PROVIDERS.map((provider) => {
           const account = getProviderAccount(accounts, provider);
           const isPending = pendingProvider === provider;
@@ -188,14 +205,10 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
             return (
               <div
                 key={provider}
-                className="flex h-11 w-full items-center justify-between rounded-md border border-border bg-surface-soft px-3"
+                className="col-span-2 flex min-h-11 min-w-0 flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface-soft px-3 py-2"
               >
-                <div className="flex min-w-0 items-center gap-2">
-                  {provider === "github" ? (
-                    <FolderGit2 className="size-4 shrink-0 text-ink-soft" aria-hidden="true" />
-                  ) : (
-                    <GitBranch className="size-4 shrink-0 text-ink-soft" aria-hidden="true" />
-                  )}
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <Image src={`/icons/${provider}.svg`} alt="" width={24} height={24} className="size-6 shrink-0" aria-hidden="true" />
                   <span className="text-sm font-medium text-ink">{providerLabel}</span>
                   <Badge
                     variant="outline"
@@ -205,7 +218,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
                     <span>{PORTFOLIO_ACCOUNT_MESSAGES.connected}</span>
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                   {username ? (
                     profileUrl ? (
                       <a
@@ -215,11 +228,11 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
                         className="flex items-center gap-1 text-xs text-text-secondary hover:text-ink hover:underline"
                         title={`Ver perfil de ${username}`}
                       >
-                        <span>@{username}</span>
+                        <span className="break-all">@{username}</span>
                         <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
                       </a>
                     ) : (
-                      <span className="text-xs text-text-secondary">@{username}</span>
+                      <span className="text-xs break-all text-text-secondary">@{username}</span>
                     )
                   ) : null}
                   <Button
@@ -257,7 +270,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
               key={provider}
               type="button"
               variant="outline"
-              className="h-11 w-full justify-center gap-2 border-border-strong text-ink hover:bg-surface-soft"
+              className="h-auto min-h-11 w-full min-w-0 justify-center gap-1.5 border-border-strong px-2 py-1 text-xs whitespace-normal text-ink hover:bg-surface-soft"
               disabled={isPending}
               onClick={() => handleConnect(provider)}
             >
@@ -268,18 +281,15 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
                 </>
               ) : (
                 <>
-                  {provider === "github" ? (
-                    <FolderGit2 className="size-4" aria-hidden="true" />
-                  ) : (
-                    <GitBranch className="size-4" aria-hidden="true" />
-                  )}
-                  <span>{PORTFOLIO_ACCOUNT_MESSAGES.connectWith(providerLabel)}</span>
+                  <Image src={`/icons/${provider}.svg`} alt="" width={20} height={20} className="size-5 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0 text-left leading-tight break-words">{PORTFOLIO_ACCOUNT_MESSAGES.connectWith(providerLabel)}</span>
                 </>
               )}
             </Button>
           );
         })}
       </div>
+      <FeedbackMessage feedback={feedback} />
       <ConfirmDeleteDialog
         isOpen={providerToDisconnect !== null}
         title={

@@ -10,6 +10,15 @@ export async function seedEventsFixtures(
   tx: Prisma.TransactionClient,
   context: FixtureContext,
 ): Promise<number> {
+  const owner = await tx.user.findUnique({
+    where: { email: 'prueba@umss.edu.bo' },
+    select: { id: true, isActive: true },
+  });
+  if (!owner?.isActive) {
+    throw new Error(
+      'La cuenta prueba@umss.edu.bo debe existir y estar activa para crear el taller QA.',
+    );
+  }
   const data: Prisma.EventCreateManyInput[] = [
     {
       id: context.getId('record-01390'),
@@ -470,6 +479,25 @@ export async function seedEventsFixtures(
       createdById: context.getId('record-00524'),
       createdAt: context.getDate('monday', -57600, false),
       updatedAt: context.getDate('anchor', 0, false),
+    },
+    {
+      id: context.getId('qa-workshop-2026-11-19'),
+      title: '[QA] Taller práctico de análisis de datos',
+      description:
+        'Introducción al análisis de datos con ejercicios de limpieza, visualización e interpretación de resultados. Actividad ficticia para pruebas de publicación y asistencia.',
+      categoryId: context.getReference('event_categories', 'Tecnología'),
+      instructorName: 'Facilitador de análisis de datos',
+      eventDate: new Date('2026-11-19T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T00:00:00.000Z'),
+      endTime: new Date('1970-01-01T21:00:00.000Z'),
+      modalityId: context.getReference('event_modalities', 'Presencial'),
+      location: 'Aula de informática, campus de demostración',
+      capacity: 20,
+      originId: context.getReference('event_origins', 'Comunidad'),
+      statusId: context.getReference('event_statuses', 'Votacion'),
+      supportThreshold: 10,
+      votingDeadline: new Date('2026-11-20T04:00:00.000Z'),
+      createdById: owner.id,
     },
   ];
   await tx.event.createMany({ data, skipDuplicates: true });

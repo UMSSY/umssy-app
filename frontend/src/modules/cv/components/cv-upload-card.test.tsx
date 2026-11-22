@@ -147,4 +147,13 @@ describe("CvUploadCard", () => {
     expect(screen.getByText("Subiendo... 60%")).toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: "Progreso de la subida" })).toBeInTheDocument();
   });
+
+  it("applies min-w-0 to prevent layout overflow on smaller screens", () => {
+    renderCard();
+
+    const card = screen.getByText("Subir currículum").closest('[data-slot="card"]');
+    expect(card).toHaveClass("min-w-0");
+  });
 });
+
+

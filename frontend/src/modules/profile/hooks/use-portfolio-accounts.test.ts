@@ -8,6 +8,7 @@ import {
 } from "../constants/portfolio-projects.constants";
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
 import * as assignLocationModule from "../utils/assign-window-location";
+import * as sessionStorageService from "@/shared/services/storage/browser-session-storage";
 import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
 import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
 import type { PortfolioOAuthUrlResponse } from "../types/portfolio-oauth-url-response.types";
@@ -17,6 +18,8 @@ import {
   usePortfolioAccounts,
   useStartPortfolioOAuth,
 } from "./use-portfolio-accounts";
+
+vi.mock("../utils/github-oauth", () => ({ prepareGithubAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
 
 vi.mock("../services/portfolio-accounts.service", () => ({
   portfolioAccountsService: {
@@ -69,9 +72,21 @@ describe("use-portfolio-accounts hooks", () => {
   });
 
   describe("useStartPortfolioOAuth", () => {
+    it("does not redirect when the authorization attempt cannot be stored", async () => {
+      vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce({
+        url: "https://github.com/login/oauth/authorize?state=github-test-state",
+      });
+      vi.spyOn(sessionStorageService, "writeSessionStorage").mockReturnValue(false);
+      const assignSpy = vi.spyOn(assignLocationModule, "assignWindowLocation").mockImplementation(() => {});
+      const { result } = renderHook(() => useStartPortfolioOAuth());
+      await act(async () => {
+        await expect(result.current.mutateAsync({ provider: "github" })).rejects.toThrow();
+      });
+      expect(assignSpy).not.toHaveBeenCalled();
+    });
     it("fetches authorization url and assigns it to window location", async () => {
       const mockUrlResponse: PortfolioOAuthUrlResponse = {
-        url: "https://github.com/login/oauth/authorize?client_id=123",
+        url: "https://github.com/login/oauth/authorize?client_id=123&state=github-test-state",
       };
       vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce(
         mockUrlResponse,
@@ -88,7 +103,8 @@ describe("use-portfolio-accounts hooks", () => {
 
       expect(portfolioAccountsService.getOAuthAuthorizationUrl).toHaveBeenCalledWith(
         "github",
-        "github",
+        undefined,
+        "test-challenge",
       );
       expect(assignSpy).toHaveBeenCalledWith(mockUrlResponse.url);
     });

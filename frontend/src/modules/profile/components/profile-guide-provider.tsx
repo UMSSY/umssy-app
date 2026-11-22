@@ -59,6 +59,7 @@ import {
   profileGuideStorage,
 } from '../services/profile-guide-storage';
 import type { ProfileGuideProviderProps } from '../types/profile-guide-provider-props.types';
+import { requestGuardedNavigation } from '@/shared/hooks/use-unsaved-changes-guard';
 import type { ProfileGuideSession } from '../types/profile-guide-session.types';
 import type { ProfileCompletenessSectionId } from '../types/profile-completeness-section-id.types';
 import type { ProfileGuideStepDirection } from '../types/profile-guide-step-direction.types';
@@ -364,7 +365,8 @@ function ProfileGuideSessionProvider({
                 onClick={() => {
                   if (isComplete) {
                     setBubbleOpen(false);
-                    router.push('/profile');
+                    const navigate = () => router.push('/profile');
+                    requestGuardedNavigation(navigate);
                   } else start();
                 }}
               >

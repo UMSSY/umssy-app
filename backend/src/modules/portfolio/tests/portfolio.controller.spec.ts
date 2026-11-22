@@ -133,7 +133,9 @@ describe('PortfolioController', () => {
     service.getAccounts.mockResolvedValue(sampleAccounts);
     service.getRepositories.mockResolvedValue([sampleRepo]);
     socialOAuthService.getAuthorizationUrl.mockReturnValue(sampleOAuthUrl);
-    socialOAuthService.connectWithCode.mockResolvedValue(sampleConnectedAccount);
+    socialOAuthService.connectWithCode.mockResolvedValue(
+      sampleConnectedAccount,
+    );
     session.getAuthenticatedUser.mockResolvedValue({
       id: userId,
       email: 'user@example.test',
@@ -243,6 +245,8 @@ describe('PortfolioController', () => {
     expect(socialOAuthService.getAuthorizationUrl).toHaveBeenCalledWith(
       'github',
       'mystate',
+      userId,
+      undefined,
     );
   });
 
@@ -263,6 +267,8 @@ describe('PortfolioController', () => {
       userId,
       'github',
       'valid-auth-code',
+      undefined,
+      undefined,
     );
   });
 

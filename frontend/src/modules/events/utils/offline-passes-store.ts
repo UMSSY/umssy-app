@@ -1,23 +1,23 @@
 import {
-  readIndexedDbPair,
-  updateIndexedDbPair,
   readIndexedDb,
   removeIndexedDb,
-  removeIndexedDbByPrefix,
   writeIndexedDb,
 } from '@/shared/services/storage/browser-indexed-db';
-import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import {
+  claimOfflinePasses,
+  clearOfflinePasses,
+  readOfflinePassesOwner,
+  readOwnedOfflinePasses,
+  updateOwnedOfflinePasses,
+} from '@/shared/services/storage/offline-passes-owner';
 import { offlinePassesKey } from '@/shared/constants/offline-passes.constants';
 import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
 import {
   clearPendingPassRemovals,
   readPendingPassRemovals,
 } from '@/shared/services/storage/pending-offline-pass-removals';
-import {
-  OFFLINE_PASSES_KEY_PREFIX,
-  OFFLINE_QR_TOKEN_PATTERN,
-} from '../constants/offline-passes.constants';
+import { OFFLINE_QR_TOKEN_PATTERN } from '../constants/offline-passes.constants';
 
 import type { OfflinePass } from '../types/offline-pass.types';
 import type { OfflinePassesSnapshot } from '../types/offline-passes-snapshot.types';
@@ -65,32 +65,34 @@ function toSnapshot(
 }
 
 export async function loadSessionOfflinePasses(
-  accessToken: string,
+  accessToken: string | null,
 ): Promise<OfflinePassesSnapshot | null> {
-  const userId = readAccessTokenSubject(accessToken);
-  if (!userId || getAccessToken() !== accessToken) return null;
+  const sessionUserId = accessToken ? readAccessTokenSubject(accessToken) : null;
+  if (accessToken && (!sessionUserId || getAccessToken() !== accessToken))
+    return null;
   try {
-    const [persistedToken, snapshot] = await readIndexedDbPair(
-      ACCESS_TOKEN_STORAGE_KEY,
-      keyFor(userId),
-    );
-    if (persistedToken !== accessToken || getAccessToken() !== accessToken)
-      return null;
-    return await withoutPendingRemovals(
-      toSnapshot(snapshot, userId),
-      accessToken,
-      userId,
-    );
+    const owner = sessionUserId
+      ? await confirmSessionOwner(sessionUserId)
+      : await readOfflinePassesOwner();
+    if (!owner || (sessionUserId && owner !== sessionUserId)) return null;
+    const copy = await readOwnedOfflinePasses(owner);
+    if (accessToken && getAccessToken() !== accessToken) return null;
+    return await withoutPendingRemovals(toSnapshot(copy, owner), owner);
   } catch {
     return null;
   }
 }
 
-// Passes whose cancellation was confirmed but could not be removed locally are hidden
-// right away, and their removal is retried without contacting the server again.
+async function confirmSessionOwner(userId: string): Promise<string | null> {
+  const owner = await readOfflinePassesOwner();
+  if (owner) return owner;
+  if (!toSnapshot(await readIndexedDb<unknown>(keyFor(userId)), userId)) return null;
+  await claimOfflinePasses(userId);
+  return userId;
+}
+
 async function withoutPendingRemovals(
   snapshot: OfflinePassesSnapshot | null,
-  accessToken: string,
   userId: string,
 ): Promise<OfflinePassesSnapshot | null> {
   const pending = readPendingPassRemovals(userId);
@@ -100,19 +102,27 @@ async function withoutPendingRemovals(
     passes: snapshot.passes.filter(({ id }) => !pending.includes(id)),
   };
   try {
-    await updateSessionOfflinePasses(accessToken, undefined, (current) =>
-      current
+    await updateOwnedOfflinePasses(userId, (copy) => {
+      const current = toSnapshot(copy, userId);
+      return current
         ? {
             ...current,
             savedAt: new Date().toISOString(),
             passes: current.passes.filter(({ id }) => !pending.includes(id)),
           }
-        : undefined,
-    );
-    if (getAccessToken() === accessToken)
-      clearPendingPassRemovals(userId, pending);
+        : undefined;
+    });
+    clearPendingPassRemovals(userId, pending);
   } catch {}
   return visible;
+}
+
+export async function claimSessionOfflinePasses(
+  accessToken: string,
+): Promise<void> {
+  const userId = readAccessTokenSubject(accessToken);
+  if (!userId || getAccessToken() !== accessToken) return;
+  await claimOfflinePasses(userId);
 }
 
 export async function updateSessionOfflinePasses(
@@ -125,21 +135,13 @@ export async function updateSessionOfflinePasses(
 ): Promise<OfflinePassesSnapshot | null | undefined> {
   const userId = readAccessTokenSubject(accessToken);
   if (!userId || signal?.aborted || getAccessToken() !== accessToken) return;
+  await claimOfflinePasses(userId);
   let next: OfflinePassesSnapshot | null | undefined;
-  await updateIndexedDbPair(
-    ACCESS_TOKEN_STORAGE_KEY,
-    keyFor(userId),
-    (persistedToken, snapshot) => {
-      if (
-        persistedToken !== accessToken ||
-        getAccessToken() !== accessToken ||
-        signal?.aborted
-      )
-        return {};
-      next = update(toSnapshot(snapshot, userId), userId);
-      return { secondary: next };
-    },
-  );
+  await updateOwnedOfflinePasses(userId, (copy) => {
+    if (getAccessToken() !== accessToken || signal?.aborted) return undefined;
+    next = update(toSnapshot(copy, userId), userId);
+    return next;
+  });
   return getAccessToken() === accessToken && !signal?.aborted
     ? next
     : undefined;
@@ -154,15 +156,16 @@ export const offlinePassesStore: OfflinePassesStore = {
         .map((pass) => toOfflinePass(pass))
         .filter((pass) => pass !== null),
     };
+    await claimOfflinePasses(userId);
     await writeIndexedDb(keyFor(userId), snapshot);
   },
   async load(userId) {
     try {
-      return toSnapshot(await readIndexedDb<unknown>(keyFor(userId)), userId);
+      return toSnapshot(await readOwnedOfflinePasses(userId), userId);
     } catch {
       return null;
     }
   },
   clearUser: (userId) => removeIndexedDb(keyFor(userId)),
-  clearAll: () => removeIndexedDbByPrefix(OFFLINE_PASSES_KEY_PREFIX),
+  clearAll: clearOfflinePasses,
 };

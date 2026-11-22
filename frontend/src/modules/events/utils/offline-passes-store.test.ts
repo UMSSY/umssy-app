@@ -1,7 +1,9 @@
 import "@/shared/testing/indexed-db.mock";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readIndexedDb, writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
-import { offlinePassesStore } from "./offline-passes-store";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { endOfflinePassesSession } from "@/shared/services/storage/offline-passes-owner";
+import { loadSessionOfflinePasses, offlinePassesStore } from "./offline-passes-store";
 
 const pass = {
   id: "reg-1",
@@ -15,6 +17,7 @@ const pass = {
 };
 
 afterEach(() => {
+  localStorage.clear();
   vi.useRealTimers();
 });
 
@@ -83,4 +86,38 @@ describe("offlinePassesStore", () => {
     expect(await offlinePassesStore.load("user-b")).toBeNull();
     expect(await readIndexedDb("other-key")).toBe("keep");
   });
+
+  describe("copies saved before the device owner existed", () => {
+    const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
+    const legacy = { userId: "user-a", savedAt: "2026-11-13T15:00:00.000Z", passes: [pass] };
+
+    it("adopts the copy of the current session and keeps it readable offline", async () => {
+      await saveAccessToken(token("user-a"));
+      await writeIndexedDb("offline-passes:user-a", legacy);
+      expect((await loadSessionOfflinePasses(token("user-a")))?.passes).toEqual([pass]);
+      expect(await readIndexedDb("offline-passes:owner")).toBe("user-a");
+      expect((await loadSessionOfflinePasses(null))?.passes).toEqual([pass]);
+    });
+
+    it("does not adopt another user's copy", async () => {
+      await saveAccessToken(token("user-b"));
+      await writeIndexedDb("offline-passes:user-a", legacy);
+      expect(await loadSessionOfflinePasses(token("user-b"))).toBeNull();
+      expect(await readIndexedDb("offline-passes:owner")).toBe(null);
+    });
+
+    it("never shows an unowned copy without a session", async () => {
+      await writeIndexedDb("offline-passes:user-a", legacy);
+      expect(await loadSessionOfflinePasses(null)).toBeNull();
+    });
+
+    it("hides the copy without a session once the offline session was revoked", async () => {
+      await saveAccessToken(token("user-a"));
+      await offlinePassesStore.save("user-a", [pass]);
+      expect(await loadSessionOfflinePasses(token("user-a"))).not.toBeNull();
+      await endOfflinePassesSession("user-a");
+      expect(await loadSessionOfflinePasses(null)).toBeNull();
+    });
+  });
 });
+

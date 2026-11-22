@@ -7,6 +7,7 @@ import { MentorOffersController } from '../controllers/mentor-offers.controller.
 import { MentorOffersRepository } from '../repositories/mentor-offers.repository.js';
 import { MentorOffersService } from '../services/mentor-offers.service.js';
 import { MentorOffersWorker } from '../services/mentor-offers-worker.service.js';
+import type { MentorOfferNotificationsService } from '../services/mentor-offer-notifications.service.js';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -167,12 +168,15 @@ describe('proceso programado de ofertas', () => {
     vi.useFakeTimers();
     vi.stubEnv('NODE_ENV', 'development');
     const reconcile = vi.fn().mockResolvedValue(undefined);
-    const worker = new MentorOffersWorker({
-      reconcile,
-    } as unknown as MentorOffersService);
+    const processPending = vi.fn().mockResolvedValue(undefined);
+    const worker = new MentorOffersWorker(
+      { reconcile } as unknown as MentorOffersService,
+      { processPending } as unknown as MentorOfferNotificationsService,
+    );
     worker.onModuleInit();
     await vi.advanceTimersByTimeAsync(30_000);
     expect(reconcile).toHaveBeenCalledTimes(3);
+    expect(processPending).toHaveBeenCalledTimes(3);
     worker.onModuleDestroy();
     await vi.advanceTimersByTimeAsync(30_000);
     expect(reconcile).toHaveBeenCalledTimes(3);
@@ -191,9 +195,14 @@ describe('proceso programado de ofertas', () => {
       .mockRejectedValueOnce(new Error('database unavailable'))
       .mockResolvedValue(undefined);
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
-    const worker = new MentorOffersWorker({
-      reconcile,
-    } as unknown as MentorOffersService);
+    const worker = new MentorOffersWorker(
+      {
+        reconcile,
+      } as unknown as MentorOffersService,
+      {
+        processPending: vi.fn().mockResolvedValue(undefined),
+      } as unknown as MentorOfferNotificationsService,
+    );
     const first = worker.tick();
     await worker.tick();
     expect(reconcile).toHaveBeenCalledOnce();

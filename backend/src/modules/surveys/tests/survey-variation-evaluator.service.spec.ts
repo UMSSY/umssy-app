@@ -91,8 +91,8 @@ describe('SurveyVariationEvaluatorService', () => {
     } as any);
 
     // Previous: Option A: 50 answers (50%), Option B: 50 answers (50%)
-    // Diff for Empleado: 70 - 50 = +20 pp (>= 10 threshold) -> shift!
-    // Diff for Buscando: 30 - 50 = -20 pp (>= 10 threshold) -> shift!
+    // Diff for Empleado: 70 - 50 = +20 pp (> 10 threshold) -> shift!
+    // Diff for Buscando: 30 - 50 = -20 pp (> 10 threshold) -> shift!
     vi.mocked(repository.findStatistics!).mockResolvedValueOnce({
       _count: { responses: 100 },
       questions: [
@@ -212,5 +212,64 @@ describe('SurveyVariationEvaluatorService', () => {
     expect(result.currentPeriod).toBe('II-2024');
     expect(result.previousPeriod).toBe('I-2024');
     expect(repository.findStatistics).toHaveBeenCalledTimes(2);
+  });
+
+  describe('umbral estricto', () => {
+    function mockStatistics(currentYes: number, previousYes: number) {
+      const build = (yes: number) =>
+        ({
+          _count: { responses: 100 },
+          questions: [
+            {
+              id: 'q-1',
+              statement: '¿Trabaja en su área?',
+              options: [
+                { id: 'opt-1', label: 'Sí', _count: { answers: yes } },
+                { id: 'opt-2', label: 'No', _count: { answers: 100 - yes } },
+              ],
+            },
+          ],
+        }) as any;
+
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue(null);
+      vi.mocked(repository.findStatistics!)
+        .mockResolvedValueOnce(build(currentYes))
+        .mockResolvedValueOnce(build(previousYes));
+    }
+
+    it('no alerta cuando la variación es igual al umbral', async () => {
+      mockStatistics(60, 50);
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        closesAt: new Date('2024-11-15T12:00:00Z'),
+        threshold: 10,
+      });
+
+      expect(result.hasShifts).toBe(false);
+    });
+
+    it('alerta cuando la variación supera el umbral por un punto', async () => {
+      mockStatistics(61, 50);
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        closesAt: new Date('2024-11-15T12:00:00Z'),
+        threshold: 10,
+      });
+
+      expect(result.hasShifts).toBe(true);
+      expect(result.shifts[0]).toMatchObject({ optionLabel: 'Sí', difference: 11 });
+      expect(result.summaryText).toContain('umbral de 10 pp');
+    });
+
+    it('alerta por una disminución mayor al umbral', async () => {
+      mockStatistics(39, 50);
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        closesAt: new Date('2024-11-15T12:00:00Z'),
+        threshold: 10,
+      });
+
+      expect(result.shifts[0]).toMatchObject({ difference: -11, direction: 'down' });
+    });
   });
 });

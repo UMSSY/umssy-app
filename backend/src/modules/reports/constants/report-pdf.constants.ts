@@ -7,6 +7,12 @@ export const REPORT_PDF_PAGE = {
   footerLimit: 45,
 } as const;
 
+export const REPORT_PDF_LOGOS = {
+  sealHeight: 40,
+  brandHeight: 32,
+  gap: 10,
+} as const;
+
 export const REPORT_PDF_COLORS = {
   navy: '#08365c',
   text: '#1f262e',
@@ -21,7 +27,6 @@ export const REPORT_PDF_COLORS = {
 export const REPORT_PDF_TEXT = {
   universityName: 'Universidad Mayor de San Simón',
   universitySubtitle: 'Ingeniería de Sistemas · Acreditación y comunidad',
-  brand: 'UMSSY',
   generatedAtCard: 'FECHA DE GENERACIÓN',
   generatedByCard: 'GENERADO POR',
   totalCard: 'TOTAL DE REGISTROS',

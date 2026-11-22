@@ -10,6 +10,7 @@ import type { ProfileSkillProcessingState } from '../types/profile-skill-process
 import type { ProfileSkillRow } from '../types/profile-skill-row.type.js';
 import { parseEvidenceRefs } from '../utils/parse-evidence-refs.js';
 import { validateSkillName } from '../utils/validate-skill-name.js';
+import { isVisibleNlpSkill } from '../utils/is-visible-nlp-skill.js';
 
 const STATUSES: ReadonlySet<string> = new Set(
   Object.values(NLP_PROCESSING_STATUSES),
@@ -63,7 +64,8 @@ export class ProfileSkillsRadarMapper {
 
     if (!nameCheck.isValid) return [];
     const evidenceRefs = parseEvidenceRefs(row.evidenceRefs);
-    if (isNlp && evidenceRefs.length === 0) return [];
+    if (isNlp && !isVisibleNlpSkill(row.skill.name, row.evidenceRefs))
+      return [];
 
     return [
       {

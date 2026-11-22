@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBadGatewayResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
@@ -24,6 +25,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiServiceUnavailableResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -60,9 +62,23 @@ import { PortfolioService } from '../services/portfolio.service.js';
 import { SocialOAuthService } from '../services/social-oauth.service.js';
 import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 
+const OAUTH_ERROR_SCHEMA = {
+  type: 'object' as const,
+  properties: {
+    statusCode: { type: 'number' as const },
+    ok: { type: 'boolean' as const, example: false },
+    detail: { type: 'string' as const },
+    code: { type: 'string' as const },
+    data: { nullable: true },
+  },
+};
+
 @ApiTags('profile')
 @ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: 'A valid access token is required' })
+@ApiUnauthorizedResponse({
+  description: 'A valid access token is required',
+  schema: OAUTH_ERROR_SCHEMA,
+})
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ResponseInterceptor)
 @UsePipes(
@@ -161,40 +177,110 @@ export class PortfolioController {
 
   @Get('oauth/:provider/url')
   @ApiOperation({
+    operationId: 'getPortfolioOAuthAuthorizationUrl',
     summary: 'Get OAuth authorization URL for the specified provider',
+    description:
+      'GitHub requires an S256 PKCE challenge. GitLab currently accepts a provider state.',
   })
   @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
   @ApiQuery({ name: 'state', required: false, type: String })
+  @ApiQuery({
+    name: 'challenge',
+    required: false,
+    type: String,
+    description:
+      'Required for GitHub: 43-character base64url SHA-256 PKCE challenge.',
+  })
   @ApiOkResponse({
     description: 'OAuth authorization URL for GitHub or GitLab',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string', example: 'OK' },
+        data: {
+          type: 'object',
+          required: ['url'],
+          properties: { url: { type: 'string', format: 'uri' } },
+        },
+      },
+    },
   })
   @ApiBadRequestResponse({
-    description: 'Unsupported social provider',
+    description: 'Unsupported provider or missing or invalid GitHub challenge',
+    schema: OAUTH_ERROR_SCHEMA,
+  })
+  @ApiServiceUnavailableResponse({
+    description:
+      'GitHub OAuth credentials or callback configuration are unavailable',
+    schema: OAUTH_ERROR_SCHEMA,
   })
   getOAuthUrl(
+    @CurrentUserId() userId: string,
     @Param('provider', { schema: portfolioProviderParamSchema })
     provider: PortfolioProvider,
     @Query({ schema: oauthUrlQuerySchema })
     query: OAuthUrlQueryRequest,
   ): OAuthUrlResponse {
-    return this.socialOAuthService.getAuthorizationUrl(provider, query.state);
+    return this.socialOAuthService.getAuthorizationUrl(
+      provider,
+      query.state,
+      userId,
+      query.challenge,
+    );
   }
 
   @Post('oauth/:provider/callback')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
+    operationId: 'completePortfolioOAuthAuthorization',
     summary: 'Connect a social account using the OAuth authorization code',
+    description:
+      'GitHub requires state and verifier from the same authorization attempt. GitLab currently requires the authorization code.',
   })
   @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
-  @ApiBody(toApiBody(oauthCallbackSchema))
+  @ApiBody({
+    ...toApiBody(oauthCallbackSchema),
+    description:
+      'GitHub requires code, state and verifier. GitLab requires code.',
+  })
   @ApiOkResponse({
     description: 'Connected social account details',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string', example: 'OK' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            provider: { type: 'string', enum: [...PORTFOLIO_PROVIDERS] },
+            username: { type: 'string' },
+            profileUrl: { type: 'string', nullable: true },
+            connected: { type: 'boolean' },
+          },
+        },
+      },
+    },
   })
   @ApiBadRequestResponse({
     description: 'Invalid OAuth authorization code or provider exchange error',
+    schema: OAUTH_ERROR_SCHEMA,
   })
   @ApiConflictResponse({
     description: 'Social account is already linked to another user',
+    schema: OAUTH_ERROR_SCHEMA,
+  })
+  @ApiBadGatewayResponse({
+    description: 'GitHub or GitLab is unavailable',
+    schema: OAUTH_ERROR_SCHEMA,
+  })
+  @ApiServiceUnavailableResponse({
+    description: 'GitHub OAuth configuration is unavailable',
+    schema: OAUTH_ERROR_SCHEMA,
   })
   connectOAuthAccount(
     @CurrentUserId() userId: string,
@@ -207,6 +293,8 @@ export class PortfolioController {
       userId,
       provider,
       request.code,
+      request.state,
+      request.verifier,
     );
   }
 

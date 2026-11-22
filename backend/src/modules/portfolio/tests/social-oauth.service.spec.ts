@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { ConfigService } from '@nestjs/config';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExternalProviderUnavailableException } from '../exceptions/external-provider-unavailable.exception.js';
@@ -9,6 +10,8 @@ import { SocialOAuthService } from '../services/social-oauth.service.js';
 import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
+const verifier = 'a'.repeat(43);
+const challenge = createHash('sha256').update(verifier).digest('base64url');
 
 describe('SocialOAuthService', () => {
   let service: SocialOAuthService;
@@ -25,6 +28,8 @@ describe('SocialOAuthService', () => {
     configMock = {
       get: vi.fn((key: string) => {
         switch (key) {
+          case 'JWT_SECRET':
+            return 'test-secret';
           case 'GITHUB_CLIENT_ID':
             return 'gh-client-id';
           case 'GITHUB_CLIENT_SECRET':
@@ -61,26 +66,30 @@ describe('SocialOAuthService', () => {
 
   describe('getAuthorizationUrl', () => {
     it('returns authorization URL for GitHub with read:user scope', () => {
-      const result = service.getAuthorizationUrl('github', 'csrf-token-123');
+      const result = service.getAuthorizationUrl(
+        'github',
+        undefined,
+        userId,
+        challenge,
+      );
 
       expect(result.url).toContain('https://github.com/login/oauth/authorize');
       expect(result.url).toContain('client_id=gh-client-id');
       expect(result.url).toContain('scope=read%3Auser');
-      expect(result.url).toContain('state=csrf-token-123');
+      expect(new URL(result.url).searchParams.get('state')).toBeTruthy();
+      expect(new URL(result.url).searchParams.get('code_challenge')).toBe(
+        challenge,
+      );
       expect(result.url).toContain(
         'redirect_uri=https%3A%2F%2Fapp.umssy.test%2Foauth%2Fgithub%2Fcallback',
       );
     });
 
-    it('returns authorization URL for GitHub without optional state or callback', () => {
+    it('rejects GitHub authorization when configuration is missing', () => {
       configMock.get.mockReturnValue(undefined);
-
-      const result = service.getAuthorizationUrl('github');
-
-      expect(result.url).toContain('https://github.com/login/oauth/authorize');
-      expect(result.url).toContain('scope=read%3Auser');
-      expect(result.url).not.toContain('state=');
-      expect(result.url).not.toContain('redirect_uri=');
+      expect(() =>
+        service.getAuthorizationUrl('github', undefined, userId, challenge),
+      ).toThrow();
     });
 
     it('returns authorization URL for GitLab with read_user scope and response_type=code', () => {
@@ -109,12 +118,64 @@ describe('SocialOAuthService', () => {
 
     it('throws UnsupportedPortfolioProviderException for unknown provider', () => {
       expect(() =>
-        service.getAuthorizationUrl('bitbucket' as unknown as PortfolioProvider),
+        service.getAuthorizationUrl(
+          'bitbucket' as unknown as PortfolioProvider,
+        ),
       ).toThrow(UnsupportedPortfolioProviderException);
     });
   });
 
   describe('connectWithCode - GitHub', () => {
+    it('rejects a state from another user or an incorrect verifier before contacting GitHub', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(
+        service.getAuthorizationUrl('github', undefined, userId, challenge).url,
+      ).searchParams.get('state')!;
+      await expect(
+        service.connectWithCode(
+          'another-user',
+          'github',
+          'code',
+          state,
+          verifier,
+        ),
+      ).rejects.toThrow();
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'code',
+          state,
+          'b'.repeat(43),
+        ),
+      ).rejects.toThrow();
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'code',
+          state + 'x',
+          verifier,
+        ),
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(socialAccountRepositoryMock.upsertAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects an expired authorization before contacting GitHub', async () => {
+      vi.useFakeTimers();
+      try {
+        const state = new URL(service.getAuthorizationUrl('github', undefined, userId, challenge).url).searchParams.get('state')!;
+        vi.advanceTimersByTime(10 * 60_000 + 1);
+        const fetchMock = vi.fn();
+        global.fetch = fetchMock;
+        await expect(service.connectWithCode(userId, 'github', 'code', state, verifier)).rejects.toThrow();
+        expect(fetchMock).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
     it('exchanges code for access token in memory, fetches profile, and saves account without exposing token', async () => {
       const fetchMock = vi
         .fn()
@@ -153,6 +214,11 @@ describe('SocialOAuthService', () => {
         userId,
         'github',
         'auth-code-abc',
+        new URL(
+          service.getAuthorizationUrl('github', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
       );
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -207,7 +273,16 @@ describe('SocialOAuthService', () => {
         updatedAt: new Date(),
       });
 
-      const result = await service.connectWithCode(userId, 'github', 'code');
+      const result = await service.connectWithCode(
+        userId,
+        'github',
+        'code',
+        new URL(
+          service.getAuthorizationUrl('github', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
+      );
       expect(result.profileUrl).toBeNull();
     });
 
@@ -222,7 +297,16 @@ describe('SocialOAuthService', () => {
       });
 
       await expect(
-        service.connectWithCode(userId, 'github', 'invalid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'invalid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -234,7 +318,16 @@ describe('SocialOAuthService', () => {
       });
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -245,7 +338,16 @@ describe('SocialOAuthService', () => {
       });
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -253,7 +355,16 @@ describe('SocialOAuthService', () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(ExternalProviderUnavailableException);
     });
 
@@ -270,7 +381,16 @@ describe('SocialOAuthService', () => {
         .mockRejectedValueOnce(new Error('Network timeout'));
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(ExternalProviderUnavailableException);
     });
 
@@ -290,7 +410,16 @@ describe('SocialOAuthService', () => {
         });
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -311,7 +440,16 @@ describe('SocialOAuthService', () => {
         });
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -335,7 +473,16 @@ describe('SocialOAuthService', () => {
         });
 
       await expect(
-        service.connectWithCode(userId, 'github', 'valid-code'),
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
   });

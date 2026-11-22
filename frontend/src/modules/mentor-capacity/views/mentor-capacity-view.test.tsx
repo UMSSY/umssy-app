@@ -202,4 +202,47 @@ describe('MentorCapacityView', () => {
       );
     });
   });
+
+  it('pagina solicitudes con la query key de la página solicitada', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(mentorCapacityService, 'getWaitingRequests').mockResolvedValue({
+      items: [],
+      totalItems: 11,
+      page: 1,
+      limit: 10,
+      totalPages: 2,
+    });
+    renderView();
+
+    await screen.findByText('11 registros');
+    await user.click(screen.getAllByLabelText('Página siguiente')[0]);
+
+    await waitFor(() => {
+      expect(mentorCapacityService.getWaitingRequests).toHaveBeenCalledWith(
+        2,
+        expect.any(AbortSignal),
+      );
+    });
+  });
+
+  it('muestra fechas de solicitudes en la zona horaria de Bolivia', async () => {
+    vi.spyOn(mentorCapacityService, 'getWaitingRequests').mockResolvedValue({
+      items: [
+        {
+          id: 'request-1',
+          firstName: 'Ana',
+          lastName: 'Rojas',
+          email: 'ana@example.com',
+          queuedAt: '2026-11-20T14:30:00.000Z',
+        },
+      ],
+      totalItems: 1,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+    });
+    renderView();
+
+    expect(await screen.findByText(/10:30/)).toBeInTheDocument();
+  });
 });

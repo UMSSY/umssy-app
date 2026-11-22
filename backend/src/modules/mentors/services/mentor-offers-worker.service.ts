@@ -5,6 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { MentorOffersService } from './mentor-offers.service.js';
+import { MentorOfferNotificationsService } from './mentor-offer-notifications.service.js';
 
 @Injectable()
 export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
@@ -12,7 +13,10 @@ export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
   private timer?: ReturnType<typeof setInterval>;
   private running = false;
 
-  constructor(private readonly offers: MentorOffersService) {}
+  constructor(
+    private readonly offers: MentorOffersService,
+    private readonly notifications: MentorOfferNotificationsService,
+  ) {}
 
   onModuleInit() {
     if (process.env.NODE_ENV === 'test') return;
@@ -32,6 +36,7 @@ export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
     this.running = true;
     try {
       await this.offers.reconcile();
+      await this.notifications.processPending();
     } catch (error) {
       this.logger.error(
         'No se pudieron vencer y reasignar las ofertas de mentoría',
