@@ -79,7 +79,7 @@ describe('seedEvents', () => {
     expect(upsert).toHaveBeenCalledTimes(2);
     const [active, finished] = upsert.mock.calls.map(([args]) => args);
     expect(active.where.id).toBe('fb69db6e-ded6-4eed-85ef-6135cf88fad4');
-    expect(active.create.title).toBe('taller de base de datos');
+    expect(active.create.title).toBe('Taller de base de datos');
     expect(active.create.eventDate.toISOString().slice(0, 10)).toBe(
       '2026-11-23',
     );
