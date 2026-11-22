@@ -11,6 +11,7 @@ import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
 import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
+import { AppliedJobChip } from "./applied-job-chip";
 import {
   HIGH_AFFINITY_THRESHOLD,
   JOB_MATCHING_MESSAGES,
@@ -27,7 +28,10 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
     <Card className={cn(VACANCY_CARD_CLASS, "h-full gap-3 p-4")}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
+            <AppliedJobChip jobOfferId={job.jobOfferId} />
+          </div>
           <p className="text-sm text-text-secondary">{job.companyName}</p>
           <p className="flex items-center gap-1.5 text-sm text-text-secondary">
             <ModalityIcon modality={job.modality} className="size-3.5" />
