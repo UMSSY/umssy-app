@@ -17,6 +17,7 @@ import { CV_ERROR_MESSAGES } from '../constants/cv-error-messages.constants';
 import { CV_FILE_INPUT_ACCEPT } from '../constants/cv-upload.constants';
 import { useCvDocument } from '../hooks/use-cv-document';
 import { useApplyCvExtraction } from '../hooks/use-apply-cv-extraction';
+import { useCvEducationNamesResolver } from '../hooks/use-cv-education-names-resolver';
 import { useCvExtraction } from '../hooks/use-cv-extraction';
 import { useCvFeedback } from '../hooks/use-cv-feedback';
 import { useCvViewer } from '../hooks/use-cv-viewer';
@@ -47,6 +48,7 @@ export function DocumentsCvContent({
   const { profile } = useProfile();
   const cvExtraction = useCvExtraction({ currentHeadline: profile?.headline });
   const cvApply = useApplyCvExtraction();
+  const resolveEducationNames = useCvEducationNamesResolver();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<File | null>(
@@ -190,7 +192,12 @@ export function DocumentsCvContent({
   const applyCvExtraction = async () => {
     const { extraction, selection } = cvExtraction;
     if (!extraction) return;
-    const results = await cvApply.apply(extraction, selection, profile);
+    const results = await cvApply.apply({
+      extraction,
+      selection,
+      profile,
+      resolveEducationNames,
+    });
 
     if (results.every(({ isApplied }) => isApplied)) {
       closeCvExtraction();
