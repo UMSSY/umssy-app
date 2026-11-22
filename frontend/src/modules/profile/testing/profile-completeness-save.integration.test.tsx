@@ -46,6 +46,11 @@ const api = vi.hoisted(() => ({
   detectedSkills: vi.fn(),
 }));
 
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock('@/shared/contexts/auth-context', () => ({
   useAuth: () => ({ currentUserId: 'user-a', isLoading: false }),
 }));
