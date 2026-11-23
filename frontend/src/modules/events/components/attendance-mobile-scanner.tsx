@@ -15,7 +15,6 @@ export function AttendanceMobileScanner({ workshopId, sessions }: AttendanceMobi
   const [reference, setReference] = useState('');
   const sortedSessions = getSortedSessions({ sessions });
   const isMultiSession = sortedSessions.length > 1;
-  // Por defecto se elige la sesión en curso o la próxima.
   const [sessionId, setSessionId] = useState(
     () => (getNextSession(sortedSessions) ?? sortedSessions[0])?.id ?? '',
   );

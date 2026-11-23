@@ -6,8 +6,9 @@ The backend owns the workshop catalogue, proposal creation, cover images, manage
 
 ## Main flows and business rules
 
-- An authenticated `titulado` submits a workshop proposal with an optional cover and idempotency key. Creating it does not immediately publish it.
+- An authenticated `titulado` submits a workshop proposal with a cover and a UUID idempotency key. The multipart form accepts the first session as date and time fields and up to 19 more sessions as JSON text. Creating it does not immediately publish it.
 - The public catalogue and detail display the state returned by the server.
+- The catalogue supports date, `popular` (confirmed registrations) and `recommended` (profile signals and popularity) ordering. Without a session, `recommended` uses date order; with insufficient profile signals it uses popular order and reports `isProfileComplete: false`. Reads do not expire proposals; the cron performs that update.
 - An online visit to `/events/my-passes` without the session marker redirects to `/login` with the requested path in `next`.
 - The service worker precaches `/events/my-passes` with `credentials: 'omit'` and `X-UMSSY-Offline-Shell: 1`. This keeps PWA installation and access to previously saved passes available offline. Client-side session checks still protect private data.
 - `Mis talleres` lists only published workshops whose `createdById` equals the current user ID. A new unpublished proposal does not appear. Other responsible users are not assigned by the current implementation.
@@ -55,6 +56,7 @@ sequenceDiagram
 
 - Authentication supplies the session and `titulado` role. Server-side ownership checks authorize attendance; frontend route rules control navigation.
 - Event categories supply catalogue classification and filters.
+- Profile, education, skills and Radar expose affinity signals through their public services.
 - Event registrations supplies proposal support, passes and attendance validation.
 - Prisma stores events, statuses and cover metadata. Proposal expiry uses the NestJS scheduler.
 
@@ -62,9 +64,9 @@ sequenceDiagram
 
 | Method | Path | Current use |
 | --- | --- | --- |
-| GET | `/api/events` | Catalogue with pagination and filters. |
+| GET | `/api/events` | Catalogue with pagination, filters and `popular` or `recommended` ordering; bearer token optional. Items include sessions and optional recommendation reasons. |
 | GET | `/api/events/:id` | Workshop or proposal detail. |
-| POST | `/api/event-proposals` | Submit a proposal as an authenticated `titulado`; multipart form with optional cover and idempotency key. |
+| POST | `/api/event-proposals` | Submit a proposal as an authenticated `titulado`; multipart form with cover, UUID `Idempotency-Key` and optional `additionalSessions` JSON string. |
 | GET | `/api/events/:id/cover` | Retrieve a stored cover image. |
 | GET | `/api/events/managed` | Published workshops created by the authenticated `titulado`. |
 
@@ -75,6 +77,7 @@ Successful JSON responses use the shared API envelope. The cover endpoint return
 ### Sprint 3
 
 - Proposal expiry gained a periodic five-minute backend job independent of catalogue reads.
+- Proposals gained multiple nonoverlapping sessions, while the event's original date and time columns retain the first session. Catalogue ordering gained popularity and profile recommendations.
 - The organizer flow gained `Mis talleres`, its published-owner lookup and a desktop QR link to the mobile attendance screen.
 - Saved passes gained the `/offline/passes` route, served by the service worker when `Mis inscripciones` cannot load, and readable only by the user who owns the offline session.
 - Attendance validation remains online and is documented with the registration module.

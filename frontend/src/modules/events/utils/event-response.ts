@@ -1,6 +1,6 @@
 import type { EventItem } from '../types/event-item.types';
 import type { EventDetail } from '../types/event-detail.types';
-import type { EventSession } from '../types/event-session.types';
+import { parseRegistrationSessions } from '@/modules/event-registrations';
 import {
   readRecord,
   readString,
@@ -8,18 +8,7 @@ import {
   readCount,
   readNullableCount,
   readBoolean,
-  readArray,
 } from './response-validation';
-
-function parseEventSession(value: unknown): EventSession {
-  const session = readRecord(value);
-  return {
-    id: readString(session.id),
-    startsAt: readString(session.startsAt),
-    endsAt: readString(session.endsAt),
-    location: session.location === undefined ? null : readNullableString(session.location),
-  };
-}
 
 export function parseEventItem(value: unknown): EventItem {
   const event = readRecord(value);
@@ -64,7 +53,7 @@ export function parseEventItem(value: unknown): EventItem {
     modalityId: readString(event.modalityId),
     // Respuestas antiguas sin `sessions` se tratan como taller de una sesión.
     ...(event.sessions !== undefined && {
-      sessions: readArray(event.sessions).map(parseEventSession),
+      sessions: parseRegistrationSessions(event.sessions),
     }),
   };
 }

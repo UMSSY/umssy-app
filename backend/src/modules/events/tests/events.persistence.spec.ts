@@ -284,13 +284,13 @@ describe('EventsService', () => {
     );
   });
 
-  it('does not select registrations when there is no userId', async () => {
+  it('does not return user registrations when there is no userId', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
     await repository.findAndCount({ skip: 0, take: 10 });
 
     const args = prismaMock.event.findMany.mock.calls[0][0];
-    expect(args.select).not.toHaveProperty('registrations');
+    expect(args.select.registrations.where.userId).toEqual({ in: [] });
   });
 });

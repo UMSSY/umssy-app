@@ -31,14 +31,12 @@ function toValidDate(value: string): Date | null {
   return Number.isFinite(date.getTime()) ? date : null;
 }
 
-// Sesiones válidas ordenadas por inicio; un taller sin sesiones devuelve [].
 export function getSortedSessions(event: Pick<EventItem, 'sessions'>): EventSession[] {
   return (event.sessions ?? [])
     .filter((session) => toValidDate(session.startsAt) && toValidDate(session.endsAt))
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
 }
 
-// Solo los talleres con más de una sesión usan la presentación multisesión.
 export function hasMultipleSessions(event: Pick<EventItem, 'sessions'>): boolean {
   return getSortedSessions(event).length > 1;
 }

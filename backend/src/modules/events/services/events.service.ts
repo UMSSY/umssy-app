@@ -128,7 +128,6 @@ export class EventsService {
     payload: GetEventsPayload,
     userId?: string,
   ): Promise<EventsListResponse> {
-    await this.expireOverdueProposals(new Date());
     const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
     const isPublishedOnly = statusId === undefined;
@@ -148,7 +147,6 @@ export class EventsService {
   }
 
   async findOne(id: string, userId?: string): Promise<EventDetailResponse> {
-    await this.expireOverdueProposals(new Date());
     const event = await this.findById(id, userId);
 
     if (!event) {
