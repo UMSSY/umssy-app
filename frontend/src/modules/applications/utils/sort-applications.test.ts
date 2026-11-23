@@ -33,13 +33,13 @@ describe("sortApplications", () => {
 
 describe("nextApplicationSort", () => {
   it("starts ascending, then toggles to descending on the same column", () => {
-    const first = nextApplicationSort(null, "status");
-    expect(first).toEqual({ key: "status", direction: "asc" });
-    expect(nextApplicationSort(first, "status")).toEqual({ key: "status", direction: "desc" });
+    const first = nextApplicationSort(null, "vacancy");
+    expect(first).toEqual({ key: "vacancy", direction: "asc" });
+    expect(nextApplicationSort(first, "vacancy")).toEqual({ key: "vacancy", direction: "desc" });
   });
 
   it("restarts ascending when another column is chosen", () => {
-    expect(nextApplicationSort({ key: "status", direction: "desc" }, "company")).toEqual({
+    expect(nextApplicationSort({ key: "vacancy", direction: "desc" }, "company")).toEqual({
       key: "company",
       direction: "asc",
     });
