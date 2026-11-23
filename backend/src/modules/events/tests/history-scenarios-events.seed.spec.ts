@@ -21,11 +21,14 @@ describe('history scenario events', () => {
     expect(scenarios.boundary.endsAt.toISOString()).toBe('2026-11-21T00:20:00.000Z');
     expect(scenarios.boundary.eventDate.toISOString()).toBe('2026-11-20T00:00:00.000Z');
     expect(scenarios.future.eventDate > now).toBe(true);
+    expect(scenarios.fixedBoundary.eventDate.toISOString()).toBe('2026-11-22T00:00:00.000Z');
+    expect(scenarios.fixedBoundary.endTime.toISOString()).toBe('1970-01-01T20:00:00.000Z');
+    expect(scenarios.fixedBoundary.endsAt.toISOString()).toBe('2026-11-23T00:00:00.000Z');
     expect(buildHistoryEventScenarios(new Date('2027-01-01T12:00:00Z')).future.eventDate > new Date('2027-01-01T12:00:00Z')).toBe(true);
   });
 
   it('creates historical events once and refreshes only dynamic dates', async () => {
-    const createMany = vi.fn().mockResolvedValue({ count: 14 });
+    const createMany = vi.fn().mockResolvedValue({ count: 15 });
     const upsert = vi.fn().mockResolvedValue({});
     const sessionUpsert = vi.fn().mockResolvedValue({});
     const findUniqueOrThrow = vi.fn().mockResolvedValue({ id: 'catalog' });
@@ -39,11 +42,23 @@ describe('history scenario events', () => {
     };
     await seedHistoryScenarioEvents(tx as unknown as Prisma.TransactionClient, 'creator', now);
     expect(createMany).toHaveBeenCalledWith({ data: expect.arrayContaining([expect.objectContaining({ id: HISTORY_EVENT_IDS.historical[0] })]), skipDuplicates: true });
-    expect(createMany.mock.calls[0][0].data).toHaveLength(14);
+    expect(createMany.mock.calls[0][0].data).toHaveLength(15);
+    expect(createMany.mock.calls[0][0].data).toContainEqual(expect.objectContaining({
+      id: HISTORY_EVENT_IDS.fixedBoundary,
+      eventDate: new Date('2026-11-22T00:00:00.000Z'),
+      endTime: new Date('1970-01-01T20:00:00.000Z'),
+    }));
     expect(upsert).toHaveBeenCalledTimes(2);
     expect(sessionUpsert).toHaveBeenCalledWith(expect.objectContaining({
       where: { id: HISTORY_EVENT_IDS.boundarySession },
       update: { startsAt: new Date('2026-11-20T23:40:00.000Z'), endsAt: new Date('2026-11-21T00:20:00.000Z') },
+    }));
+    expect(sessionUpsert).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: HISTORY_EVENT_IDS.fixedBoundarySession },
+      create: expect.objectContaining({
+        startsAt: new Date('2026-11-22T23:20:00.000Z'),
+        endsAt: new Date('2026-11-23T00:00:00.000Z'),
+      }),
     }));
   });
 
@@ -59,5 +74,20 @@ describe('history scenario events', () => {
     expect(service.isFinished(event, new Date('2026-11-21T00:00:00.000Z'))).toBe(false);
     expect(service.isFinished(event, boundary.endsAt)).toBe(true);
     expect(service.isFinished(event, new Date('2026-11-21T00:20:01.000Z'))).toBe(true);
+  });
+
+  it('finishes the fixed workshop exactly at 20:00 in Bolivia on November 22', () => {
+    const boundary = buildHistoryEventScenarios(now).fixedBoundary;
+    const event = {
+      eventDate: boundary.eventDate,
+      endTime: boundary.endTime,
+      sessions: [{ startsAt: boundary.startsAt, endsAt: boundary.endsAt }],
+    };
+    const service = new EventsService({} as EventsRepository);
+    expect(service.isFinished(event, new Date('2026-11-22T23:19:59.000Z'))).toBe(false);
+    expect(service.isFinished(event, new Date('2026-11-22T23:30:00.000Z'))).toBe(false);
+    expect(service.isFinished(event, new Date('2026-11-22T23:59:59.999Z'))).toBe(false);
+    expect(service.isFinished(event, new Date('2026-11-23T00:00:00.000Z'))).toBe(true);
+    expect(service.isFinished(event, new Date('2026-11-23T00:00:01.000Z'))).toBe(true);
   });
 });

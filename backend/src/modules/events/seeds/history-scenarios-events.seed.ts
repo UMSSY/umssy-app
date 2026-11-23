@@ -30,7 +30,16 @@ export async function seedHistoryScenarioEvents(
   const historical: Prisma.EventCreateManyInput[] = [
     ...scenarios.historical,
     scenarios.cancelledRegistration,
-  ].map((event) => ({ ...shared, ...event }));
+    scenarios.fixedBoundary,
+  ].map(({ id, title, eventDate, startTime, endTime, location }) => ({
+    ...shared,
+    id,
+    title,
+    eventDate,
+    startTime,
+    endTime,
+    location,
+  }));
   await tx.event.createMany({ data: historical, skipDuplicates: true });
 
   for (const event of [scenarios.boundary, scenarios.future]) {
@@ -61,6 +70,17 @@ export async function seedHistoryScenarioEvents(
       startsAt: scenarios.boundary.startsAt,
       endsAt: scenarios.boundary.endsAt,
       location: scenarios.boundary.location,
+    },
+  });
+  await tx.eventSession.upsert({
+    where: { id: HISTORY_EVENT_IDS.fixedBoundarySession },
+    update: {},
+    create: {
+      id: HISTORY_EVENT_IDS.fixedBoundarySession,
+      eventId: HISTORY_EVENT_IDS.fixedBoundary,
+      startsAt: scenarios.fixedBoundary.startsAt,
+      endsAt: scenarios.fixedBoundary.endsAt,
+      location: scenarios.fixedBoundary.location,
     },
   });
 }

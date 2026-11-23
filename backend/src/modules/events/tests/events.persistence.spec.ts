@@ -38,7 +38,7 @@ describe('EventsService', () => {
       expect.objectContaining({
         where: {
           status: {
-            title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] },
+            title: { in: ['Publicado', 'Votacion', 'En votación'] },
           },
         },
         select: expect.objectContaining({
@@ -77,7 +77,7 @@ describe('EventsService', () => {
 
     const expectedWhere = {
       status: {
-        title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] },
+        title: { in: ['Publicado', 'Votacion', 'En votación'] },
       },
     };
 

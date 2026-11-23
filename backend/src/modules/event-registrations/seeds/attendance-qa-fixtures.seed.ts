@@ -41,7 +41,7 @@ export const ATTENDANCE_QA_CASES = {
   },
   saturdayClosed: {
     registrationId: '86be2929-64fd-48c6-b35a-d9793d96c32b',
-    email: 'sinpases@umss.edu.bo',
+    email: 'titulado.1@umssy.test',
     event: 'saturdayClosed',
   },
 } as const;

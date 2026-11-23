@@ -26,6 +26,8 @@ import { getScheduleBounds } from "../utils/event-sessions";
 
 import type { MyPassesViewProps } from '../types/my-passes-view-props.types';
 
+const sectionTabClassName = "h-11 flex-none rounded-full border border-border-strong bg-transparent px-4 py-0 text-xs font-semibold text-foreground shadow-none hover:bg-muted data-active:border-transparent data-active:bg-primary data-active:text-primary-foreground data-active:hover:bg-brand-hover dark:data-active:bg-primary dark:data-active:text-primary-foreground";
+
 export function MyPassesView({
   onOpenWorkshopChat,
   onConfirmCancelRegistration,
@@ -122,9 +124,9 @@ export function MyPassesView({
       ) : null}
       {cancelError ? <RequestFeedback message={cancelError} isError /> : null}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList aria-label="Secciones de mis inscripciones">
-          <TabsTrigger value="current">Vigentes</TabsTrigger>
-          <TabsTrigger value="history">Historial</TabsTrigger>
+        <TabsList aria-label="Secciones de mis inscripciones" className="h-auto flex-wrap justify-start gap-2 rounded-none bg-transparent p-0">
+          <TabsTrigger value="current" className={sectionTabClassName}>Vigentes</TabsTrigger>
+          <TabsTrigger value="history" className={sectionTabClassName}>Historial</TabsTrigger>
         </TabsList>
         <TabsContent value="current" className="pt-6">
       {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} onRetry={retry} /> : null}
