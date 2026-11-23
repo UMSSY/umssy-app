@@ -2,19 +2,10 @@ import type { Application } from "../types/application.types";
 import type { ApplicationSort } from "../types/application-sort.types";
 import type { ApplicationSortKey } from "../types/application-sort-key.types";
 
-const STATUS_ORDER = [
-  "En revisión",
-  "Entrevista",
-  "Aceptada",
-  "No seleccionado",
-  "Retirada",
-];
-
 const SORT_VALUE: Record<ApplicationSortKey, (application: Application) => string | number> = {
   vacancy: (application) => application.vacancyTitle,
   company: (application) => application.companyName,
   affinity: (application) => application.affinityPercentage,
-  status: (application) => STATUS_ORDER.indexOf(application.status),
   date: (application) => Date.parse(application.appliedDate),
 };
 

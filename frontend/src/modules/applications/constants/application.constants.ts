@@ -64,7 +64,6 @@ export const APPLICATION_SORT_COLUMNS: readonly { key: ApplicationSortKey; label
   { key: "vacancy", label: APPLICATION_MESSAGES.vacancy },
   { key: "company", label: APPLICATION_MESSAGES.company },
   { key: "affinity", label: APPLICATION_MESSAGES.affinity },
-  { key: "status", label: APPLICATION_MESSAGES.status },
   { key: "date", label: APPLICATION_MESSAGES.date },
 ];
 
@@ -77,6 +76,4 @@ export const APPLICATION_SORT_OPTIONS = [
   { value: "company:desc", key: "company", direction: "desc", label: "Empresa (Z-A)" },
   { value: "affinity:desc", key: "affinity", direction: "desc", label: "Afinidad (mayor a menor)" },
   { value: "affinity:asc", key: "affinity", direction: "asc", label: "Afinidad (menor a mayor)" },
-  { value: "status:asc", key: "status", direction: "asc", label: "Estado (ascendente)" },
-  { value: "status:desc", key: "status", direction: "desc", label: "Estado (descendente)" },
 ] as const;
