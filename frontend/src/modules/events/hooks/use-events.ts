@@ -20,7 +20,6 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
     queryFn: ({ pageParam, signal }) => eventsService.getEvents({
       page: pageParam, limit: 50,
       includeProposals: true,
-      isPublishedOnly: !statusId,
       ...(search && { search }), 
       ...(categoryId && { categoryId }), 
       ...(sort && { sort }), 

@@ -130,12 +130,10 @@ export class EventsService {
   ): Promise<EventsListResponse> {
     const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
-    const isPublishedOnly = statusId === undefined;
 
     const { items, total } = await this.findAndCount({
       categoryId,
       statusId,
-      isPublishedOnly,
       ...(payload.includeProposals && { includeProposals: true }),
       search,
       userId,

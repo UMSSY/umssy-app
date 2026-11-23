@@ -93,7 +93,6 @@ describe('EventsCatalogService', () => {
     expect(eventsService.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-1',
       statusId: undefined,
-      isPublishedOnly: true,
       includeProposals: true,
       search: 'taller',
       userId: 'user-1',
@@ -117,7 +116,7 @@ describe('EventsCatalogService', () => {
     });
 
     expect(eventsService.findAndCount).toHaveBeenCalledWith(
-      expect.objectContaining({ isPublishedOnly: false }),
+      expect.objectContaining({ statusId: '6f9619ff-8b86-4011-b42d-00c04fc964ff' }),
     );
     expect(result.data.items.map(({ id }) => id)).toEqual(['a']);
     expect(result.offset).toBe(2);
