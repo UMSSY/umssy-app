@@ -1,9 +1,7 @@
 'use client';
 
 import { Label } from '@/components/ui/label';
-
 import { MAX_SCORE } from '@/modules/radar-chart/constants/radar-score.constants';
-
 import { useId, useState } from 'react';
 import {
   PolarAngleAxis,
@@ -23,6 +21,13 @@ import { RadarCard } from './radar-card';
 
 const LEVEL_TICK_COUNT = 6;
 const SERIES_LABEL = 'Puntaje de afinidad del perfil';
+
+function getResponsiveRadius(width: number): string {
+  if (width < 320) return '42%';
+  if (width < 380) return '48%';
+  if (width < 460) return '54%';
+  return '68%';
+}
 
 export function AffinityRadarChart({
   areas,
@@ -45,13 +50,13 @@ export function AffinityRadarChart({
       dateStyle: 'medium',
       timeStyle: 'short',
     });
-  const [radius, setRadius] = useState('68%');
+  const [radius, setRadius] = useState('54%');
   const hasAreas = areas.length > 0;
 
   return (
     <RadarCard
       aria-labelledby={titleId}
-      className={cn('flex flex-col p-4 sm:p-6', className)}
+      className={cn('flex w-full min-w-0 flex-col p-4 sm:p-6', className)}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -78,8 +83,8 @@ export function AffinityRadarChart({
       </div>
 
       {hasAreas && previousScores && onComparisonChange ? (
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
-          <div>
+        <div className="mt-4 flex min-h-12 items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
+          <div className="min-w-0">
             <Label
               htmlFor={comparisonId}
               className="cursor-pointer text-sm font-semibold text-ink"
@@ -100,20 +105,18 @@ export function AffinityRadarChart({
             aria-describedby={comparisonDescriptionId}
             checked={isComparisonEnabled}
             onCheckedChange={onComparisonChange}
-            className="data-checked:bg-accent"
+            className="shrink-0 data-checked:bg-accent"
           />
         </div>
       ) : null}
 
       {hasAreas ? (
         <>
-          <div className="mt-2 h-[360px] w-full sm:h-[440px] [&_.recharts-surface]:outline-none">
+          <div className="mt-2 h-[310px] w-full min-w-0 sm:h-[440px] [&_.recharts-surface]:outline-none">
             <ResponsiveContainer
               width="100%"
               height="100%"
-              onResize={(width) =>
-                setRadius(width < 280 ? '30%' : width < 360 ? '50%' : '68%')
-              }
+              onResize={(width) => setRadius(getResponsiveRadius(width))}
             >
               <RadarChart
                 data={areas.map((area) => ({
@@ -121,6 +124,7 @@ export function AffinityRadarChart({
                   previousScore: previousScores?.[area.id],
                   projectedScore: projectedScores?.[area.id] ?? area.score,
                 }))}
+                margin={{ top: 16, right: 24, bottom: 16, left: 24 }}
                 outerRadius={radius}
                 accessibilityLayer={false}
               >
@@ -200,7 +204,7 @@ export function AffinityRadarChart({
               </RadarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
+          <div className="flex w-full flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
             {projectedScores ? (
               <p className="flex items-center gap-2">
                 <span
@@ -212,7 +216,7 @@ export function AffinityRadarChart({
             ) : null}
             <p className="flex items-center gap-2">
               <span
-                className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15"
+                className="h-2.5 w-5 shrink-0 rounded-sm border border-accent bg-accent/15"
                 aria-hidden="true"
               />
               {hasPreviousComparison
@@ -223,7 +227,7 @@ export function AffinityRadarChart({
               <p className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className="w-5 border-t-2 border-dashed border-ink"
+                  className="w-5 shrink-0 border-t-2 border-dashed border-ink"
                 />
                 Anterior (línea discontinua):{' '}
                 {previousPublishedAt

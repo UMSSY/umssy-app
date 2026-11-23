@@ -416,4 +416,43 @@ describe('Radar personal integrado con Épica 2', () => {
       screen.queryByText('Consultando la versión histórica 2'),
     ).not.toBeInTheDocument();
   });
+  it('despliega el bottom sheet en móvil al tocar un área y restaura el scroll al cerrar', async () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
+      matches: query.includes('max-width: 767px'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+    const scrollToSpy = vi
+      .spyOn(window, 'scrollTo')
+      .mockImplementation(() => {});
+    Object.defineProperty(window, 'scrollY', { value: 320, writable: true });
+
+    renderWithQuery(<RadarProfileView />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'QA' });
+    expect(dialog).toBeInTheDocument();
+    expect(
+      await screen.findByText('Sin información registrada'),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cerrar detalle del área' }),
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'QA' }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(scrollToSpy).toHaveBeenCalledWith({
+      top: 320,
+      behavior: 'instant',
+    });
+  });
 });

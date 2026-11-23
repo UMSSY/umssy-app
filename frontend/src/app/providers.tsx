@@ -16,6 +16,7 @@ import {
 } from '@/shared/services/storage/access-token-storage';
 import { SocketProvider } from '@/modules/chat/contexts/socket-context';
 import { OfflineNavigation } from '@/shared/components/offline-navigation';
+import { MentorProfileDraftProvider } from '@/modules/mentorship';
 
 import { AppVisibilityReporter } from '@/modules/notifications';
 
@@ -28,7 +29,7 @@ function SessionProviders({ children }: { children: ReactNode }) {
         <AppVisibilityReporter />
         <SocketProvider>
           <OfflineNavigation />
-          {children}
+          <MentorProfileDraftProvider>{children}</MentorProfileDraftProvider>
         </SocketProvider>
       </AuthProvider>
       <Toaster />

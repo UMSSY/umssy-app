@@ -23,6 +23,10 @@ import type { UpdateBlockDto } from '../requests/update-block.request.js';
 import type { MentorAvailabilityStatusResponse } from '../types/mentor-availability-status-response.types.js';
 import type { WeeklyRepeatResponse } from '../types/weekly-repeat-response.types.js';
 import { weeklyOccurrences } from '../utils/weekly-occurrences.js';
+import { splitIntoBlocks } from '../utils/split-into-blocks.js';
+import type { BlockSlot } from '../types/block-slot.types.js';
+import type { BlockSeriesData } from '../types/block-series-data.types.js';
+import type { AvailabilityBlock } from '../../../prisma/client.js';
 import { toCalendarDate } from '../utils/bolivia-day.js';
 import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
 import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
@@ -125,24 +129,50 @@ export class AvailabilityService {
       return this.createWeeklySeries(mentorId, payload, payload.repeatUntil);
     }
     try {
-      const block = await this.blockedDatesService.runOnUnblockedDay(
+      const blocks = await this.blockedDatesService.runOnUnblockedDay(
         mentorId,
         payload.startAt,
         (tx) =>
-          this.availabilityRepository.create(
+          this.createSlots(
             mentorId,
-            payload.startAt,
-            payload.endAt,
+            splitIntoBlocks(payload.startAt, payload.endAt),
             tx,
           ),
       );
-      return this.availabilityMapper.toResponse({ ...block, appointments: [] });
+      if (blocks.length > 1) {
+        return { created: blocks.length, skipped: [] };
+      }
+      return this.availabilityMapper.toResponse({
+        ...blocks[0],
+        appointments: [],
+      });
     } catch (error) {
       if (hasOverlapErrorCode(error)) {
         throw new BlockOverlapException();
       }
       throw error;
     }
+  }
+
+  private async createSlots(
+    mentorId: string,
+    slots: BlockSlot[],
+    tx: TransactionClient,
+    series?: BlockSeriesData,
+  ): Promise<AvailabilityBlock[]> {
+    const blocks: AvailabilityBlock[] = [];
+    for (const slot of slots) {
+      blocks.push(
+        await this.availabilityRepository.create(
+          mentorId,
+          slot.startAt,
+          slot.endAt,
+          tx,
+          series,
+        ),
+      );
+    }
+    return blocks;
   }
 
   private async createWeeklySeries(
@@ -162,19 +192,18 @@ export class AvailabilityService {
       repeatUntil,
     )) {
       try {
-        await this.blockedDatesService.runOnUnblockedDay(
+        const blocks = await this.blockedDatesService.runOnUnblockedDay(
           mentorId,
           occurrence.startAt,
           (tx) =>
-            this.availabilityRepository.create(
+            this.createSlots(
               mentorId,
-              occurrence.startAt,
-              occurrence.endAt,
+              splitIntoBlocks(occurrence.startAt, occurrence.endAt),
               tx,
               series,
             ),
         );
-        result.created++;
+        result.created += blocks.length;
       } catch (error) {
         if (
           error instanceof DayBlockedException ||

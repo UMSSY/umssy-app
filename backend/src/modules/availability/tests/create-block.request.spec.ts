@@ -15,7 +15,7 @@ const getMessages = (payload: unknown): string[] => {
 describe('createBlockSchema', () => {
   const weekly = {
     startAt: '2026-10-10T19:00:00Z',
-    endAt: '2026-10-10T20:00:00Z',
+    endAt: '2026-10-10T20:30:00Z',
     repeatWeekly: true,
     repeatUntil: '2026-10-31',
   };
@@ -71,17 +71,17 @@ describe('createBlockSchema', () => {
     expect(
       getMessages({
         startAt: '2026-10-11T00:00:00Z',
-        endAt: '2026-10-11T01:00:00Z',
+        endAt: '2026-10-11T01:30:00Z',
         repeatWeekly: true,
         repeatUntil: '2026-10-10',
       }),
     ).toEqual([]);
   });
 
-  it('acepta un bloque futuro válido (15:00 a 16:00 Bolivia)', () => {
+  it('acepta un bloque futuro válido (15:00 a 16:30 Bolivia)', () => {
     const result = schema.safeParse({
       startAt: '2026-10-10T19:00:00Z',
-      endAt: '2026-10-10T20:00:00Z',
+      endAt: '2026-10-10T20:30:00Z',
     });
     expect(result.success).toBe(true);
   });
@@ -89,7 +89,7 @@ describe('createBlockSchema', () => {
   it('devuelve las fechas ya convertidas a Date', () => {
     const result = schema.safeParse({
       startAt: '2026-10-10T19:00:00Z',
-      endAt: '2026-10-10T20:00:00Z',
+      endAt: '2026-10-10T20:30:00Z',
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -102,7 +102,7 @@ describe('createBlockSchema', () => {
     expect(
       getMessages({
         startAt: '2026-10-10T15:00:00-04:00',
-        endAt: '2026-10-10T16:00:00-04:00',
+        endAt: '2026-10-10T16:30:00-04:00',
       }),
     ).toEqual([]);
   });
@@ -115,6 +115,28 @@ describe('createBlockSchema', () => {
       }),
     ).toEqual([]);
   });
+
+  it('acepta un rango de 4 h 30 que se divide en tres bloques de 1 h 30', () => {
+    expect(
+      getMessages({
+        startAt: '2026-10-10T14:00:00Z',
+        endAt: '2026-10-10T18:30:00Z',
+      }),
+    ).toEqual([]);
+  });
+
+  it.each([
+    ['1 h', '2026-10-10T20:00:00Z'],
+    ['2 h', '2026-10-10T21:00:00Z'],
+    ['30 min', '2026-10-10T19:30:00Z'],
+  ])(
+    'rechaza un rango de %s que no se divide en bloques de 1 h 30',
+    (_case, endAt) => {
+      expect(getMessages({ startAt: '2026-10-10T19:00:00Z', endAt })).toEqual([
+        MSG.invalidRangeDuration,
+      ]);
+    },
+  );
 
   it('rechaza fin anterior al inicio', () => {
     expect(
@@ -147,25 +169,25 @@ describe('createBlockSchema', () => {
     expect(
       getMessages({
         startAt: '2026-10-10T19:15:00Z',
-        endAt: '2026-10-10T20:00:00Z',
+        endAt: '2026-10-10T20:45:00Z',
       }),
-    ).toEqual([MSG.invalidStep]);
+    ).toContain(MSG.invalidStep);
   });
 
   it('rechaza un fin fuera de intervalos de 30 minutos', () => {
     expect(
       getMessages({
-        startAt: '2026-10-10T19:00:00Z',
-        endAt: '2026-10-10T20:10:00Z',
+        startAt: '2026-10-10T19:10:00Z',
+        endAt: '2026-10-10T20:40:00Z',
       }),
-    ).toEqual([MSG.invalidStep]);
+    ).toContain(MSG.invalidStep);
   });
 
   it('rechaza un inicio antes de las 07:00 Bolivia', () => {
     expect(
       getMessages({
         startAt: '2026-10-10T10:00:00Z',
-        endAt: '2026-10-10T12:00:00Z',
+        endAt: '2026-10-10T11:30:00Z',
       }),
     ).toEqual([MSG.outOfRange]);
   });
@@ -189,7 +211,7 @@ describe('createBlockSchema', () => {
     expect(
       getMessages({
         startAt: '2026-10-11T01:00:00Z',
-        endAt: '2026-10-11T04:30:00Z',
+        endAt: '2026-10-11T05:30:00Z',
       }),
     ).toEqual([MSG.differentDays]);
   });

@@ -19,6 +19,7 @@ describe('education fixture career alignment', () => {
     const requests = vi.fn().mockResolvedValue({ count: 0 });
     const educations = vi.fn().mockResolvedValue({ count: 0 });
     const tx = {
+      $executeRaw: vi.fn(),
       accessRequest: { createMany: requests, updateMany: vi.fn() },
       education: { createMany: educations, updateMany: vi.fn() },
     };

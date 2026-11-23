@@ -59,11 +59,11 @@ export function BlockSelectionPanel({
                 </CardDescription>
               </CardContent>
             </Card>
-            {children}
           </>
         ) : (
           <CardDescription>{BLOCK_SELECTION_TEXT.empty}</CardDescription>
         )}
+        <div hidden={isChecking || !selectedBlock}>{children}</div>
       </CardContent>
 
       {!selectedBlock && (

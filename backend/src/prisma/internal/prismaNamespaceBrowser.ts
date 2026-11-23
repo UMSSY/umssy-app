@@ -81,6 +81,10 @@ export const ModelName = {
   AppointmentDocument: 'AppointmentDocument',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
+  AppointmentNotificationEvent: 'AppointmentNotificationEvent',
+  AppointmentNotificationChannel: 'AppointmentNotificationChannel',
+  AppointmentNotificationStatus: 'AppointmentNotificationStatus',
+  AppointmentNotification: 'AppointmentNotification',
   EventCategory: 'EventCategory',
   Event: 'Event',
   EventRegistration: 'EventRegistration',
@@ -97,6 +101,7 @@ export const ModelName = {
   AccessRequest: 'AccessRequest',
   MentorParticipationRequest: 'MentorParticipationRequest',
   MentorSlotOffer: 'MentorSlotOffer',
+  MentorCapacitySetting: 'MentorCapacitySetting',
   ActivationOtp: 'ActivationOtp',
   MessageStatus: 'MessageStatus',
   ConnectionRequestStatus: 'ConnectionRequestStatus',
@@ -501,6 +506,8 @@ export const AppointmentScalarFieldEnum = {
   rejectionReason: 'rejectionReason',
   meetingUrl: 'meetingUrl',
   cancelledById: 'cancelledById',
+  cancellationReason: 'cancellationReason',
+  cancelledAt: 'cancelledAt',
   requestedAt: 'requestedAt',
   respondedAt: 'respondedAt',
   createdAt: 'createdAt',
@@ -552,6 +559,56 @@ export const AppointmentHistoryScalarFieldEnum = {
 } as const
 
 export type AppointmentHistoryScalarFieldEnum = (typeof AppointmentHistoryScalarFieldEnum)[keyof typeof AppointmentHistoryScalarFieldEnum]
+
+
+export const AppointmentNotificationEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationEventScalarFieldEnum = (typeof AppointmentNotificationEventScalarFieldEnum)[keyof typeof AppointmentNotificationEventScalarFieldEnum]
+
+
+export const AppointmentNotificationChannelScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationChannelScalarFieldEnum = (typeof AppointmentNotificationChannelScalarFieldEnum)[keyof typeof AppointmentNotificationChannelScalarFieldEnum]
+
+
+export const AppointmentNotificationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationStatusScalarFieldEnum = (typeof AppointmentNotificationStatusScalarFieldEnum)[keyof typeof AppointmentNotificationStatusScalarFieldEnum]
+
+
+export const AppointmentNotificationScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  recipientId: 'recipientId',
+  eventId: 'eventId',
+  channelId: 'channelId',
+  statusId: 'statusId',
+  attempts: 'attempts',
+  lastError: 'lastError',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationScalarFieldEnum = (typeof AppointmentNotificationScalarFieldEnum)[keyof typeof AppointmentNotificationScalarFieldEnum]
 
 
 export const EventCategoryScalarFieldEnum = {
@@ -795,6 +852,15 @@ export const MentorSlotOfferScalarFieldEnum = {
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
+
+
+export const MentorCapacitySettingScalarFieldEnum = {
+  id: 'id',
+  percentage: 'percentage',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorCapacitySettingScalarFieldEnum = (typeof MentorCapacitySettingScalarFieldEnum)[keyof typeof MentorCapacitySettingScalarFieldEnum]
 
 
 export const ActivationOtpScalarFieldEnum = {

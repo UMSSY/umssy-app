@@ -2,97 +2,159 @@
 
 ## Purpose and responsibilities
 
-`frontend/src/modules/radar-chart` presents the owner's published radar, supporting evidence, comparisons between publications, and mentorship simulations. It consumes [radar-integration](../radar-integration/README.md), which calculates and persists scores. Routes only render views; interactive views and hooks declare `use client`.
+`frontend/src/modules/radar-chart` presents the owner's published radar, comparisons with the preceding publication, supporting evidence, historical publications, administrative review and mentorship simulations. [radar-integration](../radar-integration/README.md) owns scoring, persistence, verification and authorization; [notifications](../notifications/README.md) owns publication notices and their read state.
+
+The personal route is `/profile/radar`. Views and hooks use `use client`; the route wraps the view in Suspense for navigation parameters. Scores represent approved evidence on six axes: `desarrollo`, `cloud-devops`, `data-ai`, `qa`, `ciberseguridad` and `gobernanza-ti`.
 
 ## Architecture and dependencies
 
 ```mermaid
 flowchart LR
-  Route[profile/radar: server] --> View[RadarProfileView: client]
-  View --> Query[useLiveRadar: TanStack Query]
-  Query --> Api[radarIntegrationApi]
-  Api --> Backend[radar-integration]
-  View --> Mentors[mentorship: available mentors]
+  Route[Profile radar route] --> View[RadarProfileView]
+  View --> Live[useLiveRadar]
+  View --> History[useHistoricalRadar]
+  Live --> API[radarIntegrationApi]
+  History --> API
+  API --> Backend[radar-integration]
+  View --> Projection[MentorshipProjection]
+  Projection --> Directory[mentorship: useMentorDirectory]
   View --> Evidence[CV and certification evidence]
+  Inbox[Central notifications inbox] -->|snapshot link| Route
+  Review[Document and skill review panels] --> Recovery[Shared review operation service]
+  Recovery --> API
 ```
 
-HTTP services use `shared/services/api-client`; they neither store tokens nor open IndexedDB. Cross-domain integrations import the owning module's `index.ts`. Each contract and props type has its own file in `types/`.
+HTTP calls use the centralized `api-client`. The historical hook owns the query key, session scope and loading/error states. Review operation identifiers use shared IndexedDB storage. Data contracts live in individual files under `types/`.
 
-## Flows and business rules
+## Current and previous publications
+
+1. `useLiveRadar` loads the authenticated owner's latest publication and its preceding publication through `GET /profile/me/radar`.
+2. The view displays scores, average, approved skills, pending skills and publication time. Expanding the professional profile shows the approved skills and their evidence sources.
+3. When a preceding publication exists, **Comparar con la anterior** overlays its scores and date on the chart. The change detail shows the selected area's previous score, current score and signed difference, rounded to two decimals. Global variation compares the published averages.
+4. The user can select an area from the chart or breakdown and inspect its evidence. Comparison can be disabled without changing either publication.
 
 ```mermaid
 sequenceDiagram
-  actor Owner as Profile owner
+  actor Owner
   participant View as RadarProfileView
-  participant Query as useLiveRadar
+  participant Hook as useLiveRadar
   participant API as Radar API
-  Owner->>View: Open My radar
-  View->>Query: Query with the current session
-  Query->>API: GET /profile/me/radar
-  API-->>Query: Current and previous publications and processing state
-  Query-->>View: Six axes and approved evidence
-  opt Processing is pending
-    loop While hasPending or processingStatus=pending
-      Query->>API: Poll every 1.5 seconds
-    end
-  end
+  Owner->>View: Open personal radar
+  View->>Hook: Load current publication
+  Hook->>API: GET /profile/me/radar
+  API-->>Hook: Current snapshot, previous snapshot and processing state
+  Hook-->>View: Published scores and variation
+  Owner->>View: Enable comparison and select an area
+  View-->>Owner: Dated overlays and per-area difference
 ```
 
-- Persisted identifiers are `desarrollo`, `cloud-devops`, `data-ai`, `qa`, `ciberseguridad`, and `gobernanza-ti`; translating code names does not change these contracts.
-- Scores come from the backend, rather than demonstration data. An older version cannot replace a newer cached version. If the session changes, the in-flight response is discarded.
-- An empty state appears when there is no publication; a publication without approved skills keeps all six axes at zero.
-- Comparisons use the two latest publications and their dates. Pending or failed recalculation preserves the latest valid publication and allows retrying.
-- Mentorship integration: selecting an area queries the actual directory of available mentors. When results exist, the simulation estimates up to **+1 point**, capped at 10, and calculates the projected average. No projection is applied when there are no mentors or a query fails. Closing the dialog clears the projection. This illustrative estimate never changes the published radar.
-- Administrative review consumes authorized backend APIs; hiding controls does not replace server authorization.
+### Publication states and safeguards
+
+| Condition                                    | Behavior                                                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| No publication (`version=0`)                 | Empty state; no invented scores or previous version                                                         |
+| One publication                              | Current radar and an explanation that comparison needs another publication                                  |
+| Publication with no approved skills          | Six axes at zero with guidance to complete documentation                                                    |
+| Analysis or evidence synchronization pending | Keep the valid publication and poll every 1.5 seconds while `processingStatus=pending` or `hasPending=true` |
+| Recalculation or connection failure          | Preserve available data, display the failure and offer retry                                                |
+| An older response arrives                    | Keep the higher cached publication version                                                                  |
+| Session changes during a live request        | Discard that response                                                                                       |
+
+The comparison uses the latest two available publications in the current view. It is not an arbitrary archive picker. A historical link instead compares the requested publication with its own preceding version. Simulated scores never replace either persisted publication.
+
+## Mentors by area and score simulation
+
+Selecting an area exposes **Ver mentores de esta area** and **Simular habilidad**. The directory link passes the area name and `from=radar`; [mentorship](../mentorship/README.md) normalizes the filter and requires available mentors for this entry point.
+
+Opening the simulation queries `GET /mentors/directory` through `useMentorDirectory`, with the selected area, `available=true`, page 1 and default ordering. The result's `totalItems` determines whether a projection can be shown.
+
+- With available mentors, the selected axis is projected as `min(10, currentScore + 1)`. The displayed gain can therefore be less than one near the cap.
+- The projected global average uses the projected selected axis and the unchanged scores of the other five axes.
+- With no mentors, the current score is preserved. While loading or after a query failure, no projection is applied; failures offer retry.
+- Closing or unmounting the simulation clears the projection. Simulation does not approve a skill, reserve a mentor or write a score; the estimate does not guarantee a future improvement.
+
+For example, an axis at 6 becomes 7 when mentors are available, increasing the six-axis average by approximately 0.17. An axis at 9.5 becomes 10, not 10.5.
+
+```mermaid
+sequenceDiagram
+  actor Owner
+  participant View as Radar area panel
+  participant Projection as MentorshipProjection
+  participant Directory as Mentors directory API
+  Owner->>View: Select an area and open simulation
+  View->>Projection: Current area and six scores
+  Projection->>Directory: GET /mentors/directory with area and available=true
+  alt Available mentors found
+    Directory-->>Projection: totalItems greater than zero
+    Projection-->>View: Capped projected axis and global average
+  else Empty result or request error
+    Directory-->>Projection: No available mentors or failure
+    Projection-->>View: Keep published scores; show empty state or retry
+  end
+  Owner->>Projection: Close dialog
+  Projection->>View: Clear projection
+```
+
+## Publication notices and historical access
+
+The central inbox opens `/profile/radar?snapshot=<snapshotId>`. `useHistoricalRadar` requests `GET /profile/me/radar/snapshots/:id`, scoped to the current session. The backend authorizes ownership and returns the requested publication with its preceding version. The view displays a historical-version banner and **Volver al radar actual**, which clears the historical selection and comparison. Loading and unavailable-publication errors are explicit.
+
+Listing notices and marking them read stay in the Notifications module. Opening a historical snapshot directly does not itself acknowledge a notification. A missing or foreign snapshot returns 404; the client never substitutes another person's data.
+
+```mermaid
+sequenceDiagram
+  actor Owner
+  participant Inbox as Central notifications inbox
+  participant View as RadarProfileView
+  participant Hook as useHistoricalRadar
+  participant API as Radar API
+  Owner->>Inbox: Open publication notice
+  Inbox->>View: Navigate with snapshot ID
+  View->>Hook: Select historical snapshot
+  Hook->>API: GET /profile/me/radar/snapshots/id
+  API-->>Hook: Authorized snapshot and preceding publication, or 404
+  Hook-->>View: Data, loading or error state
+  Owner->>View: Return to current radar
+  View->>View: Clear historical selection and comparison
+```
+
+## Administrative review and recoverable decisions
+
+Document review lists active versions by filter and offers actions according to their state. The panel previews the backing file before confirmation; temporary file URLs are released when the preview changes or unmounts. Skill review separately lists skills, evidence and approval/rejection/revocation actions. Backend authorization requires `administrativo`; visible controls do not grant access by themselves.
+
+Document approval/rejection and skill decisions use `radar-review-operation.service.ts`. It persists an operation UUID per authenticated administrator, kind, target and decision, queries the matching operation endpoint, and sends a decision only after a 404. Before clearing local intent, it validates operation ID, completed status, kind, target and decision. A failed request or mismatching result retains the UUID for retry. Mount/reconnect recovery checks saved results without issuing new decisions, then refreshes the queues. Document reprocessing and revocation use the document action endpoint without this operation identifier.
+
+The complete verification lifecycle, allowed transitions and response contracts are documented in [radar-integration](../radar-integration/README.md); the owner's result dashboard is documented in [cv](../cv/README.md).
 
 ## Consumed endpoints
 
-| Method and path                              | Purpose                                                      |
-| -------------------------------------------- | ------------------------------------------------------------ |
-| `GET /profile/me/radar`                      | Current and previous radar publications and processing state |
-| `POST /profile/me/radar/recalculations`      | Retry analysis and publication                               |
-| `POST /profile/me/radar/cv-rescans`          | Reanalyze the current CV                                     |
-| `GET /radar-document-reviews?filter=pending` | Administrative document review queue                         |
-| `PATCH /radar-document-reviews/:id`          | Decide, reprocess, or revoke a document                      |
-| `GET /radar-document-reviews/:id/file`       | Administrative document preview                              |
-| `GET /radar-reviews`                         | Skill and CV review queue                                    |
-| `PATCH /radar-reviews/:kind/:id`             | Evidence review decision                                     |
+| Method and path                                       | Purpose                                                     |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| `GET /profile/me/radar`                               | Current and preceding publications with processing state    |
+| `GET /profile/me/radar/snapshots/:id`                 | Authorized historical publication and its preceding version |
+| `POST /profile/me/radar/recalculations`               | Retry analysis and publication                              |
+| `POST /profile/me/radar/cv-rescans`                   | Reanalyze the current CV                                    |
+| `GET /mentors/directory`                              | Available mentors for the selected area                     |
+| `GET /radar-document-reviews?filter=pending`          | Administrative document queue                               |
+| `GET /radar-document-reviews/:id/file`                | Administrative supporting-file preview                      |
+| `PATCH /radar-document-reviews/:id`                   | Approve, reject, reprocess or revoke a document             |
+| `GET /radar-document-reviews/operations/:operationId` | Recover a document decision                                 |
+| `GET /radar-reviews`                                  | Skill and legacy CV review queue                            |
+| `PATCH /radar-reviews/:kind/:id`                      | Submit an evidence decision with operation ID               |
+| `GET /radar-reviews/operations/:operationId`          | Recover an evidence decision                                |
 
-JSON responses follow `{ statusCode, data, detail, ok }`; supporting files are binary responses. Permissions and errors are documented in [radar-integration](../radar-integration/README.md) and Swagger.
+JSON responses follow `{ statusCode, data, detail, ok }`; supporting files are binary. Owner and administrator permissions are enforced by the backend.
 
 ## Validation
 
-Tests cover queries, version preservation, empty and error states, comparisons, area interactions, simulation, and review. The minimum coverage is 80%; Vitest measures it independently of the number of passing tests.
+Existing tests cover current/previous version preservation, empty/error states, area comparisons, historical navigation and return, mentor availability and score caps, document and skill panels, and review operation recovery. Relevant tests live beside the components, hooks, services and views under `frontend/src/modules/radar-chart`; directory integration tests also live in `frontend/src/modules/mentorship`. Coverage must be measured by Vitest; documentation does not establish a coverage result.
 
 ## Sprint History
 
 ### Sprint 3
 
-- Mentorship integration: available mentors by area and illustrative simulation.
-- Comparisons between publications and navigation to evidence.
-- Document verification: document verification results and integrated administrative review.
-- Standards alignment: individual types, English identifiers, public exports, and static styles using Tailwind.
-
-## Review recovery and historical navigation
-
-The radar view consumes `/profile/me/radar/snapshots/:id` when opened with `?snapshot=<id>` from the central Notifications inbox. It displays the historical version and its previous publication for comparison, with loading/error feedback and a return action. Notification listing and read actions remain in the Notifications interface.
-
-Document and skill panels share `radar-review-operation.service.ts`. IndexedDB persists an operation UUID per authenticated administrator and intent. The service queries operation status, sends only after 404, validates the full returned identity, and clears only a completed matching operation. Mount recovery uses the same validation and cleanup. Failed queries or decisions retain the operation for retry. Hooks adapt endpoints and invalidate review queues; contracts live in separate files under `types/`.
-
-```mermaid
-sequenceDiagram
-    participant Inbox as Notifications inbox
-    participant View as Radar view
-    participant API as Radar API
-    Inbox->>View: Navigate with snapshot ID
-    View->>API: GET authenticated historical snapshot
-    API-->>View: Snapshot and previous version or 404
-    View->>View: Compare or return to current radar
-```
-
-### Sprint 3 integration updates
-
-- Shared recoverable review protocol and central notification navigation.
-- Semantic error styles and shared conditional class utility.
-
-`useHistoricalRadar` owns the historical query key, session scope, request and loading/error states. The view selects the snapshot from navigation parameters and renders the result; it no longer defines its own HTTP query.
+- Previous-publication overlays, dates, average variation and per-area comparison.
+- Available mentor search by area and illustrative, capped score simulation.
+- Central publication notices, authorized historical access and return to the current radar.
+- Document verification results, administrative document/skill review and recoverable decisions.
+- Responsive radar interactions and evidence access on mobile.

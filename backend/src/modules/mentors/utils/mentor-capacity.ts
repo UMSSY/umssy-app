@@ -1,11 +1,12 @@
 import type { MentorCapacityCounts } from '../types/mentor-capacity.types.js';
 
 export function mentorCapacity(counts: MentorCapacityCounts) {
-  const capacity = Math.floor(counts.approvedGraduates * 0.4);
+  const percentage = counts.percentage ?? 40;
+  const capacity = Math.ceil((counts.approvedGraduates * percentage) / 100);
   const occupied = counts.activeMentors + counts.reservedOffers;
   return {
     ...counts,
-    percentage: 40,
+    percentage,
     capacity,
     occupied,
     available: Math.max(0, capacity - occupied),

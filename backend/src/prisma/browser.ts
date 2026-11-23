@@ -168,6 +168,26 @@ export type TimeProposal = Prisma.TimeProposalModel
  */
 export type AppointmentHistory = Prisma.AppointmentHistoryModel
 /**
+ * Model AppointmentNotificationEvent
+ * 
+ */
+export type AppointmentNotificationEvent = Prisma.AppointmentNotificationEventModel
+/**
+ * Model AppointmentNotificationChannel
+ * 
+ */
+export type AppointmentNotificationChannel = Prisma.AppointmentNotificationChannelModel
+/**
+ * Model AppointmentNotificationStatus
+ * 
+ */
+export type AppointmentNotificationStatus = Prisma.AppointmentNotificationStatusModel
+/**
+ * Model AppointmentNotification
+ * 
+ */
+export type AppointmentNotification = Prisma.AppointmentNotificationModel
+/**
  * Model EventCategory
  * 
  */
@@ -247,6 +267,11 @@ export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
  * 
  */
 export type MentorSlotOffer = Prisma.MentorSlotOfferModel
+/**
+ * Model MentorCapacitySetting
+ * 
+ */
+export type MentorCapacitySetting = Prisma.MentorCapacitySettingModel
 /**
  * Model ActivationOtp
  * 
