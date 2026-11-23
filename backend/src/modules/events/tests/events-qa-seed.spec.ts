@@ -173,6 +173,27 @@ describe('Development event fixtures', () => {
     expect(new Set(data.map((event: { id: string }) => event.id)).size).toBe(
       data.length,
     );
+    const scheduled = [
+      ['history-interviews-2026-11-23', '2026-11-23', '18:00', '18:15'],
+      ['history-git-2026-11-23', '2026-11-23', '18:15', '18:30'],
+      ['history-accessibility-2026-11-23', '2026-11-23', '18:30', '18:45'],
+      ['history-visualization-2026-11-23', '2026-11-23', '18:45', '19:00'],
+      ['history-projects-2026-11-26', '2026-11-26', '18:00', '19:00'],
+    ];
+    for (const [key, date, start, end] of scheduled) {
+      const workshop = data.find(
+        (event: { id: string }) => event.id === context.getId(key),
+      );
+      expect(workshop).toMatchObject({
+        createdById: 'qa-owner',
+        capacity: 20,
+        supportThreshold: 10,
+        statusId: 'event_statuses:Votacion',
+      });
+      expect(workshop.eventDate.toISOString().slice(0, 10)).toBe(date);
+      expect(workshop.startTime.toISOString().slice(11, 16)).toBe(start);
+      expect(workshop.endTime.toISOString().slice(11, 16)).toBe(end);
+    }
     for (const category of [
       'Empleabilidad',
       'Investigación',
