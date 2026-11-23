@@ -6,6 +6,7 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/backoffice(?:\/|$)/, roles: ["administrativo"] },
   { pattern: /^\/affinity-radar\/review-queue\/?$/, roles: ["administrativo"] },
   { pattern: /^\/recruiters(?:\/|$)/, roles: ["empresa"] },
+  { pattern: /^\/company-profile\/?$/, roles: ["empresa"] },
   { pattern: /^\/matching\/?$/, roles: ["empresa"] },
   { pattern: /^\/area-detail(?:-interaction)?-preview\/?$/, roles: ["empresa"] },
   { pattern: /^\/profile\/radar\/?$/, roles: ["titulado", "mentor"] },
