@@ -106,14 +106,12 @@ export function ApplicationsView() {
 
       {data && data.length > 0 && (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              {withdrawnCount > 0 && (
-                <ShowWithdrawnToggle pressed={viewingWithdrawn} onPressedChange={handleShowWithdrawnChange} />
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <span className="text-sm text-text-secondary">Ordenar:</span>
+          <div className="flex flex-wrap items-center gap-3">
+            {withdrawnCount > 0 && (
+              <ShowWithdrawnToggle pressed={viewingWithdrawn} onPressedChange={handleShowWithdrawnChange} />
+            )}
+            <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+              <span className="shrink-0 text-sm text-text-secondary">Ordenar:</span>
               <Select
                 items={APPLICATION_SORT_OPTIONS}
                 value={sort ? `${sort.key}:${sort.direction}` : "date:desc"}
@@ -122,7 +120,7 @@ export function ApplicationsView() {
                   if (option) setSort({ key: option.key, direction: option.direction });
                 }}
               >
-                <SelectTrigger aria-label="Ordenar postulaciones" className="w-[210px] max-w-full bg-surface">
+                <SelectTrigger aria-label="Ordenar postulaciones" className="flex-1 bg-surface sm:w-[210px] sm:flex-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
