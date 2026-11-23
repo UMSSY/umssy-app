@@ -1,5 +1,5 @@
 import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 
 const YEAR_MONTH_FORMATTER = new Intl.DateTimeFormat("en-US", {
   timeZone: BOLIVIA_TIME_ZONE,

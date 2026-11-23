@@ -11,7 +11,7 @@ import { FREE_BLOCKS_STALE_TIME_MS } from "../constants/mentor-free-blocks.const
 import { REQUEST_MENTORSHIP_TEXT } from "../constants/request-mentorship.constants";
 import { availabilityApi } from "../services/availability.service";
 
-export function useRequestMentorship(mentorId: string) {
+export function useRequestMentorship(mentorId: string, area?: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isChecking, setIsChecking] = useState(false);
@@ -44,7 +44,7 @@ export function useRequestMentorship(mentorId: string) {
         return;
       }
 
-      router.push(`/mentors/${mentorId}/availability`);
+      router.push(`/mentors/${mentorId}/availability${area ? `?area=${encodeURIComponent(area)}` : ""}`);
     } catch {
       if (requestId === lastRequestRef.current) toast.error(REQUEST_MENTORSHIP_TEXT.checkError);
     } finally {

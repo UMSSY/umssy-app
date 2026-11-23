@@ -14,13 +14,18 @@ import { SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import type { DiscardChangesDialogProps } from "../types/discard-changes-dialog-props.types";
 
-export function DiscardChangesDialog({ open, onOpenChange, onConfirm }: DiscardChangesDialogProps) {
+export function DiscardChangesDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  description = SURVEY_MESSAGES.discardDialogDescription,
+}: DiscardChangesDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-bold text-ink">{SURVEY_MESSAGES.discardDialogTitle}</AlertDialogTitle>
-          <AlertDialogDescription className="text-left">{SURVEY_MESSAGES.discardDialogDescription}</AlertDialogDescription>
+          <AlertDialogDescription className="text-left">{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{SURVEY_TEXT.keepEditing}</AlertDialogCancel>

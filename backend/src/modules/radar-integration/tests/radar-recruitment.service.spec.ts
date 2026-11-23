@@ -22,14 +22,14 @@ import { emptyScores } from '../utils/radar-scoring.js';
 
 function makeAccess() {
   return {
-    hasRole: vi.fn(),
-    hasAnyRole: vi.fn(),
     recordAudit: vi.fn(),
   };
 }
 
 function makeSources() {
   return {
+    hasRole: vi.fn(),
+    hasAnyRole: vi.fn(),
     companyExists: vi.fn(),
     recruiterCompanyId: vi.fn(),
     assignCompany: vi.fn(),
@@ -86,7 +86,6 @@ function setup() {
   };
   const applicationActions = {
     withdrawApplication: vi.fn(),
-    notifyStateChanged: vi.fn(),
   };
   const applications = makeApplications();
   const jobApplications = makeJobApplications();
@@ -146,8 +145,8 @@ describe('RadarRecruitmentService', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('asigna una empresa a un usuario empresa siendo administrador', async () => {
-    const { access, repository, sources, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { repository, sources, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.companyExists.mockResolvedValue({ id: 'company' });
     repository.grantCompany.mockResolvedValue(undefined);
 
@@ -164,8 +163,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza asignar empresa si el solicitante no es administrador', async () => {
-    const { access, service } = setup();
-    access.hasRole.mockResolvedValue(false);
+    const { service, sources } = setup();
+    sources.hasRole.mockResolvedValue(false);
 
     await expect(
       service.grantCompany('admin', 'user', 'company'),
@@ -173,8 +172,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza asignar una empresa inexistente', async () => {
-    const { access, sources, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { sources, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.companyExists.mockResolvedValue(null);
 
     await expect(
@@ -183,8 +182,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('registra una postulación reutilizando las reglas del Epic', async () => {
-    const { access, applications, jobApplications, service } = setup();
-    access.hasAnyRole.mockResolvedValue(true);
+    const { applications, jobApplications, service, sources } = setup();
+    sources.hasAnyRole.mockResolvedValue(true);
     jobApplications.findMine.mockResolvedValue(mine(null));
     jobApplications.apply.mockResolvedValue({
       id: 'app',
@@ -220,8 +219,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('reutiliza una postulación existente y evita duplicados concurrentes', async () => {
-    const { access, applications, jobApplications, service } = setup();
-    access.hasAnyRole.mockResolvedValue(true);
+    const { applications, jobApplications, service, sources } = setup();
+    sources.hasAnyRole.mockResolvedValue(true);
     jobApplications.findMine
       .mockResolvedValueOnce(mine(null))
       .mockResolvedValueOnce(mine({ id: 'app', status: 'En revisión' }));
@@ -242,7 +241,7 @@ describe('RadarRecruitmentService', () => {
 
   it('rechaza postularse a una vacante cerrada o sin rol', async () => {
     const closed = setup();
-    closed.access.hasAnyRole.mockResolvedValue(true);
+    closed.sources.hasAnyRole.mockResolvedValue(true);
     closed.jobApplications.findMine.mockResolvedValue(mine(null));
     closed.jobApplications.apply.mockRejectedValue(
       new JobOfferUnavailableException(),
@@ -252,15 +251,15 @@ describe('RadarRecruitmentService', () => {
     ).rejects.toBeInstanceOf(JobOfferUnavailableException);
 
     const withoutRole = setup();
-    withoutRole.access.hasAnyRole.mockResolvedValue(false);
+    withoutRole.sources.hasAnyRole.mockResolvedValue(false);
     await expect(
       withoutRole.service.apply('user', 'job', true, true, true),
     ).rejects.toBeInstanceOf(ForbiddenRoleException);
   });
 
   it('rechaza una postulación ya decidida', async () => {
-    const { access, jobApplications, service } = setup();
-    access.hasAnyRole.mockResolvedValue(true);
+    const { jobApplications, service, sources } = setup();
+    sources.hasAnyRole.mockResolvedValue(true);
     jobApplications.findMine.mockResolvedValue(
       mine({ id: 'app', status: 'Aceptada' }),
     );
@@ -271,8 +270,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('lista y actualiza postulaciones propias', async () => {
-    const { access, applications, service } = setup();
-    access.hasAnyRole.mockResolvedValue(true);
+    const { applications, service, sources } = setup();
+    sources.hasAnyRole.mockResolvedValue(true);
     applications.myApplications.mockResolvedValue([
       applicationRow({ status_title: 'Entrevista', consent_to_cv: false }),
     ]);
@@ -295,8 +294,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('permite retirar sólo postulaciones abiertas', async () => {
-    const { access, applications, applicationActions, service } = setup();
-    access.hasAnyRole.mockResolvedValue(true);
+    const { applications, applicationActions, service, sources } = setup();
+    sources.hasAnyRole.mockResolvedValue(true);
     applicationActions.withdrawApplication.mockResolvedValue(undefined);
 
     await expect(service.withdrawMyApplication('user', 'app')).resolves.toEqual(
@@ -320,8 +319,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('lista sólo vacantes de las empresas vinculadas al reclutador', async () => {
-    const { access, sources, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { sources, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     sources.recruiterVacancies.mockResolvedValue([
       { id: 'job', title: 'Vacante', companyId: 'company' },
@@ -336,8 +335,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('compara la vacante con radares publicados y oculta postulantes sin consentimiento o sin radar', async () => {
-    const { access, repository, sources, applications, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { repository, sources, applications, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.publishedJob.mockResolvedValue({
       id: 'job',
       title: 'Full Stack',
@@ -410,8 +409,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('oculta el contacto cuando no fue autorizado', async () => {
-    const { access, repository, sources, applications, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { repository, sources, applications, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.publishedJob.mockResolvedValue({
       id: 'job',
       title: 'Vacante',
@@ -445,8 +444,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza consultar postulantes de una empresa no vinculada', async () => {
-    const { access, sources, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { sources, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.publishedJob.mockResolvedValue({
       id: 'job',
       companyId: 'company',
@@ -470,8 +469,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza vacantes ajenas aunque exista un acceso antiguo del radar', async () => {
-    const { access, repository, sources, service, applications } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { repository, sources, service, applications } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('own-company');
     repository.allowedCompany.mockResolvedValue([
       { company_id: 'other-company' },
@@ -487,8 +486,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('autoriza evidencias sólo por área válida y postulación consentida', async () => {
-    const { access, repository, sources, applications, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { repository, sources, applications, service } = setup();
+    sources.hasRole.mockResolvedValue(true);
     applications.companyForEvidence.mockResolvedValue([
       { user_id: 'user', company_id: 'company' },
     ]);
@@ -557,8 +556,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('devuelve evidencias vacías cuando el área no tiene habilidades publicadas', async () => {
-    const { access, repository, applications, service, sources } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { repository, applications, service, sources } = setup();
+    sources.hasRole.mockResolvedValue(true);
     applications.companyForEvidence.mockResolvedValue([
       { user_id: 'user', company_id: 'company' },
     ]);
@@ -577,7 +576,7 @@ describe('RadarRecruitmentService', () => {
 
   it('entrega el CV aprobado sólo con consentimiento y archivo disponible', async () => {
     const { access, sources, applications, service } = setup();
-    access.hasRole.mockResolvedValue(true);
+    sources.hasRole.mockResolvedValue(true);
     applications.companyForCv.mockResolvedValue([
       { user_id: 'user', company_id: 'company', consent_to_cv: true },
     ]);
@@ -616,8 +615,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('registra decisiones de contratación o rechazo', async () => {
-    const { access, applications, service, sources } = setup();
-    access.hasRole.mockResolvedValue(true);
+    const { applications, service, sources } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([{ id: 'app' }]);
 
@@ -648,41 +647,48 @@ describe('RadarRecruitmentService', () => {
     ).rejects.toBeInstanceOf(RadarApplicationNotFoundException);
   });
 
-  it('HU-15: notifica al postulante el cambio de estado tras la decisión', async () => {
-    const { access, applications, applicationActions, service, sources } =
-      setup();
-    access.hasRole.mockResolvedValue(true);
+  it('registra las decisiones de contratacion y rechazo sin emitir notificaciones de estado', async () => {
+    const { applications, service, sources } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([{ id: 'app' }]);
 
-    await service.decideApplication('recruiter', 'app', 'hired');
-    await service.decideApplication('recruiter', 'app', 'rejected');
-
-    expect(applicationActions.notifyStateChanged).toHaveBeenNthCalledWith(1, {
-      recipientId: 'user',
-      applicationId: 'app',
-      previousStatus: 'En revisión',
-      newStatus: 'Aceptada',
-      jobTitle: 'Dev Backend',
-      companyName: 'Empresa A',
+    await expect(
+      service.decideApplication('recruiter', 'app', 'hired'),
+    ).resolves.toEqual({
+      id: 'app',
+      state: 'hired',
     });
-    expect(applicationActions.notifyStateChanged).toHaveBeenNthCalledWith(
+    await expect(
+      service.decideApplication('recruiter', 'app', 'rejected'),
+    ).resolves.toEqual({
+      id: 'app',
+      state: 'rejected',
+    });
+
+    expect(applications.recordRecruiterDecision).toHaveBeenNthCalledWith(
+      1,
+      'app',
+      'Aceptada',
+    );
+    expect(applications.recordRecruiterDecision).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ newStatus: 'No seleccionado' }),
+      'app',
+      'No seleccionado',
     );
   });
 
-  it('HU-15: no notifica si la decisión no se pudo registrar', async () => {
-    const { access, applications, applicationActions, service, sources } =
-      setup();
-    access.hasRole.mockResolvedValue(true);
+  it('no registra auditoria cuando la decision no se pudo guardar', async () => {
+    const { access, applications, service, sources } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([]);
 
     await expect(
       service.decideApplication('recruiter', 'app', 'hired'),
     ).rejects.toBeInstanceOf(RadarApplicationConflictException);
-    expect(applicationActions.notifyStateChanged).not.toHaveBeenCalled();
+
+    expect(access.recordAudit).not.toHaveBeenCalled();
   });
 
   it('lista vacantes activas para el egresado', async () => {

@@ -59,7 +59,8 @@ describe('WorkExperienceListCard', () => {
     ).toBeInTheDocument();
   });
 
-  it('uses a level-three heading for the company and level-four headings for positions', () => {
+  it('uses a level-three heading for the company and level-four headings for positions', async () => {
+    const user = userEvent.setup();
     const experiences = [
       createExperience(
         'senior',
@@ -83,6 +84,8 @@ describe('WorkExperienceListCard', () => {
       screen.getByRole('heading', { level: 3, name: /Banco/ }),
     ).toBeInTheDocument();
 
+    await user.click(screen.getByRole('button', { name: /Banco/ }));
+
     expect(
       screen.getByRole('heading', {
         level: 4,
@@ -98,33 +101,163 @@ describe('WorkExperienceListCard', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows a company with several positions collapsed by default', () => {
+    const experiences = [
+      createExperience(
+        'senior',
+        'Desarrollador Senior',
+        '2024-01-01',
+        null,
+        true,
+      ),
+      createExperience(
+        'junior',
+        'Desarrollador Junior',
+        '2020-01-01',
+        '2022-12-31',
+        false,
+      ),
+    ];
+
+    render(<WorkExperienceListCard experiences={experiences} />);
+
+    expect(screen.getByRole('button', { name: /Banco/ })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(screen.getByText(/2 cargos/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { level: 4, name: 'Desarrollador Senior' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { level: 4, name: 'Desarrollador Junior' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('expands and collapses a company group and updates aria-expanded', async () => {
     const user = userEvent.setup();
+    const experiences = [
+      createExperience(
+        'senior',
+        'Desarrollador Senior',
+        '2024-01-01',
+        null,
+        true,
+      ),
+      createExperience(
+        'junior',
+        'Desarrollador Junior',
+        '2020-01-01',
+        '2022-12-31',
+        false,
+      ),
+    ];
 
-    render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
+    render(<WorkExperienceListCard experiences={experiences} />);
 
-    const companyButton = screen.getByRole('button', {
-      name: /Banco/,
-    });
+    const companyButton = screen.getByRole('button', { name: /Banco/ });
+
+    expect(companyButton).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(companyButton);
 
     expect(companyButton).toHaveAttribute('aria-expanded', 'true');
     expect(
-      screen.getByRole('heading', { level: 4, name: LONG_POSITION }),
+      screen.getByRole('heading', { level: 4, name: 'Desarrollador Senior' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 4, name: 'Desarrollador Junior' }),
     ).toBeInTheDocument();
 
     await user.click(companyButton);
 
     expect(companyButton).toHaveAttribute('aria-expanded', 'false');
     expect(
-      screen.queryByRole('heading', { level: 4, name: LONG_POSITION }),
+      screen.queryByRole('heading', { level: 4, name: 'Desarrollador Junior' }),
     ).not.toBeInTheDocument();
+  });
 
-    await user.click(companyButton);
+  it('keeps each company group collapsed or expanded on its own', async () => {
+    const user = userEvent.setup();
+    const experiences = [
+      createExperience('bank-1', 'Analista', '2020-01-01', '2021-12-31', false),
+      createExperience('bank-2', 'Gerente', '2022-01-01', null, true),
+      createExperience(
+        'lab-1',
+        'Pasante',
+        '2018-01-01',
+        '2019-12-31',
+        false,
+        'Laboratorio',
+      ),
+      createExperience(
+        'lab-2',
+        'Técnico',
+        '2020-01-01',
+        '2021-06-30',
+        false,
+        'Laboratorio',
+      ),
+    ];
 
-    expect(companyButton).toHaveAttribute('aria-expanded', 'true');
+    render(<WorkExperienceListCard experiences={experiences} />);
+
+    await user.click(screen.getByRole('button', { name: /Banco/ }));
+
+    expect(screen.getByRole('button', { name: /Banco/ })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(
+      screen.getByRole('button', { name: /Laboratorio/ }),
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByRole('heading', { level: 4, name: 'Gerente' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { level: 4, name: 'Técnico' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('lets the company tab grow and wrap its text with the content', () => {
+    const experiences = [
+      createExperience(
+        'senior',
+        'Desarrollador Senior',
+        '2024-01-01',
+        null,
+        true,
+        'Tecnologías Bolivianas del Valle S.R.L.',
+      ),
+      createExperience(
+        'junior',
+        'Desarrollador Junior',
+        '2020-01-01',
+        '2022-12-31',
+        false,
+        'Tecnologías Bolivianas del Valle S.R.L.',
+      ),
+    ];
+
+    render(<WorkExperienceListCard experiences={experiences} />);
+
+    expect(
+      screen.getByRole('button', { name: /Tecnologías Bolivianas/ }),
+    ).toHaveClass('h-auto', 'whitespace-normal');
+  });
+
+  it('does not offer to collapse a company with a single position and always shows it', () => {
+    render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: /Banco/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Banco/ }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole('heading', { level: 4, name: LONG_POSITION }),
-    ).toBeInTheDocument();
+    ).toBeVisible();
   });
 
   it('identifies the first recorded position and current status for multiple positions', () => {
@@ -211,12 +344,14 @@ describe('WorkExperienceListCard', () => {
   it('does not repeat the company period when there is only one position', () => {
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
 
-    const companyButton = screen.getByRole('button', {
+    const companyHeading = screen.getByRole('heading', {
+      level: 3,
       name: /Banco/,
     });
 
-    expect(companyButton).toHaveTextContent('1 cargo');
-    expect(companyButton).not.toHaveTextContent('Tiene un cargo actual');
+    expect(companyHeading).toHaveTextContent('1 cargo');
+    expect(companyHeading).not.toHaveTextContent('Primer cargo');
+    expect(companyHeading).not.toHaveTextContent('Tiene un cargo actual');
 
     expect(
       screen.getByText(/Feb.*2020.*Jul.*2023/),

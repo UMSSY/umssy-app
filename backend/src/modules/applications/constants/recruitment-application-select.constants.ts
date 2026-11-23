@@ -10,12 +10,6 @@ export const RECRUITMENT_APPLICATION_SELECT = {
 export const APPLICATION_DECISION_CONTEXT_SELECT = {
   id: true,
   userId: true,
+  jobOfferId: true,
   status: { select: { title: true } },
-  jobOffer: {
-    select: {
-      companyId: true,
-      title: true,
-      company: { select: { title: true } },
-    },
-  },
 } as const;

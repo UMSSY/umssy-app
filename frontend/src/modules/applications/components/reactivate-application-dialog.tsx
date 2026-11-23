@@ -10,15 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import type { Application } from "../types/application.types";
-
-interface ReactivateApplicationDialogProps {
-  application: Application | null;
-  isPending: boolean;
-  hasError: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}
+import type { ReactivateApplicationDialogProps } from "../types/reactivate-application-dialog-props.types";
 
 export function ReactivateApplicationDialog({
   application,
@@ -60,7 +52,7 @@ export function ReactivateApplicationDialog({
           </AlertDialogCancel>
           <Button
             type="button"
-            className="bg-success text-surface hover:brightness-90"
+            variant="success"
             disabled={isPending || application === null}
             onClick={onConfirm}
           >

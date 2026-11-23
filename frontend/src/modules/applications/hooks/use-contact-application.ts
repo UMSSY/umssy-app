@@ -20,7 +20,7 @@ export function useContactApplication() {
         toast.error(APPLICATION_MESSAGES.noRecruiters);
         return;
       }
-      router.push(getApplicationChatPath(contact.applicationId));
+      router.push(getApplicationChatPath(contact.recruiters[0].id, contact.applicationId));
     },
   });
 

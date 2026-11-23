@@ -8,7 +8,7 @@ import { ReportHistoryView } from "./report-history-view";
 
 const FIRST_PAGE_REPORT = "Lista_Usuarios_Activos_2026";
 const SECOND_PAGE_REPORT = "Rechazados_Julio_2026";
-const COLUMN_HEADERS = ["Nombre del Archivo/Reporte", "Tipo de Reporte", "Fecha y Hora de Generación"];
+const COLUMN_HEADERS = ["Nombre del Archivo/Reporte", "Tipo de Reporte", "Formato", "Fecha y Hora de Generación"];
 
 function getColumnHeaders(): string[] {
   return screen.getAllByRole("columnheader").map((header) => header.textContent ?? "");
@@ -85,7 +85,7 @@ describe("ReportHistoryView", () => {
     expect(rows).toHaveLength(10);
 
     const firstRowCells = within(rows[0]).getAllByRole("cell").map((cell) => cell.textContent);
-    expect(firstRowCells).toEqual([FIRST_PAGE_REPORT, "Lista de Usuarios", "2026-09-28 19:45"]);
+    expect(firstRowCells).toEqual([FIRST_PAGE_REPORT, "Lista de Usuarios", "-", "2026-09-28 19:45"]);
   });
 
   it("cambia de página con la paginación", async () => {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { ReviewQueueRows } from '../types/review-queue-rows.type.js';
+import type { ReviewQueueRows } from '../types/review-queue-rows.types.js';
 
 @Injectable()
 export class RadarReviewMapper {

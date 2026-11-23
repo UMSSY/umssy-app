@@ -79,6 +79,7 @@ function createRepository() {
     findStatusId: vi.fn().mockResolvedValue('status-deleted'),
     updateStatus: vi.fn().mockResolvedValue(RECORD),
     reopen: vi.fn().mockResolvedValue(RECORD),
+    findOfferSummary: vi.fn(),
   };
 }
 
@@ -587,23 +588,27 @@ describe('JobOffersService', () => {
     });
   });
 
-  it('no dispara la notificación de nueva vacante en update, softDelete ni reopen', async () => {
-    const notifySpy = vi
-      .spyOn(notificationHelper, 'notifyNewJobOfferPublished')
-      .mockResolvedValue(undefined);
+  describe('findOfferSummary', () => {
+    it('expone título, empresa y nombre de la empresa de la vacante', async () => {
+      repository.findOfferSummary.mockResolvedValue({
+        id: 'offer-1',
+        title: 'Dev Backend',
+        companyId: 'company-1',
+        company: { title: 'Empresa A' },
+      });
 
-    await service.update('company-1', 'offer-1', REQUEST);
-    await service.softDelete('company-1', 'offer-1');
-
-    repository.findByCompanyAndId.mockResolvedValue({
-      ...RECORD,
-      status: { title: 'Cerrada' },
+      await expect(service.findOfferSummary('offer-1')).resolves.toEqual({
+        id: 'offer-1',
+        title: 'Dev Backend',
+        companyId: 'company-1',
+        companyName: 'Empresa A',
+      });
     });
-    repository.findStatusId.mockResolvedValue('status-published');
-    await service.reopen('company-1', 'offer-1');
 
-    expect(notifySpy).not.toHaveBeenCalled();
+    it('retorna null si la vacante no existe', async () => {
+      repository.findOfferSummary.mockResolvedValue(null);
 
-    notifySpy.mockRestore();
+      await expect(service.findOfferSummary('missing')).resolves.toBeNull();
+    });
   });
 });

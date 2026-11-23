@@ -145,10 +145,11 @@ model User {
   availabilityBlocks     AvailabilityBlock[]
   blockedDates           BlockedDate[]
 
-  mentorAppointments    Appointment[]        @relation("AppointmentMentor")
-  studentAppointments   Appointment[]        @relation("AppointmentStudent")
-  cancelledAppointments Appointment[]        @relation("AppointmentCancelledBy")
-  appointmentChanges    AppointmentHistory[]
+  mentorAppointments       Appointment[]             @relation("AppointmentMentor")
+  studentAppointments      Appointment[]             @relation("AppointmentStudent")
+  cancelledAppointments    Appointment[]             @relation("AppointmentCancelledBy")
+  appointmentChanges       AppointmentHistory[]
+  appointmentNotifications AppointmentNotification[]
 
   createdEvents        Event[]             @relation("EventCreatedBy")
   moderatedEvents      Event[]             @relation("EventModeratedBy")
@@ -181,6 +182,8 @@ model User {
   radarCvOwned         RadarCvEvidence[]         @relation("RadarCvOwner")
   radarCvReviewed      RadarCvEvidence[]         @relation("RadarCvReviewer")
   radarSnapshots       RadarScoreSnapshot[]
+  documentVerifications RadarDocumentVerification[] @relation("VerifiedDocumentOwner")
+  reviewedDocuments RadarDocumentVerification[] @relation("VerifiedDocumentReviewer")
   radarAuditSubjects   RadarAuditEvent[]         @relation("RadarAuditSubject")
   radarAuditActors     RadarAuditEvent[]         @relation("RadarAuditActor")
   radarCompanyAccess   RadarCompanyAccess[]      @ignore
@@ -190,6 +193,7 @@ model User {
   portfolioProjects    UserPortfolioProject[]
 
   notificationPreferences NotificationPreference?
+  jobOfferNotificationPreference JobOfferNotificationPreference?
   receivedNotifications   Notification[]           @relation("ReceivedNotifications")
   triggeredNotifications  Notification[]           @relation("TriggeredNotifications")
   pushSubscriptions       PushSubscription[]
@@ -308,6 +312,7 @@ model JobOfferSkill {
 }
 
 model UserSkill {
+  radarAutoVerified Boolean @default(false) @map("radar_auto_verified")
   id                 String   @id @default(uuid()) @db.Uuid
   userId             String   @map("user_id") @db.Uuid
   skillId            String   @map("skill_id") @db.Uuid
@@ -462,22 +467,24 @@ model BlockedDate {
 }
 
 model Appointment {
-  id                String    @id @default(uuid()) @db.Uuid
-  blockId           String?   @map("block_id") @db.Uuid
-  mentorId          String    @map("mentor_id") @db.Uuid
-  studentId         String    @map("student_id") @db.Uuid
-  startAt           DateTime  @map("start_at") @db.Timestamptz(6)
-  endAt             DateTime  @map("end_at") @db.Timestamptz(6)
-  statusId          String    @map("status_id") @db.Uuid
-  orientationTypeId String?   @map("orientation_type_id") @db.Uuid
-  message           String?   @db.VarChar(300)
-  rejectionReason   String?   @map("rejection_reason") @db.VarChar(300)
-  meetingUrl        String?   @map("meeting_url") @db.VarChar(255)
-  cancelledById     String?   @map("cancelled_by_id") @db.Uuid
-  requestedAt       DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
-  respondedAt       DateTime? @map("responded_at") @db.Timestamptz(6)
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String    @id @default(uuid()) @db.Uuid
+  blockId            String?   @map("block_id") @db.Uuid
+  mentorId           String    @map("mentor_id") @db.Uuid
+  studentId          String    @map("student_id") @db.Uuid
+  startAt            DateTime  @map("start_at") @db.Timestamptz(6)
+  endAt              DateTime  @map("end_at") @db.Timestamptz(6)
+  statusId           String    @map("status_id") @db.Uuid
+  orientationTypeId  String?   @map("orientation_type_id") @db.Uuid
+  message            String?   @db.VarChar(300)
+  rejectionReason    String?   @map("rejection_reason") @db.VarChar(300)
+  meetingUrl         String?   @map("meeting_url") @db.VarChar(255)
+  cancelledById      String?   @map("cancelled_by_id") @db.Uuid
+  cancellationReason String?   @map("cancellation_reason") @db.VarChar(300)
+  cancelledAt        DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  requestedAt        DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
+  respondedAt        DateTime? @map("responded_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   block           AvailabilityBlock? @relation(fields: [blockId], references: [id], onDelete: SetNull)
   mentor          User               @relation("AppointmentMentor", fields: [mentorId], references: [id], onDelete: Restrict)
@@ -486,9 +493,10 @@ model Appointment {
   orientationType OrientationType?   @relation(fields: [orientationTypeId], references: [id], onDelete: SetNull)
   cancelledBy     User?              @relation("AppointmentCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
 
-  proposals TimeProposal[]
-  history   AppointmentHistory[]
-  document  AppointmentDocument?
+  proposals     TimeProposal[]
+  history       AppointmentHistory[]
+  document      AppointmentDocument?
+  notifications AppointmentNotification[]
 
   @@index([mentorId, startAt])
   @@index([studentId, startAt])
@@ -555,6 +563,69 @@ model AppointmentHistory {
   @@index([newStatusId])
   @@index([changedById])
   @@map("appointment_histories")
+}
+
+model AppointmentNotificationEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_events")
+}
+
+model AppointmentNotificationChannel {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_channels")
+}
+
+model AppointmentNotificationStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_statuses")
+}
+
+model AppointmentNotification {
+  id            String    @id @default(uuid()) @db.Uuid
+  appointmentId String    @map("appointment_id") @db.Uuid
+  recipientId   String    @map("recipient_id") @db.Uuid
+  eventId       String    @map("event_id") @db.Uuid
+  channelId     String    @map("channel_id") @db.Uuid
+  statusId      String    @map("status_id") @db.Uuid
+  attempts      Int       @default(0)
+  lastError     String?   @map("last_error")
+  sentAt        DateTime? @map("sent_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  appointment Appointment                    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  recipient   User                           @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  event       AppointmentNotificationEvent   @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  channel     AppointmentNotificationChannel @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  status      AppointmentNotificationStatus  @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@unique([appointmentId, recipientId, eventId, channelId])
+  @@index([recipientId])
+  @@index([eventId])
+  @@index([channelId])
+  @@index([statusId])
+  @@map("appointment_notifications")
 }
 
 model EventCategory {
@@ -886,6 +957,14 @@ model MentorSlotOffer {
   @@map("mentor_slot_offers")
 }
 
+model MentorCapacitySetting {
+  id         Int      @id
+  percentage Int      @default(40)
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("mentor_capacity_settings")
+}
+
 model ActivationOtp {
   id              String    @id @default(uuid()) @db.Uuid
   accessRequestId String    @map("access_request_id") @db.Uuid
@@ -945,6 +1024,8 @@ model Conversation {
   lastMessageId String?   @map("last_message_id") @db.Uuid
   lastMessageAt DateTime? @map("last_message_at") @db.Timestamptz(6)
   eventId       String?   @unique @map("event_id") @db.Uuid
+  contextType   String?   @map("context_type") @db.VarChar(50)
+  contextId     String?   @unique @map("context_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -955,9 +1036,10 @@ model Conversation {
   participants ConversationParticipant[]
   messages     Message[]                 @relation("ConversationMessages")
 
-  @@unique([userAId, userBId])
   @@index([userAId, lastMessageAt(sort: Desc)])
   @@index([userBId, lastMessageAt(sort: Desc)])
+  @@index([userAId, userBId])
+  @@index([contextType, contextId])
   @@map("conversations")
 }
 
@@ -1188,9 +1270,13 @@ model Survey {
   opensAt           DateTime? @map("opens_at") @db.Timestamptz(6)
   closesAt          DateTime? @map("closes_at") @db.Timestamptz(6)
   statusId          String    @map("status_id") @db.Uuid
-  createdById       String    @map("created_by_id") @db.Uuid
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdById           String    @map("created_by_id") @db.Uuid
+  closingSoonNotifiedAt DateTime? @map("closing_soon_notified_at") @db.Timestamptz(6)
+  closedNotifiedAt      DateTime? @map("closed_notified_at") @db.Timestamptz(6)
+  lastReminderSentAt    DateTime? @map("last_reminder_sent_at") @db.Timestamptz(6)
+  publishedNotifiedPeriod String? @map("published_notified_period") @db.VarChar(7)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   career         Career?               @relation(fields: [careerId], references: [id], onDelete: Restrict)
   status         SurveyStatus          @relation(fields: [statusId], references: [id], onDelete: Restrict)
@@ -1198,12 +1284,27 @@ model Survey {
   createdBy      User                  @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   questions      SurveyQuestion[]
   responses      SurveyResponse[]
+  alertConfig    SurveyAlertConfig?
 
   @@index([careerId, academicPeriod])
   @@index([createdById])
   @@index([statusId])
   @@index([targetAudienceId])
   @@map("surveys")
+}
+
+model SurveyAlertConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  surveyId    String   @unique @map("survey_id") @db.Uuid
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  threshold   Int      @default(10)
+  questionIds Json?    @map("question_ids")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@map("survey_alert_configs")
 }
 
 model SurveyQuestion {
@@ -1537,6 +1638,43 @@ model MentorOfferStatus {
   @@map("mentor_offer_statuses")
 }
 
+model RadarDocumentVerification {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  sourceTypeId String @map("source_type_id") @db.Uuid
+  sourceId String @map("source_id") @db.Uuid
+  filename String
+  mime String
+  content Bytes?
+  sizeBytes Int @map("size_bytes")
+  active Boolean @default(true)
+  digest String
+  statusId String @default(dbgenerated("'a0000000-0000-4000-8000-000000000001'::uuid")) @map("status_id") @db.Uuid
+  confidence Float?
+  reason String @default("")
+  skills Json @default("[]")
+  createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  decidedAt DateTime? @map("decided_at") @db.Timestamptz(6)
+  reviewerId String? @map("reviewer_id") @db.Uuid
+  noticeRead Boolean @default(false) @map("notice_read")
+  publishedIds Json @default("[]") @map("published_ids")
+  radarVersion Int? @map("radar_version")
+  synced Boolean @default(false)
+  lease String? @db.Uuid
+  retryAt DateTime @default(now()) @map("retry_at") @db.Timestamptz(6)
+  owner User @relation("VerifiedDocumentOwner", fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  reviewer User? @relation("VerifiedDocumentReviewer",fields:[reviewerId],references:[id],onDelete:SetNull,onUpdate:NoAction)
+  @@index([userId,createdAt(sort:Desc)],map:"radar_doc_owner_date")
+  @@map("radar_document_verifications")
+  statusEntry RadarDocumentStatus @relation(fields:[statusId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_status_fk")
+  sourceTypeEntry RadarDocumentSourceType @relation(fields:[sourceTypeId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_source_type_fk")
+  @@index([reviewerId],map:"radar_doc_reviewer")
+  @@index([statusId],map:"radar_doc_status")
+  @@index([sourceTypeId],map:"radar_doc_source_type")
+
+}
+
 model PortfolioProvider {
   id          String   @id @default(uuid()) @db.Uuid
   name        String   @unique @db.VarChar(50)
@@ -1660,4 +1798,49 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
+}
+
+model JobAlertMode {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  preferences JobOfferNotificationPreference[]
+
+  @@map("job_alert_modes")
+}
+
+model JobOfferNotificationPreference {
+  userId    String   @id @map("user_id") @db.Uuid
+  modeId    String   @map("mode_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode JobAlertMode @relation(fields: [modeId], references: [id], onDelete: Restrict)
+
+  @@index([modeId])
+  @@map("job_offer_notification_preferences")
+}
+
+model RadarDocumentStatus {
+ id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+ title String @unique
+ description String
+ createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+ updatedAt DateTime @default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)
+ documents RadarDocumentVerification[]
+ @@map("radar_document_statuses")
+}
+
+model RadarDocumentSourceType {
+ id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+ title String @unique
+ description String
+ createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+ updatedAt DateTime @default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)
+ documents RadarDocumentVerification[]
+ @@map("radar_document_source_types")
 }

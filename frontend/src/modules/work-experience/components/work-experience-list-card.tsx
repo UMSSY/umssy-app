@@ -22,12 +22,12 @@ export function WorkExperienceListCard({
 }: WorkExperienceListCardProps) {
   const groups = groupWorkExperiences(experiences);
 
-  const [collapsedGroups, setCollapsedGroups] = useState<
+  const [expandedGroups, setExpandedGroups] = useState<
     Record<string, boolean>
   >({});
 
   const toggleGroup = (groupId: string) => {
-    setCollapsedGroups((previous) => ({
+    setExpandedGroups((previous) => ({
       ...previous,
       [groupId]: !previous[groupId],
     }));
@@ -64,51 +64,66 @@ export function WorkExperienceListCard({
           {groups.map((group: WorkExperienceCompanyGroup) => {
             const groupId = group.id;
             const positionsId = `${groupId}-positions`;
-            const isCollapsed = collapsedGroups[groupId] ?? false;
+            const isCollapsible = group.positions.length > 1;
+            const isCollapsed = isCollapsible && !expandedGroups[groupId];
+            const headerClassName =
+              'flex h-auto w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left whitespace-normal';
+            const headerContent = (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-md bg-background text-accent"
+                >
+                  <Building2 className="size-6" strokeWidth={1.5} />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className="block wrap-anywhere text-ink">
+                    {group.companyName}
+                  </span>
+
+                  <span className="mt-1 block text-sm font-normal text-text-secondary">
+                    {group.positions.length}{' '}
+                    {group.positions.length === 1 ? 'cargo' : 'cargos'}
+                    {isCollapsible && (
+                      <>
+                        {' · '}
+                        {getCompanyGroupPeriod(group.positions)}
+                      </>
+                    )}
+                  </span>
+                </span>
+              </>
+            );
 
             return (
               <li key={groupId} className="py-5 first:pt-0 last:pb-0">
                 <h3 className="text-base font-bold">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="flex w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left transition-colors hover:bg-interaction/80"
-                    aria-expanded={!isCollapsed}
-                    aria-controls={positionsId}
-                    onClick={() => toggleGroup(groupId)}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="flex size-11 shrink-0 items-center justify-center rounded-md bg-background text-accent"
-                    >
-                      <Building2 className="size-6" strokeWidth={1.5} />
-                    </span>
-
-                    <span className="min-w-0 flex-1">
-                      <span className="block wrap-anywhere text-ink">
-                        {group.companyName}
-                      </span>
-
-                      <span className="mt-1 block text-sm font-normal text-text-secondary">
-                        {group.positions.length}{' '}
-                        {group.positions.length === 1 ? 'cargo' : 'cargos'}
-                        {group.positions.length > 1 && (
-                          <>
-                            {' · '}
-                            {getCompanyGroupPeriod(group.positions)}
-                          </>
-                        )}
-                      </span>
-                    </span>
-
-                    <ChevronDown
-                      aria-hidden="true"
+                  {isCollapsible ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
                       className={cn(
-                        'size-5 shrink-0 text-text-secondary transition-transform',
-                        !isCollapsed && 'rotate-180',
+                        headerClassName,
+                        'transition-colors hover:bg-interaction/80',
                       )}
-                    />
-                  </Button>
+                      aria-expanded={!isCollapsed}
+                      aria-controls={positionsId}
+                      onClick={() => toggleGroup(groupId)}
+                    >
+                      {headerContent}
+
+                      <ChevronDown
+                        aria-hidden="true"
+                        className={cn(
+                          'size-5 shrink-0 text-text-secondary transition-transform',
+                          !isCollapsed && 'rotate-180',
+                        )}
+                      />
+                    </Button>
+                  ) : (
+                    <span className={headerClassName}>{headerContent}</span>
+                  )}
                 </h3>
 
                 <ol
@@ -185,7 +200,7 @@ export function WorkExperienceListCard({
                             {skillsList.map((skill) => (
                               <span
                                 key={skill.toLowerCase()}
-                                className="inline-flex items-center rounded-full border border-border bg-interaction px-2.5 py-0.5 text-xs font-medium text-ink"
+                                className="inline-flex items-center rounded-full border border-transparent bg-availability px-2.5 py-0.5 text-xs font-medium text-availability-foreground"
                               >
                                 {skill}
                               </span>

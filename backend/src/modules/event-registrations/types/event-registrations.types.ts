@@ -11,6 +11,17 @@ export interface MyRegistrationResponse {
   cancelledAt: string | null;
 }
 
+export interface MyRegistrationsListResponse {
+  data: {
+    items: MyRegistrationResponse[];
+    total: number;
+    limit: number;
+    totalPages: number;
+  };
+  page: number;
+  offset: number;
+}
+
 export interface CreateEventRegistrationPayload {
   eventId: string;
   userId: string;

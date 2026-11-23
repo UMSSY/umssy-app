@@ -1,53 +1,40 @@
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as webpush from 'web-push';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
+import {
+  PUSH_NOTIFICATION_ICON,
+  PUSH_TEXT_MAX_LENGTH,
+} from '../constants/push-notification.constants.js';
+import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
+import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
+import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
 
-export interface WebPushSubscription {
-  endpoint: string;
-  keys: { p256dh: string; auth: string };
-}
-
-export interface WebPushClient {
-  setVapidDetails(subject: string, publicKey: string, privateKey: string): void;
-  sendNotification(subscription: WebPushSubscription, payload: string): Promise<unknown>;
-}
-
-export const WEB_PUSH_CLIENT = 'WEB_PUSH_CLIENT';
-
-async function loadDefaultWebPush(): Promise<WebPushClient | null> {
-  try {
-    const mod = (await import('web-push')) as { default?: WebPushClient } & WebPushClient;
-    return mod.default ?? mod;
-  } catch {
-    return null;
-  }
-}
+const PUSH_TTL_SECONDS = 24 * 60 * 60;
+const PUSH_URGENCY = 'high';
 
 @Injectable()
-export class PushDispatcherService {
+export class PushDispatcherService implements OnModuleInit {
   private readonly logger = new Logger(PushDispatcherService.name);
-  private vapidConfigured = false;
 
   constructor(
     private readonly pushSubscriptionsRepository: PushSubscriptionsRepository,
-    @Optional()
-    @Inject(WEB_PUSH_CLIENT)
-    private readonly injectedClient?: WebPushClient,
+    private readonly configService: ConfigService,
   ) {}
 
-  private async getClient(): Promise<WebPushClient | null> {
-    const client = this.injectedClient ?? (await loadDefaultWebPush());
-    if (!client) return null;
+  onModuleInit(): void {
+    const subject = this.configService.get<string>('VAPID_SUBJECT');
+    const publicKey = this.configService.get<string>('VAPID_PUBLIC_KEY');
+    const privateKey = this.configService.get<string>('VAPID_PRIVATE_KEY');
 
-    if (!this.vapidConfigured) {
-      client.setVapidDetails(
-        process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
-        process.env.VAPID_PUBLIC_KEY || '',
-        process.env.VAPID_PRIVATE_KEY || '',
+    if (!subject || !publicKey || !privateKey) {
+      throw new Error(
+        'VAPID_SUBJECT, VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must be configured',
       );
-      this.vapidConfigured = true;
     }
 
-    return client;
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    this.logger.log('VAPID details configured');
   }
 
   async dispatchToUsers(
@@ -56,63 +43,126 @@ export class PushDispatcherService {
     body: string,
     actionUrl: string,
     groupKey?: string,
-  ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (userIds.length === 0) return 'skipped';
+    notificationIds?: ReadonlyMap<string, string>,
+  ): Promise<ChannelDispatchResult> {
+    if (userIds.length === 0) return { status: 'skipped', deliveries: [] };
 
-    const webpush = await this.getClient();
-    if (!webpush) return 'skipped';
-
-    const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
-    if (subscriptions.length === 0) return 'skipped';
+    const subscriptions =
+      await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
 
     let successCount = 0;
     let failedCount = 0;
+    const sentUserIds = new Set<string>();
+    const failedUserIds = new Set<string>();
 
-    const payload = JSON.stringify({
-      title: title.substring(0, 100),
-      body: body.substring(0, 100),
-      url: actionUrl,
-      tag: groupKey,
-    });
+    const basePayload: PushNotificationPayload = {
+      title: title.substring(0, PUSH_TEXT_MAX_LENGTH),
+      body: body.substring(0, PUSH_TEXT_MAX_LENGTH),
+      icon: PUSH_NOTIFICATION_ICON,
+      actionUrl,
+      groupKey,
+    };
 
     for (const sub of subscriptions) {
       if (this.isDesktopUserAgent(sub.userAgent)) {
         continue;
       }
 
-      const pushSubscription: WebPushSubscription = {
-        endpoint: sub.endpoint,
-        keys: { p256dh: sub.p256dh, auth: sub.auth },
+      const pushPayload: PushNotificationPayload = {
+        ...basePayload,
+        notificationId: notificationIds?.get(sub.userId),
       };
 
       try {
-        await webpush.sendNotification(pushSubscription, payload);
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth },
+          },
+          JSON.stringify(pushPayload),
+          { TTL: PUSH_TTL_SECONDS, urgency: PUSH_URGENCY },
+        );
         successCount++;
+        sentUserIds.add(sub.userId);
       } catch (error: unknown) {
         failedCount++;
-        const statusCode =
-          typeof error === 'object' && error !== null && 'statusCode' in error
-            ? (error as { statusCode?: number }).statusCode
-            : undefined;
-
-        if (statusCode === 404 || statusCode === 410) {
-          await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(sub.endpoint, sub.userId);
-        } else {
-          this.logger.error(`Error enviando push a ${sub.endpoint}`, error);
+        failedUserIds.add(sub.userId);
+        const statusCode = this.getStatusCode(error);
+        const subscriptionRemoved = statusCode === 404 || statusCode === 410;
+        if (subscriptionRemoved) {
+          await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(
+            sub.endpoint,
+            sub.userId,
+          );
         }
+        this.logDeliveryFailure(
+          sub.userId,
+          sub.endpoint,
+          statusCode,
+          subscriptionRemoved,
+          error,
+        );
       }
     }
 
-    if (successCount > 0 && failedCount === 0) return 'sent';
-    if (successCount > 0 && failedCount > 0) return 'partial';
-    if (successCount === 0 && failedCount > 0) return 'failed';
-    return 'skipped';
+    return {
+      status: summarizeChannelStatus(successCount, failedCount),
+      deliveries: userIds.map((recipientId) => ({
+        recipientId,
+        channel: 'push',
+        status: sentUserIds.has(recipientId)
+          ? 'sent'
+          : failedUserIds.has(recipientId)
+            ? 'failed'
+            : 'skipped',
+      })),
+    };
+  }
+
+  private logDeliveryFailure(
+    userId: string,
+    endpoint: string,
+    statusCode: number | undefined,
+    subscriptionRemoved: boolean,
+    error: unknown,
+  ): void {
+    const entry = `[PushAudit] userId=${userId} endpointHost=${this.getEndpointHost(endpoint)} statusCode=${statusCode ?? 'unknown'} subscriptionRemoved=${subscriptionRemoved}`;
+    if (subscriptionRemoved) {
+      this.logger.warn(entry);
+      return;
+    }
+    this.logger.error(
+      entry,
+      error instanceof Error ? error.stack : String(error),
+    );
+  }
+
+  // El endpoint completo identifica al dispositivo; en el log solo va el dominio.
+  private getEndpointHost(endpoint: string): string {
+    try {
+      return new URL(endpoint).host;
+    } catch {
+      return 'invalid-endpoint';
+    }
+  }
+
+  private getStatusCode(error: unknown): number | undefined {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'statusCode' in error &&
+      typeof (error as { statusCode: unknown }).statusCode === 'number'
+    ) {
+      return (error as { statusCode: number }).statusCode;
+    }
+    return undefined;
   }
 
   private isDesktopUserAgent(userAgent: string | null): boolean {
     if (!userAgent) return false;
     const ua = userAgent.toLowerCase();
-    const isMobile = ua.includes('android') || ua.includes('iphone') || ua.includes('ipad');
+    const isMobile =
+      ua.includes('android') || ua.includes('iphone') || ua.includes('ipad');
     return !isMobile;
   }
 }

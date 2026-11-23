@@ -47,9 +47,23 @@ describe("useContactApplication", () => {
 
     act(() => result.current.contact(buildApplication({ id: "application-7" })));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7"));
     expect(getContact).toHaveBeenCalledWith("application-7");
     expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it("uses the recruiter user id and encodes the application context in the chat URL", async () => {
+    getContact.mockResolvedValue(buildContact({
+      applicationId: "application/id with spaces",
+      recruiters: [{ id: "recruiter+test@example.com", fullName: "Ana Rojas" }],
+    }));
+    const { result } = renderHook(() => useContactApplication());
+
+    act(() => result.current.contact(buildApplication({ id: "application-7" })));
+
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith(
+      "/chat?contactId=recruiter%2Btest%40example.com&contextType=POSTULACION&contextId=application%2Fid+with+spaces",
+    ));
   });
 
   it("tells that the company has no recruiters available and stays on the page", async () => {
@@ -89,7 +103,7 @@ describe("useContactApplication", () => {
   it("warns about the restriction without calling the server when the application is closed", () => {
     const { result } = renderHook(() => useContactApplication());
 
-    act(() => result.current.contact(buildApplication({ status: "No seleccionado" })));
+    act(() => result.current.contact(buildApplication({ status: "Retirada" })));
 
     expect(toast.error).toHaveBeenCalledWith(
       "Esta postulación ya no permite la comunicación directa con el reclutador.",
@@ -127,7 +141,7 @@ describe("useContactApplication", () => {
     const options = vi.mocked(toast.error).mock.calls[0][1] as unknown as { action: { onClick: () => void } };    await waitFor(() => expect(result.current.contactingId).toBeNull());
     act(() => options.action.onClick());
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7"));
     expect(getContact).toHaveBeenCalledTimes(2);
   });
 
@@ -151,6 +165,6 @@ describe("useContactApplication", () => {
     await waitFor(() => expect(result.current.contactingId).toBeNull());
     act(() => result.current.contact(buildApplication({ id: "application-7" })));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7"));
   });
 });

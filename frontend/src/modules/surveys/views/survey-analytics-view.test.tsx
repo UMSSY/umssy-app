@@ -3,12 +3,15 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { surveyParticipationService } from "../services/survey-participation.service";
 import { surveysService } from "../services/surveys.service";
 import { buildEmptyStatistics, buildStatistics } from "../testing/survey-statistics-fixtures";
 import { apiResponse } from "../testing/survey-fixtures";
+import { buildParticipation } from "../testing/survey-participation-fixtures";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const ALL = buildStatistics();
 const SECOND_SEMESTER = buildStatistics({
@@ -51,6 +54,7 @@ async function selectPeriod(user: ReturnType<typeof userEvent.setup>, name: stri
 describe("SurveyAnalyticsView", () => {
   beforeEach(() => {
     mockStatistics();
+    vi.spyOn(surveyParticipationService, "getParticipation").mockResolvedValue(apiResponse(buildParticipation()));
     vi.spyOn(surveysService, "exportSurveyPdf").mockResolvedValue({
       file: new Blob(["pdf"], { type: "application/pdf" }),
       fileName: "reporte.pdf",

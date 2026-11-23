@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CvSourcesModule } from '../cv/cv-sources.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
@@ -19,14 +20,17 @@ import { CertificationSourcesModule } from '../certifications/certification-sour
 import { ProfileCompletenessController } from './controllers/profile-completeness.controller.js';
 import { ProfileCompletenessService } from './services/profile-completeness.service.js';
 
+import { ProfileSkillsEventsModule } from '../../common/profile-skills/profile-skills-events.module.js';
 @Module({
   imports: [
+    ProfileSkillsEventsModule,
     PrismaModule,
     JwtAuthModule,
     EducationSourcesModule,
     WorkExperienceSourcesModule,
     SkillAnalysisModule,
     CertificationSourcesModule,
+    CvSourcesModule,
   ],
   controllers: [
     ProfileController,

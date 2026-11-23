@@ -27,15 +27,30 @@ export class ProfileSkillSourcesService {
   }
 
   async findTextSources(userId: string): Promise<NlpTextSource[]> {
-    const [workExperiences, educations, certifications, cvTexts] =
-      await Promise.all([
-        this.workExperience.findAnalysisSources(userId),
-        this.educations.findAnalysisSources(userId),
-        this.certifications.findManyByUserId(userId),
-        this.radarEvidence.findCurrentCvText(userId),
-      ]);
+    const [
+      workExperiences,
+      educations,
+      certifications,
+      cvTexts,
+      certificateSkills,
+      presentation,
+    ] = await Promise.all([
+      this.workExperience.findAnalysisSources(userId),
+      this.educations.findAnalysisSources(userId),
+      this.certifications.findManyByUserId(userId),
+      this.radarEvidence.findCurrentCvText(userId),
+      this.radarEvidence.findCertificateSkills(userId),
+      this.profile.getProfile(userId),
+    ]);
 
+    const introduction = joinText(
+      presentation.headline ?? '',
+      presentation.aboutMe,
+    );
     return [
+      ...(introduction
+        ? [{ id: userId, type: 'presentation' as const, text: introduction }]
+        : []),
       ...workExperiences.map((record): NlpTextSource => ({
         id: record.id,
         type: 'work-experience',
@@ -54,6 +69,7 @@ export class ProfileSkillSourcesService {
           .join('. '),
       })),
       ...cvTexts,
+      ...certificateSkills,
     ];
   }
 

@@ -92,4 +92,13 @@ export class ReportUsersRepository {
 
     return [...registered, ...rejected];
   }
+
+  findAuthor(
+    userId: string,
+  ): Promise<{ firstName: string; lastName: string } | null> {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true },
+    });
+  }
 }

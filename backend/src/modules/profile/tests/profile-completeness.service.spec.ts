@@ -3,6 +3,7 @@ import type { CertificationSourcesService } from '../../certifications/services/
 import type { EducationSourcesService } from '../../educations/services/education-sources.service.js';
 import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 import type { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
+import type { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { ProfileNotFoundException } from '../exceptions/profile-not-found.exception.js';
 import type { ProfileRepository } from '../repositories/profile.repository.js';
 import { ProfileCompletenessService } from '../services/profile-completeness.service.js';
@@ -36,12 +37,14 @@ describe('ProfileCompletenessService', () => {
   const experiences = { hasByUserId: vi.fn() };
   const skills = { hasProfileSkills: vi.fn() };
   const certifications = { hasByUserId: vi.fn() };
+  const cvs = { hasByUserId: vi.fn() };
   const service = new ProfileCompletenessService(
     profiles as unknown as ProfileRepository,
     educations as unknown as EducationSourcesService,
     experiences as unknown as WorkExperienceSourcesService,
     skills as unknown as SkillAnalysisService,
     certifications as unknown as CertificationSourcesService,
+    cvs as unknown as CvSourcesService,
   );
 
   beforeEach(() => {
@@ -51,23 +54,25 @@ describe('ProfileCompletenessService', () => {
     experiences.hasByUserId.mockResolvedValue(false);
     skills.hasProfileSkills.mockResolvedValue(false);
     certifications.hasByUserId.mockResolvedValue(false);
+    cvs.hasByUserId.mockResolvedValue(false);
   });
 
   it('returns zero for an account with no completed profile sections', async () => {
     await expect(service.getCompleteness(userId)).resolves.toEqual({
       percentage: 0,
       sections: [
-        { id: 'contact', weight: 20, isCompleted: false },
+        { id: 'contact', weight: 15, isCompleted: false },
         { id: 'presentation', weight: 15, isCompleted: false },
-        { id: 'education', weight: 20, isCompleted: false },
-        { id: 'work-experience', weight: 20, isCompleted: false },
+        { id: 'education', weight: 15, isCompleted: false },
+        { id: 'work-experience', weight: 15, isCompleted: false },
         { id: 'skills', weight: 15, isCompleted: false },
         { id: 'certifications', weight: 10, isCompleted: false },
+        { id: 'cv', weight: 15, isCompleted: false },
       ],
     });
   });
 
-  it('returns 35 percent for completed contact information and saved skills', async () => {
+  it('returns 30 percent for completed contact information and saved skills', async () => {
     profiles.findByUserId.mockResolvedValue({
       ...profile,
       headline: null,
@@ -75,7 +80,7 @@ describe('ProfileCompletenessService', () => {
     });
     skills.hasProfileSkills.mockResolvedValue(true);
     const result = await service.getCompleteness(userId);
-    expect(result.percentage).toBe(35);
+    expect(result.percentage).toBe(30);
     expect(
       result.sections
         .filter((section) => section.isCompleted)
@@ -83,23 +88,25 @@ describe('ProfileCompletenessService', () => {
     ).toEqual(['contact', 'skills']);
   });
 
-  it('returns 100 percent when all six sections are complete', async () => {
+  it('returns 100 percent when all seven sections are complete', async () => {
     profiles.findByUserId.mockResolvedValue(profile);
     educations.hasByUserId.mockResolvedValue(true);
     experiences.hasByUserId.mockResolvedValue(true);
     skills.hasProfileSkills.mockResolvedValue(true);
     certifications.hasByUserId.mockResolvedValue(true);
+    cvs.hasByUserId.mockResolvedValue(true);
     const result = await service.getCompleteness(userId);
     expect(result.percentage).toBe(100);
-    expect(result.sections).toHaveLength(6);
+    expect(result.sections).toHaveLength(7);
     expect(result.sections.every((section) => section.isCompleted)).toBe(true);
   });
 
   it.each([
-    ['education', educations.hasByUserId, 20],
-    ['work-experience', experiences.hasByUserId, 20],
+    ['education', educations.hasByUserId, 15],
+    ['work-experience', experiences.hasByUserId, 15],
     ['skills', skills.hasProfileSkills, 15],
     ['certifications', certifications.hasByUserId, 10],
+    ['cv', cvs.hasByUserId, 15],
   ] as const)(
     'awards the full %s weight once and removes it when the last record is deleted',
     async (id, lookup, weight) => {
@@ -112,6 +119,19 @@ describe('ProfileCompletenessService', () => {
       expect((await service.getCompleteness(userId)).percentage).toBe(0);
     },
   );
+
+  it('keeps the profile at 85 percent until a CV is saved, and returns to 85 after the last CV is deleted', async () => {
+    profiles.findByUserId.mockResolvedValue(profile);
+    educations.hasByUserId.mockResolvedValue(true);
+    experiences.hasByUserId.mockResolvedValue(true);
+    skills.hasProfileSkills.mockResolvedValue(true);
+    certifications.hasByUserId.mockResolvedValue(true);
+    expect((await service.getCompleteness(userId)).percentage).toBe(85);
+    cvs.hasByUserId.mockResolvedValue(true);
+    expect((await service.getCompleteness(userId)).percentage).toBe(100);
+    cvs.hasByUserId.mockResolvedValue(false);
+    expect((await service.getCompleteness(userId)).percentage).toBe(85);
+  });
 
   it.each([
     { firstName: '   ' },
@@ -143,7 +163,7 @@ describe('ProfileCompletenessService', () => {
     { headline: 'x'.repeat(151) },
   ])('requires both valid presentation fields: %j', async (changes) => {
     profiles.findByUserId.mockResolvedValue({ ...profile, ...changes });
-    expect((await service.getCompleteness(userId)).percentage).toBe(20);
+    expect((await service.getCompleteness(userId)).percentage).toBe(15);
   });
 
   it('accepts surrounding whitespace without mutating saved data', async () => {
@@ -153,7 +173,7 @@ describe('ProfileCompletenessService', () => {
       aboutMe: ' Web developer ',
     };
     profiles.findByUserId.mockResolvedValue(padded);
-    expect((await service.getCompleteness(userId)).percentage).toBe(35);
+    expect((await service.getCompleteness(userId)).percentage).toBe(30);
     expect(padded.firstName).toBe(' Taylor ');
     expect(padded.aboutMe).toBe(' Web developer ');
   });
@@ -166,6 +186,7 @@ describe('ProfileCompletenessService', () => {
       experiences.hasByUserId,
       skills.hasProfileSkills,
       certifications.hasByUserId,
+      cvs.hasByUserId,
     ]) {
       expect(lookup).toHaveBeenCalledExactlyOnceWith(userId);
     }
@@ -180,6 +201,7 @@ describe('ProfileCompletenessService', () => {
     expect(experiences.hasByUserId).not.toHaveBeenCalled();
     expect(skills.hasProfileSkills).not.toHaveBeenCalled();
     expect(certifications.hasByUserId).not.toHaveBeenCalled();
+    expect(cvs.hasByUserId).not.toHaveBeenCalled();
   });
 
   it('propagates database failures instead of returning a misleading partial percentage', async () => {

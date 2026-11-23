@@ -5,6 +5,58 @@ import type { FixtureContext } from '../../../common/database/fixture-context.js
 
 const REGISTRATION_PLANS = [
   {
+    eventKey: 'qa-workshop-2026-11-19',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'qa-support-01',
+        userKey: 'record-00242',
+        tokenKey: 'qa-token-01',
+      },
+      {
+        key: 'qa-support-02',
+        userKey: 'record-02874',
+        tokenKey: 'qa-token-02',
+      },
+      {
+        key: 'qa-support-03',
+        userKey: 'record-02069',
+        tokenKey: 'qa-token-03',
+      },
+      {
+        key: 'qa-support-04',
+        userKey: 'record-00715',
+        tokenKey: 'qa-token-04',
+      },
+      {
+        key: 'qa-support-05',
+        userKey: 'record-01645',
+        tokenKey: 'qa-token-05',
+      },
+      {
+        key: 'qa-support-06',
+        userKey: 'record-00357',
+        tokenKey: 'qa-token-06',
+      },
+      {
+        key: 'qa-support-07',
+        userKey: 'record-00979',
+        tokenKey: 'qa-token-07',
+      },
+      {
+        key: 'qa-support-08',
+        userKey: 'record-03051',
+        tokenKey: 'qa-token-08',
+      },
+      {
+        key: 'qa-support-09',
+        userKey: 'record-01197',
+        tokenKey: 'qa-token-09',
+      },
+    ],
+  },
+  {
     eventKey: 'record-01390',
     base: 'monday',
     startMinute: -33960,

@@ -12,6 +12,15 @@ const idSelect = { id: true } as const;
 export class CertificationDocumentsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async lockOwnedCertification(
+    id: string,
+    userId: string,
+    context: TransactionContext,
+  ) {
+    await context.client
+      .$queryRaw`SELECT id FROM certifications WHERE id=${id}::uuid AND user_id=${userId}::uuid FOR UPDATE`;
+  }
+
   async save(
     id: string,
     content: Buffer,

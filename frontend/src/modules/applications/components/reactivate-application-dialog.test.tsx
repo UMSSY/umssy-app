@@ -29,6 +29,20 @@ describe("ReactivateApplicationDialog", () => {
     expect(screen.getByRole("button", { name: "Confirmar postulación" })).toBeEnabled();
   });
 
+  it("usa la variante de éxito del botón compartido para confirmar", () => {
+    render(
+      <ReactivateApplicationDialog
+        application={application}
+        isPending={false}
+        hasError={false}
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Confirmar postulación" })).toHaveClass("bg-success", "hover:bg-success-hover");
+  });
+
   it("permite cancelar sin confirmar", () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();

@@ -1,5 +1,6 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
+import type { ApplicationRecord } from '../types/application-record.types.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
 import {
   ApplicationStatus,
@@ -8,17 +9,14 @@ import {
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationNotReactivableException } from '../exceptions/application-not-reactivable.exception.js';
 import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
-import type { ApplicationContactResponse } from '../types/application-contact.types.js';
+import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
-import {
-  StateChangedDto,
-  toApplicationStatusCode,
-} from '../notifications/state-changed.dto.js';
-import { NotificationsService } from '../../notifications/services/notifications.service.js';
-import { ConfigService } from '@nestjs/config';
-import { NotificationType } from '../../notifications/types/notification-type.enum.js';
+import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
+import { UsersService } from '../../users/services/users.service.js';
 
 const CONTACTABLE_STATUSES: readonly string[] = [
   ApplicationStatus.IN_REVIEW,
@@ -28,14 +26,12 @@ const CONTACTABLE_STATUSES: readonly string[] = [
 
 @Injectable()
 export class ApplicationsService {
-  private readonly logger = new Logger(ApplicationsService.name);
-
   constructor(
     private readonly repository: ApplicationsRepository,
     private readonly mapper: ApplicationMapper,
     private readonly matching: JobRecommendationsService,
-    private readonly notifications: NotificationsService,
-    private readonly config: ConfigService,
+    private readonly jobOffers: JobOffersService,
+    private readonly users: UsersService,
   ) {}
 
   async findMyApplications(
@@ -46,21 +42,16 @@ export class ApplicationsService {
     if (!records || !records.length) return [];
 
     const offerIds = records.map(
-      (record: any) => record.jobOfferId ?? record.jobOffer?.id,
+      (record: ApplicationRecord) => record.jobOfferId,
     );
+    const scoresMap = await this.matching.scoresForOffers(userId, offerIds);
 
-    let scoresMap = new Map<string, number>();
-    try {
-      scoresMap = await this.matching.scoresForOffers(userId, offerIds);
-    } catch {
-      scoresMap = new Map();
-    }
-
-    const responses: ApplicationItemResponse[] = records.map((record: any) => {
-      const offerId = record.jobOfferId ?? record.jobOffer?.id;
-      const score = scoresMap.get(offerId) ?? 0;
-      return this.mapper.toResponse(record, score);
-    });
+    const responses: ApplicationItemResponse[] = records.map(
+      (record: ApplicationRecord) => {
+        const score = scoresMap.get(record.jobOfferId) ?? 0;
+        return this.mapper.toResponse(record, score);
+      },
+    );
 
     const statuses = [
       ApplicationStatus.IN_REVIEW,
@@ -100,12 +91,10 @@ export class ApplicationsService {
         }
         case 'date':
           comparison =
-            (Date.parse(a.appliedDate) - Date.parse(b.appliedDate)) *
-            direction;
+            (Date.parse(a.appliedDate) - Date.parse(b.appliedDate)) * direction;
           break;
         default:
-          comparison =
-            Date.parse(b.appliedDate) - Date.parse(a.appliedDate);
+          comparison = Date.parse(b.appliedDate) - Date.parse(a.appliedDate);
       }
 
       if (comparison !== 0) return comparison;
@@ -115,10 +104,7 @@ export class ApplicationsService {
 
       if (dateDifference !== 0) return dateDifference;
 
-      const titleDifference = collator.compare(
-        a.vacancyTitle,
-        b.vacancyTitle,
-      );
+      const titleDifference = collator.compare(a.vacancyTitle, b.vacancyTitle);
 
       return titleDifference || a.id.localeCompare(b.id);
     });
@@ -138,23 +124,22 @@ export class ApplicationsService {
       new Date(),
     );
 
-    if (result.count !== 1) {
-      throw new ConflictException(
-        'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
-      );
-    }
+    if (result.count !== 1) throw new ApplicationNotReactivableException();
   }
 
   async getApplicationContact(
     id: string,
     userId: string,
   ): Promise<ApplicationContactResponse> {
-    const application = await this.repository.findContactContext(id);
+    const application = await this.findApplicationDecisionContext(id);
     if (!application || application.userId !== userId)
       throw new ApplicationNotFoundException();
-    if (!CONTACTABLE_STATUSES.includes(application.status.title))
+    if (!CONTACTABLE_STATUSES.includes(application.statusTitle))
       throw new ApplicationContactRestrictedException();
-    return this.mapper.toContactResponse(application);
+    const recruiters = await this.users.findActiveRecruitersByCompany(
+      application.companyId,
+    );
+    return this.mapper.toContactResponse(application, recruiters);
   }
 
   async withdrawApplication(id: string, userId: string): Promise<void> {
@@ -172,56 +157,42 @@ export class ApplicationsService {
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
 
-  public async notifyStateChanged(p: {
-    recipientId: string;
-    applicationId: string;
-    previousStatus: ApplicationStatus;
-    newStatus: ApplicationStatus;
-    jobTitle: string;
-    companyName: string;
-  }): Promise<void> {
-    // D-14: sin cambio real de estado no hay notificación.
-    if (p.previousStatus === p.newStatus) return;
-    // AC-15.4: el retiro lo hace el propio postulante; no se le notifica.
-    if (p.newStatus === ApplicationStatus.WITHDRAWN) return;
-
-    try {
-      const context = StateChangedDto.parse({
-        jobTitle: p.jobTitle,
-        companyName: p.companyName,
-        newStatus: toApplicationStatusCode(p.newStatus),
-        previousStatus: toApplicationStatusCode(p.previousStatus),
-        actionUrl: `${this.config.getOrThrow('APP_URL')}/vacancies/my-applications`,
-      });
-
-      await this.withTimeout(
-        this.notifications.notify({
-          recipientIds: [p.recipientId],
-          type: NotificationType.APPLICATION_STATUS_CHANGED,
-          payload: {
-            vacancyTitle: context.jobTitle,
-            companyName: context.companyName,
-            newStatus: context.newStatus,
-          },
-          actionUrl: context.actionUrl,
-        }),
-        5000,
-      );
-    } catch (error) {
-      // La notificación es best-effort: nunca debe revertir el cambio de estado.
-      this.logger.error(
-        `No se pudo notificar el cambio de estado (application=${p.applicationId}, recipient=${p.recipientId})`,
-        error instanceof Error ? error.stack : String(error),
-      );
+  async validateApplicationForChat(
+    applicationId: string,
+    studentUserId: string,
+    companyId: string,
+  ): Promise<{
+    isValid: boolean;
+    vacancyTitle: string | null;
+    companyName: string | null;
+  }> {
+    const record = await this.repository.findApplicationForChat(applicationId);
+    if (!record) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
     }
-  }
 
-  private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-    let timer: NodeJS.Timeout;
-    const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error(`notify() timeout (${ms}ms)`)), ms);
-    });
-    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+    if (
+      record.userId !== studentUserId ||
+      record.jobOffer.companyId !== companyId
+    ) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    const normalizedStatus = record.status.title.trim().toLowerCase();
+    const isInactive =
+      normalizedStatus.includes('rechazad') ||
+      normalizedStatus.includes('retirad') ||
+      normalizedStatus.includes('cancelad');
+
+    if (isInactive) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    return {
+      isValid: true,
+      vacancyTitle: record.jobOffer.title,
+      companyName: record.jobOffer.company.title,
+    };
   }
 
   findRecruitmentApplicationsByUser(userId: string) {
@@ -236,8 +207,25 @@ export class ApplicationsService {
     return this.repository.findRecruitmentApplication(id);
   }
 
-  findApplicationDecisionContext(id: string) {
-    return this.repository.findApplicationDecisionContext(id);
+  async findApplicationDecisionContext(
+    id: string,
+  ): Promise<ApplicationDecisionContext | null> {
+    const application =
+      await this.repository.findApplicationDecisionContext(id);
+    if (!application) return null;
+
+    const offer = await this.jobOffers.findOfferSummary(application.jobOfferId);
+    if (!offer) return null;
+
+    return {
+      id: application.id,
+      userId: application.userId,
+      statusTitle: application.status.title,
+      jobOfferId: application.jobOfferId,
+      companyId: offer.companyId,
+      jobTitle: offer.title,
+      companyName: offer.companyName,
+    };
   }
 
   recordRecruiterDecision(applicationId: string, target: string) {

@@ -108,3 +108,7 @@ export function subscribeAccessToken(onChange: () => void): () => void {
     }
   };
 }
+
+export async function waitForAccessTokenWrites(): Promise<void> {
+  await writes;
+}

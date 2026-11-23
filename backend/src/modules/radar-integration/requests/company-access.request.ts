@@ -5,4 +5,10 @@ export const companyAccessSchema = z
     userId: z.uuid(),
     companyId: z.uuid(),
   })
-  .strict();
+  .strict()
+  .meta({
+    example: {
+      userId: 'a0000000-0000-4000-8000-000000000001',
+      companyId: 'a0000000-0000-4000-8000-000000000002',
+    },
+  });

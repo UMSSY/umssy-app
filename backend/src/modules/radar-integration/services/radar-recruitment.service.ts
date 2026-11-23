@@ -1,7 +1,7 @@
-import type { ApplicationConsentsResponse } from '../types/application-consents-response.type.js';
-import type { ApplicationResponse } from '../types/application-response.type.js';
-import type { ActiveVacancyResponse } from '../types/active-vacancy-response.type.js';
-import type { RecruiterVacancyResponse } from '../types/recruiter-vacancy-response.type.js';
+import type { ApplicationConsentsResponse } from '../types/application-consents-response.types.js';
+import type { ApplicationResponse } from '../types/application-response.types.js';
+import type { ActiveVacancyResponse } from '../types/active-vacancy-response.types.js';
+import type { RecruiterVacancyResponse } from '../types/recruiter-vacancy-response.types.js';
 import { JobApplicationConsentRequiredException } from '../../matching/exceptions/job-application-consent-required.exception.js';
 import {
   mapRecruiterCandidate,
@@ -52,7 +52,7 @@ export class RadarRecruitmentService {
   ) {}
 
   private async requireApplicantRole(userId: string): Promise<void> {
-    const active = await this.access.hasAnyRole(userId, [
+    const active = await this.sources.hasAnyRole(userId, [
       'titulado',
       'estudiante',
     ]);
@@ -62,7 +62,7 @@ export class RadarRecruitmentService {
   }
 
   private async requireRole(userId: string, role: string): Promise<void> {
-    const allowed = await this.access.hasRole(userId, role);
+    const allowed = await this.sources.hasRole(userId, role);
     if (!allowed) throw new ForbiddenRoleException(`Se requiere rol ${role}`);
   }
 
@@ -458,14 +458,6 @@ export class RadarRecruitmentService {
       `application.${decision}`,
       applicationId,
     );
-    await this.applicationActions.notifyStateChanged({
-      recipientId: context.user_id,
-      applicationId,
-      previousStatus: context.status_title as ApplicationStatus,
-      newStatus: target,
-      jobTitle: context.job_title,
-      companyName: context.company_name,
-    });
     return { id: updated[0].id, state: decision };
   }
 }

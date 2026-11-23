@@ -59,6 +59,30 @@ export const rejectedUsersFiltersSchema = z.object({
   snapshotAt: snapshotAtSchema,
 });
 
+const exportPaginationSchema = z.object({
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(DEFAULT_PAGE_SIZE).optional(),
+});
+const exportFormatSchema = z.enum(['csv', 'pdf']).optional();
+
+function hasCompleteExportPagination(query: { page?: number; limit?: number }): boolean {
+  return (query.page === undefined) === (query.limit === undefined);
+}
+
+export const registeredUsersExportQuerySchema = registeredUsersFiltersSchema
+  .extend({ ...exportPaginationSchema.shape, format: exportFormatSchema })
+  .refine(hasCompleteExportPagination, {
+    message: 'La página y el límite deben enviarse juntos',
+    path: ['limit'],
+  });
+
+export const rejectedUsersExportQuerySchema = rejectedUsersFiltersSchema
+  .extend({ ...exportPaginationSchema.shape, format: exportFormatSchema })
+  .refine(hasCompleteExportPagination, {
+    message: 'La página y el límite deben enviarse juntos',
+    path: ['limit'],
+  });
+
 export const rejectedUsersQuerySchema = paginationSchema.extend(
   rejectedUsersFiltersSchema.shape,
 );

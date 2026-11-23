@@ -48,6 +48,16 @@ export const SKILLS_CATALOG_MESSAGES = {
   retry: "Reintentar",
 } as const;
 
+export const REQUIREMENTS_DETECTION_DEBOUNCE_MS = 500;
+
+export const REQUIREMENTS_SKILLS_TEXT = {
+  allSkillsTitle: "Todas las habilidades",
+  skillsIntro: "Estas son las habilidades que necesita el puesto.",
+  autoSelectHint: "Las detectadas en la descripción se agregan solas; puedes quitarlas o añadir otras.",
+  emptySelection: "Todavía no hay habilidades. Escribe la descripción para detectarlas o usa «Añadir habilidad».",
+  detectionError: "No se pudieron detectar habilidades en este momento. Añádelas manualmente.",
+} as const;
+
 export const SKILL_SEARCH_TEXT = {
   trigger: "+ Añadir habilidad",
   title: "Buscar habilidad",

@@ -4,4 +4,5 @@ export const recruiterDecisionSchema = z
   .object({
     decision: z.enum(['hired', 'rejected']),
   })
-  .strict();
+  .strict()
+  .meta({ example: { decision: 'hired' } });

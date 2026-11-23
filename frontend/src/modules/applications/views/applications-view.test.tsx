@@ -64,12 +64,6 @@ function vacancyColumn() {
     .map((row) => within(row).getAllByRole("cell")[0].querySelector("p")?.textContent);
 }
 
-async function selectStatus(option: string) {
-  await userEvent.click(screen.getByRole("combobox", { name: "Mostrar:" }));
-  await userEvent.click(await screen.findByRole("option", { name: option }));
-  await waitFor(() => expect(screen.queryByRole("option")).not.toBeInTheDocument());
-}
-
 beforeEach(() => {
   vi.clearAllMocks();
   isMobile.mockReturnValue(false);
@@ -179,7 +173,7 @@ describe("ApplicationsView", () => {
     await screen.findByText("Backend Java");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
-    await userEvent.click(screen.getByRole("option", { name: "Afinidad (menor a mayor)" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Afinidad (menor a mayor)" }));
 
     expect(vacancyColumn()).toEqual(["Backend Java", "Analista de datos"]);
   });
@@ -191,7 +185,7 @@ describe("ApplicationsView", () => {
     await screen.findByText("Backend Java");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
-    await userEvent.click(screen.getByRole("option", { name: "Afinidad (mayor a menor)" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Afinidad (mayor a menor)" }));
 
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });
@@ -203,25 +197,19 @@ describe("ApplicationsView", () => {
     await screen.findByText("Backend Java");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
-    await userEvent.click(screen.getByRole("option", { name: "Empresa (A-Z)" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Empresa (A-Z)" }));
 
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });
 
-  it("filters the applications with the status select", async () => {
+  it("does not display the removed status filter", async () => {
+
     getMine.mockResolvedValue(APPLICATIONS);
-
     renderWithQuery(<ApplicationsView />);
+
     await screen.findByText("Backend Java");
-
-    await selectStatus("Entrevista");
-    expect(vacancyColumn()).toEqual(["Analista de datos"]);
-
-    await selectStatus("Aceptada");
-    expect(screen.getByText("No tienes postulaciones en este estado.")).toBeInTheDocument();
-
-    await selectStatus("Todos");
-    expect(vacancyColumn()).toHaveLength(2);
+    expect(screen.queryByRole("combobox", { name: "Mostrar:" })).not.toBeInTheDocument();
+    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });
 
   it("shows cards instead of the table on mobile", async () => {
@@ -232,69 +220,60 @@ describe("ApplicationsView", () => {
 
     expect(await screen.findByText("Backend Java")).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Mostrar:" })).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Mostrar:" })).not.toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
 
   it("shows only withdrawn applications when the person presses the withdrawn button", async () => {
-    getMine.mockResolvedValue(APPLICATIONS);
 
+    getMine.mockResolvedValue(APPLICATIONS);
     renderWithQuery(<ApplicationsView />);
     await screen.findByText("Backend Java");
 
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
-    await userEvent.click(screen.getByRole("combobox", { name: "Mostrar:" }));
-    expect(await screen.findByRole("option", { name: "En revisión" })).toBeInTheDocument();
-    expect(screen.queryByRole("option", { name: "Retirada" })).not.toBeInTheDocument();
-    await userEvent.keyboard("{Escape}");
-    await waitFor(() => expect(screen.queryByRole("option")).not.toBeInTheDocument());
 
     const toggle = screen.getByRole("button", { name: "Postulaciones retiradas" });
     expect(toggle).toHaveAttribute("aria-pressed", "false");
+
     await userEvent.click(toggle);
 
     await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
     expect(toggle).toHaveAttribute("aria-pressed", "true");
     expect(screen.queryByText("Backend Java")).not.toBeInTheDocument();
-    expect(screen.queryByText("Analista de datos")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("combobox", { name: "Mostrar:" }));
-    expect(screen.queryByRole("option", { name: "En revisión" })).not.toBeInTheDocument();
-    expect(await screen.findByRole("option", { name: "Retirada" })).toBeInTheDocument();
-    await userEvent.keyboard("{Escape}");
-    await waitFor(() => expect(screen.queryByRole("option")).not.toBeInTheDocument());
-    await selectStatus("Retirada");
-    expect(vacancyColumn()).toEqual(["Frontend React"]);
   });
 
-  it("goes back to all the applications when the withdrawn ones are hidden again", async () => {
-    getMine.mockResolvedValue(APPLICATIONS);
+  it("goes back to active applications when withdrawn ones are hidden", async () => {
 
+    getMine.mockResolvedValue(APPLICATIONS);
     renderWithQuery(<ApplicationsView />);
     await screen.findByText("Backend Java");
 
-    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
-    await selectStatus("Retirada");
-    expect(vacancyColumn()).toEqual(["Frontend React"]);
-    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
+    const toggle = screen.getByRole("button", { name: "Postulaciones retiradas" });
+    await userEvent.click(toggle);
+    await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
 
-    await waitFor(() => expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos"));
-    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
+    await userEvent.click(toggle);
+    await waitFor(() =>
+      expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]),
+    );
   });
 
-  it("resets the status filter when switching to withdrawn applications", async () => {
-    getMine.mockResolvedValue(APPLICATIONS);
+  it("switches between active and withdrawn applications without a status filter", async () => {
 
+    getMine.mockResolvedValue(APPLICATIONS);
     renderWithQuery(<ApplicationsView />);
     await screen.findByText("Backend Java");
-    await selectStatus("Entrevista");
-    expect(vacancyColumn()).toEqual(["Analista de datos"]);
 
-    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
-    expect(vacancyColumn()).toEqual(["Frontend React"]);
-    expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos");
+    const toggle = screen.getByRole("button", { name: "Postulaciones retiradas" });
+    expect(screen.queryByRole("combobox", { name: "Mostrar:" })).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
-    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
+    await userEvent.click(toggle);
+    await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
+
+    await userEvent.click(toggle);
+    await waitFor(() =>
+      expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]),
+    );
   });
 
   it("shows only withdrawn application cards on mobile", async () => {
@@ -333,7 +312,8 @@ describe("ApplicationsView", () => {
     expect(await screen.findByText("Desarrollador Backend Python / FastAPI")).toBeInTheDocument();
   });
 
-  it("disables the withdraw button of the applications that already have a decision", async () => {
+  it("allows withdrawing every non-withdrawn application", async () => {
+
     getMine.mockResolvedValue([
       buildApplication({ id: "accepted", vacancyTitle: "Aceptada", status: "Aceptada" }),
       buildApplication({ id: "rejected", vacancyTitle: "Rechazada", status: "No seleccionado" }),
@@ -343,10 +323,7 @@ describe("ApplicationsView", () => {
     const buttons = await screen.findAllByRole("button", { name: "Retirar" });
 
     expect(buttons).toHaveLength(2);
-    buttons.forEach((button) => expect(button).toBeDisabled());
-    fireEvent.click(buttons[0]);
-    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-    expect(withdraw).not.toHaveBeenCalled();
+    buttons.forEach((button) => expect(button).toBeEnabled());
   });
 
   it("goes to the chat with the application when the person contacts it", async () => {
@@ -357,7 +334,11 @@ describe("ApplicationsView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
     await waitFor(() => expect(getContact).toHaveBeenCalledWith("application-7"));
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() =>
+  expect(router.push).toHaveBeenCalledWith(
+    "/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7",
+  ),
+);
   });
 
   it("goes to the chat from the cards on mobile", async () => {
@@ -368,13 +349,19 @@ describe("ApplicationsView", () => {
     renderWithQuery(<ApplicationsView />);
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() =>
+  expect(router.push).toHaveBeenCalledWith(
+    "/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7",
+  ),
+);
   });
 
-  it("tells the person when an application no longer allows contacting the recruiter", async () => {
-    getMine.mockResolvedValue([buildApplication({ status: "No seleccionado" })]);
+  it("prevents contacting the recruiter of a withdrawn application", async () => {
 
+    getMine.mockResolvedValue([buildApplication({ status: "Retirada" })]);
     renderWithQuery(<ApplicationsView />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Postulaciones retiradas" }));
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
     expect(toast.error).toHaveBeenCalledWith(
@@ -432,7 +419,7 @@ describe("ApplicationsView", () => {
     await waitFor(() => expect(reactivate).toHaveBeenCalledWith("last"));
     await waitFor(() => expect(screen.queryByRole("button", { name: "Postulaciones retiradas" })).not.toBeInTheDocument());
     expect(screen.getByText("Frontend React")).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos");
+    expect(screen.queryByRole("combobox", { name: "Mostrar:" })).not.toBeInTheDocument();
     expect(screen.queryByText("No tienes postulaciones activas.")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retirar" })).toBeInTheDocument();
   });

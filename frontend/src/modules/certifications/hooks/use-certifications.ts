@@ -1,22 +1,27 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
-import { certificationsService } from "../services/certifications.service";
-import { sortCertifications } from "../utils/sort-certifications";
+import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { CERTIFICATION_FEEDBACK_MESSAGES } from '../config/certification-feedback.config';
+import { certificationsService } from '../services/certifications.service';
+import { sortCertifications } from '../utils/sort-certifications';
 
-export function useCertifications(options: { enabled?: boolean } = {}) {
+export function useCertifications(
+  options: { enabled?: boolean; forGuide?: boolean } = {},
+) {
   const queryClient = useQueryClient();
   const mountedRef = useRef(false);
   useEffect(() => {
     mountedRef.current = true;
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
-  const queryKey = ["certifications", "certifications"];
+  const queryKey = ['certifications', 'certifications'];
   const query = useQuery({
     queryKey,
     enabled: options.enabled ?? true,
+    staleTime: options.forGuide ? 30_000 : undefined,
     queryFn: async ({ signal }) => {
       signal.throwIfAborted();
       const items = await certificationsService.getCertifications();
@@ -28,6 +33,16 @@ export function useCertifications(options: { enabled?: boolean } = {}) {
     await queryClient.cancelQueries({ queryKey, exact: true });
     await query.refetch();
   }
-  return { certifications: query.data ?? [], isLoading: query.isFetching,
-    error: query.isError && !query.isFetching ? CERTIFICATION_FEEDBACK_MESSAGES.loadError : null, reload };
+  return {
+    certifications: query.data ?? [],
+    isLoading: options.forGuide
+      ? (options.enabled ?? true) &&
+        (query.isPending || (query.isError && query.isFetching))
+      : query.isFetching,
+    error:
+      query.isError && !query.isFetching
+        ? CERTIFICATION_FEEDBACK_MESSAGES.loadError
+        : null,
+    reload,
+  };
 }

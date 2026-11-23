@@ -3,7 +3,7 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ProfileSummary } from "../types/profile-summary.types";
 import { ContactInfoCard } from "./contact-info-card";
-import { EducationListCard } from "@/modules/education/components/education-list-card";
+import { EducationListCard } from "@/modules/educations/components/education-list-card";
 import { PresentationSummaryCard } from "./presentation-summary-card";
 import { ProfileInfoItem } from "./profile-info-item";
 import { ProfilePreviewCard } from "./profile-preview-card";

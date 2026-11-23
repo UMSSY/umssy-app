@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_PERSONAL_INFO_VALUES } from "../config/profile-form-defaults.config";
@@ -36,6 +36,35 @@ function renderForm(initialValues = EMPTY_PERSONAL_INFO_VALUES, isSaving = false
 describe("PersonalInfoForm", () => {
   afterEach(() => {
     cleanup();
+  });
+
+  it("keeps guide labels, hints and errors scoped when the normal form stays mounted", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <>
+        <section aria-label="Formulario habitual">
+          <PersonalInfoForm initialValues={SAVED_VALUES} cities={CITIES} serverErrors={{ phone: "Revisa el teléfono habitual." }} onSubmit={vi.fn()} />
+        </section>
+        <section aria-label="Formulario de la guía">
+          <PersonalInfoForm idPrefix="profile-guide-" saveLabel="Guardar cambios" initialValues={SAVED_VALUES} cities={CITIES} serverErrors={{ phone: "Revisa el teléfono de la guía." }} onSubmit={vi.fn()} />
+        </section>
+      </>,
+    );
+    const normal = within(screen.getByRole("region", { name: "Formulario habitual" }));
+    const guide = within(screen.getByRole("region", { name: "Formulario de la guía" }));
+    expect(guide.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument();
+    for (const label of [/Nombres/, /Apellidos/, /Ciudad de residencia/, /Teléfono/, /Correo personal/]) {
+      const normalControl = normal.getByLabelText(label);
+      const guideControl = guide.getByLabelText(label);
+      expect(guideControl.id).toBe(`profile-guide-${normalControl.id}`);
+    }
+    expect(normal.getByLabelText(/Teléfono/)).toHaveAccessibleDescription(`${PHONE_HINT} Revisa el teléfono habitual.`);
+    expect(guide.getByLabelText(/Teléfono/)).toHaveAccessibleDescription(`${PHONE_HINT} Revisa el teléfono de la guía.`);
+    expect(guide.getByLabelText("Seleccionar fotografía de perfil")).toHaveAttribute("id", "profile-guide-profilePhoto");
+    await user.click(guide.getByText("Nombres"));
+    expect(guide.getByLabelText(/Nombres/)).toHaveFocus();
+    const ids = [...container.querySelectorAll("[id]")].map((element) => element.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("renders the personal information card with all the fields", async () => {

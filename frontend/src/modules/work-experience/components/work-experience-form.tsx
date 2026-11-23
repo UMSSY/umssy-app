@@ -34,6 +34,7 @@ export function WorkExperienceForm({
   initialDetectedSkills = [],
   isPending = false,
   feedback = null,
+  saveLabel = "Guardar experiencia",
   onSubmit,
   onCancel,
   onValuesChange,
@@ -216,6 +217,8 @@ export function WorkExperienceForm({
                 errors.description,
               )}
               name="description"
+              spellCheck
+              lang="es"
               maxLength={WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
               rows={4}
               placeholder="Describe las funciones que desempeñaste en este cargo"
@@ -259,7 +262,7 @@ export function WorkExperienceForm({
             {isPending ? (
               <Loader2 aria-hidden="true" className="size-4 animate-spin" />
             ) : null}
-            {isPending ? "Guardando..." : "Guardar experiencia"}
+            {isPending ? "Guardando..." : saveLabel}
           </Button>
         </div>
       </form>

@@ -1,3 +1,4 @@
+import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { SEED_SKILLS_CATALOG } from '../../skills/seeds/skills-catalog.seed.js';
@@ -95,6 +96,7 @@ function makeContext(
     repository,
     new MentorMapper(),
     userSkillService,
+    {} as MentorProfileSuggestionsService,
     affinityService,
   );
   return {
@@ -361,7 +363,19 @@ describe('MentorAffinityService', () => {
     const detailsQuery = context.userFindMany.mock.calls[0][0];
     expect(candidateQuery.sql).toContain('u.is_active = true');
     expect(candidateQuery.sql).toContain('u.is_available_for_mentoring = true');
-    expect(candidateQuery.sql.match(/strpos\(/g)).toHaveLength(4);
+    // Each search term can match a name, professional text, or specialty.
+    for (const field of [
+      'u.first_name',
+      'u.last_name',
+      'u.headline',
+      'u.about_me',
+      'we.position',
+      'ta.name',
+    ]) {
+      expect(candidateQuery.sql).toContain(field);
+    }
+    expect(candidateQuery.sql).not.toContain('Ana');
+    expect(candidateQuery.sql).not.toContain('Rojas');
     expect(candidateQuery.values).toEqual(
       expect.arrayContaining([
         'Backend',
@@ -375,7 +389,9 @@ describe('MentorAffinityService', () => {
       isActive: true,
       isAvailableForMentoring: true,
       id: { in: ['a'] },
-      mentorTechnicalAreas: { some: { technicalArea: { name: 'Backend' } } },
+      mentorTechnicalAreas: {
+        some: { technicalArea: { name: { in: ['Backend'] } } },
+      },
       mentorOrientationTypes: {
         some: {
           orientationType: { name: 'Orientación técnica', isActive: true },

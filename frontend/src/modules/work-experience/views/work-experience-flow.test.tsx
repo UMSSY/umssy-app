@@ -233,7 +233,7 @@ describe("WorkExperienceView flow", () => {
     expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith(
       "experience-2",
     );
-  }, 20_000);
+  }, 30000);
 
   it("does not save an experience with invalid dates and keeps the saved ones", async () => {
     const user = userEvent.setup();

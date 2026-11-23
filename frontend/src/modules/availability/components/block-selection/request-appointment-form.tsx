@@ -18,15 +18,17 @@ import { validateAppointmentRequest } from "../../utils/appointment-request.util
 import { AppointmentDocumentField } from "./appointment-document-field";
 
 export function RequestAppointmentForm({
+  selectedArea,
   orientationTypes,
   isLoadingTopics,
   isSubmitting,
+  canRetry = false,
   onSubmit,
   onDirtyChange,
 }: RequestAppointmentFormProps) {
   const [values, setValues] = useState<AppointmentRequestValues>({
     orientationTypeId: "",
-    message: "",
+    message: selectedArea ? `Busco orientación en ${selectedArea}. ` : "",
     document: null,
   });
   const [errors, setErrors] = useState<AppointmentRequestErrors>({});
@@ -62,6 +64,7 @@ export function RequestAppointmentForm({
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      {selectedArea ? <p role="note">Área de orientación: <strong>{selectedArea}</strong></p> : null}
       <Field data-invalid={errors.orientationTypeId ? true : undefined}>
         <FieldLabel htmlFor="orientationTypeId" className="font-semibold">
           {REQUEST_APPOINTMENT_TEXT.topicLabel}
@@ -135,7 +138,7 @@ export function RequestAppointmentForm({
         className="w-full bg-primary text-primary-foreground hover:bg-brand-hover"
         disabled={isSubmitting || Boolean(errors.document)}
       >
-        {isSubmitting ? REQUEST_APPOINTMENT_TEXT.submitting : REQUEST_APPOINTMENT_TEXT.submit}
+        {isSubmitting ? REQUEST_APPOINTMENT_TEXT.submitting : canRetry ? REQUEST_APPOINTMENT_TEXT.retry : REQUEST_APPOINTMENT_TEXT.submit}
       </Button>
       <FieldDescription className="text-xs">
         {REQUEST_APPOINTMENT_TEXT.instantConfirmationNote}

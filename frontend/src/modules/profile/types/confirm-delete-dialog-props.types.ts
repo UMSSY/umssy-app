@@ -3,6 +3,8 @@ export interface ConfirmDeleteDialogProps {
   title: string;
   message: string;
   isDeleting?: boolean;
+  confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }

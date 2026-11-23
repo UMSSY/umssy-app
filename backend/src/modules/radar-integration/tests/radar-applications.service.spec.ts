@@ -20,12 +20,11 @@ function setup() {
     findApplicationDecisionContext: vi.fn().mockResolvedValue({
       id: 'app',
       userId: 'owner',
-      status: { title: 'Entrevista' },
-      jobOffer: {
-        companyId: 'company',
-        title: 'Dev Backend',
-        company: { title: 'Empresa A' },
-      },
+      statusTitle: 'Entrevista',
+      jobOfferId: 'job',
+      companyId: 'company',
+      jobTitle: 'Dev Backend',
+      companyName: 'Empresa A',
     }),
   };
   const consents = {

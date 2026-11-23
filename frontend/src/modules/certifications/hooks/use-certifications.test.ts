@@ -1,12 +1,13 @@
-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
-import { act, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
-import { certificationsService } from "../services/certifications.service";
-import type { Certification } from "../types/certification.types";
-import { useCertifications } from "./use-certifications";
+import { renderHookWithQuery as renderHook } from '@/shared/testing/render-hook-with-query';
+import { act, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CERTIFICATION_FEEDBACK_MESSAGES } from '../config/certification-feedback.config';
+import { certificationsService } from '../services/certifications.service';
+import type { Certification } from '../types/certification.types';
+import { useCertifications } from './use-certifications';
+import { createQueryWrapper } from '@/shared/testing/create-query-wrapper';
 
-vi.mock("../services/certifications.service", () => ({
+vi.mock('../services/certifications.service', () => ({
   certificationsService: {
     getCertifications: vi.fn(),
   },
@@ -16,16 +17,16 @@ function createCertification(id: string, issueDate: string): Certification {
   return {
     id,
     name: `Certification ${id}`,
-    issuingOrganization: "Scrum Alliance",
+    issuingOrganization: 'Scrum Alliance',
     issueDate,
-    createdAt: "2025-01-01T00:00:00.000Z",
-    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
   };
 }
 
-const OLDEST = createCertification("oldest", "2021-02-10");
-const NEWEST = createCertification("newest", "2025-08-01");
-const MIDDLE = createCertification("middle", "2023-11-15");
+const OLDEST = createCertification('oldest', '2021-02-10');
+const NEWEST = createCertification('newest', '2025-08-01');
+const MIDDLE = createCertification('middle', '2023-11-15');
 
 function createDeferred<T>() {
   let resolve: (value: T) => void = () => undefined;
@@ -35,68 +36,127 @@ function createDeferred<T>() {
   return { promise, resolve };
 }
 
-describe("useCertifications", () => {
+describe('useCertifications', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("no consulta certificaciones cuando está deshabilitado", () => {
+  it('keeps cached guide certificates available and reports a failed background refresh', async () => {
+    const { wrapper, client } = createQueryWrapper();
+    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([
+      NEWEST,
+    ]);
+    const first = renderHook(() => useCertifications({ forGuide: true }), {
+      wrapper,
+    });
+    await waitFor(() =>
+      expect(first.result.current.certifications).toEqual([NEWEST]),
+    );
+    first.unmount();
+    const second = renderHook(() => useCertifications({ forGuide: true }), {
+      wrapper,
+    });
+    expect(second.result.current.isLoading).toBe(false);
+    expect(certificationsService.getCertifications).toHaveBeenCalledOnce();
+    vi.mocked(certificationsService.getCertifications).mockRejectedValueOnce(
+      new Error('unavailable'),
+    );
+    await act(async () => {
+      await client.invalidateQueries({
+        queryKey: ['certifications', 'certifications'],
+      });
+    });
+    await waitFor(() =>
+      expect(second.result.current.error).toBe(
+        CERTIFICATION_FEEDBACK_MESSAGES.loadError,
+      ),
+    );
+    expect(second.result.current.certifications).toEqual([NEWEST]);
+    expect(second.result.current.isLoading).toBe(false);
+  });
+
+  it('no consulta certificaciones cuando está deshabilitado', () => {
     const { result } = renderHook(() => useCertifications({ enabled: false }));
     expect(result.current.certifications).toEqual([]);
     expect(result.current.isLoading).toBe(false);
     expect(certificationsService.getCertifications).not.toHaveBeenCalled();
   });
 
-  it("loads the certifications sorted from the newest to the oldest", async () => {
-    vi.mocked(certificationsService.getCertifications).mockResolvedValue([OLDEST, NEWEST, MIDDLE]);
+  it('loads the certifications sorted from the newest to the oldest', async () => {
+    vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+      OLDEST,
+      NEWEST,
+      MIDDLE,
+    ]);
     const { result } = renderHook(() => useCertifications());
 
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await waitFor(() => expect(result.current.certifications).toEqual([NEWEST, MIDDLE, OLDEST]));
+    await waitFor(() =>
+      expect(result.current.certifications).toEqual([NEWEST, MIDDLE, OLDEST]),
+    );
     await waitFor(() => expect(result.current.error).toBeNull());
   });
 
-  it("reports an error when the certifications cannot be loaded", async () => {
-    vi.mocked(certificationsService.getCertifications).mockRejectedValue(new Error("failed"));
+  it('reports an error when the certifications cannot be loaded', async () => {
+    vi.mocked(certificationsService.getCertifications).mockRejectedValue(
+      new Error('failed'),
+    );
     const { result } = renderHook(() => useCertifications());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await waitFor(() => expect(result.current.certifications).toEqual([]));
-    await waitFor(() => expect(result.current.error).toBe(CERTIFICATION_FEEDBACK_MESSAGES.loadError));
+    await waitFor(() =>
+      expect(result.current.error).toBe(
+        CERTIFICATION_FEEDBACK_MESSAGES.loadError,
+      ),
+    );
   });
 
-  it("reloads the certifications on demand", async () => {
-    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([OLDEST]);
+  it('reloads the certifications on demand', async () => {
+    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([
+      OLDEST,
+    ]);
     const { result } = renderHook(() => useCertifications());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([OLDEST, NEWEST]);
+    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([
+      OLDEST,
+      NEWEST,
+    ]);
     await act(async () => {
       await result.current.reload();
     });
 
     expect(certificationsService.getCertifications).toHaveBeenCalledTimes(2);
-    await waitFor(() => expect(result.current.certifications).toEqual([NEWEST, OLDEST]));
+    await waitFor(() =>
+      expect(result.current.certifications).toEqual([NEWEST, OLDEST]),
+    );
   });
 
-  it("keeps the previous list and clears the error after a successful reload", async () => {
-    vi.mocked(certificationsService.getCertifications).mockRejectedValueOnce(new Error("failed"));
+  it('keeps the previous list and clears the error after a successful reload', async () => {
+    vi.mocked(certificationsService.getCertifications).mockRejectedValueOnce(
+      new Error('failed'),
+    );
     const { result } = renderHook(() => useCertifications());
     await waitFor(() => expect(result.current.error).not.toBeNull());
 
-    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([MIDDLE]);
+    vi.mocked(certificationsService.getCertifications).mockResolvedValueOnce([
+      MIDDLE,
+    ]);
     await act(async () => {
       await result.current.reload();
     });
 
     await waitFor(() => expect(result.current.error).toBeNull());
-    await waitFor(() => expect(result.current.certifications).toEqual([MIDDLE]));
+    await waitFor(() =>
+      expect(result.current.certifications).toEqual([MIDDLE]),
+    );
   });
 
-  it("ignores a response that arrives after a newer request", async () => {
+  it('ignores a response that arrives after a newer request', async () => {
     const firstRequest = createDeferred<Certification[]>();
     vi.mocked(certificationsService.getCertifications)
       .mockReturnValueOnce(firstRequest.promise)
@@ -111,12 +171,16 @@ describe("useCertifications", () => {
       await firstRequest.promise;
     });
 
-    await waitFor(() => expect(result.current.certifications).toEqual([NEWEST]));
+    await waitFor(() =>
+      expect(result.current.certifications).toEqual([NEWEST]),
+    );
   });
 
-  it("ignores the response after unmounting", async () => {
+  it('ignores the response after unmounting', async () => {
     const request = createDeferred<Certification[]>();
-    vi.mocked(certificationsService.getCertifications).mockReturnValueOnce(request.promise);
+    vi.mocked(certificationsService.getCertifications).mockReturnValueOnce(
+      request.promise,
+    );
     const { result, unmount } = renderHook(() => useCertifications());
 
     unmount();

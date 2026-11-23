@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { CertificationSourcesService } from '../../certifications/services/certification-sources.service.js';
 import { EducationSourcesService } from '../../educations/services/education-sources.service.js';
 import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
@@ -19,18 +20,20 @@ export class ProfileCompletenessService {
     private readonly experiences: WorkExperienceSourcesService,
     private readonly skills: SkillAnalysisService,
     private readonly certifications: CertificationSourcesService,
+    private readonly cvs: CvSourcesService,
   ) {}
 
   async getCompleteness(userId: string): Promise<ProfileCompletenessResponse> {
     const profile = await this.profiles.findByUserId(userId);
     if (!profile) throw new ProfileNotFoundException();
 
-    const [education, workExperience, skills, certifications] =
+    const [education, workExperience, skills, certifications, cv] =
       await Promise.all([
         this.educations.hasByUserId(userId),
         this.experiences.hasByUserId(userId),
         this.skills.hasProfileSkills(userId),
         this.certifications.hasByUserId(userId),
+        this.cvs.hasByUserId(userId),
       ]);
 
     const completed: Record<ProfileCompletenessSectionId, boolean> = {
@@ -49,6 +52,7 @@ export class ProfileCompletenessService {
       'work-experience': workExperience,
       skills,
       certifications,
+      cv,
     };
 
     const sections = PROFILE_COMPLETENESS_SECTIONS.map((section) => ({

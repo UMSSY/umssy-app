@@ -1,5 +1,1 @@
-export interface TechnicalAreaResponse {
-  id: string;
-  name: string;
-  description: string | null;
-}
+export type { TechnicalAreaResponse } from '@/modules/mentor-participation';

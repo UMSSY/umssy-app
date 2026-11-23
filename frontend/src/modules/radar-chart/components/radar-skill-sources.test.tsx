@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { documentsService } from "@/modules/documents";
+import { documentsService } from "@/modules/cv";
 import { certificationsService, useCertifications } from "@/modules/certifications";
 import { RadarSkillSources } from "./radar-skill-sources";
 import type { Epic2Skill } from "../types/epic2-skill.types";
-vi.mock("@/modules/documents", () => ({ documentsService: { getCvs: vi.fn() } }));
+vi.mock("@/modules/cv", () => ({ documentsService: { getCvs: vi.fn() } }));
 vi.mock("@/modules/certifications/services/certifications.service", () => ({ certificationsService: { getCertifications: vi.fn() } }));
 function show(refs: Epic2Skill["evidenceRefs"]) {
   const skill: Epic2Skill = { id: "skill-secret", name: "Python", text: "Python", source: "nlp", areaId: "data-ai", verificationStatus: "approved", isHighRelevance: false, evidenceRefs: refs };

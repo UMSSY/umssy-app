@@ -1,10 +1,17 @@
 import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+  forwardRef,
+} from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
+import { ConnectionRequestService } from './connection-request.service.js';
 
 import { EducationsService } from '../../educations/services/educations.service.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
@@ -37,15 +44,23 @@ export class ConversationService {
     private readonly chatRolePolicyService: ChatRolePolicyService,
     private readonly educationsService: EducationsService,
     private readonly userSkillService: UserSkillService,
+    @Optional()
+    @Inject(forwardRef(() => ConnectionRequestService))
+    private readonly connectionRequestService?: ConnectionRequestService,
   ) {}
 
   async getOrCreate(
     currentUserId: string,
     contactId: string,
+    context?: {
+      contextType?: string;
+      contextId?: string;
+    },
   ): Promise<ConversationResponse> {
     const { conversation } = await this.getOrCreateWithStatus(
       currentUserId,
       contactId,
+      context,
     );
 
     return conversation;
@@ -54,6 +69,10 @@ export class ConversationService {
   async getOrCreateWithStatus(
     currentUserId: string,
     contactId: string,
+    context?: {
+      contextType?: string;
+      contextId?: string;
+    },
   ): Promise<{
     conversation: ConversationResponse;
     isCreated: boolean;
@@ -94,15 +113,16 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    await this.chatRolePolicyService.assertCanCommunicate(
-      normalizedCurrentUserId,
-      normalizedContactId,
-    );
+    const { hasValidatedApplication } =
+      await this.chatRolePolicyService.assertCanCommunicate(
+        normalizedCurrentUserId,
+        normalizedContactId,
+        context,
+      );
 
-    const existing = await this.conversationRepository.findByOrderedPair(
-      userAId,
-      userBId,
-    );
+    const existing = context?.contextId
+      ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
+      : await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
     if (existing) {
       const conversation = await this.toResponse(
@@ -117,16 +137,24 @@ export class ConversationService {
       };
     }
 
-    const acceptedRequest =
-      await this.connectionRequestRepository.findAcceptedRequest(
-        userAId,
-        userBId,
-      );
+    if (!hasValidatedApplication) {
+      const hasAccepted = this.connectionRequestService
+        ? await this.connectionRequestService.hasAcceptedConnection(
+            userAId,
+            userBId,
+          )
+        : Boolean(
+            await this.connectionRequestRepository.findAcceptedRequest(
+              userAId,
+              userBId,
+            ),
+          );
 
-    if (!acceptedRequest) {
-      throw new ForbiddenException(
-        'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
-      );
+      if (!hasAccepted) {
+        throw new ForbiddenException(
+          'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
+        );
+      }
     }
 
     try {
@@ -134,6 +162,7 @@ export class ConversationService {
         userAId,
         userBId,
         new Date(),
+        context,
       );
 
       const conversation = await this.toResponse(
@@ -157,8 +186,12 @@ export class ConversationService {
         err?.message?.includes(UNIQUE_CONSTRAINT_VIOLATION_CODE) ||
         err?.message?.includes('Unique constraint')
       ) {
-        const concurrentExisting =
-          await this.conversationRepository.findByOrderedPair(userAId, userBId);
+        const concurrentExisting = context?.contextId
+          ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
+          : await this.conversationRepository.findByOrderedPair(
+              userAId,
+              userBId,
+            );
 
         if (concurrentExisting) {
           const conversation = await this.toResponse(
