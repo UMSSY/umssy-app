@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '../../../prisma/client.js';
+import { parseEvidenceRef } from '../utils/parse-evidence-refs.js';
+import { evidenceItems } from '../utils/evidence-items.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
 import { buildExperienceRef } from '../utils/build-experience-ref.js';
@@ -10,21 +11,6 @@ const userSkillEvidenceSelect = {
   source: true,
   evidenceRefs: true,
 } as const;
-
-function isExperienceReference(value: unknown, experienceId: string): boolean {
-  if (typeof value === 'string') {
-    return value === buildExperienceRef(experienceId);
-  }
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return false;
-  }
-  const ref = value as { type?: unknown; id?: unknown };
-  return ref.type === 'work-experience' && ref.id === experienceId;
-}
-
-function evidenceItems(value: unknown): Prisma.InputJsonArray {
-  return Array.isArray(value) ? (value as Prisma.InputJsonArray) : [];
-}
 
 @Injectable()
 export class UserSkillEvidenceRepository {
@@ -52,9 +38,12 @@ export class UserSkillEvidenceRepository {
 
       for (const row of linked) {
         if (skillIds.includes(row.skillId)) continue;
-        const refs = evidenceItems(row.evidenceRefs).filter(
-          (item) => !isExperienceReference(item, experienceId),
-        );
+        const refs = evidenceItems(row.evidenceRefs).filter((item) => {
+          const parsed = parseEvidenceRef(item);
+          return (
+            parsed?.type !== 'work-experience' || parsed.id !== experienceId
+          );
+        });
         if (refs.length === 0 && row.source === USER_SKILL_SOURCES.nlp) {
           await tx.userSkill.delete({ where: { id: row.id } });
         } else {
@@ -89,7 +78,14 @@ export class UserSkillEvidenceRepository {
           continue;
         }
         const refs = evidenceItems(row.evidenceRefs);
-        if (refs.some((item) => isExperienceReference(item, experienceId))) {
+        if (
+          refs.some((item) => {
+            const parsed = parseEvidenceRef(item);
+            return (
+              parsed?.type === 'work-experience' && parsed.id === experienceId
+            );
+          })
+        ) {
           continue;
         }
         await tx.userSkill.update({
