@@ -71,9 +71,9 @@ describe("HU-15 - JobAlertPreferenceSelector", () => {
 
     renderWithQuery(<JobAlertPreferenceSelector />);
 
-    expect(await screen.findByRole("radio", { name: MATCHING_OPTION })).toBeDisabled();
-    expect(screen.getByRole("radio", { name: HIGH_OPTION })).toBeDisabled();
-    expect(screen.getByRole("radio", { name: ALL_OPTION })).toBeEnabled();
+    expect(await screen.findByRole("radio", { name: MATCHING_OPTION })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("radio", { name: HIGH_OPTION })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("radio", { name: ALL_OPTION })).not.toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText(SKILLS_NOTICE, { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ir a Habilidades" })).toHaveAttribute("href", "/profile#skills");
   });
@@ -93,8 +93,8 @@ describe("HU-15 - JobAlertPreferenceSelector", () => {
     renderWithQuery(<JobAlertPreferenceSelector />);
 
     expect(await screen.findByRole("radio", { name: ALL_OPTION })).toBeChecked();
-    expect(screen.getByRole("radio", { name: MATCHING_OPTION })).toBeDisabled();
-    expect(screen.getByRole("radio", { name: HIGH_OPTION })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: MATCHING_OPTION })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("radio", { name: HIGH_OPTION })).toHaveAttribute("aria-disabled", "true");
   });
 
   it("avisa con un mensaje de error si no se pudo guardar y mantiene la elección anterior", async () => {
