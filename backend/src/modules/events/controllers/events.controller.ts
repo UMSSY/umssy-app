@@ -66,10 +66,17 @@ export class EventsController {
     description: 'Filter events by category UUID',
   })
   @ApiQuery({
+    name: 'includeProposals',
+    required: false,
+    type: Boolean,
+    description: 'Sin statusId, incluye talleres publicados y propuestas en votación. Las propuestas vencidas se consultan mediante statusId.',
+    example: true,
+  })
+  @ApiQuery({
     name: 'statusId',
     required: false,
     type: String,
-    description: 'UUID del estado para filtrar',
+    description: 'UUID del estado exacto a consultar. Si se envía, este filtro prevalece sobre includeProposals; permite consultar Propuestas vencidas.',
   })
   @ApiQuery({
     name: 'sort',

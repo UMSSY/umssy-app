@@ -43,7 +43,7 @@ describe('useEvents with filters', () => {
 
     await waitFor(() => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
-        { page: 1, includeProposals: true, limit: 50, sort: 'recommended', isPublishedOnly: true },
+        { page: 1, includeProposals: true, limit: 50, sort: 'recommended' },
         expect.any(AbortSignal),
         null,
       );
@@ -69,7 +69,6 @@ describe('useEvents with filters', () => {
           includeProposals: true, limit: 50,
           search: 'React',
           categoryId: 'category-1',
-          isPublishedOnly: true,
         },
         expect.any(AbortSignal),
         null,
@@ -94,7 +93,6 @@ describe('useEvents with filters', () => {
         {
           page: 1,
           includeProposals: true, limit: 50,
-          isPublishedOnly: true,
         },
         expect.any(AbortSignal),
         null,
@@ -137,7 +135,6 @@ describe('useEvents with filters', () => {
           includeProposals: true, limit: 50,
           search: 'Python',
           categoryId: 'category-2',
-          isPublishedOnly: true,
         },
         expect.any(AbortSignal),
         null,

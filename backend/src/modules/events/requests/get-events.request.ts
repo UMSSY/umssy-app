@@ -15,10 +15,6 @@ export const GetEventsSchema = z.object({
     .enum(['true', 'false'])
     .transform((value) => value === 'true')
     .optional(),
-  isPublishedOnly: z
-    .enum(['true', 'false'])
-    .transform((value) => value === 'true')
-    .optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(10),
   categoryId: z

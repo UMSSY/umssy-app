@@ -105,7 +105,6 @@ export class EventsRepository {
     const {
       categoryId,
       statusId,
-      isPublishedOnly,
       search,
       userId,
       skip,
@@ -116,15 +115,13 @@ export class EventsRepository {
       ...(categoryId !== undefined && { categoryId }),
       ...(statusId !== undefined
         ? { statusId }
-        : isPublishedOnly
-          ? {
-              status: {
-                title: payload.includeProposals
-                  ? { in: CATALOG_STATUS_TITLES }
-                  : PUBLISHED_STATUS_TITLE,
-              },
-            }
-          : {}),
+        : {
+            status: {
+              title: payload.includeProposals
+                ? { in: CATALOG_STATUS_TITLES }
+                : PUBLISHED_STATUS_TITLE,
+            },
+          }),
       ...(search !== undefined && {
         title: {
           contains: escapePgWildcards(search),

@@ -12,6 +12,11 @@ describe('GetEventsSchema', () => {
     expect(parsed.search).toBeUndefined();
   });
 
+  it('does not expose the internal visibility decision as a query parameter', () => {
+    const parsed = GetEventsSchema.parse({ isPublishedOnly: 'false' });
+    expect(parsed).not.toHaveProperty('isPublishedOnly');
+  });
+
   it('trims leading and trailing whitespace from search', () => {
     const parsed = GetEventsSchema.parse({ search: '   workshop   ' });
     expect(parsed.search).toBe('workshop');

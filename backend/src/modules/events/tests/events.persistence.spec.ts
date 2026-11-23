@@ -29,7 +29,6 @@ describe('EventsService', () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
     await repository.findAndCount({
-      isPublishedOnly: true,
       includeProposals: true,
       skip: 0,
       take: 10,
@@ -50,7 +49,7 @@ describe('EventsService', () => {
     );
   });
 
-  it('calls findMany and count with empty where when no filters are provided', async () => {
+  it('defaults to published workshops when no status filter is provided', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
@@ -58,9 +57,9 @@ describe('EventsService', () => {
 
     expect(prismaMock.$transaction).toHaveBeenCalledOnce();
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: {}, skip: 10, take: 5 }),
+      expect.objectContaining({ where: { status: { title: 'Publicado' } }, skip: 10, take: 5 }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: {} });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: { status: { title: 'Publicado' } } });
     expect(result).toEqual({ items: [], total: 0 });
   });
 
@@ -69,7 +68,6 @@ describe('EventsService', () => {
     prismaMock.event.count.mockResolvedValue(0);
 
     await repository.findAndCount({
-      isPublishedOnly: true,
       includeProposals: true,
       skip: 0,
       take: 10,
@@ -92,7 +90,7 @@ describe('EventsService', () => {
   it('keeps the public catalogue published-only and selects proposal covers', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
-    await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
+    await repository.findAndCount({ skip: 0, take: 10 });
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { status: { title: 'Publicado' } },
@@ -108,6 +106,7 @@ describe('EventsService', () => {
     await repository.findAndCount({ search: 'Tech', skip: 0, take: 10 });
 
     const expectedWhere = {
+      status: { title: 'Publicado' },
       title: {
         contains: 'Tech',
         mode: 'insensitive',
@@ -129,6 +128,7 @@ describe('EventsService', () => {
     await repository.findAndCount({ search: '100%_test', skip: 0, take: 10 });
 
     const expectedWhere = {
+      status: { title: 'Publicado' },
       title: {
         contains: '100\\%\\_test',
         mode: 'insensitive',
@@ -146,7 +146,7 @@ describe('EventsService', () => {
 
     await repository.findAndCount({ categoryId: 'cat-abc', skip: 0, take: 10 });
 
-    const expectedWhere = { categoryId: 'cat-abc' };
+    const expectedWhere = { categoryId: 'cat-abc', status: { title: 'Publicado' } };
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
@@ -161,6 +161,7 @@ describe('EventsService', () => {
 
     await repository.findAndCount({
       statusId: 'status-abc',
+      includeProposals: true,
       skip: 0,
       take: 10,
     });
@@ -187,6 +188,7 @@ describe('EventsService', () => {
 
     const expectedWhere = {
       categoryId: 'cat-123',
+      status: { title: 'Publicado' },
       title: {
         contains: 'workshop',
         mode: 'insensitive',
@@ -245,7 +247,7 @@ describe('EventsService', () => {
   it('counts only confirmed registrations that have not been cancelled', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
-    await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
+    await repository.findAndCount({ skip: 0, take: 10 });
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         select: expect.objectContaining({

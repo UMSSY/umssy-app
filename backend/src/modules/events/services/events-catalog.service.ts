@@ -69,7 +69,6 @@ export class EventsCatalogService {
     const { items } = await this.eventsService.findAndCount({
       categoryId,
       statusId,
-      isPublishedOnly: statusId === undefined,
       ...(payload.includeProposals && { includeProposals: true }),
       search,
       userId,

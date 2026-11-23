@@ -56,6 +56,7 @@ export const eventsService = {
       Boolean(params.includeProposals),
       params.search ?? '',
       params.categoryId ?? '',
+      params.statusId ?? '',
       ...(params.sort ? [params.sort] : []),
     ]);
     return withOfflineSessionCopy(

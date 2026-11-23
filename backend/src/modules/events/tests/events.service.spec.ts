@@ -97,7 +97,6 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: 'status-uuid',
-      isPublishedOnly: false,
       search: 'workshop',
       userId: undefined,
       skip: 10,
@@ -125,7 +124,6 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: undefined,
-      isPublishedOnly: true,
       search: 'Node',
       userId: undefined,
       skip: 10,
