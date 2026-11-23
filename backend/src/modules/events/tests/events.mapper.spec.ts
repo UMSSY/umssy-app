@@ -27,6 +27,9 @@ function buildRecord(
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
     category: { id: 'cat-uuid', name: 'Tecnologia' },
+    coverMimeType: null,
+    registrations: [],
+    sessions: [],
     _count: { registrations: 5 },
     ...overrides,
   };

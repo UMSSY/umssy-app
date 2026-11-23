@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { mapEventsToListResponse } from '../mappers/events.mapper.js';
-import { EventAffinitySignalsRepository } from '../repositories/event-affinity-signals.repository.js';
+import { EventAffinitySignalsService } from './event-affinity-signals.service.js';
 import type {
   EventWithRelations,
   EventsListResponse,
@@ -15,7 +15,7 @@ import { EventsService } from './events.service.js';
 export class EventsCatalogService {
   constructor(
     private readonly eventsService: EventsService,
-    private readonly affinitySignals: EventAffinitySignalsRepository,
+    private readonly affinitySignals: EventAffinitySignalsService,
   ) {}
 
   async findAll(
@@ -65,7 +65,6 @@ export class EventsCatalogService {
     payload: GetEventsPayload,
     userId?: string,
   ): Promise<EventWithRelations[]> {
-    await this.eventsService.expireOverdueProposals(new Date());
     const { categoryId, statusId, search } = payload;
     const { items } = await this.eventsService.findAndCount({
       categoryId,

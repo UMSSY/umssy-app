@@ -44,6 +44,9 @@ function buildEvent(
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
     category: { id: 'cat-1', name: category },
+    coverMimeType: null,
+    registrations: [],
+    sessions: [],
     _count: { registrations },
   };
 }
@@ -66,7 +69,9 @@ describe('affinity text', () => {
 
   it('extracts unique keywords without stopwords or short words', () => {
     expect(
-      extractKeywords('Ingeniería de Sistemas, interesado en Robótica y robótica'),
+      extractKeywords(
+        'Ingeniería de Sistemas, interesado en Robótica y robótica',
+      ),
     ).toEqual(['sistemas', 'robotica']);
   });
 });

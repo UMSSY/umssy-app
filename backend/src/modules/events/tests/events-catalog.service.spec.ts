@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventsCatalogService } from '../services/events-catalog.service.js';
 import type { EventsService } from '../services/events.service.js';
-import type { EventAffinitySignalsRepository } from '../repositories/event-affinity-signals.repository.js';
+import type { EventAffinitySignalsService } from '../services/event-affinity-signals.service.js';
 import type { AffinitySignals } from '../types/affinity-signals.types.js';
 import type { EventWithRelations } from '../types/events.types.js';
 
@@ -27,6 +27,9 @@ function buildRecord(
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
     category: { id: 'cat-1', name: 'Tecnología' },
+    coverMimeType: null,
+    registrations: [],
+    sessions: [],
     _count: { registrations },
   };
 }
@@ -49,7 +52,7 @@ describe('EventsCatalogService', () => {
     signals = { findByUserId: vi.fn() };
     service = new EventsCatalogService(
       eventsService as unknown as EventsService,
-      signals as unknown as EventAffinitySignalsRepository,
+      signals as unknown as EventAffinitySignalsService,
     );
   });
 
@@ -86,7 +89,7 @@ describe('EventsCatalogService', () => {
       'user-1',
     );
 
-    expect(eventsService.expireOverdueProposals).toHaveBeenCalled();
+    expect(eventsService.expireOverdueProposals).not.toHaveBeenCalled();
     expect(eventsService.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-1',
       statusId: undefined,

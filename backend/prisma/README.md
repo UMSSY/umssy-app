@@ -1152,10 +1152,58 @@ All of them have `id`, a unique `title` (varchar(100)), an optional `description
 
 Both Sprint 3 migrations only add nullable columns and new tables; they do not change existing rows.
 
+## Workshop sessions and attendance
+
+```mermaid
+erDiagram
+  events ||--o{ event_sessions : "event_id"
+  events ||--o{ event_registrations : "event_id"
+  event_registrations ||--o{ event_attendances : "registration_id"
+  event_sessions |o--o{ event_attendances : "session_id"
+  users |o--o{ event_attendances : "checked_in_by_id"
+
+  events {
+    uuid id PK
+    date event_date
+    time start_time
+    time end_time
+  }
+  event_sessions {
+    uuid id PK
+    uuid event_id FK
+    timestamptz starts_at
+    timestamptz ends_at
+    string location
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  event_registrations {
+    uuid id PK
+    uuid event_id FK
+    uuid user_id FK
+  }
+  event_attendances {
+    uuid id PK
+    uuid registration_id FK
+    uuid session_id FK
+    timestamptz checked_in_at
+    uuid checked_in_by_id FK
+    boolean checked_in_offline
+    timestamptz synced_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+```
+
+`event_sessions` has one row per workshop session, with UTC instants in `starts_at` and `ends_at`, nullable `location`, and audit timestamps. `event_id` references `events.id` with cascade deletion. The table has separate indexes on `event_id`, `starts_at` and `ends_at`, with no uniqueness constraint beyond its primary key. The original `events.event_date`, `start_time` and `end_time` retain the first session for compatibility; registrations and attendance use all session rows when present. The migration backfills one session for every existing event.
+
+`event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
+
 ## Sprint History
 
 ### Sprint 3
 
+- Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.
 - Unique `(job_offer_id, user_id)` on applications, which supports withdrawing and applying again on the same row.

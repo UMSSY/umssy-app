@@ -8,7 +8,6 @@ export const AFFINITY_WEIGHTS = {
 } as const;
 
 export const POPULARITY_WEIGHT = 0.2;
-export const EXCLUDED_SKILL_STATUSES = ['rejected', 'revoked'];
 export const RADAR_MAX_SCORE = 10;
 export const SKILL_MATCH_SATURATION = 2;
 export const INTEREST_MATCH_SATURATION = 3;

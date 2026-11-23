@@ -104,7 +104,9 @@ describe('proposal request with additional sessions', () => {
 
   it('accepts additional sessions sent as JSON text', () => {
     const parsed = CreateProposalSchema.safeParse(
-      extra([{ eventDate: '2026-12-19', startTime: '09:00', endTime: '12:00' }]),
+      extra([
+        { eventDate: '2026-12-19', startTime: '09:00', endTime: '12:00' },
+      ]),
     );
     expect(parsed.success).toBe(true);
     expect(parsed.data?.additionalSessions).toHaveLength(1);
@@ -147,7 +149,9 @@ describe('proposal request with additional sessions', () => {
 
   it('rejects sessions that overlap the main session', () => {
     const parsed = CreateProposalSchema.safeParse(
-      extra([{ eventDate: '2026-12-12', startTime: '11:00', endTime: '13:00' }]),
+      extra([
+        { eventDate: '2026-12-12', startTime: '11:00', endTime: '13:00' },
+      ]),
     );
     expect(parsed.success).toBe(false);
     expect(parsed.error?.issues[0]).toMatchObject({
@@ -312,5 +316,44 @@ describe('workshop timing with sessions', () => {
         endsAt: { gt: sessions[1].startsAt },
       },
     ]);
+    expect(where.OR[1]).toEqual({
+      sessions: { none: {} },
+      OR: [
+        {
+          eventDate: new Date('2026-12-12T00:00:00Z'),
+          startTime: { lt: new Date('1970-01-01T12:00:00Z') },
+          endTime: { gt: new Date('1970-01-01T09:00:00Z') },
+        },
+        {
+          eventDate: new Date('2026-12-19T00:00:00Z'),
+          startTime: { lt: new Date('1970-01-01T12:00:00Z') },
+          endTime: { gt: new Date('1970-01-01T09:00:00Z') },
+        },
+      ],
+    });
+  });
+
+  it('checks a newly registered legacy workshop against every session of an existing workshop', async () => {
+    const findFirst = vi.fn().mockResolvedValue(null);
+    const repository = new EventsRepository({} as never);
+    await repository.findScheduleConflict(
+      { event: { findFirst } } as never,
+      {
+        id: 'legacy-event',
+        eventDate: new Date('2026-12-19T00:00:00Z'),
+        startTime: new Date('1970-01-01T10:00:00Z'),
+        endTime: new Date('1970-01-01T11:00:00Z'),
+        sessions: [],
+      },
+      ['multi-event'],
+    );
+    const { where } = findFirst.mock.calls[0][0];
+    expect(where.OR[0].sessions.some.OR).toEqual([
+      {
+        startsAt: { lt: new Date('2026-12-19T15:00:00Z') },
+        endsAt: { gt: new Date('2026-12-19T14:00:00Z') },
+      },
+    ]);
+    expect(where.OR[1].sessions).toEqual({ none: {} });
   });
 });

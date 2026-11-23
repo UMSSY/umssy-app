@@ -1,6 +1,3 @@
-export interface EventSession {
-  id: string;
-  startsAt: string;
-  endsAt: string;
-  location: string | null;
-}
+import type { RegistrationSession } from '@/modules/event-registrations';
+
+export type EventSession = RegistrationSession;

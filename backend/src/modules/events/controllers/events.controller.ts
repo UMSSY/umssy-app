@@ -12,6 +12,7 @@ import { EventsService } from '../services/events.service.js';
 import { EventsCatalogService } from '../services/events-catalog.service.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { EVENT_SORT_OPTIONS } from '../constants/events.constants.js';
+import { EVENTS_LIST_RESPONSE } from '../constants/events-catalog-swagger.constants.js';
 import {
   GetEventsSchema,
   MAX_PAGE_SIZE,
@@ -31,9 +32,11 @@ export class EventsController {
 
   @Get()
   @ApiOperation({
+    operationId: 'listEvents',
     summary: 'Listar eventos',
     description:
-      'Retorna una lista paginada de eventos con su categoría y conteo de inscritos activos. startTime y endTime representan la hora local del evento sin zona horaria.',
+      'Autenticación opcional. Retorna eventos paginados con sesiones y conteo de inscritos activos. Con sort=recommended sin sesión usa el orden por fecha; con sesión y perfil incompleto usa popular. startTime y endTime representan horas locales de Bolivia.',
+    security: [{}, { bearer: [] }],
   })
   @ApiQuery({
     name: 'page',
@@ -75,11 +78,12 @@ export class EventsController {
     description:
       'popular ordena por inscritos confirmados; recommended ordena por afinidad con el perfil',
   })
+  @ApiResponse(EVENTS_LIST_RESPONSE)
   @ApiResponse({
-    status: 200,
-    description: 'Lista de eventos obtenida exitosamente',
+    status: 400,
+    description: 'Parámetros de consulta inválidos',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
-  @ApiResponse({ status: 400, description: 'Parámetros de consulta inválidos' })
   findAll(
     @Query(new ZodValidationPipe(GetEventsSchema)) query: GetEventsPayload,
     @Req() req: AuthenticatedRequest,
