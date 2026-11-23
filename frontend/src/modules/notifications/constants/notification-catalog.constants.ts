@@ -31,10 +31,11 @@ export const NOTIFICATION_CATALOG: Record<NotificationType, NotificationCatalogD
   SURVEY_CLOSING_SOON: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
   SURVEY_CLOSED: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
   SURVEY_VARIATION_ALERT: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
-  APPLICATION_STATUS_CHANGED: { category: "SYSTEM", icon: BriefcaseBusiness, fallbackPath: "/vacancies/my-applications" },
+  JOB_OFFER_PUBLISHED: { category: "SYSTEM", icon: BriefcaseBusiness, fallbackPath: "/vacancies" },
   NEW_JOB_APPLICANT: { category: "SYSTEM", icon: UserRoundPlus, fallbackPath: "/matching" },
   EVENT_STARTING_SOON: { category: "REMINDERS", icon: CalendarClock, fallbackPath: "/events" },
   ACCESS_REQUEST_APPROVED: { category: "SYSTEM", icon: ShieldCheck, fallbackPath: "/profile" },
+  APPLICATION_STATUS_CHANGED: { category: "SYSTEM", icon: BriefcaseBusiness, fallbackPath: "/vacancies/my-applications" },
 };
 
 export const DEFAULT_NOTIFICATION_CATALOG_DEFINITION: NotificationCatalogDefinition = {

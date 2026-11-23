@@ -1,9 +1,11 @@
 import { APPOINTMENT_BOOKED_TEMPLATE } from '../../appointments/notification/appointment-booked.template.js';
 import { APPOINTMENT_CANCELLED_TEMPLATE } from '../../appointments/notification/appointment-cancelled.template.js';
 import { NotificationType } from '../types/notification-type.enum.js';
+
 import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';
 
-import { truncateNotificationText as truncate } from '../utils/truncate-notification-text.js';
+const truncate = (text: string, max: number = 100) =>
+  text.length > max ? `${text.substring(0, max - 3)}...` : text;
 
 export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   [NotificationType.CHAT_MESSAGE]: {
@@ -69,12 +71,9 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
     renderBody: (p) => truncate(`Se detectaron cambios significativos en la encuesta "${p.surveyTitle}".`),
   },
 
-  [NotificationType.APPLICATION_STATUS_CHANGED]: {
-    renderTitle: () => 'Actualización de postulación',
-    renderBody: (p) =>
-      truncate(
-        `Tu postulación a ${p.vacancyTitle} en ${p.companyName} cambió a: ${p.newStatus}.`,
-      ),
+  [NotificationType.JOB_OFFER_PUBLISHED]: {
+    renderTitle: () => 'Nueva vacante publicada',
+    renderBody: (p) => truncate(`${p.companyName} ha publicado: ${p.jobTitle}.`),
   },
 
   [NotificationType.NEW_JOB_APPLICANT]: {
@@ -95,5 +94,9 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
     renderTitle: () => 'Acceso aprobado',
     renderBody: (p) =>
       truncate(`Bienvenido ${p.studentName}, tu cuenta ha sido activada.`),
+  },
+  [NotificationType.APPLICATION_STATUS_CHANGED]: {
+    renderTitle: () => 'Actualización de postulación',
+    renderBody: (p) => truncate(`Tu postulación a ${p.vacancyTitle} en ${p.companyName} cambió a: ${p.newStatus}.`),
   },
 };
