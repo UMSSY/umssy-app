@@ -25,7 +25,15 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
   const locationUrl = getSafeMapsUrl(job.locationUrl);
 
   return (
-    <Card className={cn(VACANCY_CARD_CLASS, "h-full gap-3 p-4")}>
+    <Card
+      className={cn(
+        VACANCY_CARD_CLASS,
+        "h-full gap-3 p-4",
+        "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in",
+        "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+      )}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

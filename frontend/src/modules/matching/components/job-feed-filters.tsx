@@ -5,6 +5,7 @@ import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
 
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +18,12 @@ export function JobFeedFilters({ filters, onChange, onClear }: JobFeedFiltersPro
   return (
     <div
       role="search"
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 md:flex-row md:items-center"
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 md:flex-row md:items-center",
+        "transition-shadow duration-200 focus-within:shadow-md",
+        "motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in",
+        "motion-reduce:transition-none",
+      )}
     >
       <div className="relative md:max-w-sm md:flex-1">
         <Search
