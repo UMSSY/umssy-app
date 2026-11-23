@@ -252,15 +252,15 @@ The three rows are inserted by the migration. `MATCHING` means an affinity above
 
 ### Catalog tables
 
-All of them have `id`, a unique `title` (varchar(100)), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
+All of them have `id`, a unique `title` (varchar(100), except in `job_alert_modes`, whose `title` is varchar(30) and which also has a `description`), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
 
-| Table                      | Used by                       | Values                                                                 |
-| -------------------------- | ----------------------------- | ---------------------------------------------------------------------- |
-| `job_application_statuses` | `job_applications.status_id`  | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
-| `job_offer_statuses`       | `job_offers.status_id`        | `Publicada`, `Cerrada`, `Eliminada`                                    |
-| `job_offer_modalities`     | `job_offers.modality_id`      | `Presencial`, `Remoto`, `Híbrido`                                      |
-| `job_offer_contract_types` | `job_offers.contract_type_id` | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
-| `job_alert_modes`          | `job_offer_notification_preferences.mode_id` | `ALL`, `MATCHING`, `HIGH_AFFINITY`                      |
+| Table                      | Used by                                      | Values                                                                 |
+| -------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| `job_application_statuses` | `job_applications.status_id`                 | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
+| `job_offer_statuses`       | `job_offers.status_id`                       | `Publicada`, `Cerrada`, `Eliminada`                                    |
+| `job_offer_modalities`     | `job_offers.modality_id`                     | `Presencial`, `Remoto`, `Híbrido`                                      |
+| `job_offer_contract_types` | `job_offers.contract_type_id`                | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| `job_alert_modes`          | `job_offer_notification_preferences.mode_id` | `ALL`, `MATCHING`, `HIGH_AFFINITY`                                     |
 
 ### Referenced tables owned by other modules
 

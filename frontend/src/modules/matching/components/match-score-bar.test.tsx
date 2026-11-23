@@ -8,10 +8,12 @@ function getFillFromRoot(container: HTMLElement): string {
   return root?.getAttribute("style") ?? "";
 }
 
-function getRgbChannels(style: string): [number, number, number] {
-  const m = style.match(/--affinity-fill:\s*rgb\((\d+)\s+(\d+)\s+(\d+)\)/);
-  if (!m) throw new Error(`No rgb fill found in: ${style}`);
-  return [Number(m[1]), Number(m[2]), Number(m[3])];
+function getBlueShare(style: string): number {
+  const m = style.match(
+    /--affinity-fill:\s*color-mix\(in srgb,\s*var\(--color-accent\)\s+(\d+)%,\s*var\(--color-brand-red\)\)/,
+  );
+  if (!m) throw new Error(`No theme fill found in: ${style}`);
+  return Number(m[1]);
 }
 
 describe("MatchScoreBar", () => {
@@ -59,23 +61,27 @@ describe("MatchScoreBar", () => {
 
   it("fills red at 0% and blue from HIGH_AFFINITY_THRESHOLD", () => {
     const { rerender, container } = render(<MatchScoreBar score={0} />);
-    expect(getRgbChannels(getFillFromRoot(container))).toEqual([227, 6, 19]);
+    expect(getBlueShare(getFillFromRoot(container))).toBe(0);
 
     rerender(<MatchScoreBar score={HIGH_AFFINITY_THRESHOLD} />);
-    expect(getRgbChannels(getFillFromRoot(container))).toEqual([0, 55, 112]);
+    expect(getBlueShare(getFillFromRoot(container))).toBe(100);
 
     rerender(<MatchScoreBar score={100} />);
-    expect(getRgbChannels(getFillFromRoot(container))).toEqual([0, 55, 112]);
+    expect(getBlueShare(getFillFromRoot(container))).toBe(100);
   });
 
   it("interpolates the fill between red and blue below the threshold", () => {
     const { container } = render(<MatchScoreBar score={HIGH_AFFINITY_THRESHOLD / 2} />);
-    const [r, g, b] = getRgbChannels(getFillFromRoot(container));
-    expect([r, g, b]).not.toEqual([227, 6, 19]);
-    expect([r, g, b]).not.toEqual([0, 55, 112]);
-    expect(r).toBeGreaterThan(0);
-    expect(r).toBeLessThan(227);
-    expect(b).toBeGreaterThan(19);
-    expect(b).toBeLessThan(112);
+    const blueShare = getBlueShare(getFillFromRoot(container));
+    expect(blueShare).toBeGreaterThan(0);
+    expect(blueShare).toBeLessThan(100);
+  });
+
+  it("builds the fill from theme tokens instead of fixed colors", () => {
+    const { container } = render(<MatchScoreBar score={HIGH_AFFINITY_THRESHOLD / 2} />);
+    const style = getFillFromRoot(container);
+    expect(style).toContain("var(--color-accent)");
+    expect(style).toContain("var(--color-brand-red)");
+    expect(style).not.toMatch(/rgb\(|#[0-9a-f]{3,6}/i);
   });
 });

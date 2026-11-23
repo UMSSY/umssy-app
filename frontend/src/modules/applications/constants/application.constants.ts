@@ -47,7 +47,6 @@ export const APPLICATION_MESSAGES = {
   vacancyAndCompany: "Vacante y empresa",
   company: "Empresa",
   affinity: "Afinidad",
-  status: "Estado",
   date: "Fecha",
   actions: "Acciones",
   noActiveApplications: "No tienes postulaciones activas.",
