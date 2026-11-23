@@ -2,6 +2,7 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ReportAuthorNotFoundException } from '../exceptions/report-author-not-found.exception.js';
 import { toReportUserPdfRow } from '../mappers/report-user-csv.mapper.js';
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
+import { ReportAuthorService } from '../services/report-author.service.js';
 import { ReportPdfService } from '../services/report-pdf.service.js';
 import { ReportsService } from '../services/reports.service.js';
 import type { ReportUser } from '../types/report-user.types.js';
@@ -26,7 +27,7 @@ function buildService(author: { firstName: string; lastName: string } | null) {
   vi.spyOn(repository, 'findAuthor').mockResolvedValue(author);
   const pdfService = new ReportPdfService();
   const render = vi.spyOn(pdfService, 'render');
-  return { service: new ReportsService(repository, pdfService), render };
+  return { service: new ReportsService(repository, pdfService, new ReportAuthorService(repository)), render };
 }
 
 describe('exportación PDF de reportes', () => {
@@ -55,7 +56,7 @@ describe('exportación PDF de reportes', () => {
     const file = await service.exportRejectedUsersPdf({}, 'admin-1');
 
     expect(file.fileName).toMatch(/^usuarios-rechazados-.*\.pdf$/);
-    expect(render).toHaveBeenCalledWith(expect.objectContaining({ title: 'Reporte de usuarios rechazados', dateColumnLabel: 'Fecha de rechazo' }));
+    expect(render).toHaveBeenCalledWith(expect.objectContaining({ title: 'Reporte de usuarios rechazados', columns: expect.arrayContaining([expect.objectContaining({ label: 'Fecha de rechazo' })]) }));
   });
 
   it('rechaza la exportación si el administrador no tiene nombre registrado', async () => {

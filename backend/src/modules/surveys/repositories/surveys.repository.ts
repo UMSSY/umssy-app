@@ -11,7 +11,10 @@ import {
   buildSurveyStatisticsInclude,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
-import { SURVEY_PARTICIPATION_TARGET_SELECT } from '../constants/survey-participation.constants.js';
+import {
+  APPROVED_ACCESS_REQUEST_WHERE,
+  SURVEY_PARTICIPATION_TARGET_SELECT,
+} from '../constants/survey-participation.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
@@ -27,6 +30,7 @@ import type {
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
 import type { GraduateProfile } from '../types/graduate-profile.type.js';
+import type { SurveyGraduateCohortFilter } from '../types/survey-graduate-cohort-filter.type.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
 import type { SemesterRange } from '../types/semester-range.type.js';
 import {
@@ -210,11 +214,39 @@ export class SurveysRepository {
 
     return this.prisma.accessRequest.findFirst({
       where: {
-        email: user.email,
-        status: { title: { equals: 'approved', mode: 'insensitive' } },
+        ...APPROVED_ACCESS_REQUEST_WHERE,
+        OR: [{ approvedUserId: userId }, { email: user.email }],
       },
       select: { careerId: true, graduationYear: true },
     });
+  }
+
+  async findApprovedGraduateUserIds({
+    careerId,
+    graduationYear,
+  }: SurveyGraduateCohortFilter): Promise<string[]> {
+    const requests = await this.prisma.accessRequest.findMany({
+      where: {
+        ...APPROVED_ACCESS_REQUEST_WHERE,
+        ...(careerId ? { careerId } : {}),
+        ...(graduationYear ? { graduationYear } : {}),
+      },
+      select: { approvedUserId: true, email: true },
+    });
+    const linkedIds = requests.flatMap((request) =>
+      request.approvedUserId ? [request.approvedUserId] : [],
+    );
+    const unlinkedEmails = requests.flatMap((request) =>
+      request.approvedUserId ? [] : [request.email],
+    );
+    const usersByEmail =
+      unlinkedEmails.length > 0
+        ? await this.prisma.user.findMany({
+            where: { email: { in: unlinkedEmails } },
+            select: { id: true },
+          })
+        : [];
+    return [...new Set([...linkedIds, ...usersByEmail.map((user) => user.id)])];
   }
 
   async findNotificationsForUser(
@@ -544,5 +576,22 @@ export class SurveysRepository {
       where: { id: surveyId },
       data: { lastReminderSentAt: date },
     });
+  }
+
+  async claimPublishedNotification(
+    surveyId: string,
+    period: string,
+  ): Promise<boolean> {
+    const { count } = await this.prisma.survey.updateMany({
+      where: {
+        id: surveyId,
+        OR: [
+          { publishedNotifiedPeriod: null },
+          { publishedNotifiedPeriod: { not: period } },
+        ],
+      },
+      data: { publishedNotifiedPeriod: period },
+    });
+    return count > 0;
   }
 }

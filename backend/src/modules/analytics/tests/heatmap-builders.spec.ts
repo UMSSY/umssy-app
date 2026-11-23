@@ -153,7 +153,7 @@ describe('buildExperienceHeatmap (HU8)', () => {
     ]);
     expect(sql?.cells.map((cell) => cell.percentage)).toEqual([50, 100, 100]);
     expect(sql?.extraValues?.[HEATMAP_EXTRA_COLUMNS.totalMastering.id]).toEqual({ count: 3, percentage: 75, subtext: '75 % del total' });
-    expect(sql?.extraValues?.[HEATMAP_EXTRA_COLUMNS.highestAdoption.id]).toEqual({ badgeText: 'Semi-Senior' });
+    expect(sql?.extraValues?.[HEATMAP_EXTRA_COLUMNS.highestAdoption.id]).toEqual({ badgeText: 'Semi-Senior y Senior' });
     expect(data.extraColumnsConfig?.[0]?.sublabel).toBe('de 4 titulados');
     expect(data.rows[0]!.skillId).toBe(SQL.id);
     expect(data.quickReadSummary).toContain('Semi-Senior');

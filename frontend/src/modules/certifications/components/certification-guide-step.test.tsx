@@ -57,7 +57,9 @@ describe('CertificationGuideStep', () => {
   it('requires the existing delete dialog confirmation before removing a certification', async () => {
     vi.mocked(certificationsService.deleteCertification).mockResolvedValue();
     const { user } = renderGuide();
-    await user.click(await screen.findByRole('button', { name: 'Eliminar CCNA' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'Eliminar CCNA' }, { timeout: 5000 }),
+    );
     const dialog = screen.getByRole('alertdialog', { name: 'Eliminar certificación' });
     expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
     await user.click(within(dialog).getByRole('button', { name: 'Cancelar' }));

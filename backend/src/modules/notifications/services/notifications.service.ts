@@ -34,6 +34,18 @@ export class NotificationsService {
     private readonly appVisibilityService: AppVisibilityService,
   ) {}
 
+  hasGroupedNotification(
+    recipientId: string,
+    type: NotificationType,
+    groupKey: string,
+  ): Promise<boolean> {
+    return this.notificationsRepository.hasGroupedNotification(
+      recipientId,
+      type,
+      groupKey,
+    );
+  }
+
   async notify(request: NotifyRequest): Promise<NotifyResult> {
     const {
       recipientIds,
@@ -96,9 +108,14 @@ export class NotificationsService {
     }
 
     const normalizedPayload = normalizeNotificationPayload(payload);
-    const title = truncateNotificationText(template.renderTitle(normalizedPayload));
-    const body = truncateNotificationText(template.renderBody(normalizedPayload));
-    const typeSendsEmail = typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
+    const title = truncateNotificationText(
+      template.renderTitle(normalizedPayload),
+    );
+    const body = truncateNotificationText(
+      template.renderBody(normalizedPayload),
+    );
+    const typeSendsEmail =
+      typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
 
     const preferences =
       await this.preferencesRepository.findManyByUserIds(validRecipients);

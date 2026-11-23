@@ -7,5 +7,6 @@ export interface SurveyAlertsFormProps {
   config: SurveyAlertConfig;
   isSaving: boolean;
   onCancel: () => void;
+  onDirtyChange: (isDirty: boolean) => void;
   onSave: (payload: SurveyAlertConfigPayload) => Promise<void>;
 }

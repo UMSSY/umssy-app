@@ -9,6 +9,7 @@ import {
   rejectedUsersExportQuerySchema,
   rejectedUsersQuerySchema,
 } from '../requests/report-users.schema.js';
+import { ReportAuthorService } from '../services/report-author.service.js';
 import { ReportPdfService } from '../services/report-pdf.service.js';
 import { ReportsService } from '../services/reports.service.js';
 import type { ReportUser } from '../types/report-user.types.js';
@@ -65,7 +66,7 @@ const USERS: ReportUser[] = [
 function buildService(users: readonly ReportUser[] = USERS): ReportsService {
   const repository = new ReportUsersRepository({} as PrismaService);
   vi.spyOn(repository, 'findAll').mockResolvedValue([...users]);
-  return new ReportsService(repository, new ReportPdfService());
+  return new ReportsService(repository, new ReportPdfService(), new ReportAuthorService(repository));
 }
 
 const registeredQuery = (input: Record<string, unknown> = {}) =>
