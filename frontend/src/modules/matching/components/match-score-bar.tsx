@@ -13,23 +13,16 @@ const SIZE_CLASSES = {
   lg: "[&_[data-slot=progress-track]]:h-4",
 } as const;
 
-type Rgb = [number, number, number];
-
-const BRAND_RED_RGB: Rgb = [227, 6, 19];
-const ACCENT_BLUE_RGB: Rgb = [0, 55, 112];
-
-function interpolateRgb(t: number, low: Rgb, high: Rgb): string {
-  const r = Math.round(low[0] + (high[0] - low[0]) * t);
-  const g = Math.round(low[1] + (high[1] - low[1]) * t);
-  const b = Math.round(low[2] + (high[2] - low[2]) * t);
-  return `rgb(${r} ${g} ${b})`;
+function mixAffinityFill(t: number): string {
+  const blueShare = Math.round(t * 100);
+  return `color-mix(in srgb, var(--color-accent) ${blueShare}%, var(--color-brand-red))`;
 }
 
 export function MatchScoreBar({ score, showLabel = true, size = "md", className }: MatchScoreProps) {
   const normalizedScore = normalizeMatchScore(score);
 
   const t = Math.min(Math.max(normalizedScore / HIGH_AFFINITY_THRESHOLD, 0), 1);
-  const fillColor = interpolateRgb(t, BRAND_RED_RGB, ACCENT_BLUE_RGB);
+  const fillColor = mixAffinityFill(t);
 
   return (
     <div className={cn("flex w-full flex-col gap-1.5", className)}>

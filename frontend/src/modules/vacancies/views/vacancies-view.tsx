@@ -15,6 +15,7 @@ import { AppliedJobChip } from "@/modules/matching";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { PageHeading } from "@/shared/components/layout";
 import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
+import { CARD_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
 import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { getInitials } from "@/shared/utils/get-initials";
@@ -89,9 +90,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
                 className={cn(
                   VACANCY_CARD_CLASS,
                   "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5",
-                  "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md",
-                  "motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in",
-                  "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                  CARD_MOTION_CLASS,
                 )}
               > 
                 <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-lg bg-accent text-base font-bold text-surface">{getInitials(vacancy.companyName)}</div>
