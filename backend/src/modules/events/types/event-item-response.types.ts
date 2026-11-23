@@ -1,4 +1,6 @@
+import type { EventRecommendation } from './event-recommendation.types.js';
 import type { EventCategoryResponse } from '../../event-categories/types/event-category-response.types.js';
+import type { EventSessionResponse } from './event-session-response.types.js';
 
 export interface EventItemResponse {
   coverUrl?: string | null;
@@ -9,6 +11,7 @@ export interface EventItemResponse {
   startTime: string;
   endTime: string;
   location: string | null;
+  sessions: EventSessionResponse[];
   capacity: number | null;
   availableSpots: number | null;
   registrationCount: number;
@@ -24,4 +27,5 @@ export interface EventItemResponse {
   progressPercent: number | null;
   votingDeadline: string | null;
   hasSupported: boolean;
+  recommendation?: EventRecommendation;
 }
