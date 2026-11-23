@@ -4,8 +4,10 @@ export const EVENT_PASS_LIFECYCLE_FIXTURES = [
   {
     eventId: 'fb69db6e-ded6-4eed-85ef-6135cf88fad4',
     registrationId: 'cf8b95fd-f796-4c9b-8797-ec7f50774442',
-    title: '[QA 08.5] Pase vigente',
-    dayOffset: 0,
+    title: 'Taller de base de datos',
+    eventDate: '2026-11-23',
+    startTime: '1970-01-01T08:00:00.000Z',
+    endTime: '1970-01-01T23:00:00.000Z',
   },
   {
     eventId: '66f39ba1-ebc1-42b9-9169-e773f2eb3d2b',
@@ -74,73 +76,6 @@ function getBoliviaCalendarDate(now: Date, dayOffset: number): Date {
   return new Date(Date.UTC(year, month - 1, day + dayOffset));
 }
 
-function getBoliviaDateTimeParts(timestamp: Date) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/La_Paz',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(timestamp);
-  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value);
-
-  return {
-    year: getPart('year'),
-    month: getPart('month'),
-    day: getPart('day'),
-    hour: getPart('hour'),
-    minute: getPart('minute'),
-    second: getPart('second'),
-    millisecond: timestamp.getUTCMilliseconds(),
-  };
-}
-
-export function getUpcomingPassSchedule(now: Date) {
-  let startsAt = new Date(now.getTime() + 5 * 60_000);
-  let endsAt = new Date(startsAt.getTime() + 60_000);
-  let start = getBoliviaDateTimeParts(startsAt);
-  let end = getBoliviaDateTimeParts(endsAt);
-  const closesNextDay =
-    start.year !== end.year || start.month !== end.month || start.day !== end.day;
-
-  if (closesNextDay) {
-    startsAt = new Date(startsAt.getTime() + 60_000);
-    endsAt = new Date(endsAt.getTime() + 60_000);
-    start = getBoliviaDateTimeParts(startsAt);
-    end = getBoliviaDateTimeParts(endsAt);
-  }
-
-  return {
-    eventDate: new Date(Date.UTC(start.year, start.month - 1, start.day)),
-    startTime: new Date(
-      Date.UTC(
-        1970,
-        0,
-        1,
-        start.hour,
-        start.minute,
-        start.second,
-        start.millisecond,
-      ),
-    ),
-    endTime: new Date(
-      Date.UTC(
-        1970,
-        0,
-        1,
-        end.hour,
-        end.minute,
-        end.second,
-        end.millisecond,
-      ),
-    ),
-  };
-}
-
 export async function seedEventPassLifecycleEvents(
   tx: Prisma.TransactionClient,
   {
@@ -161,8 +96,12 @@ export async function seedEventPassLifecycleEvents(
 ): Promise<number> {
   for (const fixture of EVENT_PASS_LIFECYCLE_FIXTURES) {
     const schedule =
-      fixture.dayOffset === 0
-        ? getUpcomingPassSchedule(now)
+      'eventDate' in fixture
+        ? {
+            eventDate: new Date(`${fixture.eventDate}T00:00:00.000Z`),
+            startTime: new Date(fixture.startTime),
+            endTime: new Date(fixture.endTime),
+          }
         : {
             eventDate: getBoliviaCalendarDate(now, fixture.dayOffset),
             startTime: new Date('1970-01-01T09:00:00.000Z'),
