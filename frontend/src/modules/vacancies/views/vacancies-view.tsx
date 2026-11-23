@@ -84,7 +84,16 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
             const locationUrl = getSafeMapsUrl(vacancy.locationUrl);
 
             return (
-              <article key={vacancy.id} className={cn(VACANCY_CARD_CLASS, "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5")}>
+              <article
+                key={vacancy.id}
+                className={cn(
+                  VACANCY_CARD_CLASS,
+                  "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5",
+                  "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md",
+                  "motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in",
+                  "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                )}
+              > 
                 <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-lg bg-accent text-base font-bold text-surface">{getInitials(vacancy.companyName)}</div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2"><h2 className="text-lg font-semibold text-ink"><Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className="underline-offset-4 hover:text-accent hover:underline">{vacancy.title}</Link></h2>{canApply ? <AppliedJobChip jobOfferId={vacancy.id} /> : null}</div>
