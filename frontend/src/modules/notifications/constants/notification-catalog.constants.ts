@@ -27,7 +27,7 @@ export const NOTIFICATION_CATALOG: Record<NotificationType, NotificationCatalogD
   APPOINTMENT_CANCELLED: { category: "REMINDERS", icon: CircleX, fallbackPath: "/appointments" },
   APPOINTMENT_BOOKED: { category: "REMINDERS", icon: CalendarDays, fallbackPath: "/appointments" },
   SURVEY_PUBLISHED: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
-  SURVEY_REMINDER: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/surveys" },
+  SURVEY_REMINDER: { category: "REMINDERS", icon: ClipboardList, fallbackPath: "/surveys" },
   SURVEY_CLOSING_SOON: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
   SURVEY_CLOSED: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
   SURVEY_VARIATION_ALERT: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
