@@ -347,5 +347,33 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(screen.queryByTestId('chat-room-postulation-banner')).not.toBeInTheDocument();
     expect(screen.queryByTestId('chat-room-view-postulation-button')).not.toBeInTheDocument();
   });
+
+  it('muestra el subtítulo del postulante, Inicio de la conversación y el separador de fecha actual cuando no hay historial previo', () => {
+    render(
+      <ChatRoom
+        conversation={{
+          ...mockConversation,
+          contact: {
+            ...mockConversation.contact,
+            academicTitle: 'Senior Software Engineer',
+          },
+          contextType: 'POSTULACION',
+          contextId: 'app-uuid-1234',
+        }}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('chat-contact-subtitle')).toHaveTextContent(
+      'Senior Software Engineer',
+    );
+    expect(screen.getByTestId('start-of-conversation')).toHaveTextContent(
+      'Inicio de la conversación',
+    );
+    expect(screen.getByTestId('date-separator-initial')).toBeInTheDocument();
+  });
 });
 

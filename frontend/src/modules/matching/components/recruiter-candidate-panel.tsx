@@ -9,25 +9,19 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { AreaDetailPanel } from "@/modules/radar-chart";
-import { useMessagingUi } from "@/modules/chat/contexts/messaging-ui-context";
-import { getOrCreateConversation } from "@/modules/chat/services/chat-api";
-import type { Conversation } from "@/modules/chat/types/conversation.types";
 import {
-  useRecruiterAreaEvidence,
-  useRecruiterDecision,
-} from "../hooks/use-radar-recruiter";
+  getOrCreateConversation,
+  useMessagingUi,
+  type Conversation,
+} from "@/modules/chat";
+import { useRecruiterAreaEvidence } from "../hooks/use-radar-recruiter";
 import { useRecruiterCv } from "../hooks/use-recruiter-cv";
 import { EMPTY_AREA_EVIDENCE } from "../constants/empty-area-evidence.constants";
 import { RECRUITER_APPLICATION_STATE_LABELS } from "../constants/recruiter-application-state.constants";
 import type { RadarAxisId } from "../types/radar-axis-id.types";
-import type { RecruiterApplicationState } from "../types/recruiter-application-state.types";
 import { buildAreaDetail } from "../utils/build-area-detail";
 
 import type { RecruiterCandidatePanelProps } from "../types/recruiter-candidate-panel-props.types";
-
-function hasOpenState(state: RecruiterApplicationState) {
-  return state === "applied" || state === "interview";
-}
 
 export function RecruiterCandidatePanel({
   candidate,
@@ -46,7 +40,6 @@ export function RecruiterCandidatePanel({
     candidate?.applicationId ?? "",
     selectedAreaId,
   );
-  const decision = useRecruiterDecision();
 
   if (!candidate || !vacancy) {
     return <EmptyCandidatePanel />;
@@ -56,6 +49,7 @@ export function RecruiterCandidatePanel({
     RECRUITER_APPLICATION_STATE_LABELS[candidate.state] ?? candidate.state;
   const candidateUserId = candidate.userId;
   const candidateApplicationId = candidate.applicationId;
+  const candidateHeadline = candidate.headline || "Perfil sin presentación";
 
   async function openCandidateChat() {
     if (isStartingChat) return;
@@ -64,10 +58,20 @@ export function RecruiterCandidatePanel({
     setChatError(null);
 
     try {
-      const conversation = await getOrCreateConversation(candidateUserId, {
+      const rawConversation = await getOrCreateConversation(candidateUserId, {
         contextType: "POSTULACION",
         contextId: candidateApplicationId,
       });
+      const conversation: Conversation = rawConversation.contact
+        ? {
+            ...rawConversation,
+            contact: {
+              ...rawConversation.contact,
+              academicTitle:
+                rawConversation.contact.academicTitle ?? candidateHeadline,
+            },
+          }
+        : rawConversation;
 
       queryClient.setQueryData(
         ["chat", "conversations"],
@@ -154,25 +158,6 @@ export function RecruiterCandidatePanel({
       )}
 
       <div className="mt-auto flex flex-col gap-2 pt-2">
-        <Button
-          type="button"
-          className="min-h-11 w-full"
-          disabled={isStartingChat}
-          onClick={() => void openCandidateChat()}
-        >
-          {isStartingChat
-            ? "Abriendo mensajes..."
-            : chatError
-              ? "Reintentar Contactar"
-              : "Contactar"}
-        </Button>
-
-        {chatError && (
-          <p role="alert" className="text-sm text-destructive">
-            {chatError}
-          </p>
-        )}
-
         <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
           <p className="font-medium text-foreground">
             Datos de contacto autorizados
@@ -222,45 +207,23 @@ export function RecruiterCandidatePanel({
           )}
         </div>
 
-        {hasOpenState(candidate.state) ? (
-          <>
-            <Button
-              type="button"
-              className="w-full"
-              disabled={decision.isPending}
-              onClick={() =>
-                decision.mutate({
-                  applicationId: candidate.applicationId,
-                  decision: "hired",
-                })
-              }
-            >
-              Aceptar postulación
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="w-full"
-              disabled={decision.isPending}
-              onClick={() =>
-                decision.mutate({
-                  applicationId: candidate.applicationId,
-                  decision: "rejected",
-                })
-              }
-            >
-              Rechazar postulación
-            </Button>
-          </>
-        ) : (
-          <p className="rounded-md border border-border bg-muted px-3 py-2 text-center text-sm text-muted-foreground">
-            {stateLabel}.
-          </p>
-        )}
+        <Button
+          id="recruiter-contact-button"
+          type="button"
+          className="min-h-11 w-full"
+          disabled={isStartingChat}
+          onClick={() => void openCandidateChat()}
+        >
+          {isStartingChat
+            ? "Abriendo mensajes..."
+            : chatError
+              ? "Reintentar Contactar"
+              : "Contactar"}
+        </Button>
 
-        {decision.isError && (
+        {chatError && (
           <p role="alert" className="text-sm text-destructive">
-            No se pudo registrar la decisión. Intenta nuevamente.
+            {chatError}
           </p>
         )}
       </div>

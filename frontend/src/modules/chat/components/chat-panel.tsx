@@ -36,7 +36,12 @@ export function ChatDock() {
   useEffect(() => { if (pathname === "/chat" || !canChat) setIsPanelOpen?.(false); }, [pathname, canChat, setIsPanelOpen]);
   useEffect(() => {
     if (isOpen) closeRef.current?.focus();
-    else if (wasOpen.current) document.getElementById(TRIGGER_ID)?.focus();
+    else if (wasOpen.current) {
+      const target =
+        document.getElementById("recruiter-contact-button") ??
+        document.getElementById(TRIGGER_ID);
+      target?.focus();
+    }
     wasOpen.current = isOpen;
   }, [isOpen]);
   if (!ui || !canChat || pathname === "/chat") return null;
