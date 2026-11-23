@@ -233,4 +233,21 @@ describe("EventCard y utilidades de formato", () => {
     expect(screen.getByText('Información de apoyos no disponible.')).toBeInTheDocument();
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
+
+  it('muestra rango de fechas y cantidad de sesiones en un taller multisesión', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, sessions: [
+      { id: 's2', startsAt: '2026-12-03T13:00:00.000Z', endsAt: '2026-12-03T15:00:00.000Z', location: null },
+      { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+    ] }} />);
+    expect(screen.getByText(/^1s?[–-]s?3 de diciembre$/)).toBeInTheDocument();
+    expect(screen.getByText('2 sesiones')).toBeInTheDocument();
+    expect(screen.queryByText('09:00 - 13:00 hrs')).not.toBeInTheDocument();
+  });
+
+  it('conserva fecha y horario cuando el taller tiene una sola sesión', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, sessions: [] }} />);
+    expect(screen.getByText(formatEventDate(MOCK_EVENT.eventDate))).toBeInTheDocument();
+    expect(screen.getByText('09:00 - 13:00 hrs')).toBeInTheDocument();
+    expect(screen.queryByText(/sesiones/)).not.toBeInTheDocument();
+  });
 });
