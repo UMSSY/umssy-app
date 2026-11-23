@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -184,30 +184,44 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
 
   return (
     <section aria-label={text.ariaLabel} className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <Input
-          type="search"
-          placeholder="Buscar por título de vacante..."
-          aria-label="Buscar por título de vacante"
-          value={filters.search}
-          onChange={(event) => update("search", event.target.value)}
-          className="w-full max-md:h-11 sm:max-w-sm"
-        />
-        <VacancyFiltersDialog
-          filters={filters}
-          onChange={update}
-          onReset={reset}
-          showStatusFilter={isHistory}
-        />
-        {isEmptyWithoutFilters ? null : (
-          <Link
-            href={"/recruiters/job-offers/new"}
-            className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
-          >
-            <Plus aria-hidden="true" />
-            Crear nueva vacante
-          </Link>
-        )}
+      {isHistory ? null : (
+        <header>
+          <h2 className="text-lg font-semibold">{VACANCY_LIST_TEXT.published.title}</h2>
+          <p className="mt-1 text-sm text-text-secondary">{VACANCY_LIST_TEXT.published.subtitle}</p>
+        </header>
+      )}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-sm sm:flex-1">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-secondary"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            placeholder="Buscar por título de vacante..."
+            aria-label="Buscar por título de vacante"
+            value={filters.search}
+            onChange={(event) => update("search", event.target.value)}
+            className="w-full pl-9 max-md:h-11"
+          />
+        </div>
+        <div className="flex flex-wrap gap-3 sm:ml-auto">
+          <VacancyFiltersDialog
+            filters={filters}
+            onChange={update}
+            onReset={reset}
+            showStatusFilter={isHistory}
+          />
+          {isEmptyWithoutFilters ? null : (
+            <Link
+              href={"/recruiters/job-offers/new"}
+              className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
+            >
+              <Plus aria-hidden="true" />
+              Crear nueva vacante
+            </Link>
+          )}
+        </div>
       </div>
 
       {offers.length === 0 ? (

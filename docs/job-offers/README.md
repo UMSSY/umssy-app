@@ -140,6 +140,7 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - The wizard has a stepper, field-level validation, a preview step, a confirmation when leaving with unsaved changes (`useLeaveGuard`) and a success screen.
 - The company id comes from the session (`useCurrentCompany`); without a company the form shows an error instead of sending the request.
 - Pagination, filters dialog, reopen and delete actions in the history.
+- The company portal (`/recruiters`) shows the published vacancies as cards with the title, publication date and time open (Bolivia time), modality, number of active applicants, contract type and expiry date ("Sin fecha de cierre" when there is none). The list has a heading, a title search and a filters dialog. A session without a company shows a message instead of the list.
 
 ## Design decisions
 
@@ -158,3 +159,4 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - Real-time detection of required skills while the description is written, with debounce and limits.
 - Source of vacancies for the affinity calculation and recommendations.
 - Company side (shared): publish, edit, history with filters, reopen and delete.
+- Company vacancy list in the company portal: cards with time open and expiry date, title search, and a message for accounts that are not linked to a company.

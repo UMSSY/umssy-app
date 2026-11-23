@@ -130,10 +130,12 @@ export const STATUS_FILTER_OPTIONS = [
 
 export const VACANCY_LIST_TEXT = {
   published: {
+    title: "Lista de Vacantes",
+    subtitle: "Consulta y administra las vacantes que publicó tu empresa.",
     ariaLabel: "Mis vacantes publicadas",
     loading: "Cargando vacantes...",
     loadError: "No se pudieron cargar tus vacantes.",
-    empty: "Aún no tienes vacantes publicadas",
+    empty: "No se tienen vacantes creadas",
     noMatches: "Ninguna vacante coincide con los filtros.",
     noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
   },

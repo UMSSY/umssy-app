@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { CalendarDays, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,13 +29,13 @@ export function VacancyCard({
       )}
     >
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <h3 className="min-w-0 text-base font-bold text-ink">
             <Button
               type="button"
               variant="link"
               className={cn(
-                "h-auto min-h-11 justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold text-ink hover:bg-transparent hover:text-ink",
+                "h-auto min-h-11 max-w-full justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold wrap-anywhere whitespace-normal text-ink hover:bg-transparent hover:text-ink",
                 isDeleted && "text-text-secondary hover:text-text-secondary",
               )}
               onClick={() => onDetails(offer.id)}
@@ -43,18 +43,27 @@ export function VacancyCard({
               {offer.title}
             </Button>
           </h3>
-          <div className="flex shrink-0 flex-col items-end gap-1 text-sm text-text-secondary">
+          <div className="flex shrink-0 flex-col gap-1 text-sm text-text-secondary sm:items-end">
             {showStatus ? (
               <Badge className={STATUS_BADGE_CLASSES[offer.status]}>
                 {STATUS_LABELS[offer.status] ?? offer.status}
               </Badge>
             ) : null}
-            <p>Expiración: {offer.expiresAt ? formatPublicationDate(offer.expiresAt) : "Sin fecha de cierre"}</p>
+            <p className="inline-flex items-center gap-1.5">
+              <CalendarDays className="size-4" aria-hidden="true" />
+              Expiración: {offer.expiresAt ? formatPublicationDate(offer.expiresAt) : "Sin fecha de cierre"}
+            </p>
           </div>
         </div>
-        <p className="mt-1 text-sm text-text-secondary">
-          Publicado: {formatPublicationDate(offer.publishedAt)} · {formatOpenTime(offer.publishedAt)} · Modalidad:{" "}
-          {offer.modality} · Postulantes: {offer.applicantsCount} candidatos
+        <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+          <span className="inline-flex items-center gap-1.5">
+            <CalendarDays className="size-4" aria-hidden="true" />
+            <span>
+              Publicado: {formatPublicationDate(offer.publishedAt)} · {formatOpenTime(offer.publishedAt)}
+            </span>
+          </span>
+          <span>Modalidad: {offer.modality}</span>
+          <span>Postulantes: {offer.applicantsCount} candidatos</span>
         </p>
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>
         {isPublished ? (
