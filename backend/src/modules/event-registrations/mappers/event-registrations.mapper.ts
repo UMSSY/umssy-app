@@ -1,5 +1,6 @@
 import type { MyRegistrationResponse } from '../types/event-registrations.types.js';
 import type { RegistrationEntity } from '../types/registration-entity.types.js';
+import { mapEventSessions } from '../../events/index.js';
 
 export class EventRegistrationsMapper {
   static toMyRegistration(entity: RegistrationEntity): MyRegistrationResponse {
@@ -11,6 +12,7 @@ export class EventRegistrationsMapper {
       startTime: entity.event.startTime,
       endTime: entity.event.endTime,
       location: entity.event.location ?? 'Virtual',
+      sessions: mapEventSessions(entity.event.sessions),
       status: entity.status.title,
       registeredAt: entity.registeredAt.toISOString(),
       cancelledAt: entity.cancelledAt?.toISOString() ?? null,

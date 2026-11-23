@@ -12,6 +12,11 @@ import {
   formatTimeRange,
 } from '../utils/event-card';
 import { formatVotingDeadline, getEventDisplayStatus } from '../utils/event-display-status';
+import {
+  formatSessionCount,
+  formatSessionDateRange,
+  getSortedSessions,
+} from '../utils/event-sessions';
 import type { EventCardProps } from '../types/event.types';
 import { ProposalProgress } from './proposal-progress';
 import { WorkshopCover } from './workshop-cover';
@@ -40,6 +45,8 @@ export function EventCard({
   const displayStatus = getEventDisplayStatus(event);
   const isProposal = displayStatus === 'voting' || displayStatus === 'expired';
   const votingDeadline = formatVotingDeadline(event.votingDeadline);
+  const sessions = getSortedSessions(event);
+  const isMultiSession = sessions.length > 1;
 
   const categoryName = event.category.name;
   const normalizedCategory = categoryName
@@ -161,14 +168,22 @@ export function EventCard({
                   className="size-3.5 shrink-0 text-accent"
                   aria-hidden="true"
                 />
-                <span>{formatEventDate(event.eventDate)}</span>
+                <span>
+                  {isMultiSession
+                    ? formatSessionDateRange(sessions)
+                    : formatEventDate(event.eventDate)}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock
                   className="size-3.5 shrink-0 text-accent"
                   aria-hidden="true"
                 />
-                <span>{formatTimeRange(event.startTime, event.endTime)}</span>
+                <span>
+                  {isMultiSession
+                    ? formatSessionCount(sessions.length)
+                    : formatTimeRange(event.startTime, event.endTime)}
+                </span>
               </div>
             </div>
           )}

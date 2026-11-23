@@ -5,6 +5,7 @@ import { AttendanceAccessDeniedException } from '../exceptions/attendance-access
 import { AttendanceOutsideWindowException } from '../exceptions/attendance-outside-window.exception.js';
 import { AttendancePassCancelledException } from '../exceptions/attendance-pass-cancelled.exception.js';
 import { AttendancePassInvalidException } from '../exceptions/attendance-pass-invalid.exception.js';
+import { AttendanceSessionInvalidException } from '../exceptions/attendance-session-invalid.exception.js';
 import type { AttendanceErrorExample } from '../types/attendance-error-example.types.js';
 
 const API_ERROR_REF = '#/components/schemas/ApiErrorResponse';
@@ -39,6 +40,13 @@ export const ATTENDANCE_CHECK_IN_BODY: ApiBodyOptions = {
         description:
           'QR v1, token hexadecimal de 64 caracteres o UUID de inscripción. Se ignoran los espacios al inicio y al final. No se aceptan códigos cortos.',
         example: '7b8988fd-6818-4929-858b-4d83b72873cf',
+      },
+      sessionId: {
+        type: 'string',
+        format: 'uuid',
+        description:
+          'Sesión del taller en la que se registra la asistencia. Si se omite, se usa la sesión en curso.',
+        example: '44444444-4444-4444-8444-444444444444',
       },
     },
   },
@@ -101,10 +109,11 @@ export const ATTENDANCE_CHECK_IN_ERROR_RESPONSES: ApiResponseOptions[] = [
   }),
   attendanceErrorResponse(
     422,
-    'Pase inválido (`ATTENDANCE_PASS_INVALID`) o inscripción cancelada (`ATTENDANCE_PASS_CANCELLED`)',
+    'Pase inválido (`ATTENDANCE_PASS_INVALID`), inscripción cancelada (`ATTENDANCE_PASS_CANCELLED`) o sesión ajena al taller (`ATTENDANCE_SESSION_INVALID`)',
     {
       passInvalid: { summary: 'Pase inválido', error: new AttendancePassInvalidException() },
       passCancelled: { summary: 'Inscripción cancelada', error: new AttendancePassCancelledException() },
+      sessionInvalid: { summary: 'Sesión ajena al taller', error: new AttendanceSessionInvalidException() },
     },
   ),
   attendanceErrorResponse(500, 'Error interno al registrar asistencia (`INTERNAL_ERROR`)', {
