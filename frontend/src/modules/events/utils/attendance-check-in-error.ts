@@ -37,6 +37,12 @@ export function getAttendanceCheckInError(
       message: 'Este pase no corresponde al taller o ya no está vigente.',
     };
   }
+  if (status === 422 && code === 'ATTENDANCE_SESSION_INVALID') {
+    return {
+      kind: 'invalid',
+      message: 'La sesión elegida no pertenece a este taller.',
+    };
+  }
   if (status === 400 && code === 'VALIDATION_ERROR') {
     return {
       kind: 'invalid',

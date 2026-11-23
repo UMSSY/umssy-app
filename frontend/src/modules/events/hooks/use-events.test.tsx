@@ -46,6 +46,13 @@ describe("useEvents", () => {
       result.current.events.some((event) => event.id === "other-event"),
     ).toBe(true);
   });
+  it('reports the profile state of the first page and assumes complete when absent', async () => {
+    getEventsMock.mockResolvedValueOnce({ data: [], page: 1, offset: 0, isProfileComplete: false });
+    const { result } = renderHook(() => useEvents());
+
+    expect(result.current.isProfileComplete).toBe(true);
+    await waitFor(() => expect(result.current.isProfileComplete).toBe(false));
+  });
   it('carga la primera pagina y actualiza el estado', async () => {
     const response: EventsListResponse = {
       data: [],
