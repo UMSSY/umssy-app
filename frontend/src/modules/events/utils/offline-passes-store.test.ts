@@ -4,6 +4,7 @@ import { readIndexedDb, writeIndexedDb } from "@/shared/services/storage/browser
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { endOfflinePassesSession } from "@/shared/services/storage/offline-passes-owner";
 import { loadSessionOfflinePasses, offlinePassesStore } from "./offline-passes-store";
+import type { OfflinePass } from "../types/offline-pass.types";
 
 const pass = {
   id: "reg-1",
@@ -119,5 +120,14 @@ describe("offlinePassesStore", () => {
       expect(await loadSessionOfflinePasses(null)).toBeNull();
     });
   });
-});
 
+  it("keeps saved sessions and reads older copies without them", async () => {
+    const sessions = [{ id: "s1", startsAt: "2026-12-02T13:00:00.000Z", endsAt: "2026-12-02T16:00:00.000Z", location: null }];
+    const withSessions: OfflinePass = { ...pass, id: "reg-2", sessions };
+    await offlinePassesStore.save("user-s", [pass, withSessions, { ...pass, id: "reg-3", sessions: [{ id: 1 }] } as unknown as OfflinePass]);
+    const passes = (await offlinePassesStore.load("user-s"))?.passes ?? [];
+    expect(passes[0]).not.toHaveProperty("sessions");
+    expect(passes[1].sessions).toEqual(sessions);
+    expect(passes[2]).not.toHaveProperty("sessions");
+  });
+});

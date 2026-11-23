@@ -68,7 +68,13 @@ describe('managed workshops', () => {
     await expect(service.findManagedWorkshop(workshop.id, OWNER.id, tx as never)).resolves.toBeNull();
     expect(findFirst).toHaveBeenCalledWith({
       where: { id: workshop.id, createdById: OWNER.id, status: { title: 'Publicado' } },
-      select: { id: true, eventDate: true, startTime: true, endTime: true },
+      select: {
+        id: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        sessions: { select: { id: true, startsAt: true, endsAt: true } },
+      },
     });
   });
 
@@ -87,6 +93,10 @@ describe('managed workshops', () => {
         endTime: true,
         location: true,
         coverMimeType: true,
+        sessions: {
+          select: { id: true, startsAt: true, endsAt: true, location: true },
+          orderBy: [{ startsAt: 'asc' }, { id: 'asc' }],
+        },
       },
       orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
     });
@@ -114,6 +124,7 @@ describe('managed workshops', () => {
         startTime: '14:00:00.000',
         endTime: '17:00:00.000',
         location: 'Aula D-101',
+        sessions: [],
         coverUrl: `/events/${workshop.id}/cover`,
       },
       {
@@ -123,6 +134,7 @@ describe('managed workshops', () => {
         startTime: '14:00:00.000',
         endTime: '17:00:00.000',
         location: 'Aula D-101',
+        sessions: [],
       },
     ]);
   });

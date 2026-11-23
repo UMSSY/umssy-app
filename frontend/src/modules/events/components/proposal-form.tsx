@@ -15,6 +15,7 @@ import { ProposalField } from './proposal-field';
 import { ProposalTimeField } from './proposal-time-field';
 import { ProposalCoverField } from './proposal-cover-field';
 import { ProposalReviewDialog } from './proposal-review-dialog';
+import { ProposalSessionsField } from './proposal-sessions-field';
 
 export function ProposalForm() {
   const state = useProposalForm();
@@ -132,7 +133,10 @@ export function ProposalForm() {
               {duration && <p className="text-xs text-text-secondary">Duración: {duration}</p>}
             </div>
           </div>
-          
+
+          <ProposalSessionsField sessions={state.sessions} errors={state.sessionErrors} error={errors.additionalSessions} minDate={getMinDate()} maxDate={getMaxDate()}
+            canAdd={state.canAddSession} disabled={state.pending} onAdd={state.addSession} onChange={state.changeSession} onRemove={state.removeSession} />
+
           <div className="grid gap-6 md:grid-cols-2">
             <ProposalField id="proposal-capacity" label="Cupo del taller" error={errors.capacity}>
               <Input id="proposal-capacity" name="capacity" type="number" min={20} max={60} step={1} required inputMode="numeric" value={values.capacity} onChange={(event) => change('capacity', event.target.value)} placeholder="Ej. 30" className="h-11" {...feedback('capacity')} aria-describedby={`proposal-capacity-help${errors.capacity ? ' proposal-capacity-error' : ''}`} />
@@ -165,7 +169,7 @@ export function ProposalForm() {
         </div>
       </form>
       
-      <ProposalReviewDialog open={state.reviewing} values={values} cover={state.cover} tutor={tutor} category={categories.categories.find(({ id }) => id === values.categoryId)?.name ?? ''}
+      <ProposalReviewDialog open={state.reviewing} values={values} sessions={state.sessions} cover={state.cover} tutor={tutor} category={categories.categories.find(({ id }) => id === values.categoryId)?.name ?? ''}
         pending={state.pending} unavailable={state.unavailable} error={state.message} onClose={state.closeReview} onConfirm={() => void state.confirm()} />
     </>
   );
