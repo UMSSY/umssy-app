@@ -3,8 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { AppShell } from "./app-shell";
 
+vi.mock("@/modules/radar-chart/components/radar-notification-popup", () => ({
+  RadarNotificationPopup: () => null,
+}));
+
 vi.mock("next/navigation", () => ({
   usePathname: () => "/home",
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({

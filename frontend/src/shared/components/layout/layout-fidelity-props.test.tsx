@@ -6,7 +6,11 @@ import { AppShell } from "./app-shell";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes" }));
+vi.mock("@/modules/radar-chart/components/radar-notification-popup", () => ({
+  RadarNotificationPopup: () => null,
+}));
+
+vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes", useRouter: () => ({ push: vi.fn() }) }));
 
 vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
