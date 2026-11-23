@@ -5,7 +5,7 @@ import { seedHistoryScenarioRegistrations } from '../seeds/history-scenarios-reg
 
 describe('history scenario registrations', () => {
   it('seeds twelve active historical registrations, two private accounts, and attendance only for one workshop', async () => {
-    const createMany = vi.fn().mockResolvedValue({ count: 17 });
+    const createMany = vi.fn().mockResolvedValue({ count: 18 });
     const attendanceCreateMany = vi.fn().mockResolvedValue({ count: 1 });
     const findUniqueOrThrow = vi
       .fn()
@@ -26,7 +26,7 @@ describe('history scenario registrations', () => {
       .data as Prisma.EventRegistrationCreateManyInput[];
     const primary = registrations.filter((item) => item.userId === 'primary');
     const secondary = registrations.filter((item) => item.userId === 'secondary');
-    expect(registrations).toHaveLength(17);
+    expect(registrations).toHaveLength(18);
     expect(primary.filter((item) => HISTORY_EVENT_IDS.historical.slice(0, 12).includes(item.eventId))).toHaveLength(12);
     expect(secondary).toHaveLength(2);
     expect(secondary.map((item) => item.eventId)).toEqual([
@@ -37,7 +37,12 @@ describe('history scenario registrations', () => {
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.cancelledRegistration)).toMatchObject({ statusId: 'cancelled', cancelledAt: expect.any(Date) });
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.boundary)).toMatchObject({ statusId: 'confirmed', cancelledAt: null });
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.future)).toMatchObject({ statusId: 'confirmed', cancelledAt: null });
-    expect(new Set(registrations.map((item) => item.id)).size).toBe(17);
+    expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.fixedBoundary)).toMatchObject({
+      statusId: 'confirmed',
+      cancelledAt: null,
+      registeredAt: new Date('2026-11-20T12:00:00.000Z'),
+    });
+    expect(new Set(registrations.map((item) => item.id)).size).toBe(18);
     expect(createMany).toHaveBeenCalledWith({ data: registrations, skipDuplicates: true });
     expect(attendanceCreateMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ registrationId: primary[4].id, checkedInAt: expect.any(Date) })],

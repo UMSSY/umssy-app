@@ -8,10 +8,13 @@ import {
 } from '../constants/events.constants';
 import type { EventFiltersPayload } from '../types/event-filters.types';
 
+const EXPIRED_STATUS_ID = '22222222-2222-2222-2222-222222222227';
+
 export function useEventsFilters() {
   const [searchInput, setSearchInput] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [isPopular, setIsPopular] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
 
   const search = useDebouncedValue(searchInput, 300);
 
@@ -19,6 +22,7 @@ export function useEventsFilters() {
     search,
     categoryId,
     sort: isPopular ? POPULAR_EVENT_SORT : DEFAULT_EVENT_SORT,
+    statusId: isExpired ? EXPIRED_STATUS_ID : undefined,
   };
 
   return {
@@ -28,6 +32,8 @@ export function useEventsFilters() {
     setCategoryId,
     isPopular,
     setIsPopular,
+    isExpired,
+    setIsExpired,
     filters,
   };
 }

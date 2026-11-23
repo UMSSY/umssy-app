@@ -12,14 +12,19 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
   const search = filters.search.trim();
   const categoryId = filters.categoryId;
   const sort = filters.sort;
-  const queryKey = ["events", "list", accessToken, search, categoryId, sort];
+  const statusId = filters.statusId;
+  const queryKey = ["events", "list", accessToken, search, categoryId, sort, statusId];
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: 1,
     queryFn: ({ pageParam, signal }) => eventsService.getEvents({
       page: pageParam, limit: 50,
       includeProposals: true,
-      ...(search && { search }), ...(categoryId && { categoryId }), ...(sort && { sort }),
+      isPublishedOnly: !statusId,
+      ...(search && { search }), 
+      ...(categoryId && { categoryId }), 
+      ...(sort && { sort }), 
+      ...(statusId && { statusId }),
     }, signal, accessToken),
     getNextPageParam: (lastPage, pages) => lastPage.data.length === 50 ? pages.length + 1 : undefined,
   });
