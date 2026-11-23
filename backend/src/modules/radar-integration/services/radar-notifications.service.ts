@@ -31,6 +31,7 @@ export class RadarNotificationsService {
         return snapshot
           ? {
               id: notification.id,
+              snapshotId,
               message: 'Tu radar se ha actualizado',
               version: snapshot.version,
               createdAt: notification.createdAt,

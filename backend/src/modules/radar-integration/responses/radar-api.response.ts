@@ -83,6 +83,7 @@ export const radarReviewOperationResponseSchema = z.object({
 export const radarNotificationsResponseSchema = z.array(
   z.object({
     id: identifier,
+    snapshotId: identifier,
     message: z.string(),
     version: z.number().int(),
     createdAt: timestamp,

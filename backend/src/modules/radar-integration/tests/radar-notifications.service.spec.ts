@@ -125,11 +125,12 @@ describe('RadarNotificationsService', () => {
   });
 
   it('lists the owner notifications with the required message', async () => {
-    const { service, inbox, createdAt } = setup();
+    const { service, inbox, createdAt, snapshot } = setup();
 
     await expect(service.list(userId)).resolves.toEqual([
       {
         id: notificationId,
+        snapshotId: snapshot.id,
         message: 'Tu radar se ha actualizado',
         version: 2,
         createdAt,

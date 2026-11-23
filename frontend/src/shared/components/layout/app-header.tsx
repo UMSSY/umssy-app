@@ -10,6 +10,7 @@ import { ChatPanel } from "@/modules/chat";
 import { NotificationBell } from "@/modules/notifications";
 import { BrandLogo } from "./brand-logo";
 import type { AppHeaderProps } from "@/shared/types/app-header-props.types";
+import { RadarNotificationPopup } from "@/modules/radar-chart/components/radar-notification-popup";
 
 export function AppHeader({ brand }: AppHeaderProps) {
   const { roles } = useAuth();
@@ -23,7 +24,10 @@ export function AppHeader({ brand }: AppHeaderProps) {
       </div>
       <div className="min-w-0 flex-1"><NavigationSearch /></div>
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-        <NotificationBell />
+        <div className="relative">
+          <NotificationBell />
+          <RadarNotificationPopup />
+        </div>
         <ChatPanel roles={roles} />
         <AccountMenu roles={roles} />
       </div>

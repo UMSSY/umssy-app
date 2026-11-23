@@ -1,5 +1,6 @@
 export interface RadarNotification {
   id: string;
+  snapshotId: string;
   message: string;
   version: number;
   createdAt: string;
