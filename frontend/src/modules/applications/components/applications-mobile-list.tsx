@@ -2,7 +2,6 @@ import { formatBoliviaDate } from "@/shared/utils/date-time";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsMobileListProps } from "../types/applications-mobile-list-props.types";
 import { ApplicationActions } from "./application-actions";
-import { ApplicationStatusBadge } from "./application-status-badge";
 
 export function ApplicationsMobileList({
   applications,
@@ -29,7 +28,6 @@ export function ApplicationsMobileList({
             <span>
               {APPLICATION_MESSAGES.date}: {formatBoliviaDate(application.appliedDate)}
             </span>
-            <ApplicationStatusBadge status={application.status} />
           </div>
           <ApplicationActions
             application={application}

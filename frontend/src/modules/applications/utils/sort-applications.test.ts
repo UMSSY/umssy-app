@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { buildApplication } from "../testing/application-fixtures";
-import { filterApplicationsByStatus } from "./filter-applications-by-status";
 import { nextApplicationSort, sortApplications } from "./sort-applications";
 
 const APPLICATIONS = [
@@ -43,15 +42,5 @@ describe("nextApplicationSort", () => {
       key: "company",
       direction: "asc",
     });
-  });
-});
-
-describe("filterApplicationsByStatus", () => {
-  it("returns every application for the all tab", () => {
-    expect(ids(filterApplicationsByStatus(APPLICATIONS, "all"))).toEqual(["a", "b", "c"]);
-  });
-
-  it("returns only the applications in the chosen status", () => {
-    expect(ids(filterApplicationsByStatus(APPLICATIONS, "Entrevista"))).toEqual(["b"]);
   });
 });
