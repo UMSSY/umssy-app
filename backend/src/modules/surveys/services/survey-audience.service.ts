@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ApprovedGraduateCareersService } from '../../access-requests/services/approved-graduate-careers.service.js';
 import { UsersService } from '../../users/services/users.service.js';
 import type { UserContact } from '../../users/types/user-contact.types.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
@@ -10,7 +9,6 @@ import type { SurveyAudienceFilter } from '../types/survey-audience-filter.type.
 export class SurveyAudienceService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly approvedGraduateCareersService: ApprovedGraduateCareersService,
     private readonly surveysRepository: SurveysRepository,
   ) {}
 
@@ -33,7 +31,7 @@ export class SurveyAudienceService {
   }: SurveyAudienceFilter): Promise<UserContact[]> {
     const userIds =
       careerId || graduationYear
-        ? await this.approvedGraduateCareersService.findApprovedUserIds({
+        ? await this.surveysRepository.findApprovedGraduateUserIds({
             careerId,
             graduationYear,
           })

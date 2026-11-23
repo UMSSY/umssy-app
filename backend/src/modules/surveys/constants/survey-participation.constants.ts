@@ -2,12 +2,17 @@ import type { Prisma } from '../../../prisma/client.js';
 import { SurveyTargetAudience } from '../types/survey.enum.js';
 import { CAREER_SELECT, CATALOG_TITLE_SELECT } from './survey.constants.js';
 
+export const APPROVED_ACCESS_REQUEST_WHERE = {
+  status: { title: { equals: 'approved', mode: 'insensitive' } },
+} satisfies Prisma.AccessRequestWhereInput;
+
 export const SURVEY_PARTICIPATION_TARGET_SELECT = {
   id: true,
   title: true,
   academicPeriod: true,
   closesAt: true,
   lastReminderSentAt: true,
+  publishedNotifiedPeriod: true,
   status: CATALOG_TITLE_SELECT,
   targetAudience: CATALOG_TITLE_SELECT,
   career: { select: CAREER_SELECT },
@@ -36,5 +41,8 @@ export const SURVEY_REMINDER_ERROR_MESSAGES = {
 } as const;
 
 export const SURVEY_ANSWER_FRONTEND_PATH = '/surveys';
+export const SURVEY_PUBLISHED_ACTION_URL = '/notifications?filter=SURVEYS';
 export const SURVEY_REMINDER_GROUP_KEY_PREFIX = 'survey-reminder';
+export const SURVEY_PUBLISHED_NO_CHANGES_TEXT =
+  'Sin variaciones registradas respecto al semestre anterior.';
 export const SURVEY_WITHOUT_CLOSING_DATE_TEXT = 'Sin fecha de cierre definida.';

@@ -50,6 +50,21 @@ afterEach(() => {
 });
 
 describe("Mis pases", () => {
+  it('shows workshop-style pill tabs while preserving tab selection', async () => {
+    getMine.mockResolvedValue([]);
+    getFinished.mockResolvedValue({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    const currentTab = screen.getByRole('tab', { name: 'Vigentes' });
+    const historyTab = screen.getByRole('tab', { name: 'Historial' });
+    expect(currentTab).toHaveClass('rounded-full', 'data-active:bg-primary');
+    expect(historyTab).toHaveClass('rounded-full', 'data-active:bg-primary');
+    expect(currentTab).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(historyTab);
+    expect(historyTab).toHaveAttribute('aria-selected', 'true');
+    expect(currentTab).toHaveAttribute('aria-selected', 'false');
+    expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
+  });
+
   it('loads finished history lazily and keeps its cards separate from the current panel', async () => {
     getMine.mockResolvedValue([pass]);
     getFinished.mockResolvedValue({ items: [{ id: 'reg-history', title: 'Historia', date: '2026-08-10T00:00:00Z', startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 12, limit: 10, totalPages: 2 });

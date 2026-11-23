@@ -11,8 +11,14 @@ import {
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Check, MessageCircle, X } from 'lucide-react';
+import { Calendar, Clock, Check, Layers, MessageCircle, X } from 'lucide-react';
 import { OfflineAvailableBadge } from './offline-available-badge';
+import {
+  formatSessionPosition,
+  getNextSession,
+  getSortedSessions,
+  toSessionSchedule,
+} from '../utils/event-sessions';
 
 import type { PassCardProps } from '../types/pass-card-props.types';
 
@@ -31,10 +37,17 @@ export function PassCard({
   onCancelRegistration,
   cancelDisabledReason,
   isAvailableOffline,
+  sessions,
 }: PassCardProps) {
-  const timing = useEventTiming({ date, startTime: startTime ?? '', endTime: endTime ?? '' });
+  const timing = useEventTiming({ date, startTime: startTime ?? '', endTime: endTime ?? '', sessions });
   const effectiveStatus = getEffectiveRegistrationStatus(status, timing.isPast, timing.isInProgress);
-  const timeRange = (startTime || endTime) ? formatRegistrationTimeRange(startTime ?? '', endTime ?? '') : null;
+  // En talleres multisesión se muestra la sesión en curso o la próxima.
+  const sortedSessions = getSortedSessions({ sessions });
+  const nextSession = sortedSessions.length > 1
+    ? getNextSession(sortedSessions) ?? sortedSessions[sortedSessions.length - 1]
+    : null;
+  const shown = nextSession ? toSessionSchedule(nextSession) : { date, startTime, endTime };
+  const timeRange = (shown.startTime || shown.endTime) ? formatRegistrationTimeRange(shown.startTime ?? '', shown.endTime ?? '') : null;
   const canCancel =
     isConfirmedRegistrationStatus(status) &&
     timing.hasValidStart &&
@@ -83,12 +96,16 @@ export function PassCard({
           >
             <Calendar className="size-4 shrink-0 opacity-70" />
             <span className="min-w-0 break-words">
-              {formatRegistrationDate(date)}
+              {formatRegistrationDate(shown.date)}
             </span>
           </div>
           {timeRange && <div className="mt-1 flex items-center gap-2 text-sm">
             <Clock className="size-4 shrink-0" aria-hidden="true" />
             <span>{timeRange}</span>
+          </div>}
+          {nextSession && <div className="mt-1 flex items-center gap-2 text-sm">
+            <Layers className="size-4 shrink-0" aria-hidden="true" />
+            <span>{formatSessionPosition(sortedSessions, nextSession)}</span>
           </div>}
           <p
             className="mt-2 line-clamp-1 text-sm [overflow-wrap:anywhere] break-words"

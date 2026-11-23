@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   CareerNotFoundException,
   InvalidSurveyScheduleException,
@@ -45,16 +45,20 @@ import {
 import { getScheduleError } from '../utils/survey-schedule.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
+import { SurveyParticipationService } from './survey-participation.service.js';
 import { SurveyPdfService } from './survey-pdf.service.js';
 
 @Injectable()
 export class SurveysService {
+  private readonly logger = new Logger(SurveysService.name);
+
   constructor(
     private readonly surveysRepository: SurveysRepository,
     private readonly careersRepository: CareersRepository,
     private readonly surveyMapper: SurveyMapper,
     private readonly surveyPdfService: SurveyPdfService,
     private readonly reportHistoryService: ReportHistoryService,
+    private readonly surveyParticipationService: SurveyParticipationService,
   ) {}
 
   async create(
@@ -66,6 +70,8 @@ export class SurveysService {
     await this.ensureSurveyIsValid(data, request, now);
 
     const record = await this.surveysRepository.create(data);
+    if (request.status === SurveyStatus.PUBLISHED)
+      await this.notifyPublished(record.id, createdById, now);
     return this.surveyMapper.toCreatedResponse(record);
   }
 
@@ -92,6 +98,8 @@ export class SurveysService {
     await this.ensureSurveyIsValid(data, request, now, id);
 
     const record = await this.surveysRepository.update(id, data);
+    if (request.status === SurveyStatus.PUBLISHED)
+      await this.notifyPublished(record.id, undefined, now);
     return this.surveyMapper.toCreatedResponse(record);
   }
 
@@ -282,6 +290,25 @@ export class SurveysService {
       questionIds: dto.questionIds ?? null,
     });
     return toSurveyAlertConfigSavedResponse(config);
+  }
+
+  private async notifyPublished(
+    surveyId: string,
+    actorId: string | undefined,
+    now: Date,
+  ): Promise<void> {
+    try {
+      await this.surveyParticipationService.notifyPublished(
+        surveyId,
+        actorId,
+        now,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error notificando la publicación de la encuesta ${surveyId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    }
   }
 
   private async ensureSurveyIsValid(

@@ -139,7 +139,7 @@ const extractNextStaticUrls = (html) =>
 
 const precacheRoute = async (route) => {
   const key = shellKey(route);
-  const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
+  const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit', headers: { 'X-UMSSY-Offline-Shell': '1' } }));
   return cacheShell(key, response);
 };
 

@@ -1,5 +1,8 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
+import { getFileNameFromDisposition } from "@/shared/utils/download-file";
+import { HEATMAP_PDF_FILE_NAME } from "../constants/heatmap-text.constants";
+import type { HeatmapExportedFile } from "../types/heatmap-exported-file.types";
 import type { HeatmapFilters } from "../types/heatmap-filters.types";
 import type { HeatmapData } from "../types/heatmap-data.types";
 import type { HeatmapType } from "../types/heatmap-type.types";
@@ -23,5 +26,18 @@ export const heatmapsService = {
       params: toHeatmapQueryParams(filters),
     });
     return data;
+  },
+  exportHeatmapPdf: async (type: HeatmapType, filters: HeatmapFilters): Promise<HeatmapExportedFile> => {
+    const response = await apiClient.get<Blob>(`/analytics/heatmap/${type}/export`, {
+      params: { ...toHeatmapQueryParams(filters), format: "pdf" },
+      responseType: "blob",
+    });
+    return {
+      file: response.data,
+      fileName: getFileNameFromDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        HEATMAP_PDF_FILE_NAME(type),
+      ),
+    };
   },
 };

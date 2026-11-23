@@ -179,3 +179,27 @@ it('keeps both locations across navigation and sends only the active one', async
   expect(payload).not.toHaveProperty('locations');
   expect(drafts.has('user-a')).toBe(false);
 });
+
+describe('Proposal with additional sessions', () => {
+  it('sends additional sessions and keeps them in the draft', async () => {
+    const hook = await setup();
+    vi.mocked(proposalsService.create).mockResolvedValueOnce(resultData);
+    act(() => hook.result.current.addSession());
+    expect(hook.result.current.sessions).toEqual([{ eventDate: '', startTime: '09:00', endTime: '12:00' }]);
+    act(() => hook.result.current.changeSession(0, 'eventDate', '2026-11-19'));
+    await waitFor(() => expect(drafts.get('user-a')?.sessions).toEqual([{ eventDate: '2026-11-19', startTime: '09:00', endTime: '12:00' }]));
+    act(() => { expect(hook.result.current.review()).toBe(true); });
+    await act(async () => { await hook.result.current.confirm(); });
+    expect(vi.mocked(proposalsService.create).mock.calls[0][4]).toEqual([{ eventDate: '2026-11-19', startTime: '09:00', endTime: '12:00' }]);
+    expect(hook.result.current.sessions).toEqual([]);
+  });
+
+  it('blocks the review while a session is invalid and allows removing it', async () => {
+    const hook = await setup();
+    act(() => hook.result.current.addSession());
+    act(() => { expect(hook.result.current.review()).toBe(false); });
+    expect(hook.result.current.sessionErrors[0].eventDate).toBe('Selecciona la fecha del taller.');
+    act(() => hook.result.current.removeSession(0));
+    act(() => { expect(hook.result.current.review()).toBe(true); });
+  });
+});
