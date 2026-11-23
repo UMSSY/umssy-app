@@ -1,6 +1,5 @@
 import type { ApplicationStatus } from "../types/application.types";
 import type { ApplicationSortKey } from "../types/application-sort-key.types";
-import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 
 export function getWithdrawApplicationEndpoint(applicationId: string): string {
   return `/applications/${applicationId}/withdraw`;
@@ -27,23 +26,7 @@ export const APPLICATION_QUERY_KEYS = {
   mine: ["applications", "mine"] as const,
 };
 
-export const WITHDRAWABLE_STATUSES: readonly ApplicationStatus[] = ["En revisión", "Entrevista"];
-
-export const CONTACTABLE_STATUSES: readonly ApplicationStatus[] = ["En revisión", "Entrevista", "Aceptada"];
-
 export const WITHDRAWN_STATUS: ApplicationStatus = "Retirada";
-
-const IN_PROGRESS_BADGE_CLASS = "bg-availability text-availability-foreground";
-
-const CLOSED_BADGE_CLASS = "bg-brand-soft text-danger";
-
-export const APPLICATION_STATUS_BADGE_CLASSES: Record<ApplicationStatus, string> = {
-  "En revisión": IN_PROGRESS_BADGE_CLASS,
-  Entrevista: IN_PROGRESS_BADGE_CLASS,
-  Aceptada: "bg-surface-soft text-ink",
-  "No seleccionado": CLOSED_BADGE_CLASS,
-  Retirada: CLOSED_BADGE_CLASS,
-};
 
 export const APPLICATION_MESSAGES = {
   pageTitle: "Mis postulaciones",
@@ -67,10 +50,8 @@ export const APPLICATION_MESSAGES = {
   status: "Estado",
   date: "Fecha",
   actions: "Acciones",
-  show: "Mostrar:",
-  allStatuses: "Todos",
-  noApplicationsInStatus: "No tienes postulaciones en este estado.",
   noActiveApplications: "No tienes postulaciones activas.",
+  noWithdrawnApplications: "No tienes postulaciones retiradas.",
   withdrawnApplications: "Postulaciones retiradas",
   confirmWithdrawTitle: "¿Retirar tu postulación?",
   confirmWithdrawDescription:
@@ -78,15 +59,6 @@ export const APPLICATION_MESSAGES = {
   cancel: "Cancelar",
   confirmWithdraw: "Sí, retirar",
 } as const;
-
-export const APPLICATION_STATUS_OPTIONS: readonly { value: ApplicationStatusFilter; label: string }[] = [
-  { value: "all", label: APPLICATION_MESSAGES.allStatuses },
-  { value: "En revisión", label: "En revisión" },
-  { value: "Entrevista", label: "Entrevista" },
-  { value: "Aceptada", label: "Aceptada" },
-  { value: "No seleccionado", label: "No seleccionado" },
-  { value: "Retirada", label: "Retirada" },
-];
 
 export const APPLICATION_SORT_COLUMNS: readonly { key: ApplicationSortKey; label: string }[] = [
   { key: "vacancy", label: APPLICATION_MESSAGES.vacancy },
