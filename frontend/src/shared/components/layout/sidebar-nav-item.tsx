@@ -21,6 +21,7 @@ export function SidebarNavItem({
   pathname,
   className,
   badge,
+  childBadges,
 }: SidebarNavItemProps & { className?: string; badge?: ReactNode }) {
   const Icon = item.icon;
   const submenuId = useId();
@@ -102,7 +103,8 @@ export function SidebarNavItem({
                       aria-hidden="true"
                     />
                   )}
-                  <span>{child.label}</span>
+                  <span className={childBadges?.[child.label] ? "flex-1" : undefined}>{child.label}</span>
+                  {childBadges?.[child.label]}
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             );

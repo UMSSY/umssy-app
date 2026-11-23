@@ -1,3 +1,5 @@
+import type { EventSessionResponse } from '../../events/index.js';
+
 export interface MyRegistrationResponse {
   id: string;
   eventId: string;
@@ -6,6 +8,7 @@ export interface MyRegistrationResponse {
   startTime: Date;
   endTime: Date;
   location: string;
+  sessions: EventSessionResponse[];
   status: string;
   registeredAt: string;
   cancelledAt: string | null;

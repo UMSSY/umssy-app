@@ -27,6 +27,9 @@ function buildRecord(
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
     category: { id: 'cat-uuid', name: 'Tecnologia' },
+    coverMimeType: null,
+    registrations: [],
+    sessions: [],
     _count: { registrations: 5 },
     ...overrides,
   };
@@ -69,6 +72,7 @@ describe('mapEventToResponse', () => {
       startTime: '09:00',
       endTime: '11:30',
       location: 'Sala A',
+      sessions: [],
       capacity: 20,
       availableSpots: 15,
       registrationCount: 5,

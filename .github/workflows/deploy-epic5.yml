@@ -28,6 +28,8 @@ jobs:
         run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
       - name: Build and push frontend image
+        env:
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID_TEST }}
         run: |
           docker build \
             --label org.opencontainers.image.source=https://github.com/UMSSY/umssy-app \
@@ -35,6 +37,7 @@ jobs:
             --build-arg NEXT_PUBLIC_API_URL_LOCAL=http://localhost:8080/api \
             --build-arg NEXT_PUBLIC_API_URL_DEV=https://epic5-api-umssy.zer4c.dev/api \
             --build-arg NEXT_PUBLIC_API_URL_PROD=https://epic5-api-umssy.zer4c.dev/api \
+            --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID="$NEXT_PUBLIC_GOOGLE_CLIENT_ID" \
             -f frontend/Dockerfile -t "$IMAGE" ./frontend
           docker push "$IMAGE"
 

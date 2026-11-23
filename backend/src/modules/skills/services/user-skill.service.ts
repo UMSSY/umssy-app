@@ -22,6 +22,10 @@ export class UserSkillService {
     private readonly evidence: UserSkillEvidenceRepository,
   ) {}
 
+  getAffinitySkillNames(userId: string): Promise<string[]> {
+    return this.userSkillRepository.findAffinitySkillNames(userId);
+  }
+
   replaceExperienceEvidence(
     userId: string,
     experienceId: string,

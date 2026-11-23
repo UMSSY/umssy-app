@@ -84,4 +84,45 @@ describe('MailDispatcherService', () => {
     });
     expect(result.status).toBe('sent');
   });
+
+  it('debe usar la plantilla notification con el botón "Ver en UMSSY" y URL absoluta', async () => {
+    await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/chat?tab=requests');
+
+    const payload = mockMailService.send.mock.calls[0][0];
+    expect(payload.mjml).toBe('<mjml>notification</mjml>');
+    expect(payload.text).toBe('Body\n\nVer en UMSSY: http://localhost:3000/chat?tab=requests');
+    expect(payload.values).toEqual({
+      title: 'Title',
+      body: 'Body',
+      actionUrl: 'http://localhost:3000/chat?tab=requests',
+    });
+  });
+
+  it('no debe usar un actionUrl de otro dominio en el botón', async () => {
+    await service.dispatchToUsers(['user-1'], 'Title', 'Body', 'https://evil.example.com/x');
+
+    const payload = mockMailService.send.mock.calls[0][0];
+    expect(payload.values.actionUrl).toBe('http://localhost:3000/');
+  });
+
+  it('debe recortar título y cuerpo a 100 caracteres', async () => {
+    const long = 'a'.repeat(150);
+
+    await service.dispatchToUsers(['user-1'], long, long, '/url');
+
+    const payload = mockMailService.send.mock.calls[0][0];
+    expect(payload.subject).toHaveLength(100);
+    expect(payload.values.title).toHaveLength(100);
+    expect(payload.values.body).toHaveLength(100);
+  });
+
+  it('debe devolver partial si solo algunos envíos fallan', async () => {
+    mockMailService.send
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('SMTP Down'));
+
+    const result = await service.dispatchToUsers(['user-1', 'user-2'], 'Title', 'Body', '/url');
+
+    expect(result.status).toBe('partial');
+  });
 });

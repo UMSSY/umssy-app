@@ -1,5 +1,6 @@
-import { SurveyNotificationsView } from "@/modules/surveys";
+import { redirect } from "next/navigation";
+import { SURVEY_NOTIFICATIONS_PATH } from "@/modules/surveys";
 
 export default function SurveysPage() {
-  return <SurveyNotificationsView />;
+  redirect(SURVEY_NOTIFICATIONS_PATH);
 }

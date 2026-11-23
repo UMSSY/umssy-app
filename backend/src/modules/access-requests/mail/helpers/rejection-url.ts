@@ -1,7 +1,7 @@
 import { DOCUMENT_CORRECTION_TOKEN_PATTERN } from '../../constants/document-correction.constants.js';
 import { RejectionMailContextException } from '../../exceptions/rejection-mail-context.exception.js';
 import type { DocumentCorrectionGrant } from '../../types/document-correction.types.js';
-import { buildFrontendUrl } from './frontend-url.js';
+import { buildFrontendUrl } from '../../../mail/helpers/frontend-url.js';
 
 export function buildRejectionUrl(grant: DocumentCorrectionGrant): string {
   if (

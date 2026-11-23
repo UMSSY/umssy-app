@@ -12,9 +12,11 @@ It also exposes the notification inbox, the channel preferences and the push sub
 flowchart LR
   subgraph Domains
     CH[chat]
+    AP[appointments]
     SV[surveys: survey-notifications.ts]
   end
   CH --> NS
+  AP --> NS
   SV -->|notify with validated payload and renderMail| NS
   subgraph Backend["backend/src/modules/notifications"]
     NS[NotificationsService.notify] --> NR[(NotificationsRepository)]
@@ -47,12 +49,12 @@ sequenceDiagram
   participant P as PushDispatcherService
   participant M as MailDispatcherService
   participant ML as MailService
-  D->>N: notify({ recipientIds, actorId?, type, payload, actionUrl, groupKey?, renderMail? })
+  D->>N: notify({ recipientIds, actorId?, type, payload, actionUrl, groupKey?, renderMail?, channels? })
   N->>N: Removes the actor and users with a block involving the actor
   N->>N: Looks up the type in notification_types (404 if missing)
   N->>N: Title and body from NOTIFICATION_TEMPLATES[type]
-  N->>N: Channels per recipient: catalog (sendsPush/sendsEmail) + preferences + visibility
-  N->>N: Creates one in-app notification per recipient
+  N->>N: One external channel per recipient: preference + catalog + visibility
+  N->>N: Creates one in-app notification per recipient (unless channels omits IN_APP)
   N->>G: emitToUser(id, "notification:new")
   opt there are push recipients
     N->>P: dispatchToUsers(...)
@@ -74,11 +76,14 @@ sequenceDiagram
 
 - **Recipients.** The actor is never notified about their own action. If there is an actor, recipients with a block between them and the actor are excluded. With no valid recipients it returns everything as `skipped` without writing anything.
 - **Catalog.** Every `NotificationType` must exist in `notification_types`; its `sends_push` and `sends_email` columns enable each channel. The catalog seed upserts by `code`, so it updates the channels of existing types.
-- **Preferences.** With no saved preference: push disabled and email enabled. Push and email cannot be enabled at the same time (`PUT /notifications/preferences`).
-- **Push.** Only if the type allows it, the user enabled it, and the app is not visible for that user (`visibility:changed` over WebSocket). Subscriptions with a desktop user agent are skipped (mobile or no user agent only). Title and body are truncated. Subscriptions that respond 404/410 are deleted.
-- **Email.** The domain can pass `renderMail(context)` in the request itself (`NotifyRequest.renderMail`, type `NotificationMailRenderer`); the `NOTIFICATION_TEMPLATES` catalog only defines the in-app title and body. `renderMail` receives `recipientName` and `actionUrl` and returns a promise with `mjml`, `subject`, `text` and `values`, so the domain can read its own `.mjml` template with `loadMailTemplate`. Without `renderMail`, the generic `mail/mjml/notification.mjml` template is used, loaded only once per send.
+- **Preferences.** Each recipient receives at most one external channel, resolved by `resolveNotificationChannel`: push if `pushEnabled`, otherwise email if `emailEnabled`, otherwise none. With no saved preference the channel is email. Older rows that have both push and email enabled resolve to push only. The in-app notification does not depend on this choice.
+- **Requested channels.** `notify()` accepts an optional `channels` list (`IN_APP`, `PUSH`, `EMAIL`) to deliver only those channels, for example to retry the one that failed. Without it every channel is considered, so the in-app notification is always created unless `IN_APP` is omitted.
+- **Chat and email.** `CHAT_MESSAGE` and `CHAT_GROUP_MESSAGE` never go out by email, even if the catalog enables email for them.
+- **Push.** Only if the type allows it, the user enabled it, and the app is not visible for that user (`visibility:changed` over WebSocket). Subscriptions with a desktop user agent are skipped (mobile or no user agent only). Title and body are truncated to 100 characters. Notifications are sent with a 24-hour TTL and `urgency: high` so they arrive with the app closed; `groupKey` becomes the notification tag on the device. Subscriptions that respond 404/410 are deleted.
+- **Push subscriptions.** `POST /push/subscriptions` upserts by endpoint and always assigns the endpoint to the authenticated user, so a device used by a new account stops delivering to the previous one.
+- **Email.** The domain can pass `renderMail(context)` in the request itself (`NotifyRequest.renderMail`, type `NotificationMailRenderer`); the `NOTIFICATION_TEMPLATES` catalog only defines the in-app title and body. `renderMail` receives `recipientName` and `actionUrl` and returns a promise with `mjml`, `subject`, `text` and `values`, so the domain can read its own `.mjml` template with `loadMailTemplate`. Without `renderMail`, the generic `mail/mjml/notification.mjml` template is used, loaded only once per send; title and body are truncated and the "Ver en UMSSY" button gets an absolute link built with the shared `frontendBaseUrl()` from the mail module (`FRONTEND_URL`, otherwise the first `CORS_ORIGIN`). Links to another origin are replaced by the frontend home.
 - **Result.** Each channel is summarized as `sent` (everything sent), `partial`, `failed` or `skipped`. `deliveries` contains `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. A critical failure in one dispatcher marks its channel as `failed` without cancelling the others.
-- **Survey notifications.** `SURVEY_REMINDER` (push and email), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (email only). Their payloads are validated with Zod and their emails are rendered in `backend/src/modules/surveys/notification/`; `notifications` only defines the in-app title and body.
+- **Survey notifications.** `SURVEY_PUBLISHED` and `SURVEY_REMINDER` (push and email), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (email only). Their payloads are validated with Zod and their emails are rendered in `backend/src/modules/surveys/notification/`; `notifications` only defines the in-app title and body.
 
 ## Endpoints
 
@@ -101,16 +106,16 @@ All require JWT (any role). The WebSocket authenticates with `handshake.auth.tok
 
 ### Exported service
 
-`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: chat, [surveys](../surveys/README.md), and [radar-integration](../radar-integration/README.md).
+`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), and [radar-integration](../radar-integration/README.md).
 
 ## Dependencies
 
 | Direction | Module                                                                                     | Usage                                                                              |
 | --------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Uses      | [mail](../mail/README.md)                                                                  | `MailService.send` and `loadMailTemplate('notification')` for the generic template |
+| Uses      | [mail](../mail/README.md)                                                                  | `MailService.send`, `loadMailTemplate('notification')` and `frontendBaseUrl()` for the generic email |
 | Uses      | [users](../users/README.md)                                                                | `findEmailById`, `findContactById` (recipient name and email)                      |
 | Uses      | auth                                                                                       | Session to authenticate the WebSocket                                              |
-| Used by   | chat, [surveys](../surveys/README.md), [radar-integration](../radar-integration/README.md) | Sending domain notifications                                                       |
+| Used by   | [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), [radar-integration](../radar-integration/README.md) | Sending domain notifications |
 
 ## Data
 
@@ -118,7 +123,30 @@ Tables `notifications`, `notification_types`, `notification_preferences` and `pu
 
 ## Frontend integration
 
-The frontend does not call `notify()`: the domain that owns the event does. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/surveys/:id` for those who must respond and `/backoffice/surveys/statistics/:id` for the creator.
+The frontend does not call `notify()`: the domain that owns the event does. Users choose their channel in **Perfil → Configuración** (see [profile](../profile/README.md)); `PushSubscriptionSync` registers the device subscription again after sign in when the saved channel is push. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/notifications?filter=SURVEYS` for the publication notice, `/surveys/:id` for reminders and `/backoffice/surveys/statistics/:id` for the creator.
+
+### Inbox extension points
+
+The inbox stays owned by this module; other domains can add content to it without changing its behavior:
+
+| Extension point | Consumer | Use |
+| --- | --- | --- |
+| `NotificationsView` optional `filterSections` prop (`Partial<Record<NotificationInboxFilter, ReactNode>>`) | [surveys](../surveys/README.md) | `/notifications` passes `{ SURVEYS: <SurveyNotificationsSection /> }`, rendered above the history only when that filter is active, using the same card and group header styles as `NotificationItem`. Without the prop the view is unchanged |
+| Sidebar sub-item badges (`AppShell` `sidebarItemBadges`, matched by label) | [surveys](../surveys/README.md) | `PendingSurveysBadge` on the "Notificaciones de Encuestas" sub-item |
+
+The other filters, the notification list, read state and link resolution are not affected.
+
+### Shared inbox components and routes
+
+The module exposes in `index.ts` the visual pieces of the inbox and the route of each filter, so the sections that other domains add look the same and stay connected to the menu:
+
+| Public export | Use |
+| --- | --- |
+| `NotificationCard` | Card presentation: unread/pending dot, icon, title, description (`line-clamp-2`), date and an `action` slot. `NotificationItem` uses it with the "open and mark as read" button; surveys uses it with "Responder encuesta" |
+| `NotificationsInboxLoading` | Loading rows built with the shared `Skeleton` (`rows`, 4 by default) |
+| `NotificationsInboxEmpty` | Empty state with the `icon`, `title` and `description` of each section |
+| `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications?filter=SURVEYS`...), used by the sidebar, the filter tabs and surveys |
+| `NOTIFICATION_INBOX_FILTER_LABELS` | Filter labels; surveys keys its sidebar badge with `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`, so renaming the menu entry does not disconnect the counter |
 
 ## Sprint History
 
@@ -128,9 +156,16 @@ The frontend does not call `notify()`: the domain that owns the event does. For 
 - Email supports domain-specific content through an async `renderMail` (MJML content, subject, text and values) with the recipient's name.
 - New survey notification types in the catalog; the catalog seed switches to upsert.
 - The survey notification contracts (Zod payloads, emails and MJML) live in the surveys domain.
+- One external channel per recipient, with push taking precedence for older rows that enable both channels.
+- Chat messages are excluded from email; the generic email shows a "Ver en UMSSY" button with an absolute link from the shared mail resolver.
+- Optional `channels` in `notify()` to deliver or retry specific channels.
+- Push is sent with TTL and high urgency; push subscriptions are reassigned to the account that registers them.
+- Optional `filterSections` slot in `NotificationsView` and sub-item badges in the sidebar, so surveys shows its list and pending count inside the "Notificaciones de Encuestas" filter (single inbox).
+- Shared inbox components (`NotificationCard`, `NotificationsInboxLoading`, `NotificationsInboxEmpty`) and filter routes (`getNotificationInboxPath`) exported for the sections of other domains.
 
 - Central publication notices retain the exact Radar snapshot reference and support historical navigation.
 - Concurrent duplicate prevention per recipient and snapshot, with central ownership of listing and read state.
+- Mentor slot offers use `hasGroupedNotification` as a durable preflight for `mentor-slot-offer:<offerId>` and avoid routine repeated `notify()` calls. Recipient/type/group creation is still serialized as the race-safe second defense, so concurrent workers receive at most one newly created recipient to dispatch.
 
 ## Radar publication integration
 

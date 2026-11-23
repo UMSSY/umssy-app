@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import type { NotifyResult } from '../../notifications/types/notify-result.type.js';
+import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import {
   SURVEY_ANSWER_FRONTEND_PATH,
+  SURVEY_PUBLISHED_ACTION_URL,
   SURVEY_REMINDER_GROUP_KEY_PREFIX,
   SURVEY_WITHOUT_CLOSING_DATE_TEXT,
 } from '../constants/survey-participation.constants.js';
@@ -12,13 +14,17 @@ import {
   SurveyReminderNotAllowedException,
   SurveyWithoutPendingRespondentsException,
 } from '../exceptions/index.js';
-import { surveyReminderNotification } from '../notification/survey-notifications.js';
+import {
+  surveyPublishedNotification,
+  surveyReminderNotification,
+} from '../notification/survey-notifications.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { SurveyParticipationResponse } from '../responses/survey-participation.response.js';
 import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
+import { getPreviousSemester } from '../utils/academic-semester.js';
+import { buildSurveyPublishedChange } from '../utils/build-survey-published-change.js';
 import {
-  buildSurveyFrontendUrl,
   formatSurveyClosureDate,
 } from '../utils/survey-frontend-url.js';
 import {
@@ -28,6 +34,7 @@ import {
   isSurveyOpenForReminders,
 } from '../utils/survey-participation.js';
 import { SurveyAudienceService } from './survey-audience.service.js';
+import { SurveyVariationEvaluatorService } from './survey-variation-evaluator.service.js';
 
 @Injectable()
 export class SurveyParticipationService {
@@ -35,6 +42,7 @@ export class SurveyParticipationService {
     private readonly surveysRepository: SurveysRepository,
     private readonly surveyAudienceService: SurveyAudienceService,
     private readonly notificationsService: NotificationsService,
+    private readonly variationEvaluator: SurveyVariationEvaluatorService,
   ) {}
 
   async getParticipation(
@@ -86,9 +94,7 @@ export class SurveyParticipationService {
           ? formatSurveyClosureDate(target.closesAt)
           : SURVEY_WITHOUT_CLOSING_DATE_TEXT,
       }),
-      actionUrl: buildSurveyFrontendUrl(
-        `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
-      ),
+      actionUrl: `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
       groupKey: `${SURVEY_REMINDER_GROUP_KEY_PREFIX}:${target.id}`,
     });
 
@@ -106,6 +112,49 @@ export class SurveyParticipationService {
       pushStatus: result.pushStatus,
       sentAt: now.toISOString(),
     };
+  }
+
+  async notifyPublished(
+    surveyId: string,
+    actorId?: string,
+    now: Date = new Date(),
+  ): Promise<NotifyResult | undefined> {
+    const target = await this.findTarget(surveyId);
+    const currentPeriod = getAcademicPeriod(now.toISOString());
+    if (!currentPeriod || target.publishedNotifiedPeriod === currentPeriod)
+      return undefined;
+
+    const { eligible } = await this.surveyAudienceService.resolve(
+      buildSurveyAudienceFilter(target),
+    );
+    if (eligible.length === 0) return undefined;
+
+    const claimed = await this.surveysRepository.claimPublishedNotification(
+      surveyId,
+      currentPeriod,
+    );
+    if (!claimed) return undefined;
+
+    const { shifts } = await this.variationEvaluator.evaluateSurvey(surveyId, {
+      closesAt: now,
+    });
+    const previousPeriod = getPreviousSemester(currentPeriod) ?? '';
+
+    return this.notificationsService.notify({
+      recipientIds: eligible.map((recipient) => recipient.id),
+      actorId,
+      ...surveyPublishedNotification({
+        surveyTitle: target.title,
+        previousPeriod,
+        currentPeriod,
+        change: buildSurveyPublishedChange(
+          shifts,
+          previousPeriod,
+          currentPeriod,
+        ),
+      }),
+      actionUrl: SURVEY_PUBLISHED_ACTION_URL,
+    });
   }
 
   private async findTarget(

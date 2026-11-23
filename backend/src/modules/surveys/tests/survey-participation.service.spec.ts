@@ -21,6 +21,7 @@ const TARGET: SurveyParticipationTarget = {
   academicPeriod: '2020',
   closesAt: new Date('2026-12-01T00:00:00.000Z'),
   lastReminderSentAt: new Date('2026-11-05T14:00:00.000Z'),
+  publishedNotifiedPeriod: null,
   status: { title: 'published' },
   targetAudience: { title: 'graduates' },
   career: { id: 'career-1', title: 'Ingeniería de Sistemas' },
@@ -86,6 +87,7 @@ describe('SurveyParticipationService', () => {
       repository as unknown as SurveysRepository,
       audienceService as unknown as SurveyAudienceService,
       notificationsService as unknown as NotificationsService,
+      { evaluateSurvey: vi.fn() } as never,
     );
   });
 

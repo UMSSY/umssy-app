@@ -83,7 +83,7 @@ describe('AttendanceCheckInController', () => {
         statusCode: status, ok: true, detail: 'Operación exitosa',
         data: { result, checkedInAt: TIME },
       });
-      expect(checkIn).toHaveBeenCalledWith(EVENT_ID, ACTOR, TOKEN);
+      expect(checkIn).toHaveBeenCalledWith(EVENT_ID, ACTOR, TOKEN, undefined);
     } finally {
       await app.close();
     }
@@ -159,7 +159,7 @@ describe('AttendanceCheckInController', () => {
         .post(`/api/events/${EVENT_ID}/attendances/check-ins`)
         .send({ reference: registrationId })
         .expect(201);
-      expect(checkIn).toHaveBeenCalledWith(EVENT_ID, ACTOR, registrationId);
+      expect(checkIn).toHaveBeenCalledWith(EVENT_ID, ACTOR, registrationId, undefined);
     } finally {
       await app.close();
     }

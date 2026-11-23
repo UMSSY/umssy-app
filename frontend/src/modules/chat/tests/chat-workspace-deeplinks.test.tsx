@@ -4,6 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChatWorkspace } from '../components/chat-workspace';
 import { toast } from 'sonner';
 
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(window.location.search),
+}));
+
 vi.mock('sonner', () => ({
   toast: {
     error: vi.fn(),

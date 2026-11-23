@@ -7,21 +7,24 @@ export function assertRegistrationOpen(
     eventDate: Date;
     startTime: Date;
     endTime: Date;
+    sessions?: { startsAt: Date }[];
   },
   isFinished: boolean,
 ): void {
-  const { eventDate, startTime } = event;
+  const { eventDate, startTime, sessions } = event;
   if (isFinished) throw new EventFinishedException();
 
-  const startsAt =
-    Date.UTC(
-      eventDate.getUTCFullYear(),
-      eventDate.getUTCMonth(),
-      eventDate.getUTCDate(),
-      startTime.getUTCHours(),
-      startTime.getUTCMinutes(),
-      startTime.getUTCSeconds(),
-      startTime.getUTCMilliseconds(),
-    ) - BOLIVIA_OFFSET_MS;
+  // La inscripción y la cancelación cierran al iniciar la primera sesión.
+  const startsAt = sessions?.length
+    ? Math.min(...sessions.map((session) => session.startsAt.getTime()))
+    : Date.UTC(
+        eventDate.getUTCFullYear(),
+        eventDate.getUTCMonth(),
+        eventDate.getUTCDate(),
+        startTime.getUTCHours(),
+        startTime.getUTCMinutes(),
+        startTime.getUTCSeconds(),
+        startTime.getUTCMilliseconds(),
+      ) - BOLIVIA_OFFSET_MS;
   if (Date.now() >= startsAt) throw new RegistrationClosedException();
 }

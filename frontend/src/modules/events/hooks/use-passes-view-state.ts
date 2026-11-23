@@ -26,8 +26,9 @@ export function usePassesViewState(isCurrentActive = true): PassesViewState {
   const savedView = (error: string | null): PassesViewState => ({
     ...base,
     status: "saved",
-    passes: saved.map(({ id, eventName, date, startTime, endTime, location, status }) => ({
+    passes: saved.map(({ id, eventName, date, startTime, endTime, location, status, sessions }) => ({
       id, eventName, date, startTime, endTime, status, location: location ?? "",
+      ...(sessions && { sessions }),
     })),
     error,
   });
@@ -42,6 +43,10 @@ export function usePassesViewState(isCurrentActive = true): PassesViewState {
     if (isSnapshotLoading) return emptyView("loading");
     if (!snapshot) return emptyView("no-offline-copy");
     return savedView(null);
+  }
+  if (!accessToken) {
+    if (isSnapshotLoading) return emptyView("loading");
+    return snapshot ? savedView(null) : emptyView("no-offline-copy");
   }
   if (live.isLoading) return emptyView("loading");
   if (live.error) {

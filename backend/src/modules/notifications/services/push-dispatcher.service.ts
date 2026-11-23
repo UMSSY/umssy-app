@@ -10,6 +10,9 @@ import type { ChannelDispatchResult } from '../types/channel-dispatch-result.typ
 import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
 import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
 
+const PUSH_TTL_SECONDS = 24 * 60 * 60;
+const PUSH_URGENCY = 'high';
+
 @Injectable()
 export class PushDispatcherService implements OnModuleInit {
   private readonly logger = new Logger(PushDispatcherService.name);
@@ -77,6 +80,7 @@ export class PushDispatcherService implements OnModuleInit {
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
           JSON.stringify(pushPayload),
+          { TTL: PUSH_TTL_SECONDS, urgency: PUSH_URGENCY },
         );
         successCount++;
         sentUserIds.add(sub.userId);
