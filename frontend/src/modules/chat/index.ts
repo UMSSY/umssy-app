@@ -5,7 +5,11 @@ export * from './types/attachment.types';
 export * from './types/link-preview.types';
 export * from './contexts/socket-context';
 export { ChatPanel, ChatDock } from "./components/chat-panel";
-export { MessagingUiProvider } from "./contexts/messaging-ui-context";
+export {
+  MessagingUiProvider,
+  useMessagingUi,
+} from "./contexts/messaging-ui-context";
+export { getOrCreateConversation } from "./services/chat-api";
 export { ChatImageThumbnail } from "./components/chat-image-thumbnail";
 export { ChatPdfCard } from "./components/chat-pdf-card";
 export { ChatLinkPreviewCard } from "./components/chat-link-preview-card";
