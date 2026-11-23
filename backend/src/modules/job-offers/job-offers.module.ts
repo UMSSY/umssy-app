@@ -8,9 +8,10 @@ import { JobOfferMapper } from './mappers/job-offer.mapper.js';
 import { JobOffersRepository } from './repositories/job-offers.repository.js';
 import { JobOfferSkillsService } from './services/job-offer-skills.service.js';
 import { JobOffersService } from './services/job-offers.service.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
-  imports: [JwtAuthModule, PrismaModule, SkillsModule],
+  imports: [JwtAuthModule, PrismaModule, SkillsModule, NotificationsModule,],
   controllers: [JobOffersController],
   providers: [
     JobOfferMatchRepository,

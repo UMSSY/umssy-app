@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { NotificationsService } from '../../notifications/services/notifications.service.js';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
@@ -17,6 +18,7 @@ import {
   JobOfferModality,
 } from '../types/job-offer.enum.js';
 import type { JobOfferRecord } from '../types/job-offer-record.type.js';
+import * as notificationHelper from '../utils/job-offer-notification.helper.js';
 
 const CREATED_AT = new Date('2026-10-12T15:00:00.000Z');
 
@@ -86,6 +88,9 @@ describe('JobOffersService', () => {
     validateSkillIds: ReturnType<typeof vi.fn>;
     listCatalog: ReturnType<typeof vi.fn>;
   };
+  let notificationsService: {
+    notify: ReturnType<typeof vi.fn>;
+  };
   let service: JobOffersService;
 
   beforeEach(() => {
@@ -96,6 +101,9 @@ describe('JobOffersService', () => {
         .fn()
         .mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
     };
+    notificationsService = {
+      notify: vi.fn().mockResolvedValue(undefined),
+    };
     service = new JobOffersService(
       repository as unknown as JobOffersRepository,
       skillsService as unknown as JobOfferSkillsService,
@@ -104,6 +112,7 @@ describe('JobOffersService', () => {
         findPublishedById: vi.fn(),
         findPublished: vi.fn(),
       } as unknown as JobOfferMatchRepository,
+      notificationsService as unknown as NotificationsService,
     );
   });
 
@@ -133,6 +142,44 @@ describe('JobOffersService', () => {
         otherRequirements: ['Carta de motivación'],
         skillIds: ['skill-1'],
       });
+      expect(result).toEqual({
+        id: 'offer-1',
+        createdAt: CREATED_AT.toISOString(),
+      });
+    });
+
+    it('dispara la notificación de nueva vacante publicada al crear la oferta', async () => {
+      const notifySpy = vi
+        .spyOn(notificationHelper, 'notifyNewJobOfferPublished')
+        .mockResolvedValue(undefined);
+
+      const result = await service.create('company-1', REQUEST);
+
+      expect(notifySpy).toHaveBeenCalledTimes(1);
+      expect(notifySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          notificationsService,
+          jobOfferId: 'offer-1',
+          jobTitle: 'DevOps Senior',
+          companyName: 'Empresa',
+          candidates: [],
+        }),
+      );
+      expect(result).toEqual({
+        id: 'offer-1',
+        createdAt: CREATED_AT.toISOString(),
+      });
+
+      notifySpy.mockRestore();
+    });
+
+    it('no interrumpe la creación de la vacante si el helper de notificación falla', async () => {
+      notificationsService.notify.mockRejectedValueOnce(
+        new Error('Fallo en NotificationsService'),
+      );
+
+      const result = await service.create('company-1', REQUEST);
+
       expect(result).toEqual({
         id: 'offer-1',
         createdAt: CREATED_AT.toISOString(),
@@ -427,6 +474,7 @@ describe('JobOffersService', () => {
       expect(repository.update).not.toHaveBeenCalled();
     });
   });
+
   describe('softDelete', () => {
     it('marca la vacante como Eliminada sin borrarla', async () => {
       await service.softDelete('company-1', 'offer-1');
@@ -460,6 +508,7 @@ describe('JobOffersService', () => {
       expect(repository.updateStatus).not.toHaveBeenCalled();
     });
   });
+
   describe('reopen', () => {
     const CLOSED_RECORD: JobOfferRecord = {
       ...RECORD,
@@ -536,5 +585,25 @@ describe('JobOffersService', () => {
       ).rejects.toBeInstanceOf(JobOfferCatalogNotFoundException);
       expect(repository.reopen).not.toHaveBeenCalled();
     });
+  });
+
+  it('no dispara la notificación de nueva vacante en update, softDelete ni reopen', async () => {
+    const notifySpy = vi
+      .spyOn(notificationHelper, 'notifyNewJobOfferPublished')
+      .mockResolvedValue(undefined);
+
+    await service.update('company-1', 'offer-1', REQUEST);
+    await service.softDelete('company-1', 'offer-1');
+
+    repository.findByCompanyAndId.mockResolvedValue({
+      ...RECORD,
+      status: { title: 'Cerrada' },
+    });
+    repository.findStatusId.mockResolvedValue('status-published');
+    await service.reopen('company-1', 'offer-1');
+
+    expect(notifySpy).not.toHaveBeenCalled();
+
+    notifySpy.mockRestore();
   });
 });

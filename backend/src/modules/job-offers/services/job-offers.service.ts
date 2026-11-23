@@ -1,5 +1,5 @@
+import { Injectable, Logger } from '@nestjs/common';
 import { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
-import { Injectable } from '@nestjs/common';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
@@ -23,15 +23,20 @@ import type {
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
+import { notifyNewJobOfferPublished } from '../utils/job-offer-notification.helper.js';
 import { JobOfferSkillsService } from './job-offer-skills.service.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
 
 @Injectable()
 export class JobOffersService {
+  private readonly logger = new Logger(JobOffersService.name);
+
   constructor(
     private readonly jobOffersRepository: JobOffersRepository,
     private readonly jobOfferSkillsService: JobOfferSkillsService,
     private readonly jobOfferMapper: JobOfferMapper,
     private readonly matchSource: JobOfferMatchRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   findPublishedMatchById(id: string, now: Date) {
@@ -67,7 +72,18 @@ export class JobOffersService {
       ...this.toOfferFields(request),
     });
 
-    return this.jobOfferMapper.toCreatedResponse(record);
+    const response = this.jobOfferMapper.toCreatedResponse(record);
+
+   await notifyNewJobOfferPublished({
+      logger: this.logger,
+      notificationsService: this.notificationsService,
+      jobOfferId: record.id,
+      jobTitle: request.title,
+      companyName: 'Empresa', // TODO (Lunes): reemplazar por el nombre real de la empresa
+      candidates: [],
+    });
+
+    return response;
   }
 
   async listPublished(): Promise<PublishedJobOfferResponse[]> {
