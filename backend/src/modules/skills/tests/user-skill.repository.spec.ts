@@ -44,6 +44,21 @@ describe('UserSkillRepository', () => {
     } as unknown as PrismaService);
   });
 
+  it('exposes only usable skill names for affinity', async () => {
+    userSkill.findMany.mockResolvedValue([{ skill: { name: 'React' } }]);
+
+    await expect(repository.findAffinitySkillNames(userId)).resolves.toEqual([
+      'React',
+    ]);
+    expect(userSkill.findMany).toHaveBeenCalledExactlyOnceWith({
+      where: {
+        userId,
+        verificationStatus: { notIn: ['rejected', 'revoked'] },
+      },
+      select: { skill: { select: { name: true } } },
+    });
+  });
+
   it('reads all professional skills in one query without source or verification filters', async () => {
     const records = [
       { skill: { id: skillId, name: 'Python', isCustom: false } },
