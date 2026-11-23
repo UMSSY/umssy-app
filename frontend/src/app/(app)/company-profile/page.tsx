@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { CompanyProfileView } from "@/modules/company-profile";
+import { CompanyProfileContainer } from "@/modules/company-profile";
 
 export const metadata: Metadata = {
-  title: "Perfil de Empresa - HU14",
+  title: "Perfil de Empresa - HU10",
 };
 
 export default function CompanyProfilePage() {
-  return <CompanyProfileView />;
+  return <CompanyProfileContainer />;
 }
