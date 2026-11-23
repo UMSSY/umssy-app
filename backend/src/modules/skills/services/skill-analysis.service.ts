@@ -82,16 +82,16 @@ export class SkillAnalysisService {
     detected: readonly DetectedSkillPayload[],
     context: TransactionContext,
   ): Promise<boolean> {
-    const rows = await this.repository.findProfileSkillRows(userId, context);
-
-    const plan = planSkillReconciliation(rows, detected);
-
-    await this.repository.applyReconciliation(userId, plan, context);
-
-    const [updated, sources] = await Promise.all([
+    const [rows, sources] = await Promise.all([
       this.repository.findProfileSkillRows(userId, context),
       this.sources.load(userId, context),
     ]);
+
+    const plan = planSkillReconciliation(rows, detected, sources.live);
+
+    await this.repository.applyReconciliation(userId, plan, context);
+
+    const updated = await this.repository.findProfileSkillRows(userId, context);
     const approved: string[] = [],
       pending: string[] = [];
     for (const row of updated) {
