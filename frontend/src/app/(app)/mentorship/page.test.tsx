@@ -1,13 +1,14 @@
 import { act, cleanup, screen } from "@testing-library/react";
-import "@/shared/testing/indexed-db.mock";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
-import {
-  clearAccessToken,
-  saveAccessToken,
-} from "@/shared/services/storage/access-token-storage";
 import MentorshipPage from "./page";
+
+vi.mock("@/shared/services/storage/access-token-storage", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/shared/services/storage/access-token-storage")>(),
+  getAccessToken: () => "mentor-token",
+  subscribeAccessToken: () => () => {},
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -22,8 +23,7 @@ vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
 }));
 
 describe("MentorshipPage", () => {
-  beforeEach(async () => {
-    await saveAccessToken("mentor-token");
+  beforeEach(() => {
     vi.spyOn(mentorParticipationService, "getMyParticipation").mockResolvedValue({
       status: "NEVER",
       areas: [],
@@ -34,7 +34,6 @@ describe("MentorshipPage", () => {
 
   afterEach(() => {
     cleanup();
-    clearAccessToken();
     vi.restoreAllMocks();
   });
 
