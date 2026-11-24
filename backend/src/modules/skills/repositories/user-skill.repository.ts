@@ -22,6 +22,14 @@ const sourceRowSelect = {
 export class UserSkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findAffinitySkillNames(userId: string): Promise<string[]> {
+    const rows = await this.prisma.userSkill.findMany({
+      where: { userId, verificationStatus: { notIn: ['rejected', 'revoked'] } },
+      select: { skill: { select: { name: true } } },
+    });
+    return rows.map(({ skill }) => skill.name);
+  }
+
   findAllByUserId(userId: string): Promise<UserSkillRecord[]> {
     return this.listSkills(userId);
   }

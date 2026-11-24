@@ -21,10 +21,19 @@ export class AttendanceCheckInRepository {
     return rows.length === 1;
   }
 
-  insertIfAbsent(tx: Prisma.TransactionClient, registrationId: string, actorId: string, checkedInAt: Date) {
+  // Se ejecuta con la inscripción bloqueada; así también se evita duplicar asistencias sin sesión.
+  async insertIfAbsent(
+    tx: Prisma.TransactionClient,
+    registrationId: string,
+    sessionId: string | null,
+    actorId: string,
+    checkedInAt: Date,
+  ) {
+    if (!sessionId && (await this.findAttendance(tx, registrationId, sessionId))) return { count: 0 };
     return tx.eventAttendance.createMany({
       data: {
         registrationId,
+        sessionId,
         checkedInAt,
         checkedInById: actorId,
         checkedInOffline: false,
@@ -34,9 +43,9 @@ export class AttendanceCheckInRepository {
     });
   }
 
-  findAttendance(tx: Prisma.TransactionClient, registrationId: string) {
-    return tx.eventAttendance.findUnique({
-      where: { registrationId },
+  findAttendance(tx: Prisma.TransactionClient, registrationId: string, sessionId: string | null) {
+    return tx.eventAttendance.findFirst({
+      where: { registrationId, sessionId },
       select: { checkedInAt: true },
     });
   }

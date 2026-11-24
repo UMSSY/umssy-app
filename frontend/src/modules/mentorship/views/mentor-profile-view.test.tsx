@@ -184,7 +184,8 @@ describe('MentorProfileView', () => {
     expect(
       screen.getByRole('heading', { name: 'Trayectoria actual' }),
     ).toBeInTheDocument();
-    expect(container.querySelector('main > div > div.grid')).toHaveClass(
+    const grid = container.querySelector('main > div > div.grid');
+    expect(grid).toHaveClass(
       'lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)]',
     );
     const recommendations = screen.getByRole('region', {
@@ -193,9 +194,7 @@ describe('MentorProfileView', () => {
     expect(container.querySelector('main > div')?.lastElementChild).toBe(
       recommendations,
     );
-    expect(recommendations.previousElementSibling).toBe(
-      container.querySelector('main > div > div.grid'),
-    );
+    expect(recommendations.previousElementSibling).toBe(grid);
   });
 
   it('maneja campos opcionales nulos sin inventar contenido', async () => {

@@ -182,7 +182,7 @@ describe('Radar personal integrado con Épica 2', () => {
           .querySelector('text'),
       ).toHaveClass('fill-accent', 'underline');
       expect(
-        screen.getByTestId('radar-dot-qa').querySelector('.stroke-yellow-500'),
+        screen.getByTestId('radar-dot-qa').querySelector('.stroke-accent'),
       ).toBeInTheDocument();
       expect(
         screen.getByText(`Puntaje anterior: ${previousScore} / 10`),

@@ -103,7 +103,7 @@ describe("useContactApplication", () => {
   it("warns about the restriction without calling the server when the application is closed", () => {
     const { result } = renderHook(() => useContactApplication());
 
-    act(() => result.current.contact(buildApplication({ status: "No seleccionado" })));
+    act(() => result.current.contact(buildApplication({ status: "Retirada" })));
 
     expect(toast.error).toHaveBeenCalledWith(
       "Esta postulación ya no permite la comunicación directa con el reclutador.",

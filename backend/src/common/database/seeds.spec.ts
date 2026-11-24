@@ -6,7 +6,10 @@ import {
   seedUsers,
 } from '../../modules/users/seeds/users.seed.js';
 import { seedEvents } from '../../modules/events/seeds/events.seed.js';
+import { seedHistoryScenarioEvents } from '../../modules/events/seeds/history-scenarios-events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
+import { seedHistoryScenarioRegistrations } from '../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js';
+import { seedAttendanceQaFixtures } from '../../modules/event-registrations/seeds/attendance-qa-fixtures.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedRadar } from '../../modules/radar-integration/seeds/radar.seed.js';
@@ -20,9 +23,24 @@ vi.mock('../../modules/users/seeds/users.seed.js', () => ({
 vi.mock('../../modules/events/seeds/events.seed.js', () => ({
   seedEvents: vi.fn(),
 }));
+vi.mock('../../modules/events/seeds/history-scenarios-events.seed.js', () => ({
+  seedHistoryScenarioEvents: vi.fn(),
+}));
 vi.mock(
   '../../modules/event-registrations/seeds/event-registrations.seed.js',
   () => ({ seedEventRegistrations: vi.fn() }),
+);
+vi.mock(
+  '../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js',
+  () => ({
+    seedHistoryScenarioRegistrations: vi.fn(),
+  }),
+);
+vi.mock(
+  '../../modules/event-registrations/seeds/attendance-qa-fixtures.seed.js',
+  () => ({
+    seedAttendanceQaFixtures: vi.fn(),
+  }),
 );
 vi.mock('../../modules/availability/seeds/availability.seed.js', () => ({
   seedAvailability: vi.fn(),
@@ -61,6 +79,7 @@ const users = {
   graduate: { id: 'availability-graduate' },
   eventGraduate: { id: 'event-graduate' },
   emptyGraduate: { id: 'without-passes' },
+  historyGraduate: { id: 'history-graduate' },
 };
 
 beforeEach(() => {
@@ -136,7 +155,19 @@ describe('combined events and availability seed', () => {
     expect(seedOrientationTypes).toHaveBeenCalledBefore(vi.mocked(seedUsers));
     expect(seedUsers).toHaveBeenCalledBefore(vi.mocked(seedEvents));
     expect(seedEvents).toHaveBeenCalledWith(tx, 'event-graduate');
+    expect(seedHistoryScenarioEvents).toHaveBeenCalledWith(
+      tx,
+      'event-graduate',
+      expect.any(Date),
+    );
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'event-graduate');
+    expect(seedHistoryScenarioRegistrations).toHaveBeenCalledWith(
+      tx,
+      'event-graduate',
+      'history-graduate',
+      expect.any(Date),
+    );
+    expect(seedAttendanceQaFixtures).toHaveBeenCalledWith(tx, expect.any(Date));
     expect(seedEvents).toHaveBeenCalledBefore(
       vi.mocked(seedEventRegistrations),
     );
@@ -155,7 +186,7 @@ describe('combined events and availability seed', () => {
       maxWait: 5000,
       timeout: 120000,
     });
-    expect(client.$transaction).toHaveBeenCalledTimes(10);
+    expect(client.$transaction).toHaveBeenCalledTimes(13);
     expect(client.$disconnect).not.toHaveBeenCalled();
   });
 

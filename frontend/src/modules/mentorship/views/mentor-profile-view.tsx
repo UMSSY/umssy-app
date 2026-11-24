@@ -141,7 +141,7 @@ export function MentorProfileView({
                   {professionalInterests.map((skill) => (
                     <li
                       key={skill.id}
-                      className="rounded-md border border-border bg-surface-soft px-3 py-1 text-sm text-ink"
+                      className="max-w-full min-w-0 rounded-md border border-border bg-surface-soft px-3 py-1 text-sm [overflow-wrap:anywhere] text-ink"
                     >
                       {skill.name}
                     </li>

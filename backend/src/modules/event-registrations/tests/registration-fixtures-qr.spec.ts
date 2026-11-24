@@ -59,5 +59,26 @@ describe('registration fixture QR tokens', () => {
         (row: { statusId: string }) => row.statusId === 'confirmed',
       ),
     ).toBe(true);
+    for (const key of [
+      'history-interviews-2026-11-23',
+      'history-git-2026-11-23',
+      'history-accessibility-2026-11-23',
+      'history-visualization-2026-11-23',
+      'history-projects-2026-11-26',
+    ]) {
+      const workshopSupports = createMany.mock.calls[0]![0].data.filter(
+        (row: { eventId: string }) => row.eventId === context.getId(key),
+      );
+      expect(workshopSupports).toHaveLength(9);
+      expect(
+        new Set(workshopSupports.map((row: { userId: string }) => row.userId))
+          .size,
+      ).toBe(9);
+      expect(
+        workshopSupports.every(
+          (row: { statusId: string }) => row.statusId === 'confirmed',
+        ),
+      ).toBe(true);
+    }
   });
 });

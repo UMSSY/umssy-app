@@ -8,10 +8,18 @@ import { EventsService } from '../../events/services/events.service.js';
 const eventFilter = {
   status: { title: 'Publicado' },
   OR: [
-    { eventDate: { gt: new Date('2026-10-23T00:00:00Z') } },
     {
-      eventDate: new Date('2026-10-23T00:00:00Z'),
-      endTime: { gt: new Date('1970-01-01T08:00:00Z') },
+      sessions: { some: { endsAt: { gt: new Date('2026-10-23T12:00:00Z') } } },
+    },
+    {
+      sessions: { none: {} },
+      OR: [
+        { eventDate: { gt: new Date('2026-10-23T00:00:00Z') } },
+        {
+          eventDate: new Date('2026-10-23T00:00:00Z'),
+          endTime: { gt: new Date('1970-01-01T08:00:00Z') },
+        },
+      ],
     },
   ],
 };
@@ -59,6 +67,15 @@ describe('EventRegistrationsService', () => {
             startTime: true,
             endTime: true,
             location: true,
+            sessions: {
+              select: {
+                id: true,
+                startsAt: true,
+                endsAt: true,
+                location: true,
+              },
+              orderBy: [{ startsAt: 'asc' }, { id: 'asc' }],
+            },
           },
         },
       },

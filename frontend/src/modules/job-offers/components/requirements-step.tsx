@@ -84,6 +84,8 @@ export function RequirementsStep({
           </Label>
           <Textarea
             id="description"
+            spellCheck
+            lang="es"
             value={conditions.description}
             onChange={handleDescriptionChange}
             maxLength={MAX_DESCRIPTION_CHARS}
