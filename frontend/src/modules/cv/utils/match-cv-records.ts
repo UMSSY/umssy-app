@@ -35,11 +35,6 @@ export function matchCvRecords<TExtracted, TRecord extends { id: string; startDa
   pairByStartDate((date) => date ?? "");
   pairByStartDate(toYearMonth);
 
-  extracted.forEach((item, index) => {
-    if (paired[index]) return;
-    pair(index, [...findCandidates(item)].sort((first, second) => second.startDate.localeCompare(first.startDate))[0]);
-  });
-
   return extracted.map((item, index) => {
     const record = paired[index];
     if (!record) return { status: "new" };

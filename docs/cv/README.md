@@ -48,7 +48,7 @@ sequenceDiagram
 - Uploading or deleting cancels in-flight queries to prevent stale data from being reintroduced.
 - Deletion requires confirmation, removes the cached file, and updates completeness.
 - File previews release their temporary URLs when closed or unmounted.
-- Extraction lets the user review data before applying it to the profile; export uses the selected data.
+- Extraction lets the user review data before applying it to the profile; export uses the selected data. Extracted education and work experience items match existing profile records only when their institution/degree or company/position and start dates align (exact date or year-month). Items with incompatible or unaligned dates are treated as new records to prevent overwriting existing profile entries.
 - The dashboard shows active versions and history, confidence, reasons, and skills. It does not approve documents in the browser.
 - Queries are scoped to the owner: polling runs every 1.5 seconds during processing, every 15 seconds while idle, and on reconnection.
 - Replacing or deleting a file may change NLP analysis and the radar; mentorship simulation does not change persisted data.

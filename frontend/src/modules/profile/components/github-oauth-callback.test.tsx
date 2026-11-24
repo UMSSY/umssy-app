@@ -1,25 +1,36 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { completeGithubOAuth } from '../utils/complete-portfolio-oauth';
+import { completePortfolioOAuth } from '../utils/complete-portfolio-oauth';
 import { GithubOAuthCallback } from './github-oauth-callback';
+import { resetPendingOAuthExchanges } from './portfolio-oauth-callback';
 
 vi.mock('../utils/complete-portfolio-oauth', () => ({
-  completeGithubOAuth: vi.fn(() => new Promise<string>(() => {})),
+  completePortfolioOAuth: vi.fn(() => new Promise<string>(() => {})),
 }));
 
-describe('GitHub OAuth callback page', () => {
-  afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  resetPendingOAuthExchanges();
+});
 
+describe('GitHub OAuth callback page', () => {
   it('reuses the pending exchange if session restoration remounts the page', () => {
-    window.history.replaceState({}, '', '/oauth/github/callback?code=code-1&state=state-1');
+    window.history.replaceState(
+      {},
+      '',
+      '/oauth/github/callback?code=code-1&state=state-1',
+    );
     const first = render(<GithubOAuthCallback />);
-    expect(completeGithubOAuth).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(completeGithubOAuth).mock.calls[0][0].get('code')).toBe('code-1');
+    expect(completePortfolioOAuth).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(completePortfolioOAuth).mock.calls[0][0]).toBe('github');
+    expect(vi.mocked(completePortfolioOAuth).mock.calls[0][1].get('code')).toBe(
+      'code-1',
+    );
     expect(window.location.search).toBe('');
 
     first.unmount();
     render(<GithubOAuthCallback />);
 
-    expect(completeGithubOAuth).toHaveBeenCalledTimes(1);
+    expect(completePortfolioOAuth).toHaveBeenCalledTimes(1);
   });
 });
