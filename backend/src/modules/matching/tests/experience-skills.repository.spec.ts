@@ -9,6 +9,7 @@ const USER_ID = '0b9f8a52-3c1d-4e7a-9d55-6f1c2a8b7e10';
 const EXPERIENCE_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 const OTHER_REF = 'work_experience:other';
 const REF = buildExperienceRef(EXPERIENCE_ID);
+const STRUCTURED_REF = { type: 'work-experience', id: EXPERIENCE_ID };
 
 describe('buildExperienceRef y readEvidenceRefs', () => {
   it('arma la referencia con el prefijo de experiencia laboral', () => {
@@ -88,8 +89,8 @@ describe('UserSkillEvidenceRepository', () => {
         data: {
           userId: USER_ID,
           skillId: 'skill-1',
-          source: 'manual',
-          evidenceRefs: [REF],
+          source: 'nlp',
+          evidenceRefs: [STRUCTURED_REF],
         },
       });
       expect(userSkill.update).not.toHaveBeenCalled();
@@ -100,7 +101,13 @@ describe('UserSkillEvidenceRepository', () => {
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, []);
 
       expect(userSkill.findMany).toHaveBeenCalledWith({
-        where: { userId: USER_ID, evidenceRefs: { array_contains: [REF] } },
+        where: {
+          userId: USER_ID,
+          OR: [
+            { evidenceRefs: { array_contains: [REF] } },
+            { evidenceRefs: { array_contains: [STRUCTURED_REF] } },
+          ],
+        },
         select: { id: true, skillId: true, source: true, evidenceRefs: true },
       });
     });
@@ -119,12 +126,12 @@ describe('UserSkillEvidenceRepository', () => {
 
       expect(userSkill.update).toHaveBeenCalledWith({
         where: { id: 'row-1' },
-        data: { evidenceRefs: [REF] },
+        data: { evidenceRefs: [STRUCTURED_REF] },
       });
       expect(userSkill.create).not.toHaveBeenCalled();
     });
 
-    it('promueve a habilidad del perfil la habilidad nlp que la experiencia vuelve a detectar', async () => {
+    it('conserva el origen automatico si la habilidad nlp ya esta vinculada', async () => {
       userSkill.findMany
         .mockResolvedValueOnce([
           {
@@ -145,15 +152,12 @@ describe('UserSkillEvidenceRepository', () => {
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
-      expect(userSkill.update).toHaveBeenCalledWith({
-        where: { id: 'row-1' },
-        data: { source: 'manual' },
-      });
+      expect(userSkill.update).not.toHaveBeenCalled();
       expect(userSkill.create).not.toHaveBeenCalled();
       expect(userSkill.delete).not.toHaveBeenCalled();
     });
 
-    it('promueve la habilidad nlp detectada por otro proceso y conserva sus referencias', async () => {
+    it('agrega una referencia a la habilidad nlp sin hacerla manual', async () => {
       const otherEvidence = { type: 'work-experience', id: 'other-experience' };
       userSkill.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([
         {
@@ -168,7 +172,7 @@ describe('UserSkillEvidenceRepository', () => {
 
       expect(userSkill.update).toHaveBeenCalledWith({
         where: { id: 'row-1' },
-        data: { source: 'manual', evidenceRefs: [otherEvidence, REF] },
+        data: { evidenceRefs: [otherEvidence, STRUCTURED_REF] },
       });
     });
 
