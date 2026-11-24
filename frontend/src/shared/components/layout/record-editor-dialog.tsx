@@ -20,7 +20,7 @@ export function RecordEditorDialog({ title, description, isBusy = false, hasUnsa
 
   return (
     <Dialog open onOpenChange={(isOpen) => { if (!isOpen) requestClose(); }}>
-      <DialogContent ref={dialogRef} initialFocus={() => dialogRef.current?.querySelector<HTMLElement>('input:not([type="hidden"]):not([type="file"]):not([disabled]), textarea:not([disabled]), [role="combobox"]:not([aria-disabled="true"])') ?? true} showCloseButton={false} aria-busy={isBusy} className="max-h-editor-dialog overflow-y-auto p-6 sm:max-w-3xl" onChangeCapture={() => setHasChanges(true)}>
+      <DialogContent ref={dialogRef} initialFocus={() => dialogRef.current?.querySelector<HTMLElement>('input:not([type="hidden"]):not([type="file"]):not([disabled]), textarea:not([disabled]), [role="combobox"]:not([aria-disabled="true"])') ?? true} showCloseButton={false} aria-busy={isBusy} className="max-h-editor-dialog overflow-y-auto p-4 sm:max-w-3xl sm:p-6" onChangeCapture={() => setHasChanges(true)}>
         <DialogClose render={<Button variant="ghost" size="icon-sm" className="absolute top-3 right-3" disabled={isBusy} aria-label="Cerrar formulario" />}><X aria-hidden="true" /></DialogClose>
         <DialogHeader className="border-b border-border pr-8 pb-4">
           <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
