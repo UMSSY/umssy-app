@@ -8,13 +8,29 @@ import {
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
-import { ApiProduces, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiProduces,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 
+import {
+  AUDIT_EVENT_DETAIL_OK_RESPONSE,
+  AUDIT_EVENT_ID_PARAM,
+  AUDIT_EVENT_TIMELINE_OK_RESPONSE,
+} from '../constants/audit-events-openapi.constants.js';
 import {
   auditEventsFiltersSchema,
   type AuditEventsFiltersQuery,
@@ -41,6 +57,7 @@ const uuidPipe = new ParseUUIDPipe({
 
 // Solo consultas: este controlador no expone rutas para crear, editar ni borrar eventos
 @ApiTags('Registro de auditoría')
+@ApiBearerAuth()
 @Controller('audit-events')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('administrativo')
@@ -79,11 +96,49 @@ export class AuditEventsController {
   }
 
   @Get(':id')
+  @ApiOperation({
+    summary: 'Obtener detalle de un evento de auditoría',
+    description:
+      'Devuelve el detalle completo de un evento de auditoría, incluyendo solicitud vinculada, solicitante, responsable, motivo de rechazo, tipo de documento y metadatos de evidencia. Solo disponible para el rol administrativo.',
+  })
+  @ApiParam(AUDIT_EVENT_ID_PARAM)
+  @ApiOkResponse(AUDIT_EVENT_DETAIL_OK_RESPONSE)
+  @ApiBadRequestResponse({
+    description: 'El identificador del evento no tiene formato UUID válido.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Sesión no autenticada o credencial expirada.',
+  })
+  @ApiForbiddenResponse({
+    description: 'El usuario no cuenta con el rol administrativo.',
+  })
+  @ApiNotFoundResponse({
+    description: 'No se encontró un evento de auditoría con el identificador indicado.',
+  })
   getDetail(@Param('id', uuidPipe) id: string) {
     return this.auditEventsService.getDetail(id);
   }
 
   @Get(':id/timeline')
+  @ApiOperation({
+    summary: 'Obtener línea de tiempo de un evento de auditoría',
+    description:
+      'Lista en orden cronológico todos los eventos de auditoría pertenecientes a la solicitud asociada al evento consultado. Solo disponible para el rol administrativo.',
+  })
+  @ApiParam(AUDIT_EVENT_ID_PARAM)
+  @ApiOkResponse(AUDIT_EVENT_TIMELINE_OK_RESPONSE)
+  @ApiBadRequestResponse({
+    description: 'El identificador del evento no tiene formato UUID válido.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Sesión no autenticada o credencial expirada.',
+  })
+  @ApiForbiddenResponse({
+    description: 'El usuario no cuenta con el rol administrativo.',
+  })
+  @ApiNotFoundResponse({
+    description: 'No se encontró un evento de auditoría con el identificador indicado.',
+  })
   getTimeline(@Param('id', uuidPipe) id: string) {
     return this.auditEventTimelineService.listForEvent(id);
   }
