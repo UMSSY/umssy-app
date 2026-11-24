@@ -7,7 +7,7 @@ import { WithdrawApplicationButton } from "./withdraw-application-button";
 afterEach(cleanup);
 
 describe("WithdrawApplicationButton", () => {
-  it.each<ApplicationStatus>(["En revisión", "Entrevista"])("is enabled when the status is %s", (status) => {
+  it.each<ApplicationStatus>(["En revisión", "Entrevista", "Aceptada", "No seleccionado"])("is enabled when the status is %s", (status) => {
     const onWithdraw = vi.fn();
     render(
       <WithdrawApplicationButton
@@ -22,7 +22,7 @@ describe("WithdrawApplicationButton", () => {
     expect(onWithdraw).toHaveBeenCalledWith("application-7");
   });
 
-  it.each<ApplicationStatus>(["Aceptada", "No seleccionado", "Retirada"])(
+  it.each<ApplicationStatus>(["Retirada"])(
     "is disabled when the status is %s",
     (status) => {
       const onWithdraw = vi.fn();

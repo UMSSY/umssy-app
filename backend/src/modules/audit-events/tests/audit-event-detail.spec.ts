@@ -3,6 +3,11 @@ import { AuditEventNotFoundException } from '../exceptions/index.js';
 import { toAuditEventDetail } from '../mappers/audit-event-detail.mapper.js';
 import { AuditEventsService } from '../services/audit-events.service.js';
 
+const APPLICANT_DETAILS = {
+  graduationYear: 2024,
+  documentType: { title: 'Diploma académico' },
+};
+
 const ROW = {
   id: 'evt-2',
   number: 812,
@@ -22,15 +27,11 @@ const ROW = {
     mimeType: 'application/pdf',
     size: 1258291,
   },
-  accessRequest: {
-    graduationYear: 2024,
-    documentType: { title: 'Diploma académico' },
-  },
 };
 
 describe('toAuditEventDetail', () => {
   it('arma el detalle con el código del evento y los datos de la persona titulada', () => {
-    const detail = toAuditEventDetail(ROW as never);
+    const detail = toAuditEventDetail(ROW as never, APPLICANT_DETAILS);
 
     expect(detail.code).toBe('EVT-2026-000812');
     expect(detail.request).toEqual({ id: 'req-1', code: 'SOL-2026-0018' });
@@ -49,9 +50,9 @@ describe('toAuditEventDetail', () => {
   });
 
   it('devuelve el motivo del rechazo sin el prefijo guardado en el evento', () => {
-    expect(toAuditEventDetail(ROW as never).rejectionReason).toBe(
-      'Documento ilegible',
-    );
+    expect(
+      toAuditEventDetail(ROW as never, APPLICANT_DETAILS).rejectionReason,
+    ).toBe('Documento ilegible');
   });
 
   it('no devuelve motivo cuando la acción no es un rechazo', () => {
@@ -61,22 +62,26 @@ describe('toAuditEventDetail', () => {
       detail: 'Aprobada automáticamente con 95% de coincidencia.',
     };
 
-    expect(toAuditEventDetail(approved as never).rejectionReason).toBeNull();
+    expect(
+      toAuditEventDetail(approved as never, APPLICANT_DETAILS).rejectionReason,
+    ).toBeNull();
   });
 
   it('devuelve evidencia nula cuando el evento no tiene archivo', () => {
     const withoutFile = { ...ROW, evidenceFile: null };
 
-    expect(toAuditEventDetail(withoutFile as never).evidence).toBeNull();
+    expect(
+      toAuditEventDetail(withoutFile as never, APPLICANT_DETAILS).evidence,
+    ).toBeNull();
   });
 
   it('devuelve tipo de documento nulo cuando la solicitud no lo tiene', () => {
-    const withoutType = {
-      ...ROW,
-      accessRequest: { graduationYear: 2024, documentType: null },
-    };
-
-    expect(toAuditEventDetail(withoutType as never).documentType).toBeNull();
+    expect(
+      toAuditEventDetail(ROW as never, {
+        ...APPLICANT_DETAILS,
+        documentType: null,
+      }).documentType,
+    ).toBeNull();
   });
 });
 
@@ -84,22 +89,70 @@ describe('AuditEventsService.getDetail', () => {
   it('devuelve el detalle del evento', async () => {
     const repository = {
       findDetailById: vi.fn().mockResolvedValue(ROW),
-      findApplicantDetails: vi.fn().mockResolvedValue(ROW.accessRequest),
     };
-    const service = new AuditEventsService(repository as never, {} as never);
+    const requests = {
+      getApplicantDetails: vi.fn().mockResolvedValue(APPLICANT_DETAILS),
+    };
+    const service = new AuditEventsService(
+      repository as never,
+      {} as never,
+      requests as never,
+    );
 
     await expect(service.getDetail('evt-2')).resolves.toMatchObject({
       id: 'evt-2',
       code: 'EVT-2026-000812',
+      applicant: { graduationYear: 2024 },
+      documentType: 'Diploma académico',
     });
+    expect(requests.getApplicantDetails).toHaveBeenCalledExactlyOnceWith(
+      'req-1',
+    );
   });
 
   it('rechaza un evento inexistente', async () => {
     const repository = { findDetailById: vi.fn().mockResolvedValue(null) };
-    const service = new AuditEventsService(repository as never, {} as never);
+    const requests = { getApplicantDetails: vi.fn() };
+    const service = new AuditEventsService(
+      repository as never,
+      {} as never,
+      requests as never,
+    );
 
     await expect(service.getDetail('evt-x')).rejects.toThrow(
       AuditEventNotFoundException,
     );
+    expect(requests.getApplicantDetails).not.toHaveBeenCalled();
+  });
+
+  it('conserva el evento si Solicitudes no encuentra datos adicionales', async () => {
+    const repository = { findDetailById: vi.fn().mockResolvedValue(ROW) };
+    const requests = { getApplicantDetails: vi.fn().mockResolvedValue(null) };
+    const service = new AuditEventsService(
+      repository as never,
+      {} as never,
+      requests as never,
+    );
+
+    await expect(service.getDetail('evt-2')).resolves.toMatchObject({
+      id: 'evt-2',
+      applicant: { fullName: ROW.applicantName, graduationYear: 0 },
+      documentType: null,
+    });
+  });
+
+  it('propaga los errores inesperados del servicio de Solicitudes', async () => {
+    const failure = new Error('Database connection timeout');
+    const repository = { findDetailById: vi.fn().mockResolvedValue(ROW) };
+    const requests = {
+      getApplicantDetails: vi.fn().mockRejectedValue(failure),
+    };
+    const service = new AuditEventsService(
+      repository as never,
+      {} as never,
+      requests as never,
+    );
+
+    await expect(service.getDetail('evt-2')).rejects.toBe(failure);
   });
 });

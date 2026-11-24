@@ -3,8 +3,9 @@ import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { AttendanceSessionRequiredError } from '../utils/attendance-session-required.error';
+import type { AttendanceCheckInOutcome } from '../types/attendance-check-in-outcome.types';
 
-export type AttendanceCheckInResult = 'registered' | 'duplicate';
+export type AttendanceCheckInResult = AttendanceCheckInOutcome['result'];
 
 export const attendanceCheckInService = {
   async checkIn(
@@ -12,14 +13,16 @@ export const attendanceCheckInService = {
     reference: string,
     signal?: AbortSignal,
     accessToken: string | null = getAccessToken(),
-  ): Promise<AttendanceCheckInResult> {
+    sessionId?: string,
+  ): Promise<AttendanceCheckInOutcome> {
     if (!accessToken) throw new AttendanceSessionRequiredError();
     if (!apiClient.defaults.baseURL)
       throw new Error('Attendance API unavailable');
 
     const response = await apiClient.post<unknown>(
       `/events/${encodeURIComponent(eventId)}/attendances/check-ins`,
-      { reference },
+      // Sin sessionId el backend usa la sesión en curso.
+      sessionId ? { reference, sessionId } : { reference },
       {
         headers: { Authorization: `${BEARER_PREFIX}${accessToken}` },
         signal,
@@ -48,10 +51,12 @@ export const attendanceCheckInService = {
       !Number.isFinite(Date.parse(data.checkedInAt))
     )
       throw new Error('Invalid attendance response');
+    const registeredSessionId =
+      'sessionId' in data && typeof data.sessionId === 'string' ? data.sessionId : null;
     if (response.status === 201 && data.result === 'registered')
-      return 'registered';
+      return { result: 'registered', sessionId: registeredSessionId };
     if (response.status === 200 && data.result === 'duplicate')
-      return 'duplicate';
+      return { result: 'duplicate', sessionId: registeredSessionId };
     throw new Error('Invalid attendance response');
   },
 };

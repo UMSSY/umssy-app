@@ -217,7 +217,7 @@ describe('Workshop proposal validation and persistence', () => {
       expect.objectContaining({
         where: expect.objectContaining({
           status: {
-            title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] },
+            title: { in: ['Publicado', 'Votacion', 'En votación'] },
           },
         }),
       }),

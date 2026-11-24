@@ -20,6 +20,7 @@ import {
 import { OFFLINE_QR_TOKEN_PATTERN } from '../constants/offline-passes.constants';
 
 import type { OfflinePass } from '../types/offline-pass.types';
+import type { EventSession } from '../types/event-session.types';
 import type { OfflinePassesSnapshot } from '../types/offline-passes-snapshot.types';
 import type { OfflinePassesStore } from '../types/offline-passes-store.types';
 
@@ -30,14 +31,27 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isText = (value: unknown): value is string => typeof value === 'string';
 
+function toOfflineSessions(value: unknown): EventSession[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const valid = value.every(
+    (session) =>
+      isRecord(session) &&
+      [session.id, session.startsAt, session.endsAt].every(isText) &&
+      (session.location === null || isText(session.location)),
+  );
+  return valid ? (value as EventSession[]) : undefined;
+}
+
 function toOfflinePass(value: unknown): OfflinePass | null {
   if (!isRecord(value)) return null;
-  const { id, eventName, date, startTime, endTime, location, status, qrToken } =
+  const { id, eventName, date, startTime, endTime, location, status, qrToken, sessions } =
     value;
   if (![id, eventName, date, startTime, endTime, status].every(isText))
     return null;
   if (location !== null && !isText(location)) return null;
   if (!isText(qrToken) || !OFFLINE_QR_TOKEN_PATTERN.test(qrToken)) return null;
+  // Copias guardadas antes de las sesiones se leen como taller de una sesión.
+  const offlineSessions = toOfflineSessions(sessions);
   return {
     id: id as string,
     eventName: eventName as string,
@@ -47,6 +61,7 @@ function toOfflinePass(value: unknown): OfflinePass | null {
     location,
     status: status as string,
     qrToken,
+    ...(offlineSessions && { sessions: offlineSessions }),
   };
 }
 

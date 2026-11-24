@@ -222,6 +222,11 @@ export type EventCategory = Prisma.EventCategoryModel
  */
 export type Event = Prisma.EventModel
 /**
+ * Model EventSession
+ *
+ */
+export type EventSession = Prisma.EventSessionModel
+/**
  * Model EventRegistration
  *
  */
@@ -556,6 +561,16 @@ export type CompanyAccessRequest = Prisma.CompanyAccessRequestModel
  *
  */
 export type CompanyActivationOtp = Prisma.CompanyActivationOtpModel
+/**
+ * Model JobAlertMode
+ *
+ */
+export type JobAlertMode = Prisma.JobAlertModeModel
+/**
+ * Model JobOfferNotificationPreference
+ *
+ */
+export type JobOfferNotificationPreference = Prisma.JobOfferNotificationPreferenceModel
 /**
  * Model RadarDocumentStatus
  *

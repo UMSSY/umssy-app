@@ -28,6 +28,15 @@ export class ProfileService {
     return this.profileMapper.toResponse(record);
   }
 
+  async findPresentation(
+    userId: string,
+  ): Promise<Pick<ProfileResponse, 'headline' | 'aboutMe'> | null> {
+    const profile = await this.profileRepository.findByUserId(userId);
+    return profile
+      ? { headline: profile.headline, aboutMe: profile.aboutMe }
+      : null;
+  }
+
   async updatePersonalInfo(
     userId: string,
     request: UpdatePersonalInfoRequest,

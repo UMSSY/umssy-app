@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import {
-  AUDIT_APPLICANT_DETAILS_SELECT,
   AUDIT_EVENT_DETAIL_SELECT,
   AUDIT_EVENT_LIST_SELECT,
   AUDIT_EVENT_ORDER,
@@ -97,13 +96,6 @@ export class AuditEventsRepository {
     return this.prisma.auditEvent.findUnique({
       where: { id },
       select: AUDIT_EVENT_DETAIL_SELECT,
-    });
-  }
-
-  findApplicantDetails(accessRequestId: string) {
-    return this.prisma.accessRequest.findUnique({
-      where: { id: accessRequestId },
-      select: AUDIT_APPLICANT_DETAILS_SELECT,
     });
   }
 

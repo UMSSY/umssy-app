@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AccessRequestDetailsService } from '../../access-requests/services/access-request-details.service.js';
 import { FileNotFoundException } from '../../files/exceptions/index.js';
 import { FilesService } from '../../files/services/files.service.js';
 import {
@@ -19,6 +20,7 @@ export class AuditEventsService {
   constructor(
     private readonly auditEventsRepository: AuditEventsRepository,
     private readonly filesService: FilesService,
+    private readonly accessRequestDetailsService: AccessRequestDetailsService,
   ) {}
 
   async list(query: ListAuditEventsQuery) {
@@ -48,7 +50,7 @@ export class AuditEventsService {
       throw new AuditEventNotFoundException();
     }
     const applicantDetails =
-      await this.auditEventsRepository.findApplicantDetails(
+      await this.accessRequestDetailsService.getApplicantDetails(
         event.accessRequestId,
       );
     return toAuditEventDetail(event, applicantDetails);

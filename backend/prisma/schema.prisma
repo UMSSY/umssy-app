@@ -200,8 +200,9 @@ model User {
   portfolioProjects    UserPortfolioProject[]
 
   notificationPreferences NotificationPreference?
-  receivedNotifications   Notification[]          @relation("ReceivedNotifications")
-  triggeredNotifications  Notification[]          @relation("TriggeredNotifications")
+  jobOfferNotificationPreference JobOfferNotificationPreference?
+  receivedNotifications Notification[] @relation("ReceivedNotifications")
+  triggeredNotifications Notification[] @relation("TriggeredNotifications")
   pushSubscriptions       PushSubscription[]
   openedCompanyRequests   CompanyAccessRequest[]  @relation("CompanyRequestOpenedBy")
   reviewedCompanyRequests CompanyAccessRequest[]  @relation("CompanyRequestReviewedBy")
@@ -683,6 +684,7 @@ model Event {
   moderatedBy User?         @relation("EventModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
 
   registrations EventRegistration[]
+  sessions      EventSession[]
 
   chatRoom Conversation?
 
@@ -694,6 +696,24 @@ model Event {
   @@index([eventDate])
   @@index([moderatedById])
   @@map("events")
+}
+
+model EventSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  eventId   String   @map("event_id") @db.Uuid
+  startsAt  DateTime @map("starts_at") @db.Timestamptz(6)
+  endsAt    DateTime @map("ends_at") @db.Timestamptz(6)
+  location  String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  attendances EventAttendance[]
+
+  @@index([eventId])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@map("event_sessions")
 }
 
 model EventRegistration {
@@ -710,7 +730,7 @@ model EventRegistration {
   event      Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   status     RegistrationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
-  attendance EventAttendance?
+  attendances EventAttendance[]
 
   @@unique([eventId, userId])
   @@index([userId])
@@ -720,7 +740,8 @@ model EventRegistration {
 
 model EventAttendance {
   id               String    @id @default(uuid()) @db.Uuid
-  registrationId   String    @unique @map("registration_id") @db.Uuid
+  registrationId   String    @map("registration_id") @db.Uuid
+  sessionId        String?   @map("session_id") @db.Uuid
   checkedInAt      DateTime  @map("checked_in_at") @db.Timestamptz(6)
   checkedInById    String?   @map("checked_in_by_id") @db.Uuid
   checkedInOffline Boolean   @default(false) @map("checked_in_offline")
@@ -729,8 +750,11 @@ model EventAttendance {
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   registration EventRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  session      EventSession?     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   checkedInBy  User?             @relation(fields: [checkedInById], references: [id], onDelete: SetNull)
 
+  @@unique([registrationId, sessionId])
+  @@index([sessionId])
   @@index([checkedInById])
   @@map("event_attendances")
 }
@@ -1944,6 +1968,31 @@ model CompanyActivationOtp {
   @@index([companyAccessRequestId])
   @@map("company_activation_otps")
 }
+model JobAlertMode {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  preferences JobOfferNotificationPreference[]
+
+  @@map("job_alert_modes")
+}
+
+model JobOfferNotificationPreference {
+  userId    String   @id @map("user_id") @db.Uuid
+  modeId    String   @map("mode_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode JobAlertMode @relation(fields: [modeId], references: [id], onDelete: Restrict)
+
+  @@index([modeId])
+  @@map("job_offer_notification_preferences")
+}
+
 model RadarDocumentStatus {
  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
  title String @unique

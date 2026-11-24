@@ -14,7 +14,7 @@ export function useCreateProposal(accessToken: string | null, onValidationError?
       if (!variables.accessToken || getAccessToken() !== variables.accessToken) {
         throw new Error('La sesión cambió antes de enviar la propuesta.');
       }
-      return proposalsService.create(variables.values, variables.cover, variables.operationKey, variables.accessToken);
+      return proposalsService.create(variables.values, variables.cover, variables.operationKey, variables.accessToken, variables.sessions);
     },
     onSuccess: (_data, variables) => {
       if (getAccessToken() !== variables.accessToken) return;
