@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { VACANCY_QUERY_KEYS } from "../constants/vacancies.constants";
 import { vacanciesService } from "../services/vacancies.service";
+import { filterVacancies } from "../utils/filter-vacancies";
 
 export function useVacancies() {
   const [search, setSearch] = useState("");
@@ -14,28 +15,7 @@ export function useVacancies() {
 
   const vacancies = useMemo(() => query.data ?? [], [query.data]);
 
-  const filteredVacancies = useMemo(() => {
-    const searchTerm = search.toLowerCase().trim();
-
-    if (!searchTerm) {
-      return vacancies;
-    }
-
-    return vacancies.filter((vacancy) => {
-      const searchableText = [
-        vacancy.title,
-        vacancy.companyName,
-        vacancy.description,
-        vacancy.modality,
-        vacancy.contractType,
-        ...vacancy.requirements,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return searchableText.includes(searchTerm);
-    });
-  }, [search, vacancies]);
+  const filteredVacancies = useMemo(() => filterVacancies(vacancies, search), [search, vacancies]);
 
   return {
     search,

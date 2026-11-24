@@ -29,6 +29,11 @@ import { JobApplicationMapper } from './mappers/job-application.mapper.js';
 import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
 import { JobRecommendationsService } from './services/job-recommendations.service.js';
 import { RequirementsController } from './controllers/requirements.controller.js'; 
+import { JobAlertPreferencesController } from './controllers/job-alert-preferences.controller.js';
+import { JobAlertPreferencesRepository } from './repositories/job-alert-preferences.repository.js';
+import { JobAlertPreferencesService } from './services/job-alert-preferences.service.js';
+import { JobAlertRecipientsService } from './services/job-alert-recipients.service.js';
+import { UsersModule } from '../users/users.module.js';
 
 @Module({
   imports: [
@@ -39,6 +44,7 @@ import { RequirementsController } from './controllers/requirements.controller.js
     JobOffersModule,
     EducationsModule,
     WorkExperienceModule,
+    UsersModule,
   ],
   controllers: [
     MatchingController,
@@ -47,6 +53,7 @@ import { RequirementsController } from './controllers/requirements.controller.js
     JobRecommendationsController,
     CompanyJobApplicantsController,
     RequirementsController,
+    JobAlertPreferencesController,
   ],
   providers: [
     JobApplicationsService,
@@ -66,6 +73,9 @@ import { RequirementsController } from './controllers/requirements.controller.js
     JobMatchService,
     CandidateProfileService,
     JobRecommendationsService,
+    JobAlertPreferencesRepository,
+    JobAlertPreferencesService,
+    JobAlertRecipientsService,
   ],
   exports: [
     JobApplicationsService,
@@ -77,6 +87,8 @@ import { RequirementsController } from './controllers/requirements.controller.js
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
+    JobAlertPreferencesService,
+    JobAlertRecipientsService,
   ],
 })
 export class MatchingModule {}

@@ -149,6 +149,8 @@ export const ModelName = {
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
   NotificationPreference: 'NotificationPreference',
+  JobAlertMode: 'JobAlertMode',
+  JobOfferNotificationPreference: 'JobOfferNotificationPreference',
   RadarDocumentStatus: 'RadarDocumentStatus',
   RadarDocumentSourceType: 'RadarDocumentSourceType'
 } as const
@@ -1509,6 +1511,27 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const JobAlertModeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobAlertModeScalarFieldEnum = (typeof JobAlertModeScalarFieldEnum)[keyof typeof JobAlertModeScalarFieldEnum]
+
+
+export const JobOfferNotificationPreferenceScalarFieldEnum = {
+  userId: 'userId',
+  modeId: 'modeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferNotificationPreferenceScalarFieldEnum = (typeof JobOfferNotificationPreferenceScalarFieldEnum)[keyof typeof JobOfferNotificationPreferenceScalarFieldEnum]
 
 
 export const RadarDocumentStatusScalarFieldEnum = {
