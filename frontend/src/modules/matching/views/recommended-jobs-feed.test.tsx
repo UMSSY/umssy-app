@@ -11,10 +11,10 @@ vi.mock("../hooks/use-recommended-jobs", () => ({
 const mockedUseRecommendedJobs = vi.mocked(useRecommendedJobs);
 
 const JOBS: RecommendedJob[] = [
-  { jobOfferId: "devops", title: "DevOps Senior", companyName: "TechBolivia", modality: "Remoto", score: 92, matchedSkills: ["Docker"], skills: ["Docker", "Terraform"] },
-  { jobOfferId: "backend", title: "Backend Developer", companyName: "Sofía Corp", modality: "Híbrido", score: 77, matchedSkills: ["Node.js"], skills: ["Node.js", "Redis"] },
-  { jobOfferId: "qa", title: "QA Automation Engineer", companyName: "Quantex", modality: "Híbrido", score: 68, matchedSkills: ["Cypress"], skills: ["Cypress", "Selenium"] },
-  { jobOfferId: "data", title: "Data Analyst Jr.", companyName: "Sofía Corp", modality: "Presencial", score: 41, matchedSkills: ["SQL"], skills: ["SQL", "Power BI"] },
+  { jobOfferId: "devops", title: "DevOps Senior", companyName: "TechBolivia", modality: "Remoto", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 92, matchedSkills: ["Docker"], skills: ["Docker", "Terraform"] },
+  { jobOfferId: "backend", title: "Backend Developer", companyName: "Sofía Corp", modality: "Híbrido", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 77, matchedSkills: ["Node.js"], skills: ["Node.js", "Redis"] },
+  { jobOfferId: "qa", title: "QA Automation Engineer", companyName: "Quantex", modality: "Híbrido", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 68, matchedSkills: ["Cypress"], skills: ["Cypress", "Selenium"] },
+  { jobOfferId: "data", title: "Data Analyst Jr.", companyName: "Sofía Corp", modality: "Presencial", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 41, matchedSkills: ["SQL"], skills: ["SQL", "Power BI"] },
 ];
 
 function renderFeed(items: RecommendedJob[] = JOBS) {

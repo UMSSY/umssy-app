@@ -8,6 +8,7 @@ import RadarProfilePage from "./page";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/profile/radar",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("recharts", async (importOriginal) => {

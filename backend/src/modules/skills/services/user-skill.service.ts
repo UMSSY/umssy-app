@@ -8,6 +8,7 @@ import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';
 import { UserSkillRepository } from '../repositories/user-skill.repository.js';
 import type { UpdateUserSkillsRequest } from '../requests/update-user-skills.request.js';
+import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import type { SkillResponse } from '../responses/skill.response.js';
 
 @Injectable()
@@ -20,6 +21,10 @@ export class UserSkillService {
     private readonly skillsAnalysis: ProfileSkillsAnalysisService,
     private readonly evidence: UserSkillEvidenceRepository,
   ) {}
+
+  getAffinitySkillNames(userId: string): Promise<string[]> {
+    return this.userSkillRepository.findAffinitySkillNames(userId);
+  }
 
   replaceExperienceEvidence(
     userId: string,
@@ -36,19 +41,17 @@ export class UserSkillService {
     );
   }
 
-  async getUserSkills(userId: string): Promise<SkillResponse[]> {
+  async getUserSkills(userId: string): Promise<OwnSkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const records = await this.userSkillRepository.findByUserId(userId);
-    return records.map((record) =>
-      this.skillMapper.toUserSkillResponse(record),
-    );
+    return records.map((record) => this.skillMapper.toOwnSkillResponse(record));
   }
 
   async updateUserSkills(
     userId: string,
     request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const { skillIds } = request;
@@ -68,15 +71,13 @@ export class UserSkillService {
       skillIds,
     );
     await this.skillsAnalysis.refreshAfterChange(userId);
-    return records.map((record) =>
-      this.skillMapper.toUserSkillResponse(record),
-    );
+    return records.map((record) => this.skillMapper.toOwnSkillResponse(record));
   }
 
   async addSkills(
     userId: string,
     request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const { skillIds } = request;
@@ -96,9 +97,7 @@ export class UserSkillService {
       skillIds,
     );
     await this.skillsAnalysis.refreshAfterChange(userId);
-    return records.map((record) =>
-      this.skillMapper.toUserSkillResponse(record),
-    );
+    return records.map((record) => this.skillMapper.toOwnSkillResponse(record));
   }
 
   private async ensureProfileExists(userId: string): Promise<void> {

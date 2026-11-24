@@ -1,5 +1,12 @@
 export const APPOINTMENT_MESSAGE_MAX_LENGTH = 300;
 
+export const APPOINTMENT_REQUEST_ERROR_CODES = {
+  overlap: "APPOINTMENT_OVERLAP",
+  dailyLimit: "DAILY_APPOINTMENT_LIMIT",
+  mentorUnavailable: "MENTOR_UNAVAILABLE",
+  slotUnavailable: "SLOT_UNAVAILABLE",
+} as const;
+
 export const REQUEST_APPOINTMENT_TEXT = {
   topicLabel: "Tema de la sesión",
   topicPlaceholder: "Selecciona un tema",
@@ -11,6 +18,12 @@ export const REQUEST_APPOINTMENT_TEXT = {
   missingMessage: "Escribe un mensaje para el mentor",
   messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
   confirmed: "Cita confirmada",
+  overlap: "Ya tienes una cita en ese horario. Elige otro horario.",
+  dailyLimit: "Ya tienes una cita reservada ese día. Elige otro día.",
+  mentorUnavailable: "El mentor no está disponible para recibir citas.",
+  slotUnavailable: "Este horario ya no está disponible.",
+  serviceError: "No se pudo verificar la disponibilidad del mentor. Intenta de nuevo.",
+  retry: "Reintentar",
   alreadyBooked: "Este horario ya fue reservado",
   createError: "No se pudo solicitar la cita. Intenta de nuevo.",
 } as const;

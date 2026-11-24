@@ -3,12 +3,22 @@ import { NotificationsRepository } from '../repositories/notifications.repositor
 
 @Injectable()
 export class NotificationsInboxService {
-  constructor(private readonly notificationsRepository: NotificationsRepository) {}
+  constructor(
+    private readonly notificationsRepository: NotificationsRepository,
+  ) {}
 
   async getNotifications(userId: string, page: number, limit: number) {
     const skip = (page - 1) * limit;
-    const data = await this.notificationsRepository.findManyByUser(userId, skip, limit);
+    const data = await this.notificationsRepository.findManyByUser(
+      userId,
+      skip,
+      limit,
+    );
     return { data, page, limit };
+  }
+
+  findByType(userId: string, typeCode: string) {
+    return this.notificationsRepository.findByType(userId, typeCode);
   }
 
   async getUnreadCount(userId: string) {
@@ -17,7 +27,18 @@ export class NotificationsInboxService {
   }
 
   async markAsRead(userId: string, id: string) {
-    await this.notificationsRepository.markAsRead(id, userId);
+    // Un aviso ajeno responde igual que uno inexistente para no revelar que existe.
+    const notification = await this.notificationsRepository.findReadStateById(
+      id,
+      userId,
+    );
+    if (!notification) {
+      throw new NotFoundException('Notificación no encontrada');
+    }
+
+    if (!notification.readAt) {
+      await this.notificationsRepository.markAsRead(id, userId);
+    }
     return { ok: true };
   }
 

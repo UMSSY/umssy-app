@@ -109,15 +109,25 @@ export function ConversationItem({
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center justify-between gap-1">
-          <h4
-            className={`truncate text-sm ${
-              hasUnread
-                ? "font-bold text-ink"
-                : "font-semibold text-ink"
-            }`}
-          >
-            {contact.fullName}
-          </h4>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <h4
+              className={`truncate text-sm ${
+                hasUnread
+                  ? "font-bold text-ink"
+                  : "font-semibold text-ink"
+              }`}
+            >
+              {contact.fullName}
+            </h4>
+            {conversation.contextType === "POSTULACION" && (
+              <span
+                data-testid="conversation-postulation-badge"
+                className="inline-flex shrink-0 items-center rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800"
+              >
+                Postulación
+              </span>
+            )}
+          </div>
 
           <span
             className={`shrink-0 text-xs whitespace-nowrap ${

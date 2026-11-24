@@ -1,4 +1,4 @@
-import type { AcademicPeriod } from "./registered-user.types";
+import type { AcademicPeriod } from "./academic-period.types";
 
 export interface ManagementMenuProps {
   value?: AcademicPeriod;

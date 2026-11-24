@@ -90,6 +90,9 @@ export const createJobOfferSchema = jobOfferFieldsSchema
   .extend({
     requiredCareers: requirementListSchema.default([]),
     otherRequirements: requirementListSchema.default([]),
+    expiresAt: z.iso
+      .datetime({ offset: true, message: MESSAGES.INVALID_EXPIRES_AT })
+      .nullish(),
   })
   .refine(hasRequiredSalary, {
     path: ['salaryMin'],

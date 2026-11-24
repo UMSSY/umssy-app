@@ -17,6 +17,15 @@ function setup() {
     findRecruitmentApplication: vi.fn().mockResolvedValue(application),
     findRecruitmentApplicants: vi.fn().mockResolvedValue([application]),
     recordRecruiterDecision: vi.fn().mockResolvedValue([{ id: 'app' }]),
+    findApplicationDecisionContext: vi.fn().mockResolvedValue({
+      id: 'app',
+      userId: 'owner',
+      statusTitle: 'Entrevista',
+      jobOfferId: 'job',
+      companyId: 'company',
+      jobTitle: 'Dev Backend',
+      companyName: 'Empresa A',
+    }),
   };
   const consents = {
     findConsents: vi.fn().mockResolvedValue([]),
@@ -99,5 +108,21 @@ describe('RadarApplicationsService', () => {
       'app',
       'Aceptada',
     );
+  });
+
+  it('companyForDecision expone el contexto para notificar (HU-15)', async () => {
+    const { service, applications } = setup();
+    await expect(service.companyForDecision('app')).resolves.toEqual([
+      {
+        user_id: 'owner',
+        company_id: 'company',
+        status_title: 'Entrevista',
+        job_title: 'Dev Backend',
+        company_name: 'Empresa A',
+      },
+    ]);
+
+    applications.findApplicationDecisionContext.mockResolvedValue(null);
+    await expect(service.companyForDecision('missing')).resolves.toEqual([]);
   });
 });

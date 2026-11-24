@@ -39,6 +39,8 @@ export class JobMatchService {
       companyName: vacancy.company.title,
       modality: vacancy.modality.title,
       description: vacancy.description,
+      publishedAt: vacancy.publishedAt.toISOString(),
+      expiresAt: vacancy.expiresAt?.toISOString() ?? null,
       score,
       hasPendingRequirements: hasPendingRequirements(requirements),
       requirements: toCategorizedRequirements(requirements),

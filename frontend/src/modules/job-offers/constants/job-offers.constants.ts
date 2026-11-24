@@ -40,12 +40,24 @@ export const PUBLISH_MESSAGES = {
   session: "Tu sesión no es válida. Inicia sesión nuevamente.",
   noCompany: "No hay una empresa asociada a tu sesión. Inicia sesión como empresa.",
   incompleteForm: "Faltan datos en los pasos anteriores. Vuelve atrás y complétalos.",
+  expirationNotConfirmed:
+    "Elige y confirma una fecha de cierre, o desmarca la opción para publicar sin fecha límite.",
 } as const;
 
 export const SKILLS_CATALOG_MESSAGES = {
   loading: "Cargando habilidades...",
   error: "No se pudo cargar el catálogo de habilidades.",
   retry: "Reintentar",
+} as const;
+
+export const REQUIREMENTS_DETECTION_DEBOUNCE_MS = 500;
+
+export const REQUIREMENTS_SKILLS_TEXT = {
+  allSkillsTitle: "Todas las habilidades",
+  skillsIntro: "Estas son las habilidades que necesita el puesto.",
+  autoSelectHint: "Las detectadas en la descripción se agregan solas; puedes quitarlas o añadir otras.",
+  emptySelection: "Todavía no hay habilidades. Escribe la descripción para detectarlas o usa «Añadir habilidad».",
+  detectionError: "No se pudieron detectar habilidades en este momento. Añádelas manualmente.",
 } as const;
 
 export const SKILL_SEARCH_TEXT = {
@@ -118,10 +130,12 @@ export const STATUS_FILTER_OPTIONS = [
 
 export const VACANCY_LIST_TEXT = {
   published: {
+    title: "Lista de Vacantes",
+    subtitle: "Consulta y administra las vacantes que publicó tu empresa.",
     ariaLabel: "Mis vacantes publicadas",
     loading: "Cargando vacantes...",
     loadError: "No se pudieron cargar tus vacantes.",
-    empty: "Aún no tienes vacantes publicadas",
+    empty: "No se tienen vacantes creadas",
     noMatches: "Ninguna vacante coincide con los filtros.",
     noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
   },
@@ -133,6 +147,11 @@ export const VACANCY_LIST_TEXT = {
     noMatches: "Ninguna vacante coincide con los filtros.",
     noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
   },
+} as const;
+
+export const NO_COMPANY_TEXT = {
+  title: "Tu cuenta aún no está vinculada a una empresa",
+  description: "Por eso no podemos mostrar vacantes. Pide al administrador que vincule tu cuenta con tu empresa.",
 } as const;
 
 export const TOAST_OPTIONS = { position: "top-center", duration: 5000 } as const;
@@ -156,4 +175,16 @@ export const REOPEN_JOB_OFFER_TEXT = {
   success: "Vacante reabierta correctamente",
   error: "No se pudo reabrir la vacante. Intente nuevamente",
   notReopenable: "La vacante ya no está cerrada, por eso no se puede reabrir.",
+} as const;
+
+export const CLOSE_JOB_OFFER_TEXT = {
+  title: "¿Estás seguro de cerrar esta vacante?",
+  cancel: "Cancelar",
+  confirm: "Cerrar",
+  busy: "Cerrando...",
+  success: "La vacante fue cerrada con éxito",
+  error: "No se pudo completar el cierre de la vacante. Inténtalo nuevamente.",
+  network: "Sin conexión a internet. Revisa tu conexión e inténtalo nuevamente.",
+  server: "No se pudo completar el cierre de la vacante. Inténtalo más tarde.",
+  notClosable: "La vacante ya se encuentra cerrada o dejó de estar publicada.",
 } as const;

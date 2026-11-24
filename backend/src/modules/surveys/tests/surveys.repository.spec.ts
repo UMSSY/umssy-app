@@ -41,6 +41,7 @@ function createPrisma() {
     survey: { findFirst: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
     career: { findMany: vi.fn(), findUnique: vi.fn() },
     user: { findUnique: vi.fn() },
+    surveyResponse: { findMany: vi.fn() },
     accessRequest: { findFirst: vi.fn() },
     $transaction: vi.fn((operation: (client: typeof tx) => unknown) =>
       operation(tx),
@@ -372,6 +373,26 @@ describe('SurveysRepository sin catálogos de encuestas', () => {
     );
     await expect(repository.create(BASE_DATA)).rejects.toMatchObject({
       statusCode: 503,
+    });
+  });
+
+  it('obtiene solo los identificadores de quienes respondieron la encuesta', async () => {
+    const prisma = createPrisma();
+    prisma.surveyResponse.findMany.mockResolvedValue([
+      { respondentId: 'user-1' },
+      { respondentId: 'user-2' },
+    ]);
+    const repository = new SurveysRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await expect(repository.findRespondentIds('survey-1')).resolves.toEqual([
+      'user-1',
+      'user-2',
+    ]);
+    expect(prisma.surveyResponse.findMany).toHaveBeenCalledWith({
+      where: { surveyId: 'survey-1' },
+      select: { respondentId: true },
     });
   });
 });

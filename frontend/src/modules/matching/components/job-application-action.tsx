@@ -15,10 +15,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { formatBoliviaDate } from '@/shared/utils/date-time';
 import { JOB_APPLICATION_MESSAGES } from '../constants/job-application.constants';
 import { useJobApplication } from '../hooks/use-job-application';
 import type { JobApplicationActionProps } from '../types/job-application-action-props.types';
-import { formatApplicationDate } from '../utils/format-application-date';
 
 export function JobApplicationAction({
   jobOfferId,
@@ -49,7 +49,7 @@ export function JobApplicationAction({
           </Button>
           <p className="flex items-center gap-2 text-xs text-text-secondary">
             {JOB_APPLICATION_MESSAGES.appliedOn}{' '}
-            {formatApplicationDate(application.appliedAt)} ·
+            {formatBoliviaDate(application.appliedAt)} ·
             <Badge variant="outline">{application.status}</Badge>
           </p>
         </>
@@ -177,7 +177,7 @@ export function JobApplicationAction({
                 {JOB_APPLICATION_MESSAGES.summaryDate}
               </dt>
               <dd className="font-semibold text-ink">
-                {formatApplicationDate(submittedApplication.appliedAt)}
+                {formatBoliviaDate(submittedApplication.appliedAt)}
               </dd>
               <dt className="text-text-secondary">
                 {JOB_APPLICATION_MESSAGES.summaryStatus}

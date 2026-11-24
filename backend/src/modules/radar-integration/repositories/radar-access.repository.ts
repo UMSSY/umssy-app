@@ -8,22 +8,6 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 export class RadarAccessRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async hasRole(userId: string, role: string): Promise<boolean> {
-    const row = await this.prisma.userRole.findFirst({
-      where: { userId, deletedAt: null, role: { name: role } },
-      select: { id: true },
-    });
-    return row !== null;
-  }
-
-  async hasAnyRole(userId: string, roles: string[]): Promise<boolean> {
-    const row = await this.prisma.userRole.findFirst({
-      where: { userId, deletedAt: null, role: { name: { in: roles } } },
-      select: { id: true },
-    });
-    return row !== null;
-  }
-
   async recordAudit(
     userId: string,
     actorId: string | null,

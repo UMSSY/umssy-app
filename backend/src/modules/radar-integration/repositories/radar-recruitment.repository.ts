@@ -1,5 +1,5 @@
-import type { RecruiterSnapshot } from '../types/recruiter-snapshot.type.js';
-import type { ApprovedCvId } from '../types/approved-cv-id.type.js';
+import type { RecruiterSnapshot } from '../types/recruiter-snapshot.types.js';
+import type { ApprovedCvId } from '../types/approved-cv-id.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 

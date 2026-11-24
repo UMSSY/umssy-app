@@ -4,6 +4,12 @@ import { BackofficeBrand } from "./backoffice-brand";
 import { DetailHeader, InboxHeader } from "./backoffice-page-header";
 import { BackofficeUserFooter } from "./backoffice-user-footer";
 
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
+}));
+
 describe("marca, cabeceras y pie del backoffice", () => {
   afterEach(() => cleanup());
 

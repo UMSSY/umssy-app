@@ -13,6 +13,7 @@ import {
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CreateProposalSchema } from '../requests/create-proposal.request.js';
+import { buildProposalSessions } from '../utils/build-proposal-sessions.js';
 import type { Event } from '../../../prisma/client.js';
 
 @Injectable()
@@ -77,18 +78,27 @@ export class EventProposalsService {
           throw new RequestValidationException([
             {
               field: 'categoryId',
-              message: 'Selecciona una categoría disponible.',
+              message: 'Esta categoría ya no está disponible. Elige otra.',
             },
           ]);
         const title = values.modality === 'virtual' ? 'Virtual' : 'Presencial';
         const catalogs = await this.repository.ensureCatalogs(tx, title);
+        const sessions = buildProposalSessions(values);
+        const [first] = sessions;
         const event = await this.repository.create(tx, {
           title: values.title,
           description: values.description,
           categoryId: values.categoryId,
-          eventDate: new Date(values.eventDate + 'T00:00:00Z'),
-          startTime: new Date('1970-01-01T' + values.startTime + ':00Z'),
-          endTime: new Date('1970-01-01T' + values.endTime + ':00Z'),
+          eventDate: new Date(first.eventDate + 'T00:00:00Z'),
+          startTime: new Date('1970-01-01T' + first.startTime + ':00Z'),
+          endTime: new Date('1970-01-01T' + first.endTime + ':00Z'),
+          sessions: {
+            create: sessions.map((session) => ({
+              startsAt: session.startsAt,
+              endsAt: session.endsAt,
+              location: session.location,
+            })),
+          },
           capacity: values.capacity,
           location: values.location,
           ...catalogs,

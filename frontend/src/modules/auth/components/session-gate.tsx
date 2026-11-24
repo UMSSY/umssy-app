@@ -6,6 +6,7 @@ import { subscribeAccessToken } from "@/shared/services/storage/access-token-sto
 import {
   getAccessToken,
   isAccessTokenReady,
+  waitForAccessTokenWrites,
 } from "@/shared/services/storage/access-token-storage";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { endSession } from "../utils/session";
@@ -29,7 +30,11 @@ export function SessionGate({ children }: SessionGateProps) {
   useEffect(() => {
     if (state === "login") {
       endSession();
-      router.replace(buildLoginUrl(currentPath()));
+      const loginUrl = buildLoginUrl(currentPath());
+      if (navigator.onLine === false) {
+        void waitForAccessTokenWrites().then(() => window.location.replace(loginUrl));
+      }
+      else router.replace(loginUrl);
       return;
     }
     if (state === "open") setSessionMarker();

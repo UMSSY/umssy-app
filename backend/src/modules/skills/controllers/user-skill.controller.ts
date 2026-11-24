@@ -24,7 +24,7 @@ import {
   updateUserSkillsSchema,
   type UpdateUserSkillsRequest,
 } from '../requests/update-user-skills.request.js';
-import type { SkillResponse } from '../responses/skill.response.js';
+import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import { UserSkillService } from '../services/user-skill.service.js';
 
 @ApiTags('skills')
@@ -42,7 +42,7 @@ export class UserSkillController {
 
   @Get()
   @ApiOkResponse({ description: 'Skills of the authenticated user' })
-  getUserSkills(@CurrentUserId() userId: string): Promise<SkillResponse[]> {
+  getUserSkills(@CurrentUserId() userId: string): Promise<OwnSkillResponse[]> {
     return this.userSkillService.getUserSkills(userId);
   }
 
@@ -52,7 +52,7 @@ export class UserSkillController {
   updateUserSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     return this.userSkillService.updateUserSkills(userId, request);
   }
 
@@ -62,7 +62,7 @@ export class UserSkillController {
   addSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     return this.userSkillService.addSkills(userId, request);
   }
 }

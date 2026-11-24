@@ -1,0 +1,13 @@
+import type { EducationFormValues } from "./education-form-values.types";
+import type { Feedback } from "@/modules/profile";
+
+export interface EducationFormProps {
+  initialValues?: EducationFormValues;
+  allowMissingEndDate?: boolean;
+  isPending?: boolean;
+  feedback?: Feedback | null;
+  saveLabel?: string;
+  onSubmit: (values: EducationFormValues) => void | Promise<void>;
+  onValuesChange?: () => void;
+  onCancel: () => void;
+}

@@ -12,6 +12,7 @@ import { SessionUserCard } from "@/modules/auth";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { ChatDock, MessagingUiProvider } from "@/modules/chat";
 import { AppHeader } from "./app-header";
+import { useNotificationsRealtimeSync } from "@/modules/notifications";
 
 export function AppShell({
   children,
@@ -27,54 +28,57 @@ export function AppShell({
   contentClassName,
 }: AppShellProps) {
   const pathname = usePathname();
+  
+  useNotificationsRealtimeSync();
+
   return (
     <MessagingUiProvider>
-    <SidebarProvider
-      data-app-shell="true"
-      className={cn("flex-col bg-background", contentClassName && "h-dvh min-h-0 overflow-hidden")}
-      style={
-        sidebarWidth
-          ? ({
-              ...SIDEBAR_STYLE,
-              "--sidebar-width": sidebarWidth,
-            } as CSSProperties)
-          : SIDEBAR_STYLE
-      }
-    >
-      {header ?? <AppHeader brand={brand} />}
-      <div className="flex min-h-0 min-w-0 flex-1">
-      <AppSidebar
-        showBrand={Boolean(header)}
-        items={items as NavigationItem[] | undefined}
-        user={user}
-        brand={brand}
-        footer={
-          sidebarFooter ??
-          (!user && getAccessToken() ? <SessionUserCard /> : undefined)
+      <SidebarProvider
+        data-app-shell="true"
+        className={cn("flex-col bg-background", contentClassName && "h-dvh min-h-0 overflow-hidden")}
+        style={
+          sidebarWidth
+            ? ({
+                ...SIDEBAR_STYLE,
+                "--sidebar-width": sidebarWidth,
+              } as CSSProperties)
+            : SIDEBAR_STYLE
         }
-        itemClassName={sidebarItemClassName}
-        itemBadges={sidebarItemBadges}
-      />
-      <SidebarInset
-        className={cn(
-          "min-h-0 min-w-0 bg-background",
-          contentClassName && "overflow-hidden",
-        )}
       >
-        <div
-          key={pathname}
-          className={cn(
-            "flex-1 animate-in duration-200 ease-out fade-in",
-            contentClassName ??
-              (fullBleed ? "flex min-w-0 flex-col" : "px-4 py-6 sm:px-6 lg:px-12 lg:py-10"),
-          )}
-        >
-          {children}
+        {header ?? <AppHeader brand={brand} />}
+        <div className="flex min-h-0 min-w-0 flex-1">
+          <AppSidebar
+            showBrand={Boolean(header)}
+            items={items as NavigationItem[] | undefined}
+            user={user}
+            brand={brand}
+            footer={
+              sidebarFooter ??
+              (!user && getAccessToken() ? <SessionUserCard /> : undefined)
+            }
+            itemClassName={sidebarItemClassName}
+            itemBadges={sidebarItemBadges}
+          />
+          <SidebarInset
+            className={cn(
+              "min-h-0 min-w-0 bg-background",
+              contentClassName && "overflow-hidden",
+            )}
+          >
+            <div
+              key={pathname}
+              className={cn(
+                "flex-1 animate-in duration-200 ease-out fade-in",
+                contentClassName ??
+                  (fullBleed ? "flex min-w-0 flex-col" : "px-4 py-6 sm:px-6 lg:px-12 lg:py-10"),
+              )}
+            >
+              {children}
+            </div>
+          </SidebarInset>
+          <ChatDock />
         </div>
-      </SidebarInset>
-      <ChatDock />
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
     </MessagingUiProvider>
   );
 }

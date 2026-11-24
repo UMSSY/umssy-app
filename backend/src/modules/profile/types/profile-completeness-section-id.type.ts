@@ -4,4 +4,5 @@ export type ProfileCompletenessSectionId =
   | 'education'
   | 'work-experience'
   | 'skills'
-  | 'certifications';
+  | 'certifications'
+  | 'cv';

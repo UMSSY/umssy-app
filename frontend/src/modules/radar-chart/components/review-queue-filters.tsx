@@ -1,11 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { REVIEW_QUEUE_FILTERS } from "../data/review-queue.data";
-import type { ReviewQueueFilter } from "../types/review-queue.types";
+import { Button } from '@/components/ui/button';
+import { REVIEW_QUEUE_FILTERS } from '../data/review-queue.data';
 
-interface ReviewQueueFiltersProps {
-  activeFilter: ReviewQueueFilter;
-  onFilterChange: (filter: ReviewQueueFilter) => void;
-}
+import type { ReviewQueueFiltersProps } from '../types/review-queue-filters-props.types';
 
 export function ReviewQueueFilters({
   activeFilter,
@@ -25,8 +21,8 @@ export function ReviewQueueFilters({
             onClick={() => onFilterChange(filter)}
             className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
               isActive
-                ? "border-accent/30 bg-interaction text-accent"
-                : "border-border bg-surface text-text-secondary hover:bg-surface-soft hover:text-ink"
+                ? 'border-accent/30 bg-interaction text-accent'
+                : 'border-border bg-surface text-text-secondary hover:bg-surface-soft hover:text-ink'
             }`}
           >
             {filter}

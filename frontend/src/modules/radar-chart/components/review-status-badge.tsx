@@ -1,30 +1,12 @@
-import { Badge } from "@/components/ui/badge";
-import type { ReviewProfileStatus } from "../types/review-queue.types";
+import { Badge } from '@/components/ui/badge';
 
-interface ReviewStatusBadgeProps {
-  status: ReviewProfileStatus;
-}
+import type { ReviewStatusBadgeProps } from '../types/review-status-badge-props.types';
 
-function getStatusClasses(status: ReviewProfileStatus): string {
-  switch (status) {
-    case "Completado":
-      return "border-availability-border bg-availability text-availability-foreground";
-
-    case "Procesando":
-      return "border-availability-border text-availability-foreground";
-
-    case "Pendiente":
-      return "border-notice-border bg-notice text-notice-foreground";
-  }
-}
-
-export function ReviewStatusBadge({
-  status,
-}: ReviewStatusBadgeProps) {
+export function ReviewStatusBadge({ status }: ReviewStatusBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={getStatusClasses(status)}
+      className="border-border bg-transparent text-text-secondary"
     >
       {status}
     </Badge>

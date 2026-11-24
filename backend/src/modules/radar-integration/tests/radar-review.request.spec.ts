@@ -12,18 +12,32 @@ describe('Contratos Zod de revisión del Radar', () => {
   });
   it('admite aprobar, rechazar y revocar', () => {
     for (const decision of ['approved', 'rejected', 'revoked']) {
-      expect(reviewDecisionSchema.safeParse({ decision }).success).toBe(true);
+      expect(
+        reviewDecisionSchema.safeParse({
+          operationId: '33333333-3333-4333-8333-333333333333',
+          decision,
+        }).success,
+      ).toBe(true);
     }
   });
   it('rechaza decisiones inválidas, cuerpos incompletos y campos adicionales', () => {
-    expect(reviewDecisionSchema.safeParse({ decision: 'hired' }).success).toBe(
-      false,
-    );
+    expect(
+      reviewDecisionSchema.safeParse({
+        operationId: '33333333-3333-4333-8333-333333333333',
+        decision: 'hired',
+      }).success,
+    ).toBe(false);
     expect(reviewDecisionSchema.safeParse({}).success).toBe(false);
+    expect(
+      reviewDecisionSchema.safeParse({ decision: 'approved' }).success,
+    ).toBe(false);
     expect(reviewDecisionSchema.safeParse(null).success).toBe(false);
     expect(
-      reviewDecisionSchema.safeParse({ decision: 'approved', companyId: 'x' })
-        .success,
+      reviewDecisionSchema.safeParse({
+        operationId: '33333333-3333-4333-8333-333333333333',
+        decision: 'approved',
+        companyId: 'x',
+      }).success,
     ).toBe(false);
   });
 });

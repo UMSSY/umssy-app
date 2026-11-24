@@ -10,6 +10,7 @@ import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 import { ProfileAvatar } from "./profile-avatar";
 
 export function ProfilePhotoField({
+  idPrefix = "",
   photoUrl,
   previewUrl,
   isUploading = false,
@@ -51,7 +52,7 @@ export function ProfilePhotoField({
         </p>
         <Input
           ref={inputRef}
-          id="profilePhoto"
+          id={`${idPrefix}profilePhoto`}
           type="file"
           accept={PHOTO_ACCEPT}
           aria-label="Seleccionar fotografía de perfil"

@@ -1,3 +1,4 @@
+import type { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
@@ -9,6 +10,7 @@ import type { RadarPublicationEvidenceService } from '../services/radar-publicat
 import { RadarPublicationRepository } from '../repositories/radar-publication.repository.js';
 import type { RadarCvService } from '../services/radar-cv.service.js';
 import type { RadarReviewService } from '../services/radar-review.service.js';
+import type { RadarNotificationsService } from '../services/radar-notifications.service.js';
 import { emptyScores, scoreVerifiedSkills } from '../utils/radar-scoring.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -25,6 +27,7 @@ const skill = (
   skill: { name: id, areaId },
 });
 const snapshot = (revision: number | null = 2) => ({
+  id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
   user_id: userId,
   version: 4,
   source_revision: revision,
@@ -55,7 +58,7 @@ function setup() {
   const rows = [snapshot()];
   const db = {
     $queryRaw: vi.fn(),
-    $executeRaw: vi.fn().mockResolvedValue(1),
+    $executeRaw: vi.fn(async () => 1),
     userSkill: {
       findMany: vi.fn().mockResolvedValue([]),
       count: vi.fn().mockResolvedValue(0),
@@ -104,7 +107,12 @@ function setup() {
       if (sql.includes('FROM radar_score_snapshots')) return rows;
       if (sql.includes('INSERT INTO radar_score_snapshots')) {
         insertions.push(values);
-        return [snapshot()];
+        return [
+          {
+            ...snapshot(),
+            id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+          },
+        ];
       }
       if (sql.includes('FROM radar_audit_events')) return [];
       throw new Error('Unexpected database operation');
@@ -134,11 +142,15 @@ function setup() {
         db.certification.findMany(),
       ]),
   };
+  const notifications = {
+    notify: vi.fn().mockResolvedValue({ inAppCount: 1 }),
+  };
   const publication = new RadarPublicationService(
     new RadarPublicationRepository(db as unknown as PrismaService),
     new RadarPublicationMapper(),
     evidence as unknown as RadarPublicationEvidenceService,
     nlp as unknown as ProfileSkillsAnalysisService,
+    notifications as unknown as NotificationsService,
   );
   const service = new RadarIntegrationService(
     nlp as unknown as ProfileSkillsAnalysisService,
@@ -146,8 +158,9 @@ function setup() {
     publication,
     {} as RadarCvService,
     {} as RadarReviewService,
+    {} as RadarNotificationsService,
   );
-  return { service, db, state, rows, insertions, nlp, events };
+  return { service, db, state, rows, insertions, nlp, events, notifications };
 }
 
 describe('Radar publication consistency', () => {
@@ -157,6 +170,27 @@ describe('Radar publication consistency', () => {
     expect(nlp.readLockedRevision).toHaveBeenCalledWith(userId, { client: db });
     expect(db.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
       nlp.readLockedRevision.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('notifies after commit and retains the snapshot when delivery fails', async () => {
+    const { service, db, notifications, insertions } = setup();
+    notifications.notify.mockImplementation(async () => {
+      expect(db.$transaction.mock.settledResults[0]?.type).toBe('fulfilled');
+      throw new Error('Delivery unavailable');
+    });
+    await expect(service.recalculate(userId, userId)).resolves.toMatchObject({
+      version: 4,
+    });
+    expect(insertions).toHaveLength(1);
+    expect(notifications.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientIds: [userId],
+        type: 'RADAR_PUBLISHED',
+        groupKey: 'radar:bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        actionUrl:
+          '/profile/radar?snapshot=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      }),
     );
   });
 
@@ -246,6 +280,11 @@ describe('Radar publication consistency', () => {
     expect(result?.version).toBe(4);
     expect(result?.sourceRevision).toBe(2);
     expect(insertions).toEqual([]);
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
   });
 
   it('refuses to score a pending NLP revision and persists a recoverable failure', async () => {
@@ -257,7 +296,26 @@ describe('Radar publication consistency', () => {
     );
     expect(rows).toEqual(previous);
     expect(insertions).toEqual([]);
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
     expect(db.$executeRaw).toHaveBeenCalled();
+  });
+
+  it('does not create a notification when NLP analysis has failed', async () => {
+    const { service, state, db } = setup();
+
+    state.status = 'error';
+
+    await expect(service.recalculate(userId, null)).rejects.toThrow();
+
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
   });
 
   it('does not hide the original publication failure if saving its error state also fails', async () => {
@@ -319,7 +377,7 @@ describe('Published radar processing states', () => {
         ]);
       const result = await service.myRadar(userId);
       expect(result.processingStatus).toBe(status);
-      expect(result.pending).toBe(4);
+      expect(result.pending).toBe(3);
       expect(result.hasPending).toBe(true);
     },
   );
@@ -371,25 +429,48 @@ describe('Published radar processing states', () => {
   });
 });
 
-
 describe('published radar comparison', () => {
   it('returns the two published snapshots while a newer revision is pending', () => {
     const current = snapshot();
-    const previous = { ...snapshot(), version: 3, created_at: new Date('2026-10-20T12:00:00Z'), scores: { ...emptyScores(), qa: 3 } };
+    const previous = {
+      ...snapshot(),
+      version: 3,
+      created_at: new Date('2026-10-20T12:00:00Z'),
+      scores: { ...emptyScores(), qa: 3 },
+    };
     const result = new RadarPublicationMapper().myRadar(userId, {
-      snapshots: [current, previous], pendingDocs: [], pendingSkills: 0,
-      attempts: [], state: { status: 'pending', inputRevision: 3, processedRevision: 2, dictionaryVersion: '1' },
+      snapshots: [current, previous],
+      pendingDocs: [],
+      pendingSkills: 0,
+      attempts: [],
+      state: {
+        status: 'pending',
+        inputRevision: 3,
+        processedRevision: 2,
+        dictionaryVersion: '1',
+      },
     });
     expect(result.version).toBe(4);
     expect(result.scores.qa).toBe(1.5);
-    expect(result.previous).toEqual({ version: 3, updatedAt: previous.created_at, scores: previous.scores });
+    expect(result.previous).toEqual({
+      version: 3,
+      updatedAt: previous.created_at,
+      scores: previous.scores,
+    });
     expect(result.processingStatus).toBe('pending');
   });
 
   it('does not invent a previous publication', () => {
     const mapper = new RadarPublicationMapper();
-    const state = { pendingDocs: [], pendingSkills: 0, attempts: [], state: null };
-    expect(mapper.myRadar(userId, { ...state, snapshots: [snapshot()] }).previous).toBeNull();
+    const state = {
+      pendingDocs: [],
+      pendingSkills: 0,
+      attempts: [],
+      state: null,
+    };
+    expect(
+      mapper.myRadar(userId, { ...state, snapshots: [snapshot()] }).previous,
+    ).toBeNull();
     const empty = mapper.myRadar(userId, { ...state, snapshots: [] });
     expect(empty.previous).toBeNull();
     expect(empty.version).toBe(0);

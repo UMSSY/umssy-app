@@ -13,7 +13,7 @@ import CertificationsPage from "./trajectory/certifications/page";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/modules/profile", () => ({ ProfileOverviewView: () => <p>profile-overview-view</p>, ProfileSettingsView: () => <p>profile-settings-view</p> }));
-vi.mock("@/modules/documents", () => ({ DocumentsCvView: () => <p>documents-cv-view</p> }));
+vi.mock("@/modules/cv", () => ({ DocumentsCvView: () => <p>documents-cv-view</p> }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("Profile routes", () => {

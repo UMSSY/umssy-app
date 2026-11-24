@@ -6,12 +6,13 @@ import { ProposalForm } from './proposal-form';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('../hooks/use-proposal-form', () => ({ useProposalForm: () => state }));
 const state = {
-  values: { ...EMPTY_PROPOSAL, eventDate: '2026-11-12' }, errors: {}, change: vi.fn(),
+  values: { ...EMPTY_PROPOSAL, eventDate: '2026-11-12' }, errors: {}, touch: vi.fn(), change: vi.fn(),
   categories: { categories: [], isLoading: false, error: null, retry: vi.fn() },
   tutor: 'Ana López', profile: { isPending: false, isError: false, refetch: vi.fn() },
   pending: false, restoring: false, created: null, draftWarning: null, cover: null,
   changeCover: vi.fn(), setCoverBusy: vi.fn(), coverBusy: false, message: null,
   reviewing: false, closeReview: vi.fn(), confirm: vi.fn(), review: vi.fn(), unavailable: false,
+  sessions: [], sessionErrors: [], addSession: vi.fn(), changeSession: vi.fn(), removeSession: vi.fn(), canAddSession: true,
 };
 beforeEach(() => { vi.clearAllMocks(); vi.useFakeTimers({ now: new Date('2026-10-24T12:00:00Z'), toFake: ['Date'] }); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
@@ -26,4 +27,31 @@ describe('proposal shared date field', () => {
     fireEvent.change(date, { target: { value: '13/11/2026' } });
     expect(state.change).toHaveBeenCalledWith('eventDate', '2026-11-13');
   });
+});
+
+ it('shows the physical location counter from the first render', () => {
+    const { rerender } = render(<ProposalForm />);
+    expect(screen.getByRole('textbox', { name: /Ubicación/ })).toHaveAttribute('maxlength', '150');
+    expect(screen.getByText('0/150')).toBeInTheDocument();
+    state.values.location = 'a'.repeat(130);
+    rerender(<ProposalForm />);
+    expect(screen.getByText('130/150')).toBeInTheDocument();
+    state.values.location = '';
+  });
+
+it('marks a field for validation when leaving it', () => {
+  render(<ProposalForm />);
+  fireEvent.blur(screen.getByRole('textbox', { name: /Título del taller/ }));
+  expect(state.touch).toHaveBeenCalledWith('title');
+});
+
+it('limits virtual links to 150 characters and shows their count', () => {
+  const original = { ...state.values };
+  state.values.modality = 'virtual';
+  state.values.location = 'https://example.org/a';
+  try {
+    render(<ProposalForm />);
+    expect(screen.getByRole('textbox', { name: /Enlace de la reunión/ })).toHaveAttribute('maxlength', '150');
+    expect(screen.getByText(`${state.values.location.length}/150`)).toBeInTheDocument();
+  } finally { Object.assign(state.values, original); }
 });

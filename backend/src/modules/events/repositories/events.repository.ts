@@ -1,5 +1,6 @@
-import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
+import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
+import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 import { mapSupportContext } from '../mappers/support-context.mapper.js';
 import { Injectable } from '@nestjs/common';
@@ -11,6 +12,9 @@ import type {
   FindEventsResponse,
   EventWithRelations,
 } from '../types/events.types.js';
+import { EVENT_SELECT } from '../constants/event-select.constants.js';
+import { formatUtcDate, formatUtcTime } from '../utils/event-date-time.js';
+import { toBoliviaInstant } from '../utils/event-session-schedule.js';
 import {
   CATALOG_STATUS_TITLES,
   COMMUNITY_ORIGIN_TITLE,
@@ -19,52 +23,63 @@ import {
   VOTING_STATUS_TITLES,
 } from '../constants/events.constants.js';
 
-function buildSelect(userId?: string): Prisma.EventSelect {
+function buildSelect(userId?: string) {
   return {
-    coverMimeType: true,
-    id: true,
-    title: true,
-    description: true,
-    eventDate: true,
-    startTime: true,
-    endTime: true,
-    location: true,
-    capacity: true,
-    statusId: true,
-    instructorName: true,
-    modalityId: true,
-    supportThreshold: true,
-    votingDeadline: true,
-    status: { select: { title: true } },
-    origin: { select: { title: true } },
-    category: { select: { id: true, name: true } },
-    _count: {
-      select: {
-        registrations: {
-          where: {
-            cancelledAt: null,
-            status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-          },
-        },
+    ...EVENT_SELECT,
+    registrations: {
+      ...EVENT_SELECT.registrations,
+      where: {
+        ...EVENT_SELECT.registrations.where,
+        userId: userId ? userId : { in: [] },
       },
     },
-    ...(userId !== undefined && {
-      registrations: {
-        where: {
-          userId,
-          cancelledAt: null,
-          status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-        },
-        select: { id: true },
-        take: 1,
-      },
-    }),
-  };
+  } as const satisfies Prisma.EventSelect;
 }
 
 @Injectable()
 export class EventsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findManaged(userId: string) {
+    return this.prisma.event.findMany({
+      where: {
+        createdById: userId,
+        status: { title: PUBLISHED_STATUS_TITLE },
+      },
+      select: {
+        id: true,
+        title: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        location: true,
+        coverMimeType: true,
+        sessions: EVENT_SELECT.sessions,
+      },
+      orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
+    });
+  }
+
+  findManagedWorkshop(
+    eventId: string,
+    userId: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.event.findFirst({
+      where: {
+        id: eventId,
+        createdById: userId,
+        status: { title: PUBLISHED_STATUS_TITLE },
+      },
+      select: {
+        id: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        sessions: { select: { id: true, startsAt: true, endsAt: true } },
+      },
+    });
+  }
 
   async expireOverdueProposals(now: Date): Promise<number> {
     const expiredStatus = await this.prisma.eventStatus.findUnique({
@@ -90,7 +105,6 @@ export class EventsRepository {
     const {
       categoryId,
       statusId,
-      isPublishedOnly,
       search,
       userId,
       skip,
@@ -101,15 +115,13 @@ export class EventsRepository {
       ...(categoryId !== undefined && { categoryId }),
       ...(statusId !== undefined
         ? { statusId }
-        : isPublishedOnly
-          ? {
-              status: {
-                title: payload.includeProposals
-                  ? { in: CATALOG_STATUS_TITLES }
-                  : PUBLISHED_STATUS_TITLE,
-              },
-            }
-          : {}),
+        : {
+            status: {
+              title: payload.includeProposals
+                ? { in: CATALOG_STATUS_TITLES }
+                : PUBLISHED_STATUS_TITLE,
+            },
+          }),
       ...(search !== undefined && {
         title: {
           contains: escapePgWildcards(search),
@@ -130,7 +142,7 @@ export class EventsRepository {
     ]);
 
     return {
-      items: items as unknown as EventWithRelations[],
+      items,
       total,
     };
   }
@@ -149,8 +161,7 @@ export class EventsRepository {
       },
     });
 
-    return event as unknown as
-      (EventWithRelations & { modality: { id: string; title: string } }) | null;
+    return event;
   }
 
   findScheduleConflict(
@@ -158,13 +169,80 @@ export class EventsRepository {
     event: RegistrationScheduleEvent,
     registeredEventIds: string[],
   ) {
+    const ownSessions = event.sessions ?? [];
+    const legacyDate = formatUtcDate(event.eventDate);
+    const legacyStartsAt = toBoliviaInstant(
+      legacyDate,
+      formatUtcTime(event.startTime),
+    );
+    const legacyEndsAt = toBoliviaInstant(
+      legacyDate,
+      formatUtcTime(event.endTime),
+    );
+    const sessionOverlaps = ownSessions.length
+      ? ownSessions.map((session) => ({
+          startsAt: { lt: session.endsAt },
+          endsAt: { gt: session.startsAt },
+        }))
+      : [{ startsAt: { lt: legacyEndsAt }, endsAt: { gt: legacyStartsAt } }];
+    const legacyOverlaps = ownSessions.length
+      ? ownSessions.map((session) => {
+          const localStart = new Date(
+            session.startsAt.getTime() + BOLIVIA_OFFSET_MS,
+          );
+          const localEnd = new Date(
+            session.endsAt.getTime() + BOLIVIA_OFFSET_MS,
+          );
+          return {
+            eventDate: new Date(
+              Date.UTC(
+                localStart.getUTCFullYear(),
+                localStart.getUTCMonth(),
+                localStart.getUTCDate(),
+              ),
+            ),
+            startTime: {
+              lt: new Date(
+                Date.UTC(
+                  1970,
+                  0,
+                  1,
+                  localEnd.getUTCHours(),
+                  localEnd.getUTCMinutes(),
+                ),
+              ),
+            },
+            endTime: {
+              gt: new Date(
+                Date.UTC(
+                  1970,
+                  0,
+                  1,
+                  localStart.getUTCHours(),
+                  localStart.getUTCMinutes(),
+                ),
+              ),
+            },
+          };
+        })
+      : [
+          {
+            eventDate: event.eventDate,
+            startTime: { lt: event.endTime },
+            endTime: { gt: event.startTime },
+          },
+        ];
+    const overlap: Prisma.EventWhereInput = {
+      OR: [
+        { sessions: { some: { OR: sessionOverlaps } } },
+        { sessions: { none: {} }, OR: legacyOverlaps },
+      ],
+    };
     return tx.event.findFirst({
       where: {
         id: { in: registeredEventIds, not: event.id },
         status: { title: PUBLISHED_STATUS_TITLE },
-        eventDate: event.eventDate,
-        startTime: { lt: event.endTime },
-        endTime: { gt: event.startTime },
+        ...overlap,
       },
       select: { id: true },
     });
@@ -182,6 +260,7 @@ export class EventsRepository {
         eventDate: true,
         startTime: true,
         endTime: true,
+        sessions: { select: { startsAt: true, endsAt: true } },
         status: { select: { title: true } },
       },
     });

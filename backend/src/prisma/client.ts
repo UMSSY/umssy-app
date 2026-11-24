@@ -192,6 +192,26 @@ export type TimeProposal = Prisma.TimeProposalModel
  */
 export type AppointmentHistory = Prisma.AppointmentHistoryModel
 /**
+ * Model AppointmentNotificationEvent
+ * 
+ */
+export type AppointmentNotificationEvent = Prisma.AppointmentNotificationEventModel
+/**
+ * Model AppointmentNotificationChannel
+ * 
+ */
+export type AppointmentNotificationChannel = Prisma.AppointmentNotificationChannelModel
+/**
+ * Model AppointmentNotificationStatus
+ * 
+ */
+export type AppointmentNotificationStatus = Prisma.AppointmentNotificationStatusModel
+/**
+ * Model AppointmentNotification
+ * 
+ */
+export type AppointmentNotification = Prisma.AppointmentNotificationModel
+/**
  * Model EventCategory
  * 
  */
@@ -201,6 +221,11 @@ export type EventCategory = Prisma.EventCategoryModel
  * 
  */
 export type Event = Prisma.EventModel
+/**
+ * Model EventSession
+ * 
+ */
+export type EventSession = Prisma.EventSessionModel
 /**
  * Model EventRegistration
  * 
@@ -271,6 +296,11 @@ export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
  * 
  */
 export type MentorSlotOffer = Prisma.MentorSlotOfferModel
+/**
+ * Model MentorCapacitySetting
+ * 
+ */
+export type MentorCapacitySetting = Prisma.MentorCapacitySettingModel
 /**
  * Model ActivationOtp
  * 
@@ -372,6 +402,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  */
 export type Survey = Prisma.SurveyModel
 /**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
+/**
  * Model SurveyQuestion
  * 
  */
@@ -457,6 +492,11 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel
 /**
+ * Model RadarDocumentVerification
+ * 
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel
+/**
  * Model PortfolioProvider
  * 
  */
@@ -491,3 +531,13 @@ export type PushSubscription = Prisma.PushSubscriptionModel
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model RadarDocumentStatus
+ * 
+ */
+export type RadarDocumentStatus = Prisma.RadarDocumentStatusModel
+/**
+ * Model RadarDocumentSourceType
+ * 
+ */
+export type RadarDocumentSourceType = Prisma.RadarDocumentSourceTypeModel

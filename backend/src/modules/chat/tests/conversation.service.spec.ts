@@ -17,9 +17,11 @@ const noBlocks = () =>
     findBlockedIdsBy: vi.fn().mockResolvedValue(new Set<string>()),
     isBlockedBetween: vi.fn().mockResolvedValue(false),
   }) as unknown as BlockService;
-const allowedRoles = () =>
+const allowedRoles = (hasValidatedApplication = false) =>
   ({
-    assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+    assertCanCommunicate: vi
+      .fn()
+      .mockResolvedValue({ hasValidatedApplication }),
   }) as unknown as ChatRolePolicyService;
 const noEducations = () =>
   ({
@@ -472,6 +474,199 @@ describe('ConversationService', () => {
     ).not.toHaveBeenCalled();
     expect(
       connectionRequestRepositoryMock.findAcceptedRequest,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('reutiliza la conversacion existente por contextId sin requerir solicitud de conexion', async () => {
+    const existingPostulationConv = {
+      id: 'conv-postulacion-1',
+      userAId: 'user-a',
+      userBId: 'user-b',
+      contextType: 'POSTULACION',
+      contextId: 'postulacion-123',
+      eventId: null,
+      event: null,
+      updatedAt: new Date(),
+      userA: { id: 'user-a', firstName: 'Juan', lastName: 'Perez' },
+      userB: { id: 'user-b', firstName: 'Tech', lastName: 'Recruiter' },
+      messages: [],
+    };
+    const conversationRepositoryMock = {
+      findByContextId: vi.fn().mockResolvedValue(existingPostulationConv),
+      findByOrderedPair: vi.fn(),
+      createWithParticipants: vi.fn(),
+    };
+    const participantRepositoryMock = {
+      findByConversationAndUser: vi.fn().mockResolvedValue(null),
+      countUnread: vi.fn().mockResolvedValue(0),
+    };
+    const userLookupRepositoryMock = {
+      findById: vi.fn().mockResolvedValue({
+        id: 'user-b',
+        isActive: true,
+      }),
+    };
+    const userPresenceServiceMock = {
+      mapOnlineStatus: vi.fn().mockResolvedValue(new Map()),
+    };
+    const connectionRequestRepositoryMock = {
+      findAcceptedRequest: vi.fn(),
+    };
+    const service = new ConversationService(
+      conversationRepositoryMock as unknown as ConversationRepository,
+      participantRepositoryMock as unknown as ConversationParticipantRepository,
+      userLookupRepositoryMock as unknown as UserLookupRepository,
+      userPresenceServiceMock as unknown as UserPresenceService,
+      connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
+      noBlocks(),
+      new ConversationMapper(),
+      allowedRoles(true),
+      noEducations(),
+      noUserSkills(),
+    );
+
+    const result = await service.getOrCreateWithStatus('user-a', 'user-b', {
+      contextType: 'POSTULACION',
+      contextId: 'postulacion-123',
+    });
+
+    expect(result.isCreated).toBe(false);
+    expect(result.conversation.id).toBe('conv-postulacion-1');
+    expect(result.conversation.contextType).toBe('POSTULACION');
+    expect(result.conversation.contextId).toBe('postulacion-123');
+    expect(conversationRepositoryMock.findByContextId).toHaveBeenCalledWith(
+      'postulacion-123',
+      'user-a',
+      'user-b',
+    );
+    expect(
+      conversationRepositoryMock.createWithParticipants,
+    ).not.toHaveBeenCalled();
+    expect(
+      connectionRequestRepositoryMock.findAcceptedRequest,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('crea conversacion con contextType y contextId cuando no existe sin requerir solicitud de conexion', async () => {
+    const createdPostulationConv = {
+      id: 'conv-postulacion-new',
+      userAId: 'user-a',
+      userBId: 'user-b',
+      contextType: 'POSTULACION',
+      contextId: 'postulacion-456',
+      eventId: null,
+      event: null,
+      updatedAt: new Date(),
+      userA: { id: 'user-a', firstName: 'Juan', lastName: 'Perez' },
+      userB: { id: 'user-b', firstName: 'Tech', lastName: 'Recruiter' },
+      messages: [],
+    };
+    const conversationRepositoryMock = {
+      findByContextId: vi.fn().mockResolvedValue(null),
+      createWithParticipants: vi
+        .fn()
+        .mockResolvedValue(createdPostulationConv),
+    };
+    const participantRepositoryMock = {
+      findByConversationAndUser: vi.fn().mockResolvedValue(null),
+      countUnread: vi.fn().mockResolvedValue(0),
+    };
+    const userLookupRepositoryMock = {
+      findById: vi.fn().mockResolvedValue({
+        id: 'user-b',
+        isActive: true,
+      }),
+    };
+    const userPresenceServiceMock = {
+      mapOnlineStatus: vi.fn().mockResolvedValue(new Map()),
+    };
+    const connectionRequestRepositoryMock = {
+      findAcceptedRequest: vi.fn(),
+    };
+    const service = new ConversationService(
+      conversationRepositoryMock as unknown as ConversationRepository,
+      participantRepositoryMock as unknown as ConversationParticipantRepository,
+      userLookupRepositoryMock as unknown as UserLookupRepository,
+      userPresenceServiceMock as unknown as UserPresenceService,
+      connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
+      noBlocks(),
+      new ConversationMapper(),
+      allowedRoles(true),
+      noEducations(),
+      noUserSkills(),
+    );
+
+    const result = await service.getOrCreateWithStatus('user-a', 'user-b', {
+      contextType: 'POSTULACION',
+      contextId: 'postulacion-456',
+    });
+
+    expect(result.isCreated).toBe(true);
+    expect(result.conversation.id).toBe('conv-postulacion-new');
+    expect(result.conversation.contextType).toBe('POSTULACION');
+    expect(result.conversation.contextId).toBe('postulacion-456');
+    expect(
+      conversationRepositoryMock.createWithParticipants,
+    ).toHaveBeenCalledWith(
+      'user-a',
+      'user-b',
+      expect.any(Date),
+      {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-456',
+      },
+    );
+    expect(
+      connectionRequestRepositoryMock.findAcceptedRequest,
+    ).not.toHaveBeenCalled();
+    });
+
+  it('exige conexion aceptada cuando la politica no valida la postulacion', async () => {
+    const conversationRepositoryMock = {
+      findByContextId: vi.fn().mockResolvedValue(null),
+      createWithParticipants: vi.fn(),
+    };
+    const participantRepositoryMock = {
+      findByConversationAndUser: vi.fn().mockResolvedValue(null),
+      countUnread: vi.fn().mockResolvedValue(0),
+    };
+    const userLookupRepositoryMock = {
+      findById: vi.fn().mockResolvedValue({
+        id: 'user-b',
+        isActive: true,
+      }),
+    };
+    const userPresenceServiceMock = {
+      mapOnlineStatus: vi.fn().mockResolvedValue(new Map()),
+    };
+    const connectionRequestRepositoryMock = {
+      findAcceptedRequest: vi.fn().mockResolvedValue(null),
+    };
+    const service = new ConversationService(
+      conversationRepositoryMock as unknown as ConversationRepository,
+      participantRepositoryMock as unknown as ConversationParticipantRepository,
+      userLookupRepositoryMock as unknown as UserLookupRepository,
+      userPresenceServiceMock as unknown as UserPresenceService,
+      connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
+      noBlocks(),
+      new ConversationMapper(),
+      allowedRoles(false),
+      noEducations(),
+      noUserSkills(),
+    );
+
+    await expect(
+      service.getOrCreateWithStatus('user-a', 'user-b', {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-789',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(
+      connectionRequestRepositoryMock.findAcceptedRequest,
+    ).toHaveBeenCalledWith('user-a', 'user-b');
+    expect(
+      conversationRepositoryMock.createWithParticipants,
     ).not.toHaveBeenCalled();
   });
 });

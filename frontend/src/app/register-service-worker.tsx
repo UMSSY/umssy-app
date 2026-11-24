@@ -1,19 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
+import {
+  registerServiceWorker,
+  unregisterServiceWorkers,
+} from "@/shared/services/service-worker/service-worker-registration";
 
 export function RegisterServiceWorker() {
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((registration) => {
-          console.log("Service Worker registrado:", registration.scope);
-        })
-        .catch((error) => {
-          console.error("Error al registrar el Service Worker:", error);
-        });
-    }
+    if (process.env.NODE_ENV === "production") void registerServiceWorker();
+    else void unregisterServiceWorkers().catch(() => undefined);
   }, []);
 
   return null;

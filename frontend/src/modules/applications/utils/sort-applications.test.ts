@@ -12,8 +12,8 @@ const APPLICATIONS = [
 const ids = (list: readonly { id: string }[]) => list.map((item) => item.id);
 
 describe("sortApplications", () => {
-  it("keeps the server order when there is no sort", () => {
-    expect(ids(sortApplications(APPLICATIONS, null))).toEqual(["a", "b", "c"]);
+  it("uses recent dates and vacancy title by default", () => {
+    expect(ids(sortApplications(APPLICATIONS, null))).toEqual(["b", "a", "c"]);
   });
 
   it("sorts text ignoring case and accents", () => {

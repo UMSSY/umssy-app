@@ -13,8 +13,10 @@ export class PrismaService
       adapter: new PrismaPg({
         connectionString: buildDatabaseConnectionString('runtime'),
         options: '-c TimeZone=UTC',
-        max: 3,
-        connectionTimeoutMillis: 10_000,
+        max: Number(process.env.DB_POOL_MAX ?? 20),
+        connectionTimeoutMillis: Number(
+          process.env.DB_POOL_TIMEOUT_MS ?? 30_000,
+        ),
         idleTimeoutMillis: 30_000,
       }),
     });

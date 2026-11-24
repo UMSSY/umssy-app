@@ -1,0 +1,9 @@
+export type ReportType =
+  | "REGISTERED_USERS"
+  | "STUDENTS"
+  | "DEGREE_HOLDERS"
+  | "MENTORS"
+  | "COMPANIES"
+  | "ADMINS"
+  | "REJECTED_USERS"
+  | "SURVEY_STATISTICS";

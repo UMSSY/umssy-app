@@ -1,35 +1,57 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DETECTED_SKILLS_QUERY_KEY, SKILLS_ANALYSIS_MUTATION_KEY } from "../constants/skills.constants";
-import { skillsService } from "../services/skills.service";
-import type { DetectedSkillsSummary } from "../types/detected-skills-summary.types";
-import type { UseDetectedSkillsResult } from "../types/use-detected-skills-result.types";
-import { useInvalidateProfileCompleteness } from "@/modules/profile";
+import { useEffect, useRef } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  DETECTED_SKILLS_QUERY_KEY,
+  SKILLS_ANALYSIS_MUTATION_KEY,
+} from '../constants/skills.constants';
+import { skillsService } from '../services/skills.service';
+import type { DetectedSkillsSummary } from '../types/detected-skills-summary.types';
+import type { UseDetectedSkillsResult } from '../types/use-detected-skills-result.types';
+import { useInvalidateProfileCompleteness } from '@/modules/profile';
 
 const ANALYSIS_KEY = JSON.stringify(SKILLS_ANALYSIS_MUTATION_KEY);
 
-export function useDetectedSkills(): UseDetectedSkillsResult {
+export function useDetectedSkills({
+  forGuide = false,
+}: { forGuide?: boolean } = {}): UseDetectedSkillsResult {
   const queryClient = useQueryClient();
   const invalidateCompleteness = useInvalidateProfileCompleteness();
-  const query = useQuery({ queryKey: DETECTED_SKILLS_QUERY_KEY, queryFn: skillsService.getDetectedSkills, refetchInterval: state => state.state.data?.status === 'pending' ? 1500 : false });
+  const query = useQuery({
+    queryKey: DETECTED_SKILLS_QUERY_KEY,
+    queryFn: skillsService.getDetectedSkills,
+    staleTime: forGuide ? 30_000 : undefined,
+    refetchInterval: (state) =>
+      state.state.data?.status === 'pending' ? 1500 : false,
+  });
+  const previousSummary = useRef(query.data);
   const analysis = useMutation({
     mutationKey: SKILLS_ANALYSIS_MUTATION_KEY,
     mutationFn: skillsService.analyzeSkills,
-    onSuccess: (summary) => queryClient.setQueryData<DetectedSkillsSummary>(DETECTED_SKILLS_QUERY_KEY, summary),
+    onSuccess: (summary) =>
+      queryClient.setQueryData<DetectedSkillsSummary>(
+        DETECTED_SKILLS_QUERY_KEY,
+        summary,
+      ),
   });
 
   useEffect(() => {
-    if (query.data?.status === "ready") void invalidateCompleteness();
-  }, [query.data, invalidateCompleteness]);
+    const hasNewSummary = previousSummary.current !== query.data;
+    previousSummary.current = query.data;
+    if (query.data?.status === 'ready' && (!forGuide || hasNewSummary))
+      void invalidateCompleteness();
+  }, [query.data, forGuide, invalidateCompleteness]);
 
   useEffect(
     () =>
       queryClient.getMutationCache().subscribe((event) => {
-        if (event.type !== "updated" || event.action.type !== "success") return;
-        if (JSON.stringify(event.mutation.options.mutationKey) === ANALYSIS_KEY) return;
-        void queryClient.invalidateQueries({ queryKey: DETECTED_SKILLS_QUERY_KEY });
+        if (event.type !== 'updated' || event.action.type !== 'success') return;
+        if (JSON.stringify(event.mutation.options.mutationKey) === ANALYSIS_KEY)
+          return;
+        void queryClient.invalidateQueries({
+          queryKey: DETECTED_SKILLS_QUERY_KEY,
+        });
       }),
     [queryClient],
   );

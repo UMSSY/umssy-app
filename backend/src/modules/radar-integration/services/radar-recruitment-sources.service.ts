@@ -6,7 +6,7 @@ import { EducationSourcesService } from '../../educations/services/education-sou
 import { CertificationSourcesService } from '../../certifications/services/certification-sources.service.js';
 import { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
 import { CvSourcesService } from '../../cv/services/cv-sources.service.js';
-import type { CurrentCvRow } from '../types/current-cv-row.type.js';
+import type { CurrentCvRow } from '../types/current-cv-row.types.js';
 
 /** Lecturas entre dominios mediante las APIs de sus servicios propietarios. */
 @Injectable()
@@ -20,6 +20,19 @@ export class RadarRecruitmentSourcesService {
     private readonly experience: WorkExperienceSourcesService,
     private readonly cvs: CvSourcesService,
   ) {}
+
+  async hasRole(userId: string, role: string): Promise<boolean> {
+    return this.hasAnyRole(userId, [role]);
+  }
+
+  async hasAnyRole(userId: string, roles: string[]): Promise<boolean> {
+    const users = await this.users.findManyWithActiveRoles([userId]);
+    const user = users.find((candidate) => candidate.id === userId);
+    return Boolean(
+      user?.isActive &&
+      user.roles.some(({ role }) => roles.includes(role.name)),
+    );
+  }
 
   companyExists(companyId: string) {
     return this.jobs.companyExists(companyId);

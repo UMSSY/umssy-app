@@ -139,7 +139,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
           <h2 className="text-2xl font-bold text-ink">{SURVEY_ANSWER_TEXT.completedTitle}</h2>
           <p className="text-sm text-text-secondary">{SURVEY_ANSWER_TEXT.completedDescription(survey.title)}</p>
           <div className="pt-4">
-            <Link href={SURVEY_NOTIFICATIONS_PATH} className={buttonVariants({ variant: "brand" })}>
+            <Link href={SURVEY_NOTIFICATIONS_PATH} className={buttonVariants({ variant: "default" })}>
               {SURVEY_ANSWER_TEXT.backToNotifications}
             </Link>
           </div>
@@ -191,7 +191,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
             ))}
           </CardContent>
           <CardFooter className="justify-end border-t border-border px-6 py-4">
-            <Button type="submit" variant="brand" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />

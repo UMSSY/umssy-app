@@ -36,8 +36,15 @@ describe("MentorProfilePage", () => {
     expect(screen.getByText("Arquitecta de Software")).toBeInTheDocument();
     expect(screen.getByText("Sobre mí")).toBeInTheDocument();
     expect(screen.getByText("Trayectoria actual")).toBeInTheDocument();
-    expect(screen.getByText("Áreas técnicas")).toBeInTheDocument();
-    expect(screen.getByText("Tipos de orientación")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Áreas técnicas", level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Tipos de orientación",
+        level: 2,
+      }),
+    ).toBeInTheDocument();
 
     expect(request).toHaveBeenCalledWith(
       MENTOR_PROFILE_FIXTURE.id,

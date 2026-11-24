@@ -1,6 +1,11 @@
-import type { AreaSectionProps } from "../types/area-detail-components.types";
+import type { AreaSectionProps } from '../types/area-section-props.types';
 
-export function AreaSection({ title, icon: Icon, count, children }: AreaSectionProps) {
+export function AreaSection({
+  title,
+  icon: Icon,
+  count,
+  children,
+}: AreaSectionProps) {
   return (
     <div className="flex min-w-0 flex-col gap-4 p-6">
       <div className="flex min-w-0 items-center gap-2 text-ink-soft">

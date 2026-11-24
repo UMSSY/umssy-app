@@ -86,12 +86,15 @@ export class RadarApplicationsService {
 
   async companyForDecision(applicationId: string) {
     const application =
-      await this.applications.findRecruitmentApplication(applicationId);
+      await this.applications.findApplicationDecisionContext(applicationId);
     return application
       ? [
           {
             user_id: application.userId,
-            company_id: application.jobOffer.companyId,
+            company_id: application.companyId,
+            status_title: application.statusTitle,
+            job_title: application.jobTitle,
+            company_name: application.companyName,
           },
         ]
       : [];

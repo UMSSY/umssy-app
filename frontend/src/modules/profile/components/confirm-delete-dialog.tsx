@@ -16,9 +16,18 @@ export function ConfirmDeleteDialog({
   title,
   message,
   isDeleting = false,
+  confirmLabel = "Eliminar",
+  cancelLabel = "Cancelar",
   onConfirm,
   onCancel,
 }: ConfirmDeleteDialogProps) {
+  const deletingLabel =
+    confirmLabel === "Desvincular"
+      ? "Desvinculando..."
+      : confirmLabel === "Eliminar"
+        ? "Eliminando..."
+        : `${confirmLabel}...`;
+
   return (
     <AlertDialog open={isOpen} onOpenChange={isDeleting ? undefined : onCancel}>
       <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-sm ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
@@ -31,7 +40,7 @@ export function ConfirmDeleteDialog({
             className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
             disabled={isDeleting}
           >
-            Cancelar
+            {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction
             type="button"
@@ -40,7 +49,7 @@ export function ConfirmDeleteDialog({
             onClick={onConfirm}
           >
             {isDeleting ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
-            {isDeleting ? "Eliminando..." : "Eliminar"}
+            {isDeleting ? deletingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

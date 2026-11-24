@@ -64,11 +64,11 @@ export const certificationsService = {
     await apiClient.delete(`${CERTIFICATIONS_ENDPOINT}/${id}`, { headers: getAuthHeaders() });
   },
 
-  uploadDocument: async (id: string, file: File): Promise<void> => {
+  uploadDocument: async (id: string, file: File, version?: string): Promise<void> => {
     const formData = new FormData();
     formData.append(CERTIFICATION_DOCUMENT_FIELD_NAME, file);
     await apiClient.put(getCertificationDocumentEndpoint(id), formData, {
-      headers: getAuthHeaders(),
+      headers: { ...getAuthHeaders(), ...(version && { "X-Document-Version": version }) },
     });
   },
 
@@ -87,7 +87,7 @@ export const certificationsService = {
     }
   },
 
-  deleteDocument: async (id: string): Promise<void> => {
-    await apiClient.delete(getCertificationDocumentEndpoint(id), { headers: getAuthHeaders() });
+  deleteDocument: async (id: string, version?: string): Promise<void> => {
+    await apiClient.delete(getCertificationDocumentEndpoint(id), { headers: { ...getAuthHeaders(), ...(version && { "X-Document-Version": version }) } });
   },
 };

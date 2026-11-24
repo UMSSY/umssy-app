@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import type { ManagementMenuProps } from "../types/management-menu-props.types";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import { getAcademicPeriods } from "../utils/academic-periods";
 
 export function ManagementMenu({ value, onChange }: ManagementMenuProps) {

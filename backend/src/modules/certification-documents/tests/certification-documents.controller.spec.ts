@@ -44,7 +44,7 @@ describe('CertificationDocumentsController', () => {
     await expect(
       controller.upload(userId, certificationId, file),
     ).resolves.toBe(response);
-    expect(service.upload).toHaveBeenCalledWith(userId, certificationId, file);
+    expect(service.upload).toHaveBeenCalledWith(userId, certificationId, file, undefined);
   });
 
   it('removes the document and returns null', async () => {
@@ -53,7 +53,7 @@ describe('CertificationDocumentsController', () => {
     await expect(
       controller.remove(userId, certificationId),
     ).resolves.toBeNull();
-    expect(service.remove).toHaveBeenCalledWith(userId, certificationId);
+    expect(service.remove).toHaveBeenCalledWith(userId, certificationId, undefined);
   });
 });
 

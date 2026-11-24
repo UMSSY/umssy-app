@@ -1,4 +1,5 @@
 import type { Prisma } from '../../../prisma/client.js';
+
 export type ApplicationRecord = Prisma.JobApplicationGetPayload<{
   select: {
     id: true;

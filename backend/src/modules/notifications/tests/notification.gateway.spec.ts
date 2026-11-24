@@ -1,8 +1,10 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import type { Socket } from 'socket.io';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { SessionService } from '../../../common/services/session.service.js';
+import { AppVisibilityService } from '../services/app-visibility.service.js';
 
 interface MockServer {
   use: ReturnType<typeof vi.fn>;
@@ -18,11 +20,21 @@ interface MockSessionService {
   getAuthenticatedUser: ReturnType<typeof vi.fn>;
 }
 
+interface MockAppVisibilityService {
+  setVisibility: ReturnType<typeof vi.fn>;
+  removeConnection: ReturnType<typeof vi.fn>;
+}
+
+function createClient(): Socket {
+  return { id: 'socket-1', data: { user: { id: 'user-123' } } } as unknown as Socket;
+}
+
 describe('NotificationGateway', () => {
   let gateway: NotificationGateway;
   let mockServer: MockServer;
   let mockJwtService: MockJwtService;
   let mockSessionService: MockSessionService;
+  let mockAppVisibilityService: MockAppVisibilityService;
 
   beforeEach(async () => {
     mockServer = {
@@ -33,12 +45,14 @@ describe('NotificationGateway', () => {
 
     mockJwtService = { verifyAsync: vi.fn() };
     mockSessionService = { getAuthenticatedUser: vi.fn() };
+    mockAppVisibilityService = { setVisibility: vi.fn(), removeConnection: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NotificationGateway,
         { provide: JwtService, useValue: mockJwtService },
         { provide: SessionService, useValue: mockSessionService },
+        { provide: AppVisibilityService, useValue: mockAppVisibilityService },
       ],
     }).compile();
 
@@ -56,5 +70,23 @@ describe('NotificationGateway', () => {
   it('debe configurar el middleware de autenticación en afterInit', () => {
     gateway.afterInit(mockServer as unknown as NotificationGateway['server']);
     expect(mockServer.use).toHaveBeenCalledTimes(1);
+  });
+
+  it('registra la visibilidad reportada por el cliente', () => {
+    gateway.handleVisibilityChanged(createClient(), { visible: true });
+
+    expect(mockAppVisibilityService.setVisibility).toHaveBeenCalledWith('user-123', 'socket-1', true);
+  });
+
+  it('ignora un payload de visibilidad inválido', () => {
+    gateway.handleVisibilityChanged(createClient(), { visible: 'yes' });
+
+    expect(mockAppVisibilityService.setVisibility).not.toHaveBeenCalled();
+  });
+
+  it('limpia la visibilidad al desconectarse el cliente', () => {
+    gateway.handleDisconnect(createClient());
+
+    expect(mockAppVisibilityService.removeConnection).toHaveBeenCalledWith('user-123', 'socket-1');
   });
 });

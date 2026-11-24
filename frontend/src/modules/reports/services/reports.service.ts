@@ -6,18 +6,15 @@ import {
   REJECTED_USERS_CSV_FALLBACK_NAME,
   SLOW_REQUEST_THRESHOLD_MS,
 } from "../constants/reports.constants";
-import type { GeneratedReport, ReportHistoryParams } from "../types/generated-report.types";
-import type {
-  ExportedFile,
-  RegisteredUser,
-  RegisteredUsersExportParams,
-  RegisteredUsersParams,
-} from "../types/registered-user.types";
-import type {
-  RejectedUser,
-  RejectedUsersExportParams,
-  RejectedUsersParams,
-} from "../types/rejected-user.types";
+import type { GeneratedReport } from "../types/generated-report.types";
+import type { ReportHistoryParams } from "../types/report-history-params.types";
+import type { ExportedFile } from "../types/exported-file.types";
+import type { RegisteredUser } from "../types/registered-user.types";
+import type { RegisteredUsersExportParams } from "../types/registered-users-export-params.types";
+import type { RegisteredUsersParams } from "../types/registered-users-params.types";
+import type { RejectedUser } from "../types/rejected-user.types";
+import type { RejectedUsersExportParams } from "../types/rejected-users-export-params.types";
+import type { RejectedUsersParams } from "../types/rejected-users-params.types";
 
 async function downloadCsv(url: string, params: object, fallbackName: string): Promise<ExportedFile> {
   const response = await apiClient.get<Blob>(url, { params, responseType: "blob" });
@@ -61,8 +58,19 @@ export const reportsService = {
     return data;
   },
 
-  exportRegisteredUsersCsv: ({ userType, period, search }: RegisteredUsersExportParams): Promise<ExportedFile> =>
-    downloadCsv("/reports/registered-users/export", { userType, period, search }, REGISTERED_USERS_CSV_FALLBACK_NAME),
+  exportRegisteredUsersCsv: ({ userType, period, search, page, limit, snapshotAt, format }: RegisteredUsersExportParams): Promise<ExportedFile> =>
+    downloadCsv(
+      "/reports/registered-users/export",
+      {
+        userType,
+        period,
+        search,
+        ...(format && { format }),
+        ...(page !== undefined && limit !== undefined && { page, limit }),
+        ...(snapshotAt && { snapshotAt }),
+      },
+      REGISTERED_USERS_CSV_FALLBACK_NAME,
+    ),
 
   getRejectedUsers: async (
     { page, limit, userType, period, search, snapshotAt }: RejectedUsersParams,
@@ -77,10 +85,17 @@ export const reportsService = {
     return data;
   },
 
-  exportRejectedUsersCsv: ({ userType, period, search }: RejectedUsersExportParams): Promise<ExportedFile> =>
+  exportRejectedUsersCsv: ({ userType, period, search, page, limit, snapshotAt, format }: RejectedUsersExportParams): Promise<ExportedFile> =>
     downloadCsv(
       "/reports/rejected-users/export",
-      { userType, period, search: search || undefined },
+      {
+        userType,
+        period,
+        search: search || undefined,
+        ...(format && { format }),
+        ...(page !== undefined && limit !== undefined && { page, limit }),
+        ...(snapshotAt && { snapshotAt }),
+      },
       REJECTED_USERS_CSV_FALLBACK_NAME,
     ),
 };

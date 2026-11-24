@@ -4,7 +4,7 @@ import type { SupportMutation } from '../types/support-mutation.types';
 
 import { useRef } from "react";
 import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
-import { REGISTRATION_QUERY_KEYS, useRegistrationSession } from "@/modules/registrations";
+import { REGISTRATION_QUERY_KEYS, useRegistrationSession } from "@/modules/event-registrations";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { registrationsService } from "../services/registrations.service";
