@@ -25,6 +25,8 @@ import { useEventsFilters } from '../hooks/use-events-filters';
 import { useProposalSupport } from '../hooks/use-proposal-support';
 import { useEventCategories } from '@/modules/event-categories';
 import { EventsSearchInput } from '../components/events-search-input';
+import { PopularFilterChip } from '../components/popular-filter-chip';
+import { IncompleteProfileNotice } from '../components/incomplete-profile-notice';
 import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 import type { EventDetail } from '../types/event-detail.types';
@@ -34,16 +36,33 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
   const router = useRouter();
   const session = useRegistrationSession();
   const { roles, isLoading: rolesLoading } = useAuth();
-  const { searchInput, setSearchInput, categoryId, setCategoryId, filters } =
-    useEventsFilters();
+  const {
+    searchInput,
+    setSearchInput,
+    categoryId,
+    setCategoryId,
+    isPopular,
+    setIsPopular,
+    isExpired,
+    setIsExpired,
+    filters,
+  } = useEventsFilters();
   const {
     categories,
     isLoading: categoriesLoading,
     error: categoriesError,
     retry: retryCategories,
   } = useEventCategories();
-  const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
-    useEvents(filters);
+  const {
+    events,
+    error,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    isProfileComplete,
+    loadMore,
+    retry,
+  } = useEvents(filters);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(initialProposalId);
   const viewRef = useRef<HTMLElement>(null);
 
@@ -183,14 +202,40 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
                 setSearchInput(value);
               }}
             />
-            <CategoryFilterChips
-              categories={categories}
-              selectedId={categoryId}
-              onSelect={(id) => {
-                setSelectedEventId(null);
-                setCategoryId(id);
-              }}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant={isExpired ? "default" : "outline"}
+                onClick={() => {
+                  setSelectedEventId(null);
+                  setIsExpired(!isExpired);
+                  setCategoryId(null);
+                  setIsPopular(false);
+                }}
+                className="rounded-full text-xs"
+              >
+                Propuestas vencidas
+              </Button>
+              <PopularFilterChip
+                isSelected={isPopular}
+                onToggle={() => {
+                  setSelectedEventId(null);
+                  setIsPopular(!isPopular);
+                  setIsExpired(false);
+                }}
+              />
+              <CategoryFilterChips
+                categories={categories}
+                selectedId={categoryId}
+                isAllActive={!isExpired && !isPopular}
+                onSelect={(id) => {
+                  setSelectedEventId(null);
+                  setCategoryId(id);
+                  setIsExpired(false);
+                  setIsPopular(false);
+                }}
+              />
+            </div>
           </div>
 
           {categoriesLoading && (
@@ -204,6 +249,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               retryLabel="Reintentar categorías"
             />
           )}
+
+          {!isProfileComplete && <IncompleteProfileNotice />}
 
           <section aria-label="Listado de talleres">
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -226,9 +273,11 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
             )}
             {!isLoading && !error && visibleEvents.length === 0 && (
               <p className="py-10 text-center text-text-secondary">
-                {filters.search.trim() || filters.categoryId
-                  ? "No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría."
-                  : "No hay talleres disponibles."}
+                {isExpired
+                  ? "No hay propuestas vencidas por el momento."
+                  : filters.search.trim() || filters.categoryId
+                    ? "No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría."
+                    : "No hay talleres disponibles."}
               </p>
             )}
             {error && (

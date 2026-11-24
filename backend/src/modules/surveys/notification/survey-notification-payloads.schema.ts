@@ -6,6 +6,13 @@ const surveyTitle = z.string().trim().min(1).max(150);
 const closesAtFormatted = z.string().trim().min(1);
 const responsesCount = z.number().int().nonnegative();
 
+export const surveyPublishedPayloadSchema = z.object({
+  surveyTitle,
+  previousPeriod: z.string().trim(),
+  currentPeriod: z.string().trim().min(1),
+  change: z.string().trim().min(1),
+}) satisfies z.ZodType<NotificationPayloadMap[NotificationType.SURVEY_PUBLISHED]>;
+
 export const surveyReminderPayloadSchema = z.object({
   surveyTitle,
   closesAtFormatted,

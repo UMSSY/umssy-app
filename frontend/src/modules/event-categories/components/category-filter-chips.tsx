@@ -7,7 +7,10 @@ export function CategoryFilterChips({
   categories,
   selectedId,
   onSelect,
+  isAllActive = true,
 }: CategoryFilterChipsProps) {
+  const showAllAsActive = selectedId === null && isAllActive;
+
   return (
     <div
       role="group"
@@ -16,8 +19,8 @@ export function CategoryFilterChips({
     >
       <Button
         size="lg"
-        variant={selectedId === null ? 'default' : 'outline'}
-        aria-pressed={selectedId === null}
+        variant={showAllAsActive ? 'default' : 'outline'}
+        aria-pressed={showAllAsActive}
         onClick={() => onSelect(null)}
         className="rounded-full px-4 text-xs font-semibold"
       >

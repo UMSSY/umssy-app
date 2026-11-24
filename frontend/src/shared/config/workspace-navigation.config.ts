@@ -1,5 +1,4 @@
 import {
-  Bell,
   BookOpen,
   BriefcaseBusiness,
   Building2,
@@ -99,14 +98,6 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
     icon: SquarePlus,
     area: 'management',
     keywords: 'nueva encuesta formulario preguntas',
-  },
-  {
-    label: 'Mapas de calor',
-    href: '/backoffice/reports/heatmaps',
-    icon: LayoutGrid,
-    area: 'management',
-    keywords:
-      'mapa de calor analíticas datos gráficos visualización estadísticas',
   },
   {
     label: 'Habilidades por Carrera',
@@ -260,13 +251,6 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
     icon: MessageCircle,
     area: 'community',
     keywords: 'chat mensajes conversaciones',
-  },
-  {
-    label: 'Notificaciones de encuestas',
-    href: '/surveys',
-    icon: Bell,
-    area: 'community',
-    keywords: 'encuestas formularios cuestionarios responder pendientes',
   },
   {
     label: 'Talleres disponibles',

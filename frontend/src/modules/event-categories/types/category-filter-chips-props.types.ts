@@ -1,7 +1,6 @@
-import type { EventCategoryItem } from './event-category-item.types';
-
 export interface CategoryFilterChipsProps {
-  categories: EventCategoryItem[];
+  categories: Array<{ id: string; name: string }>;
   selectedId: string | null;
-  onSelect: (categoryId: string | null) => void;
+  onSelect: (id: string | null) => void;
+  isAllActive?: boolean;
 }

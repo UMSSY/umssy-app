@@ -15,7 +15,11 @@ import {
   addPendingPassRemoval,
   readPendingPassRemovals,
 } from '@/shared/services/storage/pending-offline-pass-removals';
-import { loadSessionOfflinePasses } from '../utils/offline-passes-store';
+import { clearOfflinePasses } from '@/shared/services/storage/offline-passes-owner';
+import {
+  claimSessionOfflinePasses,
+  loadSessionOfflinePasses,
+} from '../utils/offline-passes-store';
 import { registrationsService } from './registrations.service';
 import { registrationsService as registrationApi } from '@/modules/event-registrations';
 import { reconcileOfflinePasses } from './offline-passes.service';
@@ -62,7 +66,7 @@ describe('HU-08-14 offline pass copies', () => {
     const { loadSessionOfflinePasses: readAfterRestart } =
       await import('../utils/offline-passes-store');
     await initializeAccessTokenStorage();
-    const restored = await readAfterRestart(accountA);
+    const restored = await readAfterRestart(null);
     expect(restored?.savedAt).toEqual(expect.any(String));
     expect(restored?.passes).toEqual([
       {
@@ -136,7 +140,7 @@ describe('HU-08-14 offline pass copies', () => {
     get.mockRestore();
   });
 
-  it("deletes the previous account's copy and ignores its late online response", async () => {
+  it("deletes the previous account's copy once the new account claims it and ignores its late response", async () => {
     await saveAccessToken(accountA);
     const get = vi.spyOn(apiClient, 'get').mockResolvedValueOnce(response);
     await registrationsService.getPass(pass.id);
@@ -150,6 +154,7 @@ describe('HU-08-14 offline pass copies', () => {
     );
     const pending = registrationsService.getPass(pass.id);
     await saveAccessToken(accountB);
+    await claimSessionOfflinePasses(accountB);
     finishRequest(response);
     await pending;
 
@@ -161,26 +166,26 @@ describe('HU-08-14 offline pass copies', () => {
     get.mockRestore();
   });
 
-  it('invalidates a read from the old session and deletes its stored passes on logout', async () => {
+  it('invalidates a read from the old session and deletes its stored passes with the logout cleanup', async () => {
     await saveAccessToken(accountA);
     const get = vi.spyOn(apiClient, 'get').mockResolvedValue(response);
     await registrationsService.getPass(pass.id);
     const pendingRead = loadSessionOfflinePasses(accountA);
     clearAccessToken();
     await expect(pendingRead).resolves.toBeNull();
-    await vi.waitFor(async () =>
-      expect(await readIndexedDb(offlinePassesKey('titulado-a'))).toBeNull(),
-    );
+    await clearOfflinePasses();
+    expect(await readIndexedDb(offlinePassesKey('titulado-a'))).toBeNull();
     await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
+    await expect(loadSessionOfflinePasses(null)).resolves.toBeNull();
     get.mockRestore();
   });
 
-  it('guards against an outdated tab after the persisted session changes', async () => {
+  it('guards against an outdated tab after another account owns the copy', async () => {
     await saveAccessToken(accountA);
     const get = vi.spyOn(apiClient, 'get').mockResolvedValue(response);
     await registrationsService.getPass(pass.id);
     const cache = await readIndexedDb(offlinePassesKey('titulado-a'));
-    vi.mocked(readIndexedDbPair).mockResolvedValueOnce([accountB, cache]);
+    vi.mocked(readIndexedDbPair).mockResolvedValueOnce(['titulado-b', cache]);
     await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
     get.mockRestore();
   });

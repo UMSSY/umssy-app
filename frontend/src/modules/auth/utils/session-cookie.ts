@@ -1,3 +1,5 @@
+import { SESSION_MARKER_COOKIE_NAME, SESSION_MARKER_COOKIE_VALUE } from '../constants/session.constants';
+
 function cookieAttributes(): string {
   const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
   return `; Path=/; SameSite=Lax${secure}`;
@@ -5,15 +7,15 @@ function cookieAttributes(): string {
 
 export function setSessionMarker(): void {
   if (typeof document === "undefined") return;
-  document.cookie = `umssy_session=1${cookieAttributes()}`;
+  document.cookie = `${SESSION_MARKER_COOKIE_NAME}=${SESSION_MARKER_COOKIE_VALUE}${cookieAttributes()}`;
 }
 
 export function clearSessionMarker(): void {
   if (typeof document === "undefined") return;
-  document.cookie = `umssy_session=; Max-Age=0${cookieAttributes()}`;
+  document.cookie = `${SESSION_MARKER_COOKIE_NAME}=; Max-Age=0${cookieAttributes()}`;
 }
 
 export function hasSessionMarker(): boolean {
   if (typeof document === "undefined") return false;
-  return document.cookie.split("; ").includes(`umssy_session=1`);
+  return document.cookie.split("; ").includes(`${SESSION_MARKER_COOKIE_NAME}=${SESSION_MARKER_COOKIE_VALUE}`);
 }

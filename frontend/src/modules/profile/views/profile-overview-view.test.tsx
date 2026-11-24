@@ -126,7 +126,7 @@ describe("ProfileOverviewView", () => {
     expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "30");
     expect(screen.queryByText("Cargando tu perfil...")).not.toBeInTheDocument();
     expect(screen.getByText("VQ")).toBeInTheDocument();
-    expect(screen.getByText("Desarrolladora web junior")).toBeInTheDocument();
+    expect(screen.getAllByText("Desarrolladora web junior")).toHaveLength(2);
     expect(screen.getByText("Cochabamba")).toBeInTheDocument();
     expect(screen.getByText("+591 70000000")).toBeInTheDocument();
     expect(screen.getByText("valeria@correo.com")).toBeInTheDocument();

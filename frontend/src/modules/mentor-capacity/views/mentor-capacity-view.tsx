@@ -1,19 +1,15 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   Check,
-  ChevronLeft,
-  ChevronRight,
   Users,
   UserRoundCheck,
   Clock3,
   TicketCheck,
   UserRoundPlus,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card/card';
 import { Input } from '@/components/ui/input';
@@ -26,107 +22,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { WorkspacePage } from '@/shared/components/layout/workspace-page';
+import { MentorCapacityMetric } from '../components/mentor-capacity-summary';
+import { MentorCapacityPageControls } from '../components/mentor-capacity-page-controls';
+import { MentorCapacityPerson } from '../components/mentor-capacity-person';
 import {
-  mentorCapacityService,
-  MENTOR_CAPACITY_PAGE_SIZE,
-} from '../services/mentor-capacity.service';
+  useMentorCapacityOverview,
+  useMentorOfferHistory,
+  useRefreshMentorCapacity,
+  useUpdateMentorCapacity,
+  useWaitingMentorRequests,
+} from '../hooks/use-mentor-capacity';
 import type { MentorOfferRecord } from '../types/mentor-capacity.types';
-
-const overviewKey = ['mentor-capacity', 'overview'];
-const requestsKey = ['mentor-capacity', 'requests'];
-const offersKey = ['mentor-capacity', 'offers'];
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
-}
-
-function MetricCard({
-  label,
-  value,
-  detail,
-  icon: Icon,
-}: {
-  label: string;
-  value: number;
-  detail: string;
-  icon: typeof Users;
-}) {
-  return (
-    <Card className="gap-2 p-5">
-      <div className="flex items-center justify-between gap-2 text-sm text-text-secondary">
-        <span>{label}</span>
-        <Icon aria-hidden="true" className="size-4 shrink-0" />
-      </div>
-      <p className="font-tight text-3xl font-bold text-accent">{value}</p>
-      <p className="text-xs text-text-secondary">{detail}</p>
-    </Card>
-  );
-}
-
-function PageControls({
-  page,
-  totalItems,
-  onChange,
-}: {
-  page: number;
-  totalItems: number;
-  onChange: (page: number) => void;
-}) {
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalItems / MENTOR_CAPACITY_PAGE_SIZE),
-  );
-  return (
-    <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-sm text-text-secondary">
-      <span>{totalItems} registros</span>
-      <div className="flex items-center gap-2">
-        <Button
-          aria-label="Página anterior"
-          disabled={page <= 1}
-          onClick={() => onChange(page - 1)}
-          size="sm"
-          variant="outline"
-        >
-          <ChevronLeft aria-hidden="true" />
-        </Button>
-        <span>
-          {page} / {totalPages}
-        </span>
-        <Button
-          aria-label="Página siguiente"
-          disabled={page >= totalPages}
-          onClick={() => onChange(page + 1)}
-          size="sm"
-          variant="outline"
-        >
-          <ChevronRight aria-hidden="true" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function PersonCell({
-  firstName,
-  lastName,
-  email,
-}: {
-  firstName: string;
-  lastName: string;
-  email: string;
-}) {
-  return (
-    <div>
-      <p className="font-medium text-foreground">
-        {firstName} {lastName}
-      </p>
-      <p className="text-xs text-text-secondary">{email}</p>
-    </div>
-  );
-}
+import {
+  formatMentorCapacityDate,
+  percentageForCapacity,
+  validatePercentage,
+} from '../utils/mentor-capacity.utils';
 
 function offerStatusLabel(status: MentorOfferRecord['status']) {
   switch (status) {
@@ -140,23 +51,12 @@ function offerStatusLabel(status: MentorOfferRecord['status']) {
 }
 
 export function MentorCapacityView() {
-  const queryClient = useQueryClient();
-  const overview = useQuery({
-    queryKey: overviewKey,
-    queryFn: ({ signal }) => mentorCapacityService.getOverview(signal),
-  });
+  const overview = useMentorCapacityOverview();
   const [requestPage, setRequestPage] = useState(1);
   const [offerPage, setOfferPage] = useState(1);
-  const requests = useQuery({
-    queryKey: [...requestsKey, requestPage],
-    queryFn: ({ signal }) =>
-      mentorCapacityService.getWaitingRequests(requestPage, signal),
-  });
-  const offers = useQuery({
-    queryKey: [...offersKey, offerPage],
-    queryFn: ({ signal }) =>
-      mentorCapacityService.getOfferHistory(offerPage, signal),
-  });
+  const requests = useWaitingMentorRequests(requestPage);
+  const offers = useMentorOfferHistory(offerPage);
+  const refresh = useRefreshMentorCapacity();
   const [percentageInput, setPercentageInput] = useState<string | undefined>();
   const [capacityInput, setCapacityInput] = useState<string | undefined>();
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -164,42 +64,27 @@ export function MentorCapacityView() {
     string | null
   >(null);
 
-  const savePercentage = useMutation({
-    mutationFn: mentorCapacityService.updatePercentage,
-    onSuccess: async (data) => {
-      queryClient.setQueryData(overviewKey, data);
-      setPercentageInput(String(data.percentage));
-      setCapacityInput(String(data.capacity));
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: requestsKey }),
-        queryClient.invalidateQueries({ queryKey: offersKey }),
-      ]);
-      setValidationError(null);
-      toast.success('Límite de participación actualizado.', { duration: 4000 });
-    },
-    onError: () => {
-      toast.error(
-        'No se pudo guardar el límite. Revisa tu conexión e inténtalo nuevamente.',
-      );
-    },
-  });
+  const savePercentage = useUpdateMentorCapacity();
+  const save = (percentage: number) => {
+    savePercentage.mutate(percentage, {
+      onSuccess: (data) => {
+        setPercentageInput(String(data.percentage));
+        setCapacityInput(String(data.capacity));
+        setValidationError(null);
+      },
+    });
+  };
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (capacityValidationError) return;
     const inputValue =
       percentageInput ?? String(overview.data?.percentage ?? '');
-    if (!/^[0-9]+$/.test(inputValue)) {
-      setValidationError('Ingresa un porcentaje entero entre 1 y 100.');
-      return;
-    }
+    const error = validatePercentage(inputValue);
+    if (error) return setValidationError(error);
     const percentage = Number(inputValue);
-    if (percentage < 1 || percentage > 100) {
-      setValidationError('El porcentaje debe estar entre 1 y 100.');
-      return;
-    }
     setValidationError(null);
-    savePercentage.mutate(percentage);
+    save(percentage);
   };
 
   const handlePercentageChange = (value: string) => {
@@ -216,48 +101,12 @@ export function MentorCapacityView() {
     setValidationError(null);
     savePercentage.reset();
 
-    const approvedGraduates = overview.data?.approvedGraduates;
-    if (!/^[0-9]+$/.test(value)) {
-      setCapacityValidationError('Ingresa una cantidad entera de cupos.');
-      return;
-    }
-
-    const requestedCapacity = Number(value);
-    if (!approvedGraduates || requestedCapacity < 1) {
-      setCapacityValidationError(
-        'La cantidad debe ser al menos 1 y requiere titulados aprobados.',
-      );
-      return;
-    }
-    if (requestedCapacity > approvedGraduates) {
-      setCapacityValidationError(
-        'La cantidad de cupos no puede superar los titulados aprobados.',
-      );
-      return;
-    }
-
-    const matchingPercentages = Array.from({ length: 100 }, (_, index) => {
-      const percentage = index + 1;
-      return Math.ceil((approvedGraduates * percentage) / 100) ===
-        requestedCapacity
-        ? percentage
-        : null;
-    }).filter((percentage): percentage is number => percentage !== null);
-
-    if (matchingPercentages.length === 0) {
-      setCapacityValidationError(
-        'No hay un porcentaje entero que produzca exactamente esa cantidad de cupos.',
-      );
-      return;
-    }
-
-    const closestPercentage = matchingPercentages.reduce((closest, current) =>
-      Math.abs(current - (requestedCapacity * 100) / approvedGraduates) <
-      Math.abs(closest - (requestedCapacity * 100) / approvedGraduates)
-        ? current
-        : closest,
+    const result = percentageForCapacity(
+      value,
+      overview.data?.approvedGraduates,
     );
-    setPercentageInput(String(closestPercentage));
+    if (result.error) return setCapacityValidationError(result.error);
+    setPercentageInput(String(result.percentage));
   };
 
   const data = overview.data;
@@ -292,11 +141,7 @@ export function MentorCapacityView() {
             aria-label="Actualizar datos"
             className="ml-1"
             disabled={isRefreshing}
-            onClick={() =>
-              void queryClient.invalidateQueries({
-                queryKey: ['mentor-capacity'],
-              })
-            }
+            onClick={() => void refresh()}
             size="sm"
             variant="outline"
           >
@@ -336,19 +181,19 @@ export function MentorCapacityView() {
         <>
           <section aria-label="Resumen de capacidad" className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
-              <MetricCard
+              <MentorCapacityMetric
                 detail="Habilitados en base"
                 icon={Users}
                 label="Titulados aprobados"
                 value={data.approvedGraduates}
               />
-              <MetricCard
+              <MentorCapacityMetric
                 detail="Ocupando cupo"
                 icon={UserRoundCheck}
                 label="Mentores activos"
                 value={data.activeMentors}
               />
-              <MetricCard
+              <MentorCapacityMetric
                 detail="En plazo de respuesta"
                 icon={TicketCheck}
                 label="Ofertas reservadas"
@@ -356,13 +201,13 @@ export function MentorCapacityView() {
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <MetricCard
+              <MentorCapacityMetric
                 detail={`Límite calculado: ${data.capacity}`}
                 icon={UserRoundPlus}
                 label="Cupos disponibles"
                 value={data.available}
               />
-              <MetricCard
+              <MentorCapacityMetric
                 detail="En espera de asignación"
                 icon={Clock3}
                 label="Solicitudes pendientes"
@@ -382,12 +227,12 @@ export function MentorCapacityView() {
               </p>
             </div>
             <form
-              className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end"
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
               onSubmit={handleSave}
             >
               <div>
                 <label
-                  className="mb-2 block text-xs font-semibold tracking-wide text-text-secondary uppercase"
+                  className="mb-2 flex h-8 items-end text-xs font-semibold tracking-wide text-text-secondary uppercase"
                   htmlFor="mentor-capacity-percentage"
                 >
                   Porcentaje máximo de participación (%)
@@ -400,8 +245,6 @@ export function MentorCapacityView() {
                     aria-invalid={Boolean(validationError)}
                     id="mentor-capacity-percentage"
                     inputMode="numeric"
-                    max={100}
-                    min={1}
                     onChange={(event) =>
                       handlePercentageChange(event.target.value)
                     }
@@ -431,7 +274,7 @@ export function MentorCapacityView() {
               </div>
               <div>
                 <label
-                  className="mb-2 block text-xs font-semibold tracking-wide text-text-secondary uppercase"
+                  className="mb-2 flex h-8 items-end text-xs font-semibold tracking-wide text-text-secondary uppercase"
                   htmlFor="mentor-capacity-maximum"
                 >
                   Número de cupos máximos (cantidad)
@@ -446,8 +289,6 @@ export function MentorCapacityView() {
                     aria-invalid={Boolean(capacityValidationError)}
                     id="mentor-capacity-maximum"
                     inputMode="numeric"
-                    max={data.approvedGraduates}
-                    min={1}
                     onChange={(event) =>
                       handleCapacityChange(event.target.value)
                     }
@@ -469,6 +310,7 @@ export function MentorCapacityView() {
                 ) : null}
               </div>
               <Button
+                className="md:col-span-2 md:justify-self-end xl:col-span-1 xl:mt-10 xl:self-start"
                 disabled={
                   savePercentage.isPending || Boolean(capacityValidationError)
                 }
@@ -535,10 +377,10 @@ export function MentorCapacityView() {
                         requests.data.items.map((request) => (
                           <TableRow key={request.id}>
                             <TableCell>
-                              <PersonCell {...request} />
+                              <MentorCapacityPerson {...request} />
                             </TableCell>
                             <TableCell>
-                              {formatDate(request.queuedAt)}
+                              {formatMentorCapacityDate(request.queuedAt)}
                             </TableCell>
                           </TableRow>
                         ))
@@ -554,7 +396,7 @@ export function MentorCapacityView() {
                       )}
                     </TableBody>
                   </Table>
-                  <PageControls
+                  <MentorCapacityPageControls
                     page={requestPage}
                     totalItems={requests.data?.totalItems ?? 0}
                     onChange={setRequestPage}
@@ -599,9 +441,11 @@ export function MentorCapacityView() {
                         offers.data.items.map((offer) => (
                           <TableRow key={offer.id}>
                             <TableCell>
-                              <PersonCell {...offer} />
+                              <MentorCapacityPerson {...offer} />
                             </TableCell>
-                            <TableCell>{formatDate(offer.offeredAt)}</TableCell>
+                            <TableCell>
+                              {formatMentorCapacityDate(offer.offeredAt)}
+                            </TableCell>
                             <TableCell>
                               {offerStatusLabel(offer.status)}
                             </TableCell>
@@ -619,7 +463,7 @@ export function MentorCapacityView() {
                       )}
                     </TableBody>
                   </Table>
-                  <PageControls
+                  <MentorCapacityPageControls
                     page={offerPage}
                     totalItems={offers.data?.totalItems ?? 0}
                     onChange={setOfferPage}

@@ -1,77 +1,95 @@
-
-import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
-import type { MentorParticipationHistoryItem } from "../../types/mentor-participation-history.types";
-import { MentorRequestHistoryDetails } from "./mentor-request-history-details";
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
+import type { MentorParticipationHistoryItem } from '../../types/mentor-participation-history.types';
+import { MentorRequestHistoryDetails } from './mentor-request-history-details';
 
 const request: MentorParticipationHistoryItem = {
-  id: "request-hu14-001",
-  userId: "user-hu14-001",
-  status: "PENDING",
-  queuedAt: "2026-11-10T14:30:00.000Z",
-  createdAt: "2026-11-10T14:00:00.000Z",
-  updatedAt: "2026-11-11T09:00:00.000Z",
-  technicalAreaIds: ["area-1", "area-2"],
-  orientationTypeIds: ["orientation-1"],
-  statusId: "status-pending",
+  id: 'request-hu14-001',
+  userId: 'user-hu14-001',
+  status: 'PENDING',
+  queuedAt: '2026-11-10T14:30:00.000Z',
+  createdAt: '2026-11-10T14:00:00.000Z',
+  updatedAt: '2026-11-11T09:00:00.000Z',
+  technicalAreaIds: ['area-1', 'area-2'],
+  orientationTypeIds: ['orientation-1'],
+  statusId: 'status-pending',
 };
 
-const renderDetails = (item: MentorParticipationHistoryItem = request) =>
+const renderDetails = (
+  item: MentorParticipationHistoryItem = request,
+) =>
   renderToStaticMarkup(
-    <MentorRequestHistoryDetails request={item} onClose={() => {}} />,
+    <MentorRequestHistoryDetails
+      request={item}
+      technicalAreaNames={['Desarrollo Web', 'Bases de Datos']}
+      orientationNames={['Mentoría académica']}
+      onClose={() => {}}
+    />,
   );
 
-describe("mentor request history details HU14", () => {
-  it("muestra el estado traducido y el identificador de la solicitud", () => {
+describe('mentor request history details HU14', () => {
+  it('muestra el título del detalle con la fecha de la solicitud', () => {
     const html = renderDetails();
 
-    expect(html).toContain("Detalles de la solicitud");
-    expect(html).toContain("Pendiente");
-    expect(html).toContain("request-hu14-001");
-    expect(html).toContain("Estado de la solicitud");
+    expect(html).toContain('Detalle de la solicitud');
+    expect(html).toContain('2026');
   });
 
-  it("muestra las fechas y cantidades registradas", () => {
+  it('muestra los nombres reales de áreas y orientaciones', () => {
     const html = renderDetails();
 
-    expect(html).toContain("Fecha de creación");
-    expect(html).toContain("Ingreso a la cola");
-    expect(html).toContain("Última actualización");
-    expect(html).toContain("Áreas técnicas");
-    expect(html).toContain("Tipos de orientación");
-    expect(html).toMatch(/>2<\/dd>/);
-    expect(html).toMatch(/>1<\/dd>/);
+    expect(html).toContain('Áreas técnicas:');
+    expect(html).toContain('Desarrollo Web');
+    expect(html).toContain('Bases de Datos');
+
+    expect(html).toContain('Tipos de orientación:');
+    expect(html).toContain('Mentoría académica');
   });
 
-  it("incluye un botón accesible para cerrar los detalles", () => {
+  it('muestra la fecha de registro con hora y el estado actual', () => {
+    const html = renderDetails();
+
+    expect(html).toContain('Fecha de registro:');
+    expect(html).toContain('Estado actual:');
+    expect(html).toContain('Pendiente');
+  });
+
+  it('muestra el mensaje informativo cuando la solicitud fue aceptada', () => {
+    const html = renderDetails({
+      ...request,
+      status: 'ACTIVE',
+    });
+
+    expect(html).toContain('Aceptada');
+    expect(html).toContain(
+      'Tu solicitud fue aceptada. Ya puedes acceder a las mentorías disponibles.',
+    );
+    expect(html).toContain('<svg');
+  });
+
+  it('no muestra el mensaje de aceptación para otros estados', () => {
+    const html = renderDetails();
+
+    expect(html).not.toContain(
+      'Tu solicitud fue aceptada. Ya puedes acceder a las mentorías disponibles.',
+    );
+  });
+
+  it('incluye un botón accesible para cerrar el detalle', () => {
     const html = renderDetails();
 
     expect(html).toContain(
       'aria-label="Cerrar detalles de la solicitud"',
     );
-    expect(html).toContain("Cerrar");
-    expect(html).toContain(
-      'aria-labelledby="mentor-request-history-details-title"',
-    );
+    expect(html).toContain('Cerrar');
   });
 
-  it("muestra un mensaje cuando las fechas son inválidas", () => {
+  it('muestra un mensaje cuando la fecha es inválida', () => {
     const html = renderDetails({
       ...request,
-      createdAt: "fecha-invalida",
-      queuedAt: "fecha-invalida",
-      updatedAt: "fecha-invalida",
+      createdAt: 'fecha-invalida',
     });
 
-    expect(html.match(/Fecha no disponible/g)).toHaveLength(3);
-  });
-
-  it("muestra la etiqueta original de un estado desconocido", () => {
-    const html = renderDetails({
-      ...request,
-      status: "UNKNOWN_STATUS",
-    });
-
-    expect(html).toContain("UNKNOWN_STATUS");
+    expect(html).toContain('Fecha no disponible');
   });
 });

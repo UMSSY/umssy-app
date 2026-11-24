@@ -1,7 +1,9 @@
+import type { PdfImage } from '../types/pdf-image.type.js';
 import type { PdfTextOptions } from '../types/pdf-text-options.type.js';
 
 export class SimplePdfDocument {
   private pages: string[][] = [[]];
+  private images: PdfImage[] = [];
   private curPage = 0;
   readonly pageW: number;
   readonly pageH: number;
@@ -110,6 +112,15 @@ export class SimplePdfDocument {
     this.pages[this.curPage].push(cmd);
   }
 
+  image(image: PdfImage, x: number, y: number, w: number, h: number) {
+    let index = this.images.indexOf(image);
+    if (index === -1) index = this.images.push(image) - 1;
+    const pdfY = this.pageH - y - h;
+    this.pages[this.curPage].push(
+      `q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${x.toFixed(2)} ${pdfY.toFixed(2)} cm /Im${index + 1} Do Q\n`,
+    );
+  }
+
   text(str: string, x: number, y: number, opts: PdfTextOptions = {}) {
     const fontSize = opts.fontSize ?? 8;
     const font = opts.font ?? 'Helvetica';
@@ -162,6 +173,7 @@ export class SimplePdfDocument {
       this.pages.map((ops) => ({ operations: ops })),
       this.pageW,
       this.pageH,
+      this.images,
     );
   }
 
@@ -169,6 +181,7 @@ export class SimplePdfDocument {
     pageStreams: readonly { operations: readonly string[] }[],
     pageW = 595.28,
     pageH = 841.89,
+    images: readonly PdfImage[] = [],
   ): Buffer {
     const objs: string[] = [];
     const addObj = (content: string) => {
@@ -188,6 +201,16 @@ export class SimplePdfDocument {
       '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>',
     );
 
+    const imageRefs = images
+      .map((image, index) => {
+        const objId = addObj(
+          `<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${image.data.length} >>\nstream\n${image.data.toString('latin1')}\nendstream`,
+        );
+        return `/Im${index + 1} ${objId} 0 R`;
+      })
+      .join(' ');
+    const xObjects = imageRefs ? ` /XObject << ${imageRefs} >>` : '';
+
     const pageObjIds: number[] = [];
     for (const stream of pageStreams) {
       const streamContent = stream.operations.join('\n');
@@ -196,7 +219,7 @@ export class SimplePdfDocument {
         `<< /Length ${streamLen} >>\nstream\n${streamContent}\nendstream`,
       );
       const pageObjId = addObj(
-        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW.toFixed(2)} ${pageH.toFixed(2)}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${streamObjId} 0 R >>`,
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW.toFixed(2)} ${pageH.toFixed(2)}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >>${xObjects} >> /Contents ${streamObjId} 0 R >>`,
       );
       pageObjIds.push(pageObjId);
     }

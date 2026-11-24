@@ -3,16 +3,29 @@ import { NotificationType } from '../../notifications/types/notification-type.en
 import {
   renderSurveyClosedMail,
   renderSurveyClosingSoonMail,
+  renderSurveyPublishedMail,
   renderSurveyReminderMail,
   renderSurveyVariationAlertMail,
 } from './survey-notification-mails.js';
 import {
   surveyClosedPayloadSchema,
   surveyClosingSoonPayloadSchema,
+  surveyPublishedPayloadSchema,
   surveyReminderPayloadSchema,
   surveyVariationAlertPayloadSchema,
 } from './survey-notification-payloads.schema.js';
 import type { SurveyNotification } from '../types/survey-notification.type.js';
+
+export function surveyPublishedNotification(
+  input: NotificationPayloadMap[NotificationType.SURVEY_PUBLISHED],
+): SurveyNotification<NotificationType.SURVEY_PUBLISHED> {
+  const payload = surveyPublishedPayloadSchema.parse(input);
+  return {
+    type: NotificationType.SURVEY_PUBLISHED,
+    payload,
+    renderMail: (context) => renderSurveyPublishedMail(payload, context),
+  };
+}
 
 export function surveyReminderNotification(
   input: NotificationPayloadMap[NotificationType.SURVEY_REMINDER],

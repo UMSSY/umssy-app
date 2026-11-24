@@ -84,7 +84,7 @@ export function RegisteredUsersReportView() {
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
           <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
         </div>
-        {userType || period || searchInput ? <Button variant="brand" onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
+        {userType || period || searchInput ? <Button onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
         <ReportActions
           onExport={exportCsv}
           isExporting={isExporting}

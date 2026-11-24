@@ -1,7 +1,9 @@
 // @vitest-environment node
+import '@/shared/testing/indexed-db.mock';
 import { AxiosHeaders, type AxiosResponse } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/shared/services/api-client';
+import { clearAccessToken, saveAccessToken } from '@/shared/services/storage/access-token-storage';
 import { eventsService } from './events.service';
 import type { EventsListResponse } from '../types/event.types';
 
@@ -20,7 +22,28 @@ describe('eventsService', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    clearAccessToken();
     apiClient.defaults.baseURL = originalBaseUrl;
+  });
+
+  it('keeps separate offline catalogues for the general list and expired proposals', async () => {
+    const token = `h.${btoa(JSON.stringify({ sub: 'user-a' }))}.s`;
+    vi.stubGlobal('navigator', { onLine: true });
+    await saveAccessToken(token);
+    const getSpy = vi.spyOn(apiClient, 'get')
+      .mockResolvedValueOnce({ data: { data: { items: [] }, page: 1, offset: 0 } })
+      .mockResolvedValueOnce({ data: { data: { items: [] }, page: 2, offset: 0 } });
+    const general = { page: 1, limit: 50, includeProposals: true };
+    const expired = { ...general, statusId: 'expired-status-id' };
+
+    await eventsService.getEvents(general, undefined, token);
+    await eventsService.getEvents(expired, undefined, token);
+    vi.stubGlobal('navigator', { onLine: false });
+
+    await expect(eventsService.getEvents(general, undefined, token)).resolves.toMatchObject({ page: 1 });
+    await expect(eventsService.getEvents(expired, undefined, token)).resolves.toMatchObject({ page: 2 });
+    expect(getSpy).toHaveBeenCalledTimes(2);
   });
 
   it('consulta GET /events con paginacion y devuelve el DTO del backend', async () => {
@@ -50,6 +73,40 @@ describe('eventsService', () => {
       signal: abortController.signal,
       timeout: 10_000,
     });
+  });
+
+  it('sends the requested order to GET /events', async () => {
+    const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+      data: { data: { items: [] }, page: 1, offset: 0 },
+    } as unknown as AxiosResponse<EventsListResponse>);
+
+    await eventsService.getEvents(
+      { page: 1, limit: 50, sort: 'popular' },
+      undefined,
+      'signed-token',
+    );
+
+    expect(getSpy).toHaveBeenCalledWith(
+      '/events',
+      expect.objectContaining({ params: { page: 1, limit: 50, sort: 'popular' } }),
+    );
+  });
+
+  it('reads the profile state only when the backend sends it', async () => {
+    vi.spyOn(apiClient, 'get')
+      .mockResolvedValueOnce({
+        data: { data: { items: [], isProfileComplete: false }, page: 1, offset: 0 },
+      } as unknown as AxiosResponse<EventsListResponse>)
+      .mockResolvedValueOnce({
+        data: { data: { items: [], isProfileComplete: 'no' }, page: 1, offset: 0 },
+      } as unknown as AxiosResponse<EventsListResponse>);
+
+    await expect(
+      eventsService.getEvents({ page: 1, limit: 50, sort: 'recommended' }),
+    ).resolves.toEqual({ data: [], page: 1, offset: 0, isProfileComplete: false });
+    await expect(
+      eventsService.getEvents({ page: 1, limit: 50, sort: 'recommended' }),
+    ).resolves.toEqual({ data: [], page: 1, offset: 0 });
   });
 
   it('falla claramente si falta configurar la URL del backend', async () => {
