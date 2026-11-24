@@ -483,13 +483,13 @@ function ProfileGuideSessionProvider({
                     'grid gap-6 p-5 sm:p-7',
                     side === 'left'
                       ? 'xl:grid-cols-[15rem_minmax(0,1fr)]'
-                      : 'lg:grid-cols-[minmax(0,1fr)_15rem]',
+                      : 'xl:grid-cols-[minmax(0,1fr)_15rem]',
                   )}
                 >
                   <div
                     className={cn(
                       'min-w-0 space-y-5',
-                      side === 'left' && 'lg:order-last',
+                      side === 'left' && 'xl:order-last',
                     )}
                   >
                     <ProfileCompletenessProgress showChecklist={false} />
@@ -520,7 +520,7 @@ function ProfileGuideSessionProvider({
                     aria-label="Ayuda de la guía"
                     className={cn(
                       'order-first flex flex-col items-center gap-4 rounded-xl p-4 text-center lg:sticky lg:top-0 lg:self-start',
-                      side === 'right' ? 'lg:order-last' : 'lg:order-first',
+                      side === 'right' ? 'xl:order-last' : 'xl:order-first',
                       !isTraveling && 'bg-interaction',
                     )}
                   >
