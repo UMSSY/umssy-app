@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DETECTED_SKILLS_QUERY_KEY,
+  MY_SKILLS_QUERY_KEY,
   SKILLS_ANALYSIS_MUTATION_KEY,
 } from '../constants/skills.constants';
 import { skillsService } from '../services/skills.service';
@@ -39,9 +40,11 @@ export function useDetectedSkills({
   useEffect(() => {
     const hasNewSummary = previousSummary.current !== query.data;
     previousSummary.current = query.data;
-    if (query.data?.status === 'ready' && (!forGuide || hasNewSummary))
+    if (query.data?.status === 'ready' && (!forGuide || hasNewSummary)) {
       void invalidateCompleteness();
-  }, [query.data, forGuide, invalidateCompleteness]);
+      void queryClient.invalidateQueries({ queryKey: MY_SKILLS_QUERY_KEY });
+    }
+  }, [query.data, forGuide, invalidateCompleteness, queryClient]);
 
   useEffect(
     () =>

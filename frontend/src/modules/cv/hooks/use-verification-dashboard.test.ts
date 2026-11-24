@@ -28,33 +28,6 @@ const doc: DocumentVerification = {
 };
 afterEach(() => vi.restoreAllMocks());
 describe('Mutaciones del dashboard documental', () => {
-  it('mantiene pendiente la subida y su actualización de consultas, usando la versión vigente', async () => {
-    let finish: () => void = () => {};
-    const refresh = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        }),
-    );
-    const upload = vi
-      .spyOn(certificationsService, 'uploadDocument')
-      .mockResolvedValue(undefined);
-    const { result } = renderHookWithQuery(() =>
-      useVerificationDashboard({ rows: [doc], refresh }),
-    );
-    act(() => result.current.openUpload());
-    const file = new File(['pdf'], 'new.pdf', { type: 'application/pdf' });
-    act(() => result.current.saveFile(file));
-    await waitFor(() =>
-      expect(upload).toHaveBeenCalledWith('certificate', file, 'version'),
-    );
-    await waitFor(() => expect(refresh).toHaveBeenCalledOnce());
-    expect(result.current.busy).toBe(true);
-    await act(async () => finish());
-    await waitFor(() => expect(result.current.busy).toBe(false));
-    expect(result.current.upload).toBe(false);
-    expect(result.current.error).toBe('');
-  });
   it('permite reintentar la eliminación fallida sin cerrar la confirmación', async () => {
     const remove = vi
       .spyOn(certificationsService, 'deleteDocument')

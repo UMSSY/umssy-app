@@ -44,6 +44,17 @@ describe("profile components with missing data", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the saved headline even when the presentation description is empty", () => {
+    render(
+      <PresentationSummaryCard
+        profile={{ ...PROFILE_WITH_EMPTY_FIELDS, headline: "Desarrollador con TypeScript y Node.js" }}
+      />,
+    );
+
+    expect(screen.getByText("Titular profesional")).toBeVisible();
+    expect(screen.getByText("Desarrollador con TypeScript y Node.js")).toBeVisible();
+  });
+
   it("renders the preview card when the values are null", () => {
     render(
       <ProfilePreviewCard
