@@ -1193,6 +1193,7 @@ model PasswordHistory {
   userId       String   @map("user_id") @db.Uuid
   passwordHash String   @map("password_hash") @db.VarChar(255)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1945,11 +1946,14 @@ model CompanyAccessRequest {
 
   activationOtps              CompanyActivationOtp[]
   accessRequestDocumentType   AccessRequestDocumentType? @relation(fields: [accessRequestDocumentTypeId], references: [id])
-  accessRequestDocumentTypeId String?                    @db.Uuid
+  accessRequestDocumentTypeId String?                    @map("access_request_document_type_id") @db.Uuid
 
   @@index([statusId])
   @@index([cityId])
   @@index([email])
+  @@index([accessRequestDocumentTypeId])
+  @@index([openedById])
+  @@index([reviewedById])
   @@map("company_access_requests")
 }
 
