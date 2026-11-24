@@ -36,6 +36,8 @@ erDiagram
   users ||--o{ job_applications : "user_id"
   job_application_statuses ||--o{ job_applications : "status_id"
   job_applications ||--o| radar_application_consents : "application_id"
+  users ||--o| job_offer_notification_preferences : "user_id"
+  job_alert_modes ||--o{ job_offer_notification_preferences : "mode_id"
 
   work_experiences {
     uuid id PK
@@ -90,6 +92,15 @@ erDiagram
     boolean consent_to_recruiter
     boolean consent_to_cv
     boolean consent_to_contact
+  }
+  job_offer_notification_preferences {
+    uuid user_id PK, FK
+    uuid mode_id FK
+  }
+  job_alert_modes {
+    uuid id PK
+    string title UK
+    string description
   }
 ```
 
@@ -214,16 +225,42 @@ Consents given when applying. Prisma model `RadarApplicationConsent`.
 
 Relationship: 1:1 with the application (`application_id` is unique). The row is written by the radar-integration module when the application is created, after the matching module has checked that the three consents were given.
 
+### `job_offer_notification_preferences`
+
+Which newly published vacancies a student or graduate wants to be notified about (HU-15). One row per person; a person who never chose has no row and is treated as `ALL`. Module: matching. Prisma model `JobOfferNotificationPreference`.
+
+| Column                     | Type           | Null | Notes                                    |
+| -------------------------- | -------------- | ---- | ---------------------------------------- |
+| `user_id`                  | uuid           | no   | Primary key and FK to `users.id`, cascade |
+| `mode_id`                  | uuid           | no   | FK to `job_alert_modes.id`, restrict     |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                          |
+
+Constraints: the primary key is `user_id`, so there is one preference per person. Indexes: `mode_id` (the primary key covers `user_id`). The row is written by the matching module through `PUT /job-offers/alert-preference`; the notification service never reads or writes it.
+
+### `job_alert_modes`
+
+Catalog of the values of the preference. Prisma model `JobAlertMode`.
+
+| Column                     | Type           | Null | Notes                                                                       |
+| -------------------------- | -------------- | ---- | --------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                 |
+| `title`                    | varchar(30)    | no   | Unique. Stable code used by the API and the code: `ALL`, `MATCHING`, `HIGH_AFFINITY` |
+| `description`              | varchar(255)   | no   | What the mode means, in Spanish                                             |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                             |
+
+The three rows are inserted by the migration. `MATCHING` means an affinity above 0 % and `HIGH_AFFINITY` an affinity of 70 % or more.
+
 ### Catalog tables
 
-All of them have `id`, a unique `title` (varchar(100)), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
+All of them have `id`, a unique `title` (varchar(100), except in `job_alert_modes`, whose `title` is varchar(30) and which also has a `description`), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
 
-| Table                      | Used by                       | Values                                                                 |
-| -------------------------- | ----------------------------- | ---------------------------------------------------------------------- |
-| `job_application_statuses` | `job_applications.status_id`  | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
-| `job_offer_statuses`       | `job_offers.status_id`        | `Publicada`, `Cerrada`, `Eliminada`                                    |
-| `job_offer_modalities`     | `job_offers.modality_id`      | `Presencial`, `Remoto`, `Híbrido`                                      |
-| `job_offer_contract_types` | `job_offers.contract_type_id` | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| Table                      | Used by                                      | Values                                                                 |
+| -------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| `job_application_statuses` | `job_applications.status_id`                 | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
+| `job_offer_statuses`       | `job_offers.status_id`                       | `Publicada`, `Cerrada`, `Eliminada`                                    |
+| `job_offer_modalities`     | `job_offers.modality_id`                     | `Presencial`, `Remoto`, `Híbrido`                                      |
+| `job_offer_contract_types` | `job_offers.contract_type_id`                | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| `job_alert_modes`          | `job_offer_notification_preferences.mode_id` | `ALL`, `MATCHING`, `HIGH_AFFINITY`                                     |
 
 ### Referenced tables owned by other modules
 
@@ -239,6 +276,8 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
 | One skill per person; one skill per vacancy; one application per person and vacancy                                                                          | Unique constraints                    |
 | A person's data disappears with the person                                                                                                                   | Cascade from `users`                  |
+| A person without a row in `job_offer_notification_preferences` is notified of every vacancy (`ALL`); `MATCHING` and `HIGH_AFFINITY` can only be saved by someone with at least one skill, and someone who loses all their skills is notified as `ALL` while the saved choice is kept | Application |
+| A notification mode cannot be deleted while a preference uses it                                                                                             | Restrict                              |
 | A skill, status, modality, contract type or company of an experience cannot be deleted while in use                                                          | Restrict                              |
 | A vacancy removes its skills and applications when deleted for good                                                                                          | Cascade from `job_offers`             |
 | Vacancy deletion by a company is logical (`Eliminada`)                                                                                                       | Application                           |
@@ -257,6 +296,7 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | `20261029120000_add_withdrawn_application_status`      | `Retirada` status                                                             |
 | `20261103120000_add_job_offer_published_at`            | `published_at` of vacancies                                                   |
 | `20261106000000_add_radar_application_consents`        | Consents of an application                                                    |
+| `20261122180000_add_job_offer_notification_preferences` | Vacancy alert modes catalog and the preference of each person (HU-15)        |
 
 ## Radar and document verification
 
@@ -1152,10 +1192,58 @@ All of them have `id`, a unique `title` (varchar(100)), an optional `description
 
 Both Sprint 3 migrations only add nullable columns and new tables; they do not change existing rows.
 
+## Workshop sessions and attendance
+
+```mermaid
+erDiagram
+  events ||--o{ event_sessions : "event_id"
+  events ||--o{ event_registrations : "event_id"
+  event_registrations ||--o{ event_attendances : "registration_id"
+  event_sessions |o--o{ event_attendances : "session_id"
+  users |o--o{ event_attendances : "checked_in_by_id"
+
+  events {
+    uuid id PK
+    date event_date
+    time start_time
+    time end_time
+  }
+  event_sessions {
+    uuid id PK
+    uuid event_id FK
+    timestamptz starts_at
+    timestamptz ends_at
+    string location
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  event_registrations {
+    uuid id PK
+    uuid event_id FK
+    uuid user_id FK
+  }
+  event_attendances {
+    uuid id PK
+    uuid registration_id FK
+    uuid session_id FK
+    timestamptz checked_in_at
+    uuid checked_in_by_id FK
+    boolean checked_in_offline
+    timestamptz synced_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+```
+
+`event_sessions` has one row per workshop session, with UTC instants in `starts_at` and `ends_at`, nullable `location`, and audit timestamps. `event_id` references `events.id` with cascade deletion. The table has separate indexes on `event_id`, `starts_at` and `ends_at`, with no uniqueness constraint beyond its primary key. The original `events.event_date`, `start_time` and `end_time` retain the first session for compatibility; registrations and attendance use all session rows when present. The migration backfills one session for every existing event.
+
+`event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
+
 ## Sprint History
 
 ### Sprint 3
 
+- Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.
 - Unique `(job_offer_id, user_id)` on applications, which supports withdrawing and applying again on the same row.
@@ -1165,6 +1253,9 @@ Both Sprint 3 migrations only add nullable columns and new tables; they do not c
   - Nuevas columnas nullable en `surveys`: `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, que permiten un único aviso de cierre próximo y de cierre por encuesta y registran el último recordatorio manual.
 - Migración `20261119120000_add_survey_published_notified_period`:
   - Nueva columna nullable `published_notified_period` (`VARCHAR(7)`) en `surveys`. Guarda el semestre en que se notificó la publicación de la encuesta, así se envía un solo aviso `SURVEY_PUBLISHED` por encuesta y semestre. No modifica filas existentes.
+- Migración `20261122180000_add_job_offer_notification_preferences` (HU-15):
+  - Nueva tabla catálogo `job_alert_modes` con los modos `ALL`, `MATCHING` y `HIGH_AFFINITY`, insertados por la migración.
+  - Nueva tabla `job_offer_notification_preferences` (una fila por usuario, clave primaria `user_id` con borrado en cascada desde `users`, `mode_id` con restricción de borrado sobre el catálogo). Solo agrega tablas; no modifica filas existentes.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
 - Mentor network (Sprint 3): documented participation models, requests, FIFO offers, capacity, technical selections, catalogs, idempotency, sanctions, indexes, SQL constraints, relationships, and deletion behavior.
 - Documented the Appointments tables: `appointments` with the new `cancellation_reason` and `cancelled_at`, `appointment_notifications` and its three catalogs (`appointment_notification_events`, `appointment_notification_channels`, `appointment_notification_statuses`), with keys, relationships, indexes and deletion behavior.

@@ -1,10 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CV_FILE_QUERY_KEY, CV_QUERY_KEY } from '../constants/cv-api.constants';
+import { CV_QUERY_KEY } from '../constants/cv-api.constants';
 import { CV_UPLOAD_PROGRESS } from '../constants/cv-upload.constants';
 import { documentsService } from '../services/documents.service';
 import { useInvalidateProfileCompleteness } from '@/modules/profile';
+import { useDeleteCvMutation } from './use-delete-cv-mutation';
 export function useCvMutations() {
   const queryClient = useQueryClient();
   const invalidateCompleteness = useInvalidateProfileCompleteness();
@@ -28,13 +29,6 @@ export function useCvMutations() {
     onSuccess: refreshAfterSave,
     onSettled: () => setUploadProgress(CV_UPLOAD_PROGRESS.min),
   });
-  const deleteMutation = useMutation({
-    mutationFn: (cvId: string) => documentsService.deleteCv(cvId),
-    onMutate: cancelLoads,
-    onSuccess: (_result, cvId) => {
-      queryClient.removeQueries({ queryKey: [...CV_FILE_QUERY_KEY, cvId] });
-      return refreshAfterSave();
-    },
-  });
+  const deleteMutation = useDeleteCvMutation();
   return { uploadMutation, deleteMutation, uploadProgress };
 }

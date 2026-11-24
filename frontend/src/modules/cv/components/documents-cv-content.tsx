@@ -30,6 +30,7 @@ import type { DocumentsCvContentProps } from '../types/documents-cv-content-prop
 
 export function DocumentsCvContent({
   guideCallbacks,
+  verification,
 }: DocumentsCvContentProps) {
   const {
     recentCvs,
@@ -243,6 +244,26 @@ export function DocumentsCvContent({
     setCvToDelete(null);
   };
 
+  const savedCvCard = (
+    <SavedCvCard
+      cvs={recentCvs}
+      totalCvs={totalCvs}
+      isLoading={isLoading}
+      loadError={loadError}
+      isReloading={isReloading}
+      isBusy={isBusy}
+      openingCvId={openingCvId}
+      onView={viewCv}
+      onDelete={openDeleteDialog}
+      onOpenHistory={() => setIsHistoryOpen(true)}
+      onRetry={() => void reloadCvs()}
+      isAutofilling={cvExtraction.isExtracting}
+      onAutofill={() => {
+        if (currentCv) startCvExtraction(currentCv.id);
+      }}
+    />
+  );
+
   return (
     <>
       {feedback ? <FeedbackMessage feedback={feedback} /> : null}
@@ -263,7 +284,9 @@ export function DocumentsCvContent({
       >
         <div className="flex min-w-0 flex-col gap-6">
           <CvUploadCard
-            selectId={guideCallbacks ? 'profile-guide-cv-upload-select' : undefined}
+            selectId={
+              guideCallbacks ? 'profile-guide-cv-upload-select' : undefined
+            }
             selectedFile={selectedFile}
             hasSavedCv={currentCv !== null}
             isLoading={isLoading}
@@ -274,25 +297,20 @@ export function DocumentsCvContent({
             onFileDropped={selectFile}
             onConfirmUpload={handleConfirmUpload}
           />
-          {guideCallbacks ? null : <CvGenerateCard />}
+          {verification ? (
+            savedCvCard
+          ) : guideCallbacks ? null : (
+            <CvGenerateCard />
+          )}
         </div>
-        <SavedCvCard
-          cvs={recentCvs}
-          totalCvs={totalCvs}
-          isLoading={isLoading}
-          loadError={loadError}
-          isReloading={isReloading}
-          isBusy={isBusy}
-          openingCvId={openingCvId}
-          onView={viewCv}
-          onDelete={openDeleteDialog}
-          onOpenHistory={() => setIsHistoryOpen(true)}
-          onRetry={() => void reloadCvs()}
-          isAutofilling={cvExtraction.isExtracting}
-          onAutofill={() => {
-            if (currentCv) startCvExtraction(currentCv.id);
-          }}
-        />
+        {verification ? (
+          <div className="flex min-w-0 flex-col gap-6">
+            <CvGenerateCard />
+            {verification}
+          </div>
+        ) : (
+          savedCvCard
+        )}
       </div>
       <ReplaceCvDialog
         file={pendingReplacement}
