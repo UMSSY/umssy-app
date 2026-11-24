@@ -505,6 +505,12 @@ describe('PortfolioController', () => {
     const oauthCallbackPath =
       document.paths['/api/profile/portfolio/oauth/{provider}/callback'];
     expect(oauthCallbackPath?.post?.security).toContainEqual({ bearer: [] });
+    expect(oauthUrlPath?.get?.responses['400']).toMatchObject({
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } },
+    });
+    expect(oauthCallbackPath?.post?.responses['400']).toMatchObject({
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } },
+    });
 
     const reposPath = document.paths['/api/profile/portfolio/repositories'];
     expect(reposPath?.get?.security).toContainEqual({ bearer: [] });
