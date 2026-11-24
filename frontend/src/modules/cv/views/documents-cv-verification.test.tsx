@@ -1,3 +1,4 @@
+import type { DocumentsCvContentProps } from '../types/documents-cv-content-props.types';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
@@ -13,7 +14,12 @@ vi.mock('../hooks/use-document-verifications', () => ({
   useDocumentVerifications: () => history,
 }));
 vi.mock('../components/documents-cv-content', () => ({
-  DocumentsCvContent: () => <p>Contenido de CV disponible</p>,
+  DocumentsCvContent: ({ verification }: DocumentsCvContentProps) => (
+    <>
+      <p>Contenido de CV disponible</p>
+      {verification}
+    </>
+  ),
 }));
 beforeEach(() => {
   history.data = undefined;
