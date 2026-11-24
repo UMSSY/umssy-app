@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { completeGithubOAuth } from '../utils/complete-github-oauth';
+import { completeGithubOAuth } from '../utils/complete-portfolio-oauth';
 
 let pendingExchange: Promise<string> | null = null;
 

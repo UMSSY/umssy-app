@@ -7,7 +7,6 @@ import { Check, ExternalLink, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { isApiError } from "@/shared/services/api-client";
 import { FeedbackMessage } from "./feedback-message";
 import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 import {
@@ -16,7 +15,6 @@ import {
   PORTFOLIO_PROVIDERS,
 } from "../constants/portfolio-accounts.constants";
 import {
-  useCompletePortfolioOAuth,
   useDisconnectPortfolioAccount,
   usePortfolioAccounts,
   useStartPortfolioOAuth,
@@ -25,18 +23,6 @@ import type { Feedback } from "../types/feedback.types";
 import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
 import type { PortfolioProviderName } from "../types/portfolio-provider-name.types";
 import type { SocialAccountConnectButtonsProps } from "../types/social-account-connect-buttons-props.types";
-
-function cleanUrlParams(): void {
-  if (typeof window !== "undefined") {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("code");
-    url.searchParams.delete("provider");
-    url.searchParams.delete("error");
-    url.searchParams.delete("error_description");
-    url.searchParams.delete("state");
-    window.history.replaceState({}, "", `${url.pathname}${url.search ? url.search : ""}`);
-  }
-}
 
 function getProviderAccount(
   accounts: PortfolioAccountStatusResponse[] = [],
@@ -56,14 +42,12 @@ function getProviderAccount(
 export function SocialAccountConnectButtons({ className }: SocialAccountConnectButtonsProps) {
   const { accounts = [] } = usePortfolioAccounts();
   const startOAuth = useStartPortfolioOAuth();
-  const completeOAuth = useCompletePortfolioOAuth();
   const disconnectAccount = useDisconnectPortfolioAccount();
   const searchParams = useSearchParams();
 
   const [pendingProvider, setPendingProvider] = useState<PortfolioProviderName | null>(null);
   const [providerToDisconnect, setProviderToDisconnect] = useState<PortfolioProviderName | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const processedCodeRef = useRef<string | null>(null);
   const processedErrorRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -82,76 +66,25 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
       return;
     }
 
-    const githubResult = rawSearchParams.get("github_connection");
-    if (githubResult && !processedErrorRef.current) {
+    const provider = rawSearchParams.has("github_connection") ? "github" : rawSearchParams.has("gitlab_connection") ? "gitlab" : null;
+    const result = provider ? rawSearchParams.get(`${provider}_connection`) : null;
+    if (provider && result && !processedErrorRef.current) {
       processedErrorRef.current = true;
       const url = new URL(window.location.href);
-      url.searchParams.delete("github_connection");
+      url.searchParams.delete(`${provider}_connection`);
       window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
       setFeedback({
-        type: githubResult === "success" ? "success" : "error",
-        message: githubResult === "success" ? PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess("GitHub") : githubResult === "cancelled" ? PORTFOLIO_ACCOUNT_MESSAGES.userCancelled : githubResult === "conflict" ? PORTFOLIO_ACCOUNT_MESSAGES.conflictError : PORTFOLIO_ACCOUNT_MESSAGES.genericError,
+        type: result === "success" ? "success" : "error",
+        message: result === "success" ? PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess(PORTFOLIO_PROVIDER_LABELS[provider]) : result === "cancelled" ? PORTFOLIO_ACCOUNT_MESSAGES.userCancelled : result === "conflict" ? PORTFOLIO_ACCOUNT_MESSAGES.conflictError : PORTFOLIO_ACCOUNT_MESSAGES.genericError,
       });
-      return;
     }
-
-    const code = rawSearchParams.get("code");
-    const error = rawSearchParams.get("error");
-    const rawProvider = rawSearchParams.get("provider") ?? rawSearchParams.get("state");
-    const provider =
-      rawProvider === "gitlab" || rawProvider === "github"
-        ? (rawProvider as PortfolioProviderName)
-        : null;
-
-    if (error && !processedErrorRef.current) {
-      processedErrorRef.current = true;
-      cleanUrlParams();
-      setFeedback({
-        type: "error",
-        message:
-          error === "access_denied"
-            ? PORTFOLIO_ACCOUNT_MESSAGES.userCancelled
-            : PORTFOLIO_ACCOUNT_MESSAGES.genericError,
-      });
-      return;
-    }
-
-    if (code && provider === "gitlab" && processedCodeRef.current !== code) {
-      processedCodeRef.current = code;
-      cleanUrlParams();
-      setPendingProvider(provider);
-      completeOAuth.mutate(
-        { provider, payload: { code } },
-        {
-          onSuccess: () => {
-            setPendingProvider(null);
-            setFeedback({
-              type: "success",
-              message: PORTFOLIO_ACCOUNT_MESSAGES.connectSuccess(
-                "GitLab",
-              ),
-            });
-          },
-          onError: (err) => {
-            setPendingProvider(null);
-            const isConflict = isApiError(err) && err.response?.status === 409;
-            setFeedback({
-              type: "error",
-              message: isConflict
-                ? PORTFOLIO_ACCOUNT_MESSAGES.conflictError
-                : PORTFOLIO_ACCOUNT_MESSAGES.genericError,
-            });
-          },
-        },
-      );
-    }
-  }, [searchParams, completeOAuth]);
+  }, [searchParams]);
 
   const handleConnect = (provider: PortfolioProviderName) => {
     setFeedback(null);
     setPendingProvider(provider);
     startOAuth.mutate(
-      { provider, ...(provider === "gitlab" ? { state: provider } : {}) },
+      { provider },
       {
         onError: () => {
           setPendingProvider(null);

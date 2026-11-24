@@ -1,9 +1,9 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { completeGithubOAuth } from '../utils/complete-github-oauth';
+import { completeGithubOAuth } from '../utils/complete-portfolio-oauth';
 import { GithubOAuthCallback } from './github-oauth-callback';
 
-vi.mock('../utils/complete-github-oauth', () => ({
+vi.mock('../utils/complete-portfolio-oauth', () => ({
   completeGithubOAuth: vi.fn(() => new Promise<string>(() => {})),
 }));
 
