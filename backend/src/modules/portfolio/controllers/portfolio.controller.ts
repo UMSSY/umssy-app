@@ -169,7 +169,7 @@ export class PortfolioController {
     operationId: 'getPortfolioOAuthAuthorizationUrl',
     summary: 'Get OAuth authorization URL for the specified provider',
     description:
-      'GitHub requires an S256 PKCE challenge. GitLab currently accepts a provider state.',
+      'GitHub and GitLab require an S256 PKCE challenge.',
   })
   @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
   @ApiQuery({ name: 'state', required: false, type: String })
@@ -178,7 +178,7 @@ export class PortfolioController {
     required: false,
     type: String,
     description:
-      'Required for GitHub: 43-character base64url SHA-256 PKCE challenge.',
+      'Required: 43-character base64url SHA-256 PKCE challenge.',
   })
   @ApiOkResponse({
     description: 'OAuth authorization URL for GitHub or GitLab',
@@ -197,12 +197,12 @@ export class PortfolioController {
     },
   })
   @ApiBadRequestResponse({
-    description: 'Unsupported provider or missing or invalid GitHub challenge',
+    description: 'Unsupported provider or missing or invalid challenge',
     schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiServiceUnavailableResponse({
     description:
-      'GitHub OAuth credentials or callback configuration are unavailable',
+      'OAuth credentials or callback configuration are unavailable for the provider',
     schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   getOAuthUrl(
@@ -226,13 +226,13 @@ export class PortfolioController {
     operationId: 'completePortfolioOAuthAuthorization',
     summary: 'Connect a social account using the OAuth authorization code',
     description:
-      'GitHub requires state and verifier from the same authorization attempt. GitLab currently requires the authorization code.',
+      'GitHub and GitLab require code, state and verifier from the same authorization attempt.',
   })
   @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
   @ApiBody({
     ...toApiBody(oauthCallbackSchema),
     description:
-      'GitHub requires code, state and verifier. GitLab requires code.',
+      'GitHub and GitLab require code, state and verifier from the same authorization attempt.',
   })
   @ApiOkResponse({
     description: 'Connected social account details',
@@ -256,7 +256,7 @@ export class PortfolioController {
     },
   })
   @ApiBadRequestResponse({
-    description: 'Invalid OAuth authorization code or provider exchange error',
+    description: 'Invalid OAuth authorization code, missing state or verifier, or provider exchange error',
     schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiConflictResponse({
@@ -268,7 +268,7 @@ export class PortfolioController {
     schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiServiceUnavailableResponse({
-    description: 'GitHub OAuth configuration is unavailable',
+    description: 'OAuth credentials or callback configuration are unavailable for the provider',
     schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   connectOAuthAccount(

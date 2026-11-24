@@ -125,16 +125,20 @@ describe("matchCvRecords", () => {
     ]);
   });
 
-  it("falls back to the most recent record when no start month matches", () => {
+  it("treats records with incompatible dates or without start dates as new", () => {
     const records = [
       { id: "old", key: "a", startDate: "2019-01-01" },
       { id: "recent", key: "a", startDate: "2022-01-01" },
     ];
 
-    const items: TestItem[] = [{ key: "a", startDate: null }];
+    const items: TestItem[] = [
+      { key: "a", startDate: null },
+      { key: "a", startDate: "2025-01-01" },
+    ];
 
     expect(matchCvRecords(items, records, matcher)).toEqual([
-      { status: "changed", record: records[1] },
+      { status: "new" },
+      { status: "new" },
     ]);
   });
 
