@@ -85,7 +85,7 @@ describe("Select", () => {
       expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveFocus()
       await user.keyboard("{ArrowDown}")
       const listbox = await screen.findByRole("listbox")
-      await waitFor(() => expect(listbox).toContainElement(document.activeElement))
+      await waitFor(() => expect(listbox.contains(document.activeElement)).toBe(true))
 
       await user.keyboard("{End}")
       const option = screen.getByRole("option", { name: "La Paz" })
