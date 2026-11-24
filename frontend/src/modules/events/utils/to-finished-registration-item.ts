@@ -9,5 +9,6 @@ export function toFinishedRegistrationItem(registration: Registration): Finished
     startTime: registration.startTime,
     endTime: registration.endTime,
     location: registration.location ?? null,
+    ...(registration.sessions && { sessions: registration.sessions }),
   };
 }

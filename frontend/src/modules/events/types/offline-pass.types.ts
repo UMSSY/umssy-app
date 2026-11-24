@@ -1,3 +1,5 @@
+import type { EventSession } from './event-session.types';
+
 export interface OfflinePass {
   id: string;
   eventName: string;
@@ -7,4 +9,5 @@ export interface OfflinePass {
   location: string | null;
   status: string;
   qrToken: string;
+  sessions?: EventSession[];
 }

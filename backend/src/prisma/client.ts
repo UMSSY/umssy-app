@@ -222,6 +222,11 @@ export type EventCategory = Prisma.EventCategoryModel
  */
 export type Event = Prisma.EventModel
 /**
+ * Model EventSession
+ * 
+ */
+export type EventSession = Prisma.EventSessionModel
+/**
  * Model EventRegistration
  * 
  */

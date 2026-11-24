@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
+import { CARD_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
 import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
 import { AppliedJobChip } from "./applied-job-chip";
 import {
@@ -29,9 +30,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
       className={cn(
         VACANCY_CARD_CLASS,
         "h-full gap-3 p-4",
-        "transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md",
-        "motion-safe:animate-in motion-safe:duration-200 motion-safe:fade-in",
-        "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        CARD_MOTION_CLASS,
       )}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

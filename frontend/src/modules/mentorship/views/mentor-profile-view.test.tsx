@@ -184,18 +184,17 @@ describe('MentorProfileView', () => {
     expect(
       screen.getByRole('heading', { name: 'Trayectoria actual' }),
     ).toBeInTheDocument();
-    expect(container.querySelector('main > div > div.grid')).toHaveClass(
-      'grid-cols-12',
-    );
+    const grid = container.querySelector('main > div > div.grid');
+    expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-12');
+    expect(grid?.firstElementChild).toHaveClass('md:col-span-8');
+    expect(grid?.lastElementChild).toHaveClass('md:col-span-4');
     const recommendations = screen.getByRole('region', {
       name: 'También podría interesarte',
     });
     expect(container.querySelector('main > div')?.lastElementChild).toBe(
       recommendations,
     );
-    expect(recommendations.previousElementSibling).toBe(
-      container.querySelector('main > div > div.grid'),
-    );
+    expect(recommendations.previousElementSibling).toBe(grid);
   });
 
   it('maneja campos opcionales nulos sin inventar contenido', async () => {

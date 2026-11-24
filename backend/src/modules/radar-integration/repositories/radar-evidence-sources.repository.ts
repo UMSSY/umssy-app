@@ -6,6 +6,15 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 export class RadarEvidenceSourcesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findLatestScores(userId: string): Promise<unknown> {
+    const snapshot = await this.prisma.radarScoreSnapshot.findFirst({
+      where: { userId },
+      orderBy: { version: 'desc' },
+      select: { scores: true },
+    });
+    return snapshot?.scores;
+  }
+
   findUnapprovedCertificateIds(userId: string, context: TransactionContext) {
     return context.client.radarDocumentVerification.findMany({
       where: {

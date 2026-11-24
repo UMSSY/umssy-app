@@ -26,8 +26,9 @@ export function usePassesViewState(isCurrentActive = true): PassesViewState {
   const savedView = (error: string | null): PassesViewState => ({
     ...base,
     status: "saved",
-    passes: saved.map(({ id, eventName, date, startTime, endTime, location, status }) => ({
+    passes: saved.map(({ id, eventName, date, startTime, endTime, location, status, sessions }) => ({
       id, eventName, date, startTime, endTime, status, location: location ?? "",
+      ...(sessions && { sessions }),
     })),
     error,
   });

@@ -56,6 +56,8 @@ export const eventsService = {
       Boolean(params.includeProposals),
       params.search ?? '',
       params.categoryId ?? '',
+      params.statusId ?? '',
+      ...(params.sort ? [params.sort] : []),
     ]);
     return withOfflineSessionCopy(
       'events:' + copyKey,
@@ -84,6 +86,9 @@ export const eventsService = {
           data: readArray(data.items).map(parseEventItem),
           page: readCount(body.page),
           offset: readCount(body.offset),
+          ...(typeof data.isProfileComplete === 'boolean' && {
+            isProfileComplete: data.isProfileComplete,
+          }),
         };
       },
       { signal, requireStorage },

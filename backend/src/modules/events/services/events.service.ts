@@ -1,7 +1,11 @@
 import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
 import type { FinishedEventThreshold } from '../types/finished-event-threshold.types.js';
-import { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
+import {
+  FINISHED_STATUS_TITLE,
+  PUBLISHED_STATUS_TITLE,
+} from '../constants/events.constants.js';
+import { getScheduleEnd } from '../utils/event-session-schedule.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
@@ -26,7 +30,11 @@ export class EventsService {
     return mapManagedWorkshops(events);
   }
 
-  findManagedWorkshop(eventId: string, userId: string, tx?: Prisma.TransactionClient) {
+  findManagedWorkshop(
+    eventId: string,
+    userId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
     return this.repository.findManagedWorkshop(eventId, userId, tx);
   }
 
@@ -61,16 +69,53 @@ export class EventsService {
     return {
       status: { title: PUBLISHED_STATUS_TITLE },
       OR: [
-        { eventDate: { gt: threshold.eventDate } },
-        { eventDate: threshold.eventDate, endTime: { gt: threshold.endTime } },
+        { sessions: { some: { endsAt: { gt: now } } } },
+        {
+          sessions: { none: {} },
+          OR: [
+            { eventDate: { gt: threshold.eventDate } },
+            {
+              eventDate: threshold.eventDate,
+              endTime: { gt: threshold.endTime },
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  // Un taller con sesiones finaliza al terminar su última sesión; sin sesiones se usa la fecha original.
+  getFinishedEventFilter(now: Date = new Date()): Prisma.EventWhereInput {
+    const threshold = this.getFinishedEventThreshold(now);
+    return {
+      status: {
+        title: { in: [PUBLISHED_STATUS_TITLE, FINISHED_STATUS_TITLE] },
+      },
+      OR: [
+        { sessions: { some: {}, none: { endsAt: { gt: now } } } },
+        {
+          sessions: { none: {} },
+          OR: [
+            { eventDate: { lt: threshold.eventDate } },
+            {
+              eventDate: threshold.eventDate,
+              endTime: { lte: threshold.endTime },
+            },
+          ],
+        },
       ],
     };
   }
 
   isFinished(
-    event: Pick<RegistrationScheduleEvent, 'eventDate' | 'endTime'>,
+    event: Pick<
+      RegistrationScheduleEvent,
+      'eventDate' | 'endTime' | 'sessions'
+    >,
     now: Date = new Date(),
   ): boolean {
+    if (event.sessions?.length)
+      return getScheduleEnd(event.sessions).getTime() <= now.getTime();
     const threshold = this.getFinishedEventThreshold(now);
     return (
       event.eventDate.getTime() < threshold.eventDate.getTime() ||
@@ -83,15 +128,12 @@ export class EventsService {
     payload: GetEventsPayload,
     userId?: string,
   ): Promise<EventsListResponse> {
-    await this.expireOverdueProposals(new Date());
     const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
-    const isPublishedOnly = statusId === undefined;
 
     const { items, total } = await this.findAndCount({
       categoryId,
       statusId,
-      isPublishedOnly,
       ...(payload.includeProposals && { includeProposals: true }),
       search,
       userId,
@@ -103,7 +145,6 @@ export class EventsService {
   }
 
   async findOne(id: string, userId?: string): Promise<EventDetailResponse> {
-    await this.expireOverdueProposals(new Date());
     const event = await this.findById(id, userId);
 
     if (!event) {
