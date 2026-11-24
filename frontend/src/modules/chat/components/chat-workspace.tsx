@@ -241,7 +241,7 @@ export function ChatWorkspace({
   );
 
   const showConnectionDialog =
-    isError && !dismissedError;
+    isError && !dismissedError && !selectedConversation && !selectedRequest;
 
   const { status: connectionStatus, refreshMessages } = useChatConnection(selectedRequestId ? null : selectedId);
 
