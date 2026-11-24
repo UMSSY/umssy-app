@@ -8,7 +8,13 @@ import {
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
-import { ApiProduces, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiParam,
+  ApiProduces,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -79,11 +85,27 @@ export class AuditEventsController {
   }
 
   @Get(':id')
+  @ApiOperation({
+    summary: 'Consultar el detalle de un evento de auditoría',
+    description:
+      'Devuelve el evento con su acción, fecha, solicitud, persona titulada, responsable, tipo de documento revisado y la evidencia asociada. El motivo solo viaja en los rechazos.',
+  })
+  @ApiParam({ name: 'id', description: 'Identificador del evento' })
+  @ApiResponse({ status: 200, description: 'Detalle del evento' })
+  @ApiResponse({ status: 404, description: 'El evento no existe' })
   getDetail(@Param('id', uuidPipe) id: string) {
     return this.auditEventsService.getDetail(id);
   }
 
   @Get(':id/timeline')
+  @ApiOperation({
+    summary: 'Consultar el historial de la solicitud de un evento',
+    description:
+      'Resuelve la solicitud a la que pertenece el evento y devuelve sus eventos en orden cronológico ascendente, junto al identificador del evento consultado para poder resaltarlo.',
+  })
+  @ApiParam({ name: 'id', description: 'Identificador del evento consultado' })
+  @ApiResponse({ status: 200, description: 'Historial de la solicitud' })
+  @ApiResponse({ status: 404, description: 'El evento no existe' })
   getTimeline(@Param('id', uuidPipe) id: string) {
     return this.auditEventTimelineService.listForEvent(id);
   }
