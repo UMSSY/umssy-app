@@ -139,7 +139,8 @@ function ChatRoomContent({
     ? eventConversation.eventTitle ?? 'Chat del evento'
     : conversation.contact?.fullName ?? '';
   const contactSubtitle = !isEventConversation
-    ? (conversation.contact?.academicTitle ??
+    ? (conversation.contact?.headline ??
+      conversation.contact?.academicTitle ??
       conversation.contact?.roleName ??
       conversation.contact?.role ??
       null)

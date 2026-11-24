@@ -10,6 +10,8 @@ export {
   useMessagingUi,
 } from "./contexts/messaging-ui-context";
 export { getOrCreateConversation } from "./services/chat-api";
+export { useOpenContextualChat } from "./hooks/use-open-contextual-chat";
+export type { OpenContextualChatParams } from "./types/open-contextual-chat-params.types";
 export { ChatImageThumbnail } from "./components/chat-image-thumbnail";
 export { ChatPdfCard } from "./components/chat-pdf-card";
 export { ChatLinkPreviewCard } from "./components/chat-link-preview-card";

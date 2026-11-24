@@ -2,12 +2,7 @@
 
 import { es } from "react-day-picker/locale";
 import { Calendar } from "@/components/ui/calendar";
-
-interface ExpirationCalendarProps {
-  selected?: Date;
-  onSelect: (date: Date | undefined) => void;
-  today?: Date;
-}
+import type { ExpirationCalendarProps } from "../types/expiration-calendar-props.types";
 
 export function ExpirationCalendar({
   selected,

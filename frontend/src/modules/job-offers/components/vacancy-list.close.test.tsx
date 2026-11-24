@@ -68,7 +68,7 @@ async function openCloseDialog(
     }),
   );
 
-  return screen.findByRole("dialog");
+  return screen.findByRole("alertdialog");
 }
 
 describe("VacancyList - cierre manual HU12", () => {
@@ -115,7 +115,7 @@ describe("VacancyList - cierre manual HU12", () => {
 
       if (action === "Clic exterior") {
         const overlay = document.querySelector<HTMLElement>(
-          '[data-slot="dialog-overlay"]',
+          '[data-slot="alert-dialog-overlay"]',
         );
 
         if (!overlay) {
@@ -126,7 +126,7 @@ describe("VacancyList - cierre manual HU12", () => {
       }
 
       await waitFor(() => {
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
       });
 
       expect(close).not.toHaveBeenCalled();
@@ -166,7 +166,7 @@ describe("VacancyList - cierre manual HU12", () => {
     expect(close).toHaveBeenCalledWith(COMPANY_ID, "backend");
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -223,7 +223,7 @@ describe("VacancyList - cierre manual HU12", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -271,7 +271,7 @@ describe("VacancyList - cierre manual HU12", () => {
       );
     });
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", {
@@ -293,7 +293,7 @@ describe("VacancyList - cierre manual HU12", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
   });
 
@@ -339,14 +339,14 @@ describe("VacancyList - cierre manual HU12", () => {
 
     await user.keyboard("{Escape}");
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 
     await act(async () => {
       resolveClose?.(CLOSED_BACKEND);
     });
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
 
     expect(close).toHaveBeenCalledOnce();

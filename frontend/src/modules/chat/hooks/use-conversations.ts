@@ -18,9 +18,11 @@ import {
 
 import { setStoredConversationUnreadCount } from "../services/message-storage";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+import { CONVERSATIONS_QUERY_KEY } from "../constants/conversations-query-key";
+import { findConversationByContext } from "../utils/find-conversation-by-context";
+import { upsertConversation } from "../utils/upsert-conversation";
 
 const PAGE_SIZE = 10;
-const CONVERSATIONS_QUERY_KEY = ["chat", "conversations"] as const;
 
 export function useConversations() {
   const ui = useMessagingUi();
@@ -341,15 +343,9 @@ export function useConversations() {
       const conversation =
         await startMutation.mutateAsync({ id: contactUser.id, context });
 
-      setConversationsData((prev) => {
-        const exists = prev.some(
-          (item) => item.id === conversation.id,
-        );
-
-        return exists
-          ? prev
-          : [conversation, ...prev];
-      });
+      setConversationsData((prev) =>
+        upsertConversation(prev, conversation),
+      );
 
       setSelectedId(conversation.id);
     } finally {
@@ -361,18 +357,16 @@ export function useConversations() {
     contactId: string,
     context: { contextType: string; contextId: string },
   ) => {
-    const existing = conversationsData.find(
-      (c) => c.contextId === context.contextId,
+    const existing = findConversationByContext(
+      conversationsData,
+      context.contextId,
     );
     if (existing) {
       handleSelectConversation(existing);
       return existing;
     }
     const conversation = await getOrCreateConversation(contactId, context);
-    setConversationsData((prev) => {
-      const exists = prev.some((item) => item.id === conversation.id);
-      return exists ? prev : [conversation, ...prev];
-    });
+    setConversationsData((prev) => upsertConversation(prev, conversation));
     setSelectedId(conversation.id);
     return conversation;
   };

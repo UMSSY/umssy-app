@@ -100,6 +100,8 @@ const EVIDENCE: AreaEvidence = {
   tags: ["Python"],
 };
 
+const openContextualChat = vi.fn();
+
 function renderPanel(candidate: RecruiterApplicant | null) {
   return renderWithQuery(
     <MessagingUiProvider>
@@ -131,7 +133,7 @@ describe("RecruiterCandidatePanel", () => {
     vi.spyOn(radarRecruiterApi, "recruiterCv").mockResolvedValue(
       new Blob(["pdf"], { type: "application/pdf" }),
     );
-    vi.spyOn(chatModule, "getOrCreateConversation").mockResolvedValue({
+    openContextualChat.mockReset().mockResolvedValue({
       id: "conversation-carlos",
       contact: {
         id: "user-carlos",
@@ -142,6 +144,10 @@ describe("RecruiterCandidatePanel", () => {
       updatedAt: "2026-11-20T20:00:00.000Z",
       contextType: "POSTULACION",
       contextId: "app-carlos",
+    });
+    vi.spyOn(chatModule, "useOpenContextualChat").mockReturnValue({
+      openContextualChat,
+      isOpening: false,
     });
   });
 
@@ -204,18 +210,20 @@ describe("RecruiterCandidatePanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
 
     await waitFor(() => {
-      expect(chatModule.getOrCreateConversation).toHaveBeenCalledWith(
-        "user-carlos",
-        {
+      expect(openContextualChat).toHaveBeenCalledWith({
+        contactId: "user-carlos",
+        context: {
           contextType: "POSTULACION",
           contextId: "app-carlos",
         },
-      );
+        contactHeadline: "Senior Software Engineer",
+        launcherId: "recruiter-contact-button",
+      });
     });
   });
 
   it("permite reintentar si no se puede abrir el chat", async () => {
-    vi.mocked(chatModule.getOrCreateConversation).mockRejectedValueOnce(
+    openContextualChat.mockRejectedValueOnce(
       new Error("sin conexión"),
     );
     renderPanel(CARLOS);
