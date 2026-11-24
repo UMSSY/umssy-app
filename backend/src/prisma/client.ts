@@ -532,6 +532,16 @@ export type PushSubscription = Prisma.PushSubscriptionModel
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
 /**
+ * Model JobAlertMode
+ * 
+ */
+export type JobAlertMode = Prisma.JobAlertModeModel
+/**
+ * Model JobOfferNotificationPreference
+ * 
+ */
+export type JobOfferNotificationPreference = Prisma.JobOfferNotificationPreferenceModel
+/**
  * Model RadarDocumentStatus
  * 
  */

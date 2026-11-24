@@ -2,11 +2,16 @@ import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useAppliedJobOfferIds } from "@/modules/matching/hooks/use-applied-job-offer-ids";
 import { jobApplicationService } from "@/modules/matching/services/job-application.service";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { vacanciesService } from "../services/vacancies.service";
 import { buildVacancy } from "../testing/vacancy-fixtures";
 import { VacanciesView } from "./vacancies-view";
+
+vi.mock("@/modules/matching/hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
 
 vi.mock("../services/vacancies.service", () => ({
   vacanciesService: { listPublished: vi.fn() },
@@ -266,5 +271,27 @@ describe("VacanciesView - tarjeta de vacante", () => {
       "col-span-2",
       "md:col-span-1",
     );
+  });
+
+  it("muestra «Ya te postulaste» solo en las vacantes con postulación activa", async () => {
+    await setRole("estudiante");
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set([VACANCIES[0].id]));
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+    expect(screen.getAllByText("Ya te postulaste")).toHaveLength(1);
+    const article = screen.getByText(VACANCIES[0].title).closest("article");
+    expect(within(article as HTMLElement).getByText("Ya te postulaste")).toBeInTheDocument();
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set<string>());
+  });
+
+  it("no muestra el chip a quien no puede postularse", async () => {
+    await setRole("empresa");
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set([VACANCIES[0].id]));
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+    expect(screen.queryByText("Ya te postulaste")).not.toBeInTheDocument();
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set<string>());
   });
 });
