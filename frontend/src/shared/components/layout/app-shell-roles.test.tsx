@@ -35,7 +35,7 @@ afterEach(() => { cleanup(); sessionStorage.clear(); vi.restoreAllMocks(); vi.un
 
 describe("shared app shell across roles and routes", () => {
   it.each(ROUTES)(
-    "keeps the same chrome and red logout for %s at %s",
+    "keeps the same chrome and logout controls for %s at %s",
     async (role, pathname) => {
       route.pathname = pathname;
       await saveAccessToken(
@@ -58,11 +58,11 @@ describe("shared app shell across roles and routes", () => {
       expect(screen.getAllByRole("main")).toHaveLength(1);
       expect(screen.getByRole("main").parentElement).toHaveClass("px-4", "py-6", "lg:p-8", "xl:px-12", "xl:py-10");
       expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeVisible();
-      expect(screen.getByRole("button", { name: "Cerrar sesión" })).toHaveClass("text-brand-red", "hover:bg-brand-soft");
+      expect(screen.getByRole("button", { name: "Cerrar sesión" })).not.toHaveClass("text-brand-red");
       const user = userEvent.setup();
       await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
       const menu = await screen.findByRole("menu");
-      expect(within(menu).getByRole("menuitem", { name: "Cerrar sesión" })).toHaveClass("text-brand-red");
+      expect(within(menu).getByRole("menuitem", { name: "Cerrar sesión" })).not.toHaveClass("text-brand-red");
     },
   );
 });
