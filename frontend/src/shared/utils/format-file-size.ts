@@ -1,11 +1,41 @@
-const KB = 1024;
-const MB = KB * 1024;
+import type { FormatFileSizeOptions } from "@/shared/types/format-file-size-options.types";
 
-// Tamaño legible en español: coma decimal y sin ",0" sobrante (por ejemplo "340 KB", "2,3 MB", "10 MB")
-export function formatFileSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
-  if (bytes < KB) return `${bytes} B`;
-  if (bytes < MB) return `${Math.round(bytes / KB)} KB`;
-  const megabytes = Math.round((bytes / MB) * 10) / 10;
-  return `${String(megabytes).replace(".", ",")} MB`;
+export const BYTES_PER_KB = 1024;
+export const BYTES_PER_MB = BYTES_PER_KB * 1024;
+
+function formatDecimal(
+  value: number,
+  decimals: 0 | 1 | 2,
+  decimalSeparator: "," | ".",
+): string {
+  const rounded =
+    decimals === 0 ? String(Math.round(value)) : value.toFixed(decimals);
+  const trimmed = decimals > 0 ? rounded.replace(/\.0+$/, "") : rounded;
+  return decimalSeparator === "," ? trimmed.replace(".", ",") : trimmed;
+}
+
+export function formatFileSize(
+  bytes: number,
+  options: FormatFileSizeOptions = {},
+): string {
+  const {
+    decimalSeparator = ",",
+    kbDecimals = 0,
+    mbDecimals = 1,
+    allowBytesUnit = true,
+  } = options;
+
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return allowBytesUnit ? "0 B" : "0 KB";
+  }
+
+  if (allowBytesUnit && bytes < BYTES_PER_KB) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < BYTES_PER_MB) {
+    return `${formatDecimal(bytes / BYTES_PER_KB, kbDecimals, decimalSeparator)} KB`;
+  }
+
+  return `${formatDecimal(bytes / BYTES_PER_MB, mbDecimals, decimalSeparator)} MB`;
 }

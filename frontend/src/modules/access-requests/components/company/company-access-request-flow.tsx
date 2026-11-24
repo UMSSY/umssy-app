@@ -52,6 +52,7 @@ import { DocumentDropzoneContent } from '../document/document-dropzone-content';
 import { DocumentPreviewContent } from '../document/document-preview-content';
 import { RequiredMark } from '../personal-data/required-mark';
 import { PublicHeader } from '../request-steps/public-header';
+import { formatFileSize as formatSharedFileSize } from '../../utils/format-file-size';
 import { companyAccessRequestService } from '../../services/company-access-request.service';
 import type {
   CityItem,
@@ -89,10 +90,12 @@ const STEPS = [
 ];
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  return formatSharedFileSize(bytes, {
+    decimalSeparator: '.',
+    kbDecimals: 1,
+    mbDecimals: 2,
+    allowBytesUnit: false,
+  });
 }
 
 export function CompanyAccessRequestFlow({

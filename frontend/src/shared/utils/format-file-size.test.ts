@@ -21,4 +21,17 @@ describe("formatFileSize", () => {
     expect(formatFileSize(-5)).toBe("0 B");
     expect(formatFileSize(Number.NaN)).toBe("0 B");
   });
+
+  it("permite personalizar decimales, separador y unidad mínima para otros consumidores", () => {
+    const profileOptions = {
+      decimalSeparator: "." as const,
+      kbDecimals: 1 as const,
+      mbDecimals: 1 as const,
+      allowBytesUnit: false,
+    };
+
+    expect(formatFileSize(512, profileOptions)).toBe("0.5 KB");
+    expect(formatFileSize(1258291, profileOptions)).toBe("1.2 MB");
+    expect(formatFileSize(0, profileOptions)).toBe("0 KB");
+  });
 });
