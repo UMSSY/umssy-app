@@ -9,7 +9,6 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockGetSession = vi.fn();
-const mockRefreshSession = vi.fn();
 const mockLogout = vi.fn();
 const mockEndSession = vi.fn();
 let mockBroadcastHandler: ((msg: { type: string; reason?: string }) => void) | null = null;
@@ -25,7 +24,7 @@ vi.mock("../utils/auth-broadcast", () => ({
 vi.mock("../services/auth.service", () => ({
   authService: {
     getSession: () => mockGetSession(),
-    refreshSession: () => mockRefreshSession(),
+    refreshSession: () => Promise.resolve(),
     logout: () => mockLogout(),
   },
 }));
