@@ -1,10 +1,12 @@
 "use client";
 import type { JobFeedFiltersProps } from "../types/job-feed-filters-props.types";
 
+import { FILTER_BAR_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
 import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
 
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +19,10 @@ export function JobFeedFilters({ filters, onChange, onClear }: JobFeedFiltersPro
   return (
     <div
       role="search"
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 md:flex-row md:items-center"
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 md:flex-row md:items-center",
+        FILTER_BAR_MOTION_CLASS,
+      )}
     >
       <div className="relative md:max-w-sm md:flex-1">
         <Search

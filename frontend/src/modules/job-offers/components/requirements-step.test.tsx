@@ -92,6 +92,14 @@ describe("RequirementsStep", () => {
     expect(screen.getByRole("button", { name: "+ Añadir habilidad" })).toBeInTheDocument();
   });
 
+  it("activa el corrector ortográfico en español en la descripción del puesto", () => {
+    renderStep();
+
+    const description = screen.getByLabelText(/Descripción del puesto/);
+    expect(description).toHaveAttribute("spellcheck", "true");
+    expect(description).toHaveAttribute("lang", "es");
+  });
+
   it("no despliega el catálogo completo cuando no hay habilidades", () => {
     renderStep();
 
