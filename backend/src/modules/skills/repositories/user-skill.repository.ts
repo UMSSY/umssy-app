@@ -3,6 +3,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
 import type { UserSkillRecord } from '../types/user-skill-record.type.js';
 import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
+import { resolveSkillOrigins } from '../utils/resolve-skill-origins.js';
 import { skillSelect } from './skill.repository.js';
 
 const userSkillSelect = {
@@ -34,7 +35,13 @@ export class UserSkillRepository {
   }
 
   findByUserId(userId: string): Promise<UserSkillRecord[]> {
-    return this.listSkills(userId, USER_SKILL_SOURCES.manual);
+    return this.listSkills(userId).then((rows) =>
+      rows.filter(
+        (row) =>
+          row.source === USER_SKILL_SOURCES.manual ||
+          resolveSkillOrigins(row.source, row.evidenceRefs).includes('experience'),
+      ),
+    );
   }
 
   private listSkills(
