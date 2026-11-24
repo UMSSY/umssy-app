@@ -231,7 +231,8 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
           <DialogFooter className="mx-0 mb-0 flex-row justify-end gap-3 rounded-b-lg border-t border-border bg-transparent px-6 py-4">
             <Button
               type="button"
-              variant="outline"
+              variant="cancel"
+              size="lg"
               className="h-11 border-border-strong px-5 text-sm text-ink hover:bg-surface-soft"
               disabled={isBusy}
               onClick={onClose}
