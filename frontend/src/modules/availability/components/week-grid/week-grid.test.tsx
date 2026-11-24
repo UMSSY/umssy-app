@@ -260,7 +260,7 @@ describe("WeekGrid", () => {
     const grid = screen.getByRole("heading", { name: "LUN 5" }).closest("section")?.parentElement;
     expect(grid).toHaveClass("hidden", "md:grid");
     expect(screen.getByRole("heading", { name: "Lunes 5 de octubre" }).closest("ol")).toHaveClass(
-      "md:hidden"
+      "@min-[44rem]/week:hidden"
     );
   });
 

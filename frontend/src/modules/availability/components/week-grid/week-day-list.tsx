@@ -19,7 +19,7 @@ export function WeekDayList({
   onBlockClick,
 }: WeekDayListProps) {
   return (
-    <ol className="flex flex-col gap-3 md:hidden">
+    <ol className="flex flex-col gap-3 @min-[44rem]/week:hidden">
       {blocksByDay.map((dayBlocks, dayIndex) => {
         const blockedDate = blockedDates.find((item) => item.blockedOn === dayDates[dayIndex]);
         const dayLabel = formatDayAndMonth(dayDates[dayIndex]);
