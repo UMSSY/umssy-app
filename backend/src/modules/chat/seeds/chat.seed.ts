@@ -90,8 +90,8 @@ async function seedConversations(
           where: { eventId: definition.eventId },
           select: { id: true },
         })
-      : await tx.conversation.findUnique({
-          where: { userAId_userBId: { userAId, userBId } },
+      : await tx.conversation.findFirst({
+          where: { userAId, userBId },
           select: { id: true },
         });
 

@@ -161,6 +161,25 @@ describe("CvPdfGeneratorService", () => {
     expect(textJson).toContain("FORMACIÓN ACADÉMICA");
   });
 
+  it("should omit personal contact information when includeContactInfo is false", () => {
+    const buffer = service.generate(mockCompleteData, {
+      sections: {
+        includeContactInfo: false,
+      },
+    });
+
+    const doc = new mupdf.PDFDocument(buffer);
+    const page = doc.loadPage(0);
+    const textJson = page.toStructuredText().asJSON();
+
+    expect(textJson).toContain("Romario Vía Orozco");
+    expect(textJson).toContain("Ingeniero de Sistemas");
+    expect(textJson).not.toContain("romario.via@umss.edu.bo");
+    expect(textJson).not.toContain("+591 71234567");
+    expect(textJson).not.toContain("romariovia.dev");
+  });
+
+
   it("should support multi-page documents and add correct footers and continuation headers", () => {
     const longExperiences = Array.from({ length: 8 }, (_, idx) => ({
       jobTitle: `Cargo de Especialista Senior Nro ${idx + 1}`,

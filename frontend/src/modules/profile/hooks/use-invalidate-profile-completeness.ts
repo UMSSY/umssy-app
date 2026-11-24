@@ -8,15 +8,27 @@ export function useInvalidateProfileCompleteness() {
   const queryClient = useQueryClient();
 
   return useCallback(async () => {
-    await queryClient.cancelQueries({ queryKey: ["mentors", "profile-suggestions"] });
-    await queryClient.invalidateQueries({ queryKey: ["mentors", "profile-suggestions"] });
-    await queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
-    // Discard reads started before the write so they cannot restore an old percentage.
-    await queryClient.cancelQueries({
-      queryKey: PROFILE_COMPLETENESS_QUERY_KEY,
-    });
-    await queryClient.invalidateQueries({
-      queryKey: PROFILE_COMPLETENESS_QUERY_KEY,
-    });
+    // Cancelar consultas anteriores antes de actualizar los datos.
+    await Promise.all([
+      queryClient.cancelQueries({
+        queryKey: ['mentors', 'profile-suggestions'],
+      }),
+      queryClient.cancelQueries({
+        queryKey: PROFILE_COMPLETENESS_QUERY_KEY,
+      }),
+    ]);
+
+    // Iniciar todas las invalidaciones sin bloquear unas con otras.
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ['mentors', 'profile-suggestions'],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['mentors', 'participation'],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: PROFILE_COMPLETENESS_QUERY_KEY,
+      }),
+    ]);
   }, [queryClient]);
 }

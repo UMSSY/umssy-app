@@ -5,6 +5,9 @@ import type { EducationAnalysisSourceResponse } from '../responses/education-ana
 
 @Injectable()
 export class EducationSourcesService {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return this.repository.findVerificationSources(userId, context);
+  }
   constructor(private readonly repository: EducationsRepository) {}
 
   hasByUserId(userId: string): Promise<boolean> {

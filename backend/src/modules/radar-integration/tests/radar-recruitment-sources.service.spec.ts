@@ -13,7 +13,10 @@ function setup() {
     publishedRecruitmentJob: vi.fn(),
     recruiterVacancies: vi.fn(),
   };
-  const users = { findRecruitmentProfile: vi.fn() };
+  const users = {
+    findRecruitmentProfile: vi.fn(),
+    findManyWithActiveRoles: vi.fn(),
+  };
   const skills = { findApprovedRecruitmentReferences: vi.fn() };
   const education = { findRecruitmentEvidence: vi.fn() };
   const certifications = { findRecruitmentEvidence: vi.fn() };
@@ -41,6 +44,26 @@ function setup() {
 }
 
 describe('RadarRecruitmentSourcesService', () => {
+  it('requires an active owner and a current role returned by the users service', async () => {
+    const { service, users } = setup();
+    users.findManyWithActiveRoles.mockResolvedValue([
+      { id: 'user', isActive: true, roles: [{ role: { name: 'mentor' } }] },
+    ]);
+    await expect(service.hasRole('user', 'mentor')).resolves.toBe(true);
+    await expect(
+      service.hasAnyRole('user', ['titulado', 'mentor']),
+    ).resolves.toBe(true);
+    await expect(service.hasRole('user', 'empresa')).resolves.toBe(false);
+    expect(users.findManyWithActiveRoles).toHaveBeenCalledWith(['user']);
+
+    users.findManyWithActiveRoles.mockResolvedValue([
+      { id: 'user', isActive: false, roles: [{ role: { name: 'mentor' } }] },
+    ]);
+    await expect(service.hasRole('user', 'mentor')).resolves.toBe(false);
+    users.findManyWithActiveRoles.mockResolvedValue([]);
+    await expect(service.hasRole('user', 'mentor')).resolves.toBe(false);
+  });
+
   it('delegates scoped reads to the owning domain services', async () => {
     const {
       service,

@@ -23,6 +23,7 @@ function createPrisma() {
       create: vi.fn(),
       findMany: vi.fn(),
       findFirst: vi.fn(),
+      findUnique: vi.fn(),
       update: vi.fn(),
     },
   };
@@ -47,6 +48,29 @@ describe('JobOffersRepository', () => {
     expect(prisma.company.findUnique).toHaveBeenCalledWith({
       where: { id: 'company-1' },
       select: { id: true },
+    });
+  });
+
+  it('obtiene el resumen de la vacante con el nombre de la empresa', async () => {
+    const summary = {
+      id: 'offer-1',
+      title: 'Dev Backend',
+      companyId: 'company-1',
+      company: { title: 'Empresa A' },
+    };
+    prisma.jobOffer.findUnique.mockResolvedValue(summary);
+
+    await expect(repository.findOfferSummary('offer-1')).resolves.toEqual(
+      summary,
+    );
+    expect(prisma.jobOffer.findUnique).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      select: {
+        id: true,
+        title: true,
+        companyId: true,
+        company: { select: { title: true } },
+      },
     });
   });
 

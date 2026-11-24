@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
-import { useRegistrationSession } from "@/modules/registrations";
+import { useRegistrationSession } from "@/modules/event-registrations";
 import { eventsService } from "../services/events.service";
 
 export function useEvent(id: string | null) {

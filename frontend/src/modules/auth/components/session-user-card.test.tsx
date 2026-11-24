@@ -39,9 +39,9 @@ describe("SessionUserCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
     const dialog = await screen.findByRole("alertdialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Cerrar sesión" }));
-    expect(clearAccessToken).toHaveBeenCalledOnce();
+    await waitFor(() => expect(clearAccessToken).toHaveBeenCalledOnce());
     expect(client.getQueryCache().getAll()).toHaveLength(0);
-    expect(replace).toHaveBeenCalledWith("/login");
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
   });
   it("shows the authenticated profile and role", async () => {
     vi.mocked(getAccessToken).mockReturnValue(`header.${btoa(JSON.stringify({ roleTag: "titulado" }))}.signature`);

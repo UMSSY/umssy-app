@@ -25,10 +25,11 @@ function getInitials(name: string) {
 
 export function MentorProfileHeader({
   mentor,
+  selectedArea,
   showRequestAction = true,
 }: MentorProfileHeaderProps) {
   const primaryEducation = mentor.educations[0];
-  const { requestMentorship, isChecking, hasNoSlots } = useRequestMentorship(mentor.id);
+  const { requestMentorship, isChecking, hasNoSlots } = useRequestMentorship(mentor.id, selectedArea);
 
   return (
     <Card className="gap-0 overflow-visible rounded-xl border border-border bg-white py-0 text-base ring-0">

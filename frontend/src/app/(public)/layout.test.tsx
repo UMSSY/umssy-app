@@ -1,6 +1,7 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import "@/shared/testing/indexed-db.mock";
 import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import PublicLayout from "./layout";
 import AppLayout from "../(app)/layout";

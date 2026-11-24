@@ -16,9 +16,7 @@ export class JobRecommendationsController {
   constructor(private readonly service: JobRecommendationsService) {}
 
   @Get('recommendations')
-  recommendations(
-    @CurrentUserId() userId: string,
-  ): Promise<JobRecommendations> {
+  recommendations(@CurrentUserId() userId: string): Promise<JobRecommendations> {
     return this.service.recommendations(userId);
   }
 }

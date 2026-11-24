@@ -22,6 +22,26 @@ describe('registrationsService' , () => {
     vi.clearAllMocks();
     vi.mocked(getAccessToken).mockReturnValue(null);
   });
+  it('requests the paginated finished history with the authenticated token', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('signed-token');
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: { items: [{ id: 'reg-1', eventName: 'Taller', date: '2026-09-20', startTime: '09:00', endTime: '12:00', location: 'Aula', status: 'Confirmada' }], total: 12, limit: 10, totalPages: 2 } } });
+    const signal = new AbortController().signal;
+    await expect(registrationsService.getFinished(1, 10, signal)).resolves.toMatchObject({ total: 12, totalPages: 2, items: [{ id: 'reg-1' }] });
+    expect(apiClient.get).toHaveBeenCalledWith('/event-registrations/me', {
+      headers: { Authorization: 'Bearer signed-token' },
+      params: { scope: 'finished', page: 1, limit: 10 },
+      signal,
+      timeout: 10000,
+    });
+  });
+  it('discards unexpected pass credentials before returning history items', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('signed-token');
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: { items: [{ id: 'reg-1', eventName: 'Taller', date: '2026-09-20', startTime: '09:00', endTime: '12:00', location: 'Aula', status: 'Confirmada', qrToken: 'private-token', passCode: 'private-code' }], total: 1, limit: 10, totalPages: 1 } } });
+    const response = await registrationsService.getFinished(1);
+    expect(response.items).toEqual([{ id: 'reg-1', title: 'Taller', date: '2026-09-20', startTime: '09:00', endTime: '12:00', location: 'Aula' }]);
+    expect(JSON.stringify(response)).not.toContain('private-token');
+    expect(JSON.stringify(response)).not.toContain('private-code');
+  });
   it('envía el token de sesión y devuelve las inscripciones del backend', async () => {
     vi.mocked(getAccessToken).mockReturnValue('signed-token');
     const items = [

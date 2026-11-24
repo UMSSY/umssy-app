@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, LayoutGrid, MessageCircle, Radar, UserRound, Users } from "lucide-react";
 import type { WorkspaceSectionProps } from "@/shared/types/workspace-section-props.types";
 
 export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
@@ -28,6 +28,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Explorar talleres", href: "/events" },
       { label: "Proponer taller", href: "/events/propose" },
       { label: "Mis inscripciones", href: "/events/my-passes" },
+      { label: "Mis talleres", href: "/events/my-workshops" },
     ],
   },
   {
@@ -40,6 +41,15 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     ],
   },
   {
+    id: "heatmaps", label: "Mapas de calor", icon: LayoutGrid, patterns: [/^\/backoffice\/reports\/heatmaps(?:\/|$)/],
+    items: [
+      { label: "Habilidades por Carrera", href: "/backoffice/reports/heatmaps/skills-by-career" },
+      { label: "Habilidades vs. Rango Salarial", href: "/backoffice/reports/heatmaps/skills-by-salary" },
+      { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability" },
+      { label: "Habilidades vs. Experiencia", href: "/backoffice/reports/heatmaps/skills-by-experience" },
+    ],
+  },
+  {
     id: "reports", label: "Reportes", icon: ChartNoAxesCombined, patterns: [/^\/backoffice\/reports(?:\/|$)/],
     items: [
       { label: "Usuarios aceptados", href: "/backoffice/reports/registered-users" },
@@ -47,7 +57,6 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
     ],
   },
-  // Va antes de "requests", que abarca todo /backoffice.
   {
     id: "surveys", label: "Encuestas", icon: ClipboardList, patterns: [/^\/backoffice\/surveys(?:\/|$)/],
     items: [

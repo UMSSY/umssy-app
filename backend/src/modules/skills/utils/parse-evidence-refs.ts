@@ -4,6 +4,7 @@ import { sortEvidenceRefs } from './sort-evidence-refs.js';
 const SOURCE_TYPES: ReadonlySet<SkillEvidenceRefPayload['type']> = new Set([
   'work-experience',
   'education',
+  'presentation',
   'certification',
   'cv',
 ]);

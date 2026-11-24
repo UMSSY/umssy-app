@@ -1,6 +1,6 @@
 import { mapApplicationConsent } from '../mappers/radar-applications.mapper.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import type { RadarApplicationConsent } from '../types/radar-application-consent.type.js';
+import type { RadarApplicationConsent } from '../types/radar-application-consent.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 

@@ -1,1 +1,1 @@
-export { parseRegistration } from '@/modules/registrations';
+export { parseRegistration } from '@/modules/event-registrations';

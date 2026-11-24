@@ -3,7 +3,10 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import { PUBLISHED_STATUS_TITLE } from '../../events/index.js';
-import { REGISTRATION_SELECT } from '../constants/registrations.constants.js';
+import {
+  MY_REGISTRATION_EVENT_SELECT,
+  REGISTRATION_SELECT,
+} from '../constants/registrations.constants.js';
 import type { CreateEventRegistrationPayload } from '../types/event-registrations.types.js';
 
 @Injectable()
@@ -150,6 +153,7 @@ export class EventRegistrationsRepository {
             endTime: true,
             location: true,
             description: true,
+            sessions: MY_REGISTRATION_EVENT_SELECT.sessions,
           },
         },
         user: {
@@ -176,13 +180,13 @@ export class EventRegistrationsRepository {
     });
   }
 
-  findByUserId(userId: string) {
+  findByUserId(userId: string, event: Prisma.EventWhereInput) {
     return this.prisma.eventRegistration.findMany({
       where: {
         userId,
         cancelledAt: null,
         status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-        event: { status: { title: PUBLISHED_STATUS_TITLE } },
+        event,
       },
       select: {
         id: true,
@@ -190,17 +194,45 @@ export class EventRegistrationsRepository {
         registeredAt: true,
         cancelledAt: true,
         status: { select: { title: true } },
-        event: {
-          select: {
-            title: true,
-            eventDate: true,
-            startTime: true,
-            endTime: true,
-            location: true,
-          },
-        },
+        event: { select: MY_REGISTRATION_EVENT_SELECT },
       },
       orderBy: { event: { eventDate: 'asc' } },
     });
+  }
+
+  async findFinishedByUserId(
+    userId: string,
+    event: Prisma.EventWhereInput,
+    skip: number,
+    take: number,
+  ) {
+    const where: Prisma.EventRegistrationWhereInput = {
+      userId,
+      cancelledAt: null,
+      status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+      event,
+    };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.eventRegistration.findMany({
+        where,
+        select: {
+          id: true,
+          eventId: true,
+          registeredAt: true,
+          cancelledAt: true,
+          status: { select: { title: true } },
+          event: { select: MY_REGISTRATION_EVENT_SELECT },
+        },
+        orderBy: [
+          { event: { eventDate: 'desc' } },
+          { event: { endTime: 'desc' } },
+          { id: 'desc' },
+        ],
+        skip,
+        take,
+      }),
+      this.prisma.eventRegistration.count({ where }),
+    ]);
+    return { items, total };
   }
 }

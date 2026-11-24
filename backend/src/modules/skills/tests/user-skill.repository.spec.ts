@@ -6,7 +6,11 @@ const userId = '11111111-1111-4111-8111-111111111111';
 const skillId = '33333333-3333-4333-8333-333333333333';
 const otherSkillId = '44444444-4444-4444-8444-444444444444';
 const detectedSkillId = '55555555-5555-4555-8555-555555555555';
-const select = { skill: { select: { id: true, name: true, isCustom: true } } };
+const select = {
+  skill: { select: { id: true, name: true, isCustom: true } },
+  source: true,
+  evidenceRefs: true,
+};
 
 describe('UserSkillRepository', () => {
   let repository: UserSkillRepository;
@@ -40,6 +44,21 @@ describe('UserSkillRepository', () => {
     } as unknown as PrismaService);
   });
 
+  it('exposes only usable skill names for affinity', async () => {
+    userSkill.findMany.mockResolvedValue([{ skill: { name: 'React' } }]);
+
+    await expect(repository.findAffinitySkillNames(userId)).resolves.toEqual([
+      'React',
+    ]);
+    expect(userSkill.findMany).toHaveBeenCalledExactlyOnceWith({
+      where: {
+        userId,
+        verificationStatus: { notIn: ['rejected', 'revoked'] },
+      },
+      select: { skill: { select: { name: true } } },
+    });
+  });
+
   it('reads all professional skills in one query without source or verification filters', async () => {
     const records = [
       { skill: { id: skillId, name: 'Python', isCustom: false } },
@@ -56,7 +75,7 @@ describe('UserSkillRepository', () => {
     expect(transaction).not.toHaveBeenCalled();
   });
 
-  it('lists manual and detected skills of the user ordered by name', async () => {
+  it('loads only manually selected skills into the editable list', async () => {
     const records = [
       { skill: { id: skillId, name: 'Python', isCustom: false } },
       { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
@@ -66,7 +85,7 @@ describe('UserSkillRepository', () => {
     await expect(repository.findByUserId(userId)).resolves.toBe(records);
 
     expect(userSkill.findMany).toHaveBeenCalledWith({
-      where: { userId },
+      where: { userId, source: 'manual' },
       orderBy: { skill: { name: 'asc' } },
       select,
     });

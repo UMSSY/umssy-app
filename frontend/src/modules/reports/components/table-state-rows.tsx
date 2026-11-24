@@ -2,7 +2,8 @@ import { FileSearchCorner } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
 
-import type { TableMessageRowProps, TableSkeletonRowsProps } from "../types/table-state-rows-props.types";
+import type { TableMessageRowProps } from "../types/table-message-row-props.types";
+import type { TableSkeletonRowsProps } from "../types/table-skeleton-rows-props.types";
 
 export function TableSkeletonRows({ columnCount }: TableSkeletonRowsProps) {
   return Array.from({ length: 10 }, (_, index) => (

@@ -51,6 +51,9 @@ export class ConversationController {
     const result = await this.conversationService.getOrCreateWithStatus(
       user.id,
       body.contactId,
+      body.contextType && body.contextId
+        ? { contextType: body.contextType, contextId: body.contextId }
+        : undefined,
     );
     if (!result.isCreated) {
       res.status(HttpStatus.OK);

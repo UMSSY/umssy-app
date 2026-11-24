@@ -10,6 +10,8 @@ function buildJob(overrides: Partial<RecommendedJob>): RecommendedJob {
     title: "Vacante",
     companyName: "Empresa",
     modality: "Remoto",
+    publishedAt: "2026-11-10T15:00:00.000Z",
+    expiresAt: null,
     score: 50,
     matchedSkills: [],
     skills: [],

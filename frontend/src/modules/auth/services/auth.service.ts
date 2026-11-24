@@ -9,6 +9,7 @@ import type {
   VerifyResetCodePayload,
   ResetPasswordPayload,
 } from "../types/forgot-password.types";
+import { withOfflineSessionCopy } from "@/shared/services/storage/offline-session-copy";
 
 function isLoginResponse(value: unknown): value is LoginResponse {
   if (typeof value !== "object" || value === null) return false;
@@ -39,11 +40,15 @@ function extractApiError(err: unknown, fallback: string): never {
 }
 
 export const authService = {
-  getSession: async (accessToken?: string | null): Promise<SessionResponse> => {
-    const response = await apiClient.get<ApiResponse<SessionResponse>>("/auth/session", {
-      headers: accessToken ? { Authorization: `${BEARER_PREFIX}${accessToken}` } : undefined,
-    });
-    return response.data.data;
+  getSession: async (accessToken?: string | null, signal?: AbortSignal, requireStorage = false): Promise<SessionResponse> => {
+    return withOfflineSessionCopy("auth-session", accessToken, async () => {
+      const response = await apiClient.get<ApiResponse<SessionResponse>>("/auth/session", {
+        signal,
+        timeout: 15_000,
+        headers: accessToken ? { Authorization: `${BEARER_PREFIX}${accessToken}` } : undefined,
+      });
+      return response.data.data;
+    }, { signal, requireStorage });
   },
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     if (!apiClient.defaults.baseURL) {

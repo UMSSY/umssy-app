@@ -19,6 +19,7 @@ import { ReportHistoryService } from '../../reports/services/report-history.serv
 import { createSurveySchema } from '../requests/create-survey.schema.js';
 import { surveyStatisticsQuerySchema } from '../requests/survey-statistics-query.schema.js';
 import { CareersService } from '../services/careers.service.js';
+import { SurveyParticipationService } from '../services/survey-participation.service.js';
 import { SurveyPdfService } from '../services/survey-pdf.service.js';
 import { SurveysService } from '../services/surveys.service.js';
 
@@ -47,6 +48,10 @@ describe('SurveysController', () => {
   let careersController: CareersController;
   let surveysService: SurveysService;
   let careersService: CareersService;
+  const participationService = {
+    getParticipation: vi.fn(),
+    sendReminders: vi.fn(),
+  };
 
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -58,6 +63,10 @@ describe('SurveysController', () => {
         CareersRepository,
         SurveyMapper,
         { provide: SurveyPdfService, useValue: { generatePdf: vi.fn() } },
+        {
+          provide: SurveyParticipationService,
+          useValue: participationService,
+        },
         {
           provide: ReportHistoryService,
           useValue: { registerGeneratedReport: vi.fn() },
@@ -268,5 +277,32 @@ describe('SurveysController', () => {
     expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', payload, [
       'titulado',
     ]);
+  });
+
+  it('delega la consulta de participación al servicio de participación', async () => {
+    const participation = {
+      surveyId: 'survey-1',
+      respondedCount: 3,
+      eligibleCount: 10,
+      pendingCount: 7,
+      responseRate: 30,
+      audienceLabel: 'Titulados · Sistemas · Gestión 2020',
+      lastReminderSentAt: null,
+      canSendReminder: true,
+    };
+    participationService.getParticipation.mockResolvedValue(participation);
+
+    await expect(
+      surveysController.getParticipation('survey-1'),
+    ).resolves.toBe(participation);
+  });
+
+  it('envía recordatorios en nombre del administrador autenticado', async () => {
+    await surveysController.sendReminders('survey-1', {}, 'admin-1');
+
+    expect(participationService.sendReminders).toHaveBeenCalledWith(
+      'survey-1',
+      'admin-1',
+    );
   });
 });

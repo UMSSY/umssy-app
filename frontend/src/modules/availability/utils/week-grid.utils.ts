@@ -3,6 +3,7 @@ import { toBoliviaTime } from "@/shared/utils/date-time";
 import type { WeekRange } from "@/shared/types/week-range.types";
 import { HOUR_HEIGHT_PX } from "../constants/week-grid.constants";
 import type { AvailabilityBlockState } from "../types/availability-block-state.types";
+import type { WeekGridDensity } from "../types/week-grid-density.types";
 import type { WeekGridVariant } from "../types/week-grid-variant.types";
 
 export function getWeekDayIndex(startAt: string, weekRange: WeekRange): number | null {
@@ -17,7 +18,8 @@ export function getBlockVerticalPosition(
   startAt: string,
   endAt: string,
   startHour: number,
-  endHour: number
+  endHour: number,
+  hourHeightPx: number = HOUR_HEIGHT_PX
 ): { topPx: number; heightPx: number } {
   const start = toBoliviaTime(startAt);
   const end = toBoliviaTime(endAt);
@@ -28,11 +30,15 @@ export function getBlockVerticalPosition(
     (end.hours - startHour) * 60 + end.minutes
   );
 
-  const pxPerMinute = HOUR_HEIGHT_PX / 60;
+  const pxPerMinute = hourHeightPx / 60;
   return {
     topPx: startMinutes * pxPerMinute,
     heightPx: Math.max(0, endMinutes - startMinutes) * pxPerMinute,
   };
+}
+
+export function isWeekGridDensity(value: string | null): value is WeekGridDensity {
+  return value === "normal" || value === "compact";
 }
 
 export function capitalize(text: string): string {

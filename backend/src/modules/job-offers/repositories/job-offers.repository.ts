@@ -34,6 +34,18 @@ export class JobOffersRepository {
     });
   }
 
+  findOfferSummary(id: string) {
+    return this.prisma.jobOffer.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        companyId: true,
+        company: { select: { title: true } },
+      },
+    });
+  }
+
   findCompanyOffer(companyId: string, id: string) {
     return this.prisma.jobOffer.findFirst({
       where: { id, companyId },

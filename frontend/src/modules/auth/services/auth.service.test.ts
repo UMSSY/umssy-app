@@ -49,7 +49,7 @@ describe('authService', () => {
     const session = { id: 'u1', email: 'user@test.com', roles: ['titulado', 'mentor'] };
     vi.mocked(apiClient.get).mockResolvedValue({ data: { data: session } });
     await expect(authService.getSession('session-token')).resolves.toEqual(session);
-    expect(apiClient.get).toHaveBeenCalledWith('/auth/session', { headers: { Authorization: 'Bearer session-token' } });
+    expect(apiClient.get).toHaveBeenCalledWith('/auth/session', expect.objectContaining({ headers: { Authorization: 'Bearer session-token' } }));
   });
 
   it('requestPasswordResetCode llama al endpoint y retorna resultado', async () => {

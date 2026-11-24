@@ -2,7 +2,7 @@ import "@/shared/testing/indexed-db.mock";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { Button as TestButton } from "@/components/ui/button";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { authService } from "@/modules/auth";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
@@ -64,5 +64,23 @@ describe("AuthProvider", () => {
     renderSession();
     await waitFor(() => expect(getAccessToken()).toBeNull());
     expect(screen.getByTestId("roles").textContent).toBe("");
+  });
+
+  it("falls back to local JWT roles instead of staying in loading while offline", async () => {
+    await saveAccessToken(`h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
+    vi.spyOn(authService, "getSession").mockRejectedValue(new TypeError("Failed to fetch"));
+    onlineManager.setOnline(false);
+    function LoadingConsumer() {
+      const { isLoading, roles } = useAuth();
+      return <p data-testid="state">{isLoading ? "loading" : roles.join(",")}</p>;
+    }
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    try {
+      render(<QueryClientProvider client={client}><AuthProvider><LoadingConsumer /></AuthProvider></QueryClientProvider>);
+      await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("titulado"));
+      expect(getAccessToken()).not.toBeNull();
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 });

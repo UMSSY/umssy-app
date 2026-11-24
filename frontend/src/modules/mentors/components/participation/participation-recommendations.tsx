@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -22,7 +21,7 @@ import { buttonVariants } from '@/components/ui/button-variants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { availabilityApi } from '@/modules/availability';
-import { educationsService } from '@/modules/education';
+import { educationsService } from '@/modules/educations';
 import { profileService, type ProfileResponse } from '@/modules/profile';
 import {
   getAccessToken,
@@ -302,10 +301,7 @@ export function ParticipationRecommendations({
                           >
                             <div className="flex min-w-0 items-start gap-3">
                               <span className="rounded-md bg-surface p-2 text-primary">
-                                <Icon
-                                  aria-hidden="true"
-                                  className="size-5"
-                                />
+                                <Icon aria-hidden="true" className="size-5" />
                               </span>
 
                               <div>

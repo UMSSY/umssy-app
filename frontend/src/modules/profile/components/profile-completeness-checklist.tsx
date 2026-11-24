@@ -13,10 +13,12 @@ import {
   PROFILE_COMPLETENESS_SECTION_LABELS,
 } from '../constants/profile-completeness.constants';
 import type { ProfileCompletenessChecklistProps } from '../types/profile-completeness-checklist-props.types';
+import { useProfileGuide } from '../contexts/profile-guide-context';
 
 export function ProfileCompletenessChecklist({
   sections = [],
 }: ProfileCompletenessChecklistProps) {
+  const guide = useProfileGuide();
   const titleId = useId();
   const sectionsById = new Map(
     (sections ?? []).map((section) => [section.id, section]),
@@ -91,6 +93,11 @@ export function ProfileCompletenessChecklist({
                     href={`${PROFILE_COMPLETENESS_ROUTES[id]}${PROFILE_COMPLETENESS_HASH_PREFIX}${id}`}
                     scroll={false}
                     onClick={(event) => {
+                      if (guide?.isEnabled && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+                        event.preventDefault();
+                        guide.start(id);
+                        return;
+                      }
                       if (
                         event.button !== 0 ||
                         event.metaKey ||
@@ -102,7 +109,6 @@ export function ProfileCompletenessChecklist({
                       )
                         return;
 
-                      // Next's same-page pushState does not emit hashchange.
                       event.preventDefault();
                       const hash = `${PROFILE_COMPLETENESS_HASH_PREFIX}${id}`;
                       if (window.location.hash === hash) {

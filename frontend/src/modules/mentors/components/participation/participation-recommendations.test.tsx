@@ -1,9 +1,8 @@
-
 import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery } from '@/shared/testing/render-with-query';
 import { availabilityApi } from '@/modules/availability';
-import { educationsService } from '@/modules/education';
+import { educationsService } from '@/modules/educations';
 import {
   profilePhotoService,
   profileService,
@@ -195,9 +194,7 @@ describe('recomendaciones de participación HU-MEN-13', () => {
 
     renderOverview(true, ['Backend'], ['Empleo']);
 
-    await waitFor(() =>
-      expect(profileService.getProfile).toHaveBeenCalled(),
-    );
+    await waitFor(() => expect(profileService.getProfile).toHaveBeenCalled());
 
     await waitFor(() =>
       expect(
@@ -231,9 +228,7 @@ describe('recomendaciones de participación HU-MEN-13', () => {
       name: 'Recomendaciones para mejorar tu perfil',
     });
 
-    await within(section).findByText(
-      'Completa tu descripción profesional',
-    );
+    await within(section).findByText('Completa tu descripción profesional');
 
     first.unmount();
 
@@ -275,9 +270,7 @@ describe('recomendaciones de participación HU-MEN-13', () => {
 
     renderOverview();
 
-    expect(
-      await screen.findByText('Agrega tu fotografía'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Agrega tu fotografía')).toBeInTheDocument();
 
     expect(screen.getByText('4 pendientes')).toBeInTheDocument();
   });
@@ -309,9 +302,7 @@ describe('recomendaciones de participación HU-MEN-13', () => {
       screen.getByText('Registra tu formación profesional'),
     ).toBeInTheDocument();
 
-    expect(
-      screen.queryByText(/^\d+ pendientes?$/),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/^\d+ pendientes?$/)).not.toBeInTheDocument();
   });
 
   it('respeta una sola sugerencia del backend aunque otros campos locales estén vacíos', async () => {

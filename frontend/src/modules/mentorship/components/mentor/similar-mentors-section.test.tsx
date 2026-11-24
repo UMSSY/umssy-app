@@ -10,6 +10,77 @@ import { SimilarMentorsSection } from './similar-mentors-section';
 afterEach(cleanup);
 
 describe('SimilarMentorsSection', () => {
+  it('conserva textos extensos completos, orden y enlaces sin eliminar las reglas de ajuste', () => {
+    const mentors = [...SIMILAR_MENTORS_FIXTURE]
+      .reverse()
+      .map((mentor, index) => ({
+        ...mentor,
+        fullName: `${mentor.fullName} ${'ApellidoExtenso'.repeat(8)}`,
+        technicalAreas: [
+          `Área ${index}: ${'ArquitecturaDeSistemasDistribuidos'.repeat(6)}`,
+        ],
+        orientationTypes: [
+          `Orientación ${index}: ${'AcompañamientoProfesional'.repeat(6)}`,
+        ],
+      }));
+    render(<SimilarMentorsSection status="success" mentors={mentors} />);
+    const section = screen.getByRole('region', {
+      name: 'También podría interesarte',
+    });
+    const headings = within(section).getAllByRole('heading', { level: 3 });
+    expect(headings.map((heading) => heading.textContent)).toEqual(
+      mentors.map((mentor) => mentor.fullName),
+    );
+    for (const [index, mentor] of mentors.entries()) {
+      const heading = headings[index];
+      expect(heading).toHaveClass('[overflow-wrap:anywhere]');
+      expect(heading.parentElement).toHaveClass('min-w-0', 'flex-1');
+      const card = heading.closest('[data-slot="card"]');
+      expect(card).toHaveClass('min-w-0', 'h-full');
+      const content = within(card as HTMLElement);
+      for (const label of [
+        ...mentor.technicalAreas,
+        ...mentor.orientationTypes,
+      ]) {
+        expect(content.getByText(label, { exact: true })).toHaveClass(
+          'max-w-full',
+          'whitespace-normal',
+          '[overflow-wrap:anywhere]',
+        );
+      }
+      expect(
+        content.getByText(
+          mentor.isAvailable ? 'Disponible para mentoría' : 'No disponible',
+        ),
+      ).toHaveClass('h-auto', 'max-w-full', 'whitespace-normal');
+      const link = content.getByRole('link', {
+        name: `Ver perfil de ${mentor.fullName}`,
+      });
+      expect(link).toHaveAttribute('href', `/mentors/${mentor.id}`);
+      expect(link).toHaveClass('min-h-11', 'w-full');
+      expect(link).not.toHaveAttribute('tabindex', '-1');
+    }
+  });
+
+  it('conserva la cuadrícula adaptable también durante la carga', () => {
+    render(<SimilarMentorsSection status="loading" />);
+    const section = screen.getByRole('region', {
+      name: 'También podría interesarte',
+    });
+    const status = within(section).getByRole('status');
+    expect(section).toHaveClass('@container', 'min-w-0', 'w-full');
+    expect(status.lastElementChild).toHaveClass(
+      'grid',
+      'grid-cols-1',
+      '@min-[60rem]:grid-cols-3',
+      'gap-5',
+    );
+    for (const skeleton of section.querySelectorAll('[data-slot="skeleton"]')) {
+      expect(skeleton).toHaveClass('w-full', 'motion-reduce:animate-none');
+    }
+    expect(within(section).queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it.each([
     '/mentorship/mentors?area=backend',
     'https://evil.test',

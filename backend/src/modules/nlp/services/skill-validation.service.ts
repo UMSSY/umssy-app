@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NLP_SKILL_DICTIONARY } from '../constants/nlp-dictionary.constants.js';
-import { NLP_VALIDATION_MESSAGES } from '../constants/nlp-validation.constants.js';
+import { MAX_NLP_SOURCE_LENGTH, NLP_VALIDATION_MESSAGES } from '../constants/nlp-validation.constants.js';
 import type { NlpCatalogSkill } from '../types/nlp-catalog-skill.type.js';
 import type { NlpDetectedSkill } from '../types/nlp-detected-skill.type.js';
 import type { NlpDetectionValidation } from '../types/nlp-detection-validation.type.js';
@@ -21,7 +21,7 @@ export class SkillValidationService {
   validateSources(sources: readonly NlpTextSource[]): NlpSourceValidation {
     const validation: NlpSourceValidation = { accepted: [], rejected: [] };
     for (const source of sources) {
-      if (source.text.length <= 20_000) {
+      if (source.text.length <= MAX_NLP_SOURCE_LENGTH) {
         validation.accepted.push(source);
         continue;
       }

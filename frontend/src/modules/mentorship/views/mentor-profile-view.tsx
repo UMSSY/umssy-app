@@ -116,11 +116,12 @@ export function MentorProfileView({
 
         <MentorProfileHeader
           mentor={mentor}
+          selectedArea={new URL(returnTo, "http://localhost").searchParams.get("area") ?? undefined}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 
-        <div className="mt-6 grid min-w-0 grid-cols-12 gap-6">
-          <div className="col-span-8 flex min-w-0 flex-col gap-6">
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-6 md:grid-cols-12">
+          <div className="flex min-w-0 flex-col gap-6 md:col-span-8">
             {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
 
             <section className="rounded-xl border border-border bg-surface p-6">
@@ -132,7 +133,7 @@ export function MentorProfileView({
                   {professionalInterests.map((skill) => (
                     <li
                       key={skill.id}
-                      className="rounded-md border border-border bg-surface-soft px-3 py-1 text-sm text-ink"
+                      className="max-w-full min-w-0 rounded-md border border-border bg-surface-soft px-3 py-1 text-sm [overflow-wrap:anywhere] text-ink"
                     >
                       {skill.name}
                     </li>
@@ -151,7 +152,7 @@ export function MentorProfileView({
             />
           </div>
 
-          <div className="col-span-4 flex min-w-0 flex-col gap-6">
+          <div className="flex min-w-0 flex-col gap-6 md:col-span-4">
             <MentorCareer mentor={mentor} />
 
             <MentorTechnicalAreas areas={mentor.technicalAreas} />

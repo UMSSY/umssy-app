@@ -1,9 +1,14 @@
+import { seedRadarDocumentSourceTypesCatalog } from '../../modules/radar-integration/seeds/radar-document-source-types-catalog.seed.js';
+import { seedRadarDocumentStatusesCatalog } from '../../modules/radar-integration/seeds/radar-document-statuses-catalog.seed.js';
 import { seedTechnicalAreasCatalog } from '../../modules/technical-areas/seeds/technical-areas-catalog.seed.js';
 import { seedOrientationTypesCatalog } from '../../modules/orientation-types/seeds/orientation-types-catalog.seed.js';
 import { seedMentorParticipationStatusesCatalog } from '../../modules/mentors/seeds/mentor-participation-statuses-catalog.seed.js';
 import { seedMentorOfferStatusesCatalog } from '../../modules/mentors/seeds/mentor-offer-statuses-catalog.seed.js';
 import { seedAppointmentStatusesCatalog } from '../../modules/availability/seeds/appointment-statuses-catalog.seed.js';
 import { seedProposalStatusesCatalog } from '../../modules/availability/seeds/proposal-statuses-catalog.seed.js';
+import { seedAppointmentNotificationEventsCatalog } from '../../modules/appointments/seeds/appointment-notification-events-catalog.seed.js';
+import { seedAppointmentNotificationChannelsCatalog } from '../../modules/appointments/seeds/appointment-notification-channels-catalog.seed.js';
+import { seedAppointmentNotificationStatusesCatalog } from '../../modules/appointments/seeds/appointment-notification-statuses-catalog.seed.js';
 import { seedEventCategoriesCatalog } from '../../modules/event-categories/seeds/event-categories-catalog.seed.js';
 import { seedEventModalitiesCatalog } from '../../modules/events/seeds/event-modalities-catalog.seed.js';
 import { seedEventOriginsCatalog } from '../../modules/events/seeds/event-origins-catalog.seed.js';
@@ -27,12 +32,17 @@ import type { Prisma } from '../../prisma/client.js';
 export async function seedCatalogStages(
   tx: Prisma.TransactionClient,
 ): Promise<void> {
+  await seedRadarDocumentStatusesCatalog(tx);
+  await seedRadarDocumentSourceTypesCatalog(tx);
   await seedTechnicalAreasCatalog(tx);
   await seedOrientationTypesCatalog(tx);
   await seedMentorParticipationStatusesCatalog(tx);
   await seedMentorOfferStatusesCatalog(tx);
   await seedAppointmentStatusesCatalog(tx);
   await seedProposalStatusesCatalog(tx);
+  await seedAppointmentNotificationEventsCatalog(tx);
+  await seedAppointmentNotificationChannelsCatalog(tx);
+  await seedAppointmentNotificationStatusesCatalog(tx);
   await seedEventCategoriesCatalog(tx);
   await seedEventModalitiesCatalog(tx);
   await seedEventOriginsCatalog(tx);

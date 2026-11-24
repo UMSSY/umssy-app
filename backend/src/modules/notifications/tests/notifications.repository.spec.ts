@@ -5,7 +5,8 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 interface MockPrisma {
   notification: {
-    createMany: ReturnType<typeof vi.fn>;
+    createManyAndReturn: ReturnType<typeof vi.fn>;
+    findFirst: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
     count: ReturnType<typeof vi.fn>;
     updateMany: ReturnType<typeof vi.fn>;
@@ -22,7 +23,8 @@ describe('NotificationsRepository', () => {
   beforeEach(async () => {
     mockPrisma = {
       notification: {
-        createMany: vi.fn(),
+        createManyAndReturn: vi.fn(),
+        findFirst: vi.fn(),
         findMany: vi.fn(),
         count: vi.fn(),
         updateMany: vi.fn(),
@@ -43,15 +45,21 @@ describe('NotificationsRepository', () => {
   });
 
   it('debe crear múltiples notificaciones en lote', async () => {
-    mockPrisma.notification.createMany.mockResolvedValue({ count: 2 });
+    const created = [
+      { id: 'n1', recipientId: '1' },
+      { id: 'n2', recipientId: '2' },
+    ];
+    mockPrisma.notification.createManyAndReturn.mockResolvedValue(created);
 
     const result = await repository.createMany([
       { recipientId: '1', typeId: 't1', title: 'T', body: 'B', link: '/' },
       { recipientId: '2', typeId: 't1', title: 'T', body: 'B', link: '/' },
     ]);
 
-    expect(mockPrisma.notification.createMany).toHaveBeenCalled();
-    expect(result).toBe(2);
+    expect(mockPrisma.notification.createManyAndReturn).toHaveBeenCalledWith(
+      expect.objectContaining({ select: { id: true, recipientId: true } }),
+    );
+    expect(result).toEqual(created);
   });
 
   it('debe contar solo las notificaciones no leídas', async () => {
@@ -59,16 +67,56 @@ describe('NotificationsRepository', () => {
     const count = await repository.countUnread('user-1');
 
     expect(mockPrisma.notification.count).toHaveBeenCalledWith({
-      where: { recipientId: 'user-1', readAt: null },
+      where: {
+        recipientId: 'user-1',
+        readAt: null,
+        type: { code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] } },
+      },
     });
     expect(count).toBe(5);
+  });
+
+  it('comprueba de forma durable un grupo por tipo y destinatario', async () => {
+    mockPrisma.notification.findFirst.mockResolvedValue({ id: 'n1' });
+
+    await expect(
+      repository.hasGroupedNotification(
+        'user-1',
+        'MENTOR_SLOT_OFFERED',
+        'mentor-slot-offer:offer-1',
+      ),
+    ).resolves.toBe(true);
+    expect(mockPrisma.notification.findFirst).toHaveBeenCalledWith({
+      where: {
+        recipientId: 'user-1',
+        groupKey: 'mentor-slot-offer:offer-1',
+        type: { code: 'MENTOR_SLOT_OFFERED' },
+      },
+      select: { id: true },
+    });
   });
 
   it('debe marcar todas las notificaciones como leídas', async () => {
     await repository.markAllAsRead('user-1');
     expect(mockPrisma.notification.updateMany).toHaveBeenCalledWith({
-      where: { recipientId: 'user-1', readAt: null },
+      where: {
+        recipientId: 'user-1',
+        readAt: null,
+        type: { code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] } },
+      },
       data: { readAt: expect.any(Date) },
     });
+  });
+
+  it('debe buscar el estado de lectura solo entre los avisos del usuario', async () => {
+    mockPrisma.notification.findFirst.mockResolvedValue({ readAt: null });
+
+    const result = await repository.findReadStateById('n1', 'user-1');
+
+    expect(mockPrisma.notification.findFirst).toHaveBeenCalledWith({
+      where: { id: 'n1', recipientId: 'user-1' },
+      select: { readAt: true },
+    });
+    expect(result).toEqual({ readAt: null });
   });
 });

@@ -1,16 +1,15 @@
+'use client';
 
-"use client";
-
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { DiscardChangesDialog } from "../components/preview/discard-changes-dialog";
-import { PageHeading } from "@/shared/components/layout";
-import { Label } from "@/components/ui/label";
-import { AlertCircle, Eye, X } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { DiscardChangesDialog } from '../components/preview/discard-changes-dialog';
+import { PageHeading } from '@/shared/components/layout';
+import { Label } from '@/components/ui/label';
+import { AlertCircle, Eye, X } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,23 +19,28 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
-import { useOrientationConfig } from "../hooks/use-orientation-config";
-import { useMentorProfileDraft } from "../hooks/use-mentor-profile-draft";
-import { useCurrentUserId } from "../hooks/use-current-user-id";
-import { MentorProfilePreview } from "../components/preview/mentor-profile-preview";
-import { useTechnicalAreas } from "@/modules/mentors/hooks/use-technical-areas";
+import { useOrientationConfig } from '../hooks/use-orientation-config';
+import { useMentorProfileDraft } from '../hooks/use-mentor-profile-draft';
+import { useCurrentUserId } from '../hooks/use-current-user-id';
+import { MentorProfilePreview } from '../components/preview/mentor-profile-preview';
+import { useTechnicalAreas } from '@/modules/mentor-participation';
+import {
+  PROFILE_CHANGES_SAVED_MESSAGE,
+  PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
+  PROFILE_SELECTION_REQUIRED_MESSAGE,
+} from '../constants/profile-changes-messages.constants';
 
 export function OrientationConfigView() {
   const {
@@ -65,13 +69,13 @@ export function OrientationConfigView() {
     orientationTypeIds: draftIds,
     technicalAreaIds: draftTechnicalAreaIds,
     setOrientationTypeIds: setSelectedIds,
-    clearOrientationTypeIds, clearAllDrafts,
+    clearOrientationTypeIds,
+    clearAllDrafts,
   } = useMentorProfileDraft();
 
   const selectedIds = draftIds ?? savedIds;
 
-  const selectedTechnicalIds =
-    draftTechnicalAreaIds ?? savedTechnicalAreaIds;
+  const selectedTechnicalIds = draftTechnicalAreaIds ?? savedTechnicalAreaIds;
 
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -88,11 +92,18 @@ export function OrientationConfigView() {
     );
   };
 
+  const handleRequestSave = () => {
+    if (selectedIds.length === 0) {
+      setErrorMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      return;
+    }
+    setIsConfirmDialogOpen(true);
+  };
+
   const handleSave = async () => {
     if (selectedIds.length === 0) {
-      setErrorMessage(
-        "Debe seleccionar al menos un tipo de orientación antes de guardar.",
-      );
+      setErrorMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      setIsConfirmDialogOpen(false);
       return;
     }
 
@@ -102,11 +113,9 @@ export function OrientationConfigView() {
       await save(idsToSave);
       clearOrientationTypeIds();
       setErrorMessage(null);
-      toast.success("Tipos de orientación actualizados correctamente");
+      toast.success(PROFILE_CHANGES_SAVED_MESSAGE);
     } catch {
-      setErrorMessage(
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      );
+      setErrorMessage(PROFILE_CHANGES_SAVE_ERROR_MESSAGE);
     } finally {
       setIsConfirmDialogOpen(false);
     }
@@ -116,19 +125,22 @@ export function OrientationConfigView() {
     selectedIds.length !== savedIds.length ||
     selectedIds.some((id) => !savedIds.includes(id));
 
+  const isSaveDisabled =
+    isSaving || hasLoadError || (!hasChanges && selectedIds.length > 0);
+
   const handleCancel = () => {
     if (hasChanges) {
       setIsDiscardDialogOpen(true);
       return;
     }
-    router.push("/mentors/participation");
+    router.push('/mentors/participation');
   };
 
   const handleConfirmDiscard = () => {
     clearAllDrafts();
     setErrorMessage(null);
     setIsDiscardDialogOpen(false);
-    router.push("/mentors/participation");
+    router.push('/mentors/participation');
   };
 
   const canOpenPreview =
@@ -145,10 +157,10 @@ export function OrientationConfigView() {
       <MentorProfilePreview
         mentorId={currentUserId}
         technicalAreas={areas.filter((area) =>
-          selectedTechnicalIds.includes(area.id)
+          selectedTechnicalIds.includes(area.id),
         )}
         orientationTypes={orientationTypes.filter((orientation) =>
-          selectedIds.includes(orientation.id)
+          selectedIds.includes(orientation.id),
         )}
         onBack={() => setIsPreviewOpen(false)}
       />
@@ -192,8 +204,8 @@ export function OrientationConfigView() {
               Editar tipos de orientación
             </CardTitle>
             <p className="mt-3 text-sm text-text-secondary">
-              Primero debes activar tu participación como mentor para editar
-              los tipos de orientación que deseas brindar.
+              Primero debes activar tu participación como mentor para editar los
+              tipos de orientación que deseas brindar.
             </p>
           </CardHeader>
           <CardFooter className="mt-6 border-0 bg-transparent p-6 pt-0 sm:p-8 sm:pt-0">
@@ -201,7 +213,7 @@ export function OrientationConfigView() {
               href="/mentorship"
               className={buttonVariants({
                 className:
-                  "h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0",
+                  'h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0',
               })}
             >
               Activar participación como mentor
@@ -256,12 +268,12 @@ export function OrientationConfigView() {
                       <Label
                         key={option.id}
                         className={cn(
-                          "group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors",
+                          'group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors',
                           !isSelected
-                            ? "border-transparent bg-surface-soft/50 hover:bg-interaction"
+                            ? 'border-transparent bg-surface-soft/50 hover:bg-interaction'
                             : isSaved
-                              ? "border-border bg-surface-soft/50"
-                              : "border-accent bg-interaction/50",
+                              ? 'border-border bg-surface-soft/50'
+                              : 'border-accent bg-interaction/50',
                         )}
                       >
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -288,12 +300,12 @@ export function OrientationConfigView() {
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
                             className={cn(
-                              "size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4",
+                              'size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4',
                               !isSelected
-                                ? ""
+                                ? ''
                                 : isSaved
-                                  ? "data-checked:bg-accent"
-                                  : "data-checked:bg-accent",
+                                  ? 'data-checked:bg-accent'
+                                  : 'data-checked:bg-accent',
                             )}
                           />
                         </div>
@@ -330,16 +342,11 @@ export function OrientationConfigView() {
 
                 <Button
                   type="button"
-                  onClick={() => setIsConfirmDialogOpen(true)}
-                  disabled={
-                    !hasChanges ||
-                    selectedIds.length === 0 ||
-                    isSaving ||
-                    hasLoadError
-                  }
+                  onClick={handleRequestSave}
+                  disabled={isSaveDisabled}
                   className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSaving ? "Guardando..." : "Guardar cambios"}
+                  {isSaving ? 'Guardando...' : 'Guardar cambios'}
                 </Button>
               </div>
             </CardFooter>
@@ -376,7 +383,7 @@ export function OrientationConfigView() {
               disabled={isSaving}
               className="h-10 bg-accent px-6 text-sm font-semibold text-accent-foreground hover:bg-brand-hover"
             >
-              {isSaving ? "Guardando..." : "Sí, guardar cambios"}
+              {isSaving ? 'Guardando...' : 'Sí, guardar cambios'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

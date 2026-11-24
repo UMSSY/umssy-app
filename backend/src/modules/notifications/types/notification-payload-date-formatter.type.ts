@@ -1,0 +1,1 @@
+export type NotificationPayloadDateFormatter = (isoValue: string) => string;

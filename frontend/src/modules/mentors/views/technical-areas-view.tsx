@@ -1,30 +1,37 @@
+'use client';
 
-"use client";
+import { toast as notify } from 'sonner';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Eye, Save, X } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
+import {
+  DiscardChangesDialog,
+  PROFILE_CHANGES_SAVED_MESSAGE,
+  PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
+  PROFILE_SELECTION_REQUIRED_MESSAGE,
+  useMentorProfileDraft,
+  useOrientationConfig,
+  useCurrentUserId,
+  MentorProfilePreview,
+} from '@/modules/mentorship';
 
-import { toast as notify } from "sonner";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Eye, Save, X } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
-import { DiscardChangesDialog, useMentorProfileDraft } from "@/modules/mentorship";
+import { WorkspacePage } from '@/shared/components/layout/workspace-page';
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
 
-import { WorkspacePage } from "@/shared/components/layout/workspace-page";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
-
-import { TechnicalAreaCard } from "../components/technical-area-card";
-import { useTechnicalAreas } from "../hooks/use-technical-areas";
-import { useOrientationConfig } from "@/modules/mentorship/hooks/use-orientation-config";
-import { useCurrentUserId } from "@/modules/mentorship/hooks/use-current-user-id";
-import { MentorProfilePreview } from "@/modules/mentorship/components/preview/mentor-profile-preview";
+import { TechnicalAreaCard } from '../components/technical-area-card';
+import { useTechnicalAreas } from '../hooks/use-technical-areas';
 
 export function TechnicalAreasView() {
   const router = useRouter();
 
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null,
+  );
   const {
     areas,
     savedIds,
@@ -49,12 +56,12 @@ export function TechnicalAreasView() {
     technicalAreaIds: draftIds,
     orientationTypeIds: draftOrientationIds,
     setTechnicalAreaIds: setSelectedIds,
-    clearTechnicalAreaIds, clearAllDrafts,
+    clearTechnicalAreaIds,
+    clearAllDrafts,
   } = useMentorProfileDraft();
 
   const selectedIds = draftIds ?? savedIds;
-  const selectedOrientationIds =
-    draftOrientationIds ?? savedOrientationIds;
+  const selectedOrientationIds = draftOrientationIds ?? savedOrientationIds;
 
   const hasChanges =
     selectedIds.length !== savedIds.length ||
@@ -70,12 +77,14 @@ export function TechnicalAreasView() {
     !isOrientationLoading &&
     !hasOrientationLoadError;
 
-  const handleToggleArea = (id: string) =>
+  const handleToggleArea = (id: string) => {
+    setValidationMessage(null);
     setSelectedIds((previous) =>
       (previous ?? savedIds).includes(id)
         ? (previous ?? savedIds).filter((item) => item !== id)
         : [...(previous ?? savedIds), id],
     );
+  };
 
   const showToast = (isError: boolean, text: string) => {
     if (isError) notify.error(text);
@@ -83,17 +92,22 @@ export function TechnicalAreasView() {
   };
 
   const handleSubmit = async () => {
-    if (!hasChanges || hasNoSelection || hasAccessError || isSaving) return;
+    if (hasAccessError || isSaving) return;
+
+    if (hasNoSelection) {
+      setValidationMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      return;
+    }
+
+    if (!hasChanges) return;
 
     try {
       await save(selectedIds);
       clearTechnicalAreaIds();
-      showToast(false, "Áreas técnicas actualizadas correctamente");
+      setValidationMessage(null);
+      showToast(false, PROFILE_CHANGES_SAVED_MESSAGE);
     } catch {
-      showToast(
-        true,
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      );
+      showToast(true, PROFILE_CHANGES_SAVE_ERROR_MESSAGE);
     }
   };
 
@@ -102,24 +116,22 @@ export function TechnicalAreasView() {
       setIsDiscardModalOpen(true);
       return;
     }
-    router.push("/mentors/participation");
+    router.push('/mentors/participation');
   };
 
   const handleConfirmDiscard = () => {
     clearAllDrafts();
     setIsDiscardModalOpen(false);
-    router.push("/mentors/participation");
+    router.push('/mentors/participation');
   };
 
   if (isPreviewOpen && currentUserId) {
     return (
       <MentorProfilePreview
         mentorId={currentUserId}
-        technicalAreas={areas.filter((area) =>
-          selectedIds.includes(area.id)
-        )}
+        technicalAreas={areas.filter((area) => selectedIds.includes(area.id))}
         orientationTypes={orientationTypes.filter((orientation) =>
-          selectedOrientationIds.includes(orientation.id)
+          selectedOrientationIds.includes(orientation.id),
         )}
         onBack={() => setIsPreviewOpen(false)}
       />
@@ -131,18 +143,18 @@ export function TechnicalAreasView() {
       title="Editar áreas técnicas"
       description="Indica las áreas en las que puedes brindar orientación."
     >
-      {!isLoading &&
-        !hasLoadError &&
-        !hasAccessError &&
-        (hasNoSelection ? (
-          <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
-            Debe seleccionarse al menos un área para continuar
-          </Alert>
-        ) : (
+      {!isLoading && !hasLoadError && !hasAccessError && (
+        <>
+          {validationMessage && (
+            <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
+              {validationMessage}
+            </Alert>
+          )}
           <div className="mb-4 rounded-lg bg-surface-soft p-3 text-sm text-ink-soft">
             {selectedIds.length} seleccionadas
           </div>
-        ))}
+        </>
+      )}
 
       {isLoading && (
         <p role="status" aria-live="polite" className="py-8 text-center">
@@ -167,7 +179,7 @@ export function TechnicalAreasView() {
           </p>
           <Link
             href="/mentors/participation"
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: 'outline' })}
           >
             Revisar mi participación
           </Link>
@@ -219,8 +231,7 @@ export function TechnicalAreasView() {
             type="button"
             onClick={handleSubmit}
             disabled={
-              !hasChanges ||
-              hasNoSelection ||
+              (!hasChanges && !hasNoSelection) ||
               isSaving ||
               isLoading ||
               hasLoadError ||
@@ -229,7 +240,7 @@ export function TechnicalAreasView() {
             className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSaving ? (
-              "Guardando..."
+              'Guardando...'
             ) : (
               <>
                 <Save size={16} /> Guardar cambios

@@ -1,7 +1,8 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import type { ReactNode } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AreaDetailPreviewPage from "./page";
 import AppLayout from "../../layout";

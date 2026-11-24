@@ -100,3 +100,8 @@ export const formatBoliviaDay = (value: DateInput): string =>
 
 export const formatBoliviaMonthShort = (value: DateInput): string =>
   BOLIVIA_MONTH_SHORT_LABELS[toBoliviaTime(value).month - 1];
+
+export const formatBoliviaDate = (value: DateInput): string => {
+  const { day, month, year } = toBoliviaTime(value);
+  return `${pad(day)}/${pad(month)}/${year}`;
+};

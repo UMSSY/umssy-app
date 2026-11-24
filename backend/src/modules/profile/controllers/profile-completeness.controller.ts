@@ -40,8 +40,10 @@ export class ProfileCompletenessController {
       'Contact and presentation must satisfy their existing form validation. ' +
       'Education, work experience, skills and certifications require at least one saved record. ' +
       'Saved skills count regardless of source or verification status. ' +
+      'CV requires at least one stored PDF with an upload date; downloading a generated CV does not save it. ' +
+      'Contact, presentation, education, work experience, skills and CV each contribute 15%; certifications contribute 10%. ' +
       'Each completed section contributes its full weight; incomplete sections contribute zero. ' +
-      'CVs, photos, unsaved drafts and document approval do not affect this percentage.',
+      'Photos, unsaved drafts and document approval do not affect this percentage.',
   })
   @ApiOkResponse({
     description: 'Weighted completeness and section breakdown',

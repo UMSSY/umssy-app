@@ -1,5 +1,6 @@
 import type { ProposalValues } from '../types/proposal.types';
 
+export const PROPOSAL_LOCATION_LIMIT = 150;
 export const PROPOSAL_TITLE_LIMIT = 80;
 export const PROPOSAL_DESCRIPTION_LIMIT = 300;
 export const PROPOSAL_COVER_MAX_BYTES = 5 * 1024 * 1024;
@@ -8,3 +9,5 @@ export const EMPTY_PROPOSAL: ProposalValues = {
   title: '', description: '', categoryId: '', eventDate: '',
   startTime: '', endTime: '', capacity: '', modality: 'presencial', location: '',
 };
+
+export const PROPOSAL_MAX_ADDITIONAL_SESSIONS = 19;

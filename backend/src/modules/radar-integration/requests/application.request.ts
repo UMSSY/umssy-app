@@ -7,4 +7,12 @@ export const applicationRequestSchema = z
     consentCv: z.literal(true),
     consentContact: z.literal(true),
   })
-  .strict();
+  .strict()
+  .meta({
+    example: {
+      jobOfferId: 'a0000000-0000-4000-8000-000000000003',
+      consent: true,
+      consentCv: true,
+      consentContact: true,
+    },
+  });
