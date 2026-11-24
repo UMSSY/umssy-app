@@ -33,32 +33,39 @@ export class SocialOAuthService {
 
   getAuthorizationUrl(
     provider: PortfolioProvider,
-    state?: string,
+    _state?: string,
     userId?: string,
     challenge?: string,
   ): OAuthUrlResponse {
-    if (provider === PortfolioProviderEnum.GITHUB) {
+    if (
+      provider === PortfolioProviderEnum.GITHUB ||
+      provider === PortfolioProviderEnum.GITLAB
+    ) {
+      const isGithub = provider === PortfolioProviderEnum.GITHUB;
+      const prefix = isGithub ? 'GITHUB' : 'GITLAB';
+      const label = isGithub ? 'GitHub' : 'GitLab';
       const clientId = (
-        this.configService.get<string>('GITHUB_CLIENT_ID') ?? ''
+        this.configService.get<string>(`${prefix}_CLIENT_ID`) ?? ''
       ).trim();
-      const redirectUri = this.githubCallbackUrl();
-      const secret = this.githubStateSecret();
-      if (
-        !clientId ||
-        !this.configService.get<string>('GITHUB_CLIENT_SECRET')?.trim()
-      ) {
+      const clientSecret = (
+        this.configService.get<string>(`${prefix}_CLIENT_SECRET`) ?? ''
+      ).trim();
+      if (!clientId || !clientSecret) {
         throw new ServiceUnavailableException(
-          'La conexión con GitHub no está configurada.',
+          `La conexión con ${label} no está configurada.`,
         );
       }
+      const redirectUri = this.oauthCallbackUrl(provider);
+      const secret = this.oauthStateSecret();
       if (!userId || !challenge || !/^[A-Za-z0-9_-]{43}$/.test(challenge)) {
         throw new BadRequestException(
-          'No se pudo iniciar la conexión segura con GitHub.',
+          `No se pudo iniciar la conexión segura con ${label}.`,
         );
       }
       const payload = Buffer.from(
         JSON.stringify({
           userId,
+          provider,
           challenge,
           expires: Date.now() + 10 * 60_000,
           nonce: randomBytes(32).toString('base64url'),
@@ -67,44 +74,18 @@ export class SocialOAuthService {
       const signature = createHmac('sha256', secret)
         .update(payload)
         .digest('base64url');
-
       const params = new URLSearchParams({
         client_id: clientId,
-        scope: 'read:user',
+        redirect_uri: redirectUri,
+        scope: isGithub ? 'read:user' : 'read_user',
         state: `${payload}.${signature}`,
         code_challenge: challenge,
         code_challenge_method: 'S256',
-        prompt: 'select_account',
       });
-      if (redirectUri) {
-        params.set('redirect_uri', redirectUri);
-      }
+      if (isGithub) params.set('prompt', 'select_account');
+      else params.set('response_type', 'code');
       return {
-        url: `https://github.com/login/oauth/authorize?${params.toString()}`,
-      };
-    }
-
-    if (provider === PortfolioProviderEnum.GITLAB) {
-      const clientId = (
-        this.configService.get<string>('GITLAB_CLIENT_ID') ?? ''
-      ).trim();
-      const redirectUri = (
-        this.configService.get<string>('GITLAB_CALLBACK_URL') ?? ''
-      ).trim();
-
-      const params = new URLSearchParams({
-        client_id: clientId,
-        response_type: 'code',
-        scope: 'read_user',
-      });
-      if (redirectUri) {
-        params.set('redirect_uri', redirectUri);
-      }
-      if (state) {
-        params.set('state', (state ?? '').trim());
-      }
-      return {
-        url: `https://gitlab.com/oauth/authorize?${params.toString()}`,
+        url: `https://${isGithub ? 'github.com/login' : 'gitlab.com'}/oauth/authorize?${params.toString()}`,
       };
     }
 
@@ -118,8 +99,13 @@ export class SocialOAuthService {
     state?: string,
     verifier?: string,
   ): Promise<SocialAccountResponse> {
-    if (provider === PortfolioProviderEnum.GITHUB)
-      this.verifyGithubState(userId, state, verifier);
+    if (
+      provider !== PortfolioProviderEnum.GITHUB &&
+      provider !== PortfolioProviderEnum.GITLAB
+    ) {
+      throw new UnsupportedPortfolioProviderException(provider);
+    }
+    this.verifyOAuthState(userId, provider, state, verifier);
     const profile = await this.exchangeCodeForProfile(provider, code, verifier);
     const account = await this.socialAccountRepository.upsertAccount({
       userId,
@@ -141,73 +127,63 @@ export class SocialOAuthService {
       return this.exchangeGitHub(code, verifier);
     }
     if (provider === PortfolioProviderEnum.GITLAB) {
-      return this.exchangeGitLab(code);
+      return this.exchangeGitLab(code, verifier);
     }
     throw new UnsupportedPortfolioProviderException(provider);
   }
 
-  private githubCallbackUrl(): string {
+  private oauthCallbackUrl(provider: PortfolioProvider): string {
+    const prefix =
+      provider === PortfolioProviderEnum.GITHUB ? 'GITHUB' : 'GITLAB';
+    const label =
+      provider === PortfolioProviderEnum.GITHUB ? 'GitHub' : 'GitLab';
     const explicit = this.configService
-      .get<string>('GITHUB_CALLBACK_URL')
+      .get<string>(`${prefix}_CALLBACK_URL`)
       ?.trim();
     if (explicit) return explicit;
     const frontend = this.configService.get<string>('FRONTEND_URL')?.trim();
-    if (frontend) {
-      try {
-        const origin = new URL(frontend);
-        if (
-          !['http:', 'https:'].includes(origin.protocol) ||
-          origin.origin !== frontend.replace(/\/$/, '')
-        )
-          throw new Error('invalid origin');
-        return `${origin.origin}/oauth/github/callback`;
-      } catch {
-        throw new ServiceUnavailableException(
-          'Configure la URL de retorno de GitHub.',
-        );
-      }
-    }
     const origins = (this.configService.get<string>('CORS_ORIGIN') ?? '')
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean);
-    if (origins.length !== 1)
+    const configured =
+      frontend || (origins.length === 1 ? origins[0] : undefined);
+    if (!configured)
       throw new ServiceUnavailableException(
-        'Configure la URL de retorno de GitHub.',
+        `Configure la URL de retorno de ${label}.`,
       );
     try {
-      const origin = new URL(origins[0]);
+      const origin = new URL(configured);
       if (
         !['http:', 'https:'].includes(origin.protocol) ||
-        origin.origin !== origins[0].replace(/\/$/, '')
+        origin.origin !== configured.replace(/\/$/, '')
       )
         throw new Error('invalid origin');
-      return `${origin.origin}/oauth/github/callback`;
+      return `${origin.origin}/oauth/${provider}/callback`;
     } catch {
       throw new ServiceUnavailableException(
-        'Configure la URL de retorno de GitHub.',
+        `Configure la URL de retorno de ${label}.`,
       );
     }
   }
 
-  private githubStateSecret(): string {
+  private oauthStateSecret(): string {
     const secret = this.configService.get<string>('JWT_SECRET')?.trim();
     if (!secret)
       throw new ServiceUnavailableException(
-        'La conexión con GitHub no está configurada.',
+        'La conexión OAuth no está configurada.',
       );
     return secret;
   }
 
-  private verifyGithubState(
+  private verifyOAuthState(
     userId: string,
+    provider: PortfolioProvider,
     state?: string,
     verifier?: string,
   ): void {
     const invalid = () =>
-      new BadRequestException(
-        'La autorización de GitHub es inválida o ha expirado.',
-      );
+      new BadRequestException('La autorización es inválida o ha expirado.');
     if (!state || !verifier || !/^[A-Za-z0-9_-]{43,128}$/.test(verifier))
       throw invalid();
     const parts = state.split('.');
@@ -218,7 +194,7 @@ export class SocialOAuthService {
     )
       throw invalid();
     const actual = Buffer.from(parts[1], 'base64url');
-    const expected = createHmac('sha256', this.githubStateSecret())
+    const expected = createHmac('sha256', this.oauthStateSecret())
       .update(parts[0])
       .digest();
     if (actual.length !== expected.length || !timingSafeEqual(actual, expected))
@@ -226,12 +202,18 @@ export class SocialOAuthService {
     try {
       const payload = JSON.parse(
         Buffer.from(parts[0], 'base64url').toString('utf8'),
-      ) as { userId?: unknown; challenge?: unknown; expires?: unknown };
+      ) as {
+        userId?: unknown;
+        provider?: unknown;
+        challenge?: unknown;
+        expires?: unknown;
+      };
       const challenge = createHash('sha256')
         .update(verifier)
         .digest('base64url');
       if (
         payload.userId !== userId ||
+        payload.provider !== provider ||
         payload.challenge !== challenge ||
         typeof payload.expires !== 'number' ||
         payload.expires < Date.now()
@@ -252,7 +234,7 @@ export class SocialOAuthService {
     const clientSecret = (
       this.configService.get<string>('GITHUB_CLIENT_SECRET') ?? ''
     ).trim();
-    const redirectUri = this.githubCallbackUrl();
+    const redirectUri = this.oauthCallbackUrl(PortfolioProviderEnum.GITHUB);
 
     let tokenResponse: Response;
     try {
@@ -355,16 +337,17 @@ export class SocialOAuthService {
     };
   }
 
-  private async exchangeGitLab(code: string): Promise<ExternalUserProfile> {
+  private async exchangeGitLab(
+    code: string,
+    verifier?: string,
+  ): Promise<ExternalUserProfile> {
     const clientId = (
       this.configService.get<string>('GITLAB_CLIENT_ID') ?? ''
     ).trim();
     const clientSecret = (
       this.configService.get<string>('GITLAB_CLIENT_SECRET') ?? ''
     ).trim();
-    const redirectUri = (
-      this.configService.get<string>('GITLAB_CALLBACK_URL') ?? ''
-    ).trim();
+    const redirectUri = this.oauthCallbackUrl(PortfolioProviderEnum.GITLAB);
 
     let tokenResponse: Response;
     try {
@@ -380,6 +363,7 @@ export class SocialOAuthService {
           client_secret: clientSecret,
           code: (code ?? '').trim(),
           grant_type: 'authorization_code',
+          code_verifier: verifier,
           ...(redirectUri ? { redirect_uri: redirectUri } : {}),
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),

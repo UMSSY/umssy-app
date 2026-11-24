@@ -93,27 +93,69 @@ describe('SocialOAuthService', () => {
     });
 
     it('returns authorization URL for GitLab with read_user scope and response_type=code', () => {
-      const result = service.getAuthorizationUrl('gitlab', 'state-xyz');
+      const result = service.getAuthorizationUrl(
+        'gitlab',
+        undefined,
+        userId,
+        challenge,
+      );
 
       expect(result.url).toContain('https://gitlab.com/oauth/authorize');
       expect(result.url).toContain('client_id=gl-client-id');
       expect(result.url).toContain('response_type=code');
       expect(result.url).toContain('scope=read_user');
-      expect(result.url).toContain('state=state-xyz');
+      expect(new URL(result.url).searchParams.get('state')).toBeTruthy();
+      expect(new URL(result.url).searchParams.get('code_challenge')).toBe(
+        challenge,
+      );
       expect(result.url).toContain(
         'redirect_uri=https%3A%2F%2Fapp.umssy.test%2Foauth%2Fgitlab%2Fcallback',
       );
     });
 
-    it('returns authorization URL for GitLab without optional state or callback', () => {
+    it('rejects GitLab authorization when configuration is missing', () => {
       configMock.get.mockReturnValue(undefined);
+      expect(() =>
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge),
+      ).toThrow();
+    });
 
-      const result = service.getAuthorizationUrl('gitlab');
+    it('rejects GitLab authorization when its client secret is missing', () => {
+      const get = configMock.get.getMockImplementation()!;
+      configMock.get.mockImplementation((key: string) => key === 'GITLAB_CLIENT_SECRET' ? undefined : get(key));
+      expect(() => service.getAuthorizationUrl('gitlab', undefined, userId, challenge)).toThrow();
+    });
 
-      expect(result.url).toContain('https://gitlab.com/oauth/authorize');
-      expect(result.url).toContain('response_type=code');
-      expect(result.url).not.toContain('state=');
-      expect(result.url).not.toContain('redirect_uri=');
+    it('constructs the GitLab callback from the configured frontend origin', () => {
+      const get = configMock.get.getMockImplementation()!;
+      configMock.get.mockImplementation((key: string) =>
+        key === 'GITLAB_CALLBACK_URL'
+          ? undefined
+          : key === 'CORS_ORIGIN'
+            ? 'https://dev-umssy.zer4c.dev'
+            : get(key),
+      );
+      const url = new URL(
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge).url,
+      );
+      expect(url.searchParams.get('redirect_uri')).toBe(
+        'https://dev-umssy.zer4c.dev/oauth/gitlab/callback',
+      );
+      expect(url.searchParams.get('code_challenge_method')).toBe('S256');
+    });
+
+    it('rejects ambiguous frontend origins without a callback override', () => {
+      const get = configMock.get.getMockImplementation()!;
+      configMock.get.mockImplementation((key: string) =>
+        key === 'GITLAB_CALLBACK_URL'
+          ? undefined
+          : key === 'CORS_ORIGIN'
+            ? 'https://one.example,https://two.example'
+            : get(key),
+      );
+      expect(() =>
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge),
+      ).toThrow();
     });
 
     it('throws UnsupportedPortfolioProviderException for unknown provider', () => {
@@ -126,6 +168,29 @@ describe('SocialOAuthService', () => {
   });
 
   describe('connectWithCode - GitHub', () => {
+    it('rejects state issued for GitLab before contacting GitHub', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge).url,
+      ).searchParams.get('state')!;
+      await expect(
+        service.connectWithCode(userId, 'github', 'code', state, verifier),
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('rejects GitHub state for a GitLab callback', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(
+        service.getAuthorizationUrl('github', undefined, userId, challenge).url,
+      ).searchParams.get('state')!;
+      await expect(
+        service.connectWithCode(userId, 'gitlab', 'code', state, verifier),
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
     it('rejects a state from another user or an incorrect verifier before contacting GitHub', async () => {
       const fetchMock = vi.fn();
       global.fetch = fetchMock;
@@ -166,11 +231,16 @@ describe('SocialOAuthService', () => {
     it('rejects an expired authorization before contacting GitHub', async () => {
       vi.useFakeTimers();
       try {
-        const state = new URL(service.getAuthorizationUrl('github', undefined, userId, challenge).url).searchParams.get('state')!;
+        const state = new URL(
+          service.getAuthorizationUrl('github', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!;
         vi.advanceTimersByTime(10 * 60_000 + 1);
         const fetchMock = vi.fn();
         global.fetch = fetchMock;
-        await expect(service.connectWithCode(userId, 'github', 'code', state, verifier)).rejects.toThrow();
+        await expect(
+          service.connectWithCode(userId, 'github', 'code', state, verifier),
+        ).rejects.toThrow();
         expect(fetchMock).not.toHaveBeenCalled();
       } finally {
         vi.useRealTimers();
@@ -488,6 +558,15 @@ describe('SocialOAuthService', () => {
   });
 
   describe('connectWithCode - GitLab', () => {
+    it('rejects a mismatched user or verifier without contacting GitLab', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(service.getAuthorizationUrl('gitlab', undefined, userId, challenge).url).searchParams.get('state')!;
+      await expect(service.connectWithCode('other-user', 'gitlab', 'code', state, verifier)).rejects.toThrow();
+      await expect(service.connectWithCode(userId, 'gitlab', 'code', state, 'b'.repeat(43))).rejects.toThrow();
+      await expect(service.connectWithCode(userId, 'gitlab', 'code')).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
     it('exchanges code for access token in memory, fetches profile, and saves account without exposing token', async () => {
       const fetchMock = vi
         .fn()
@@ -525,9 +604,20 @@ describe('SocialOAuthService', () => {
         userId,
         'gitlab',
         'auth-code-gl',
+        new URL(
+          service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
       );
 
       expect(fetchMock).toHaveBeenCalledTimes(2);
+      const tokenRequest = fetchMock.mock.calls[0][1] as RequestInit;
+      if (typeof tokenRequest.body !== 'string') throw new Error('Missing token request body');
+      expect(JSON.parse(tokenRequest.body)).toMatchObject({
+        code_verifier: verifier,
+        redirect_uri: 'https://app.umssy.test/oauth/gitlab/callback',
+      });
       expect(socialAccountRepositoryMock.upsertAccount).toHaveBeenCalledWith({
         userId,
         provider: 'gitlab',
@@ -578,7 +668,16 @@ describe('SocialOAuthService', () => {
         updatedAt: new Date(),
       });
 
-      const result = await service.connectWithCode(userId, 'gitlab', 'code');
+      const result = await service.connectWithCode(
+        userId,
+        'gitlab',
+        'code',
+        new URL(
+          service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
+      );
       expect(result.profileUrl).toBeNull();
     });
 
@@ -589,7 +688,16 @@ describe('SocialOAuthService', () => {
       });
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'invalid-code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'invalid-code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -601,7 +709,16 @@ describe('SocialOAuthService', () => {
       });
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -616,7 +733,16 @@ describe('SocialOAuthService', () => {
       });
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -624,7 +750,16 @@ describe('SocialOAuthService', () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(ExternalProviderUnavailableException);
     });
 
@@ -641,7 +776,16 @@ describe('SocialOAuthService', () => {
         .mockRejectedValueOnce(new Error('Timeout'));
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(ExternalProviderUnavailableException);
     });
 
@@ -661,7 +805,16 @@ describe('SocialOAuthService', () => {
         });
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -682,7 +835,16 @@ describe('SocialOAuthService', () => {
         });
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 
@@ -706,7 +868,16 @@ describe('SocialOAuthService', () => {
         });
 
       await expect(
-        service.connectWithCode(userId, 'gitlab', 'code'),
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
       ).rejects.toThrow(OAuthExchangeFailedException);
     });
 

@@ -19,7 +19,7 @@ import {
   useStartPortfolioOAuth,
 } from "./use-portfolio-accounts";
 
-vi.mock("../utils/github-oauth", () => ({ prepareGithubAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
+vi.mock("../utils/portfolio-oauth", () => ({ preparePortfolioAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
 
 vi.mock("../services/portfolio-accounts.service", () => ({
   portfolioAccountsService: {
@@ -72,6 +72,18 @@ describe("use-portfolio-accounts hooks", () => {
   });
 
   describe("useStartPortfolioOAuth", () => {
+    it("does not redirect GitLab if the authorization attempt cannot be stored", async () => {
+      vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce({
+        url: "https://gitlab.com/oauth/authorize?state=gitlab-test-state",
+      });
+      vi.spyOn(sessionStorageService, "writeSessionStorage").mockReturnValue(false);
+      const assignSpy = vi.spyOn(assignLocationModule, "assignWindowLocation").mockImplementation(() => {});
+      const { result } = renderHook(() => useStartPortfolioOAuth());
+      await act(async () => {
+        await expect(result.current.mutateAsync({ provider: "gitlab" })).rejects.toThrow();
+      });
+      expect(assignSpy).not.toHaveBeenCalled();
+    });
     it("does not redirect when the authorization attempt cannot be stored", async () => {
       vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce({
         url: "https://github.com/login/oauth/authorize?state=github-test-state",

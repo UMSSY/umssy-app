@@ -10,8 +10,8 @@ import {
 } from "../constants/portfolio-projects.constants";
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
 import { assignWindowLocation } from "../utils/assign-window-location";
-import { prepareGithubAuthorization } from "../utils/github-oauth";
-import { saveGithubOAuthAttempt } from "../utils/github-oauth-storage";
+import { preparePortfolioAuthorization } from "../utils/portfolio-oauth";
+import { savePortfolioOAuthAttempt } from "../utils/portfolio-oauth-storage";
 import type { PortfolioAccountDisconnectResponse } from "../types/portfolio-account-disconnect-response.types";
 import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
 import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
@@ -41,21 +41,14 @@ export function useStartPortfolioOAuth() {
     Error,
     { provider: PortfolioProviderName; state?: string }
   >({
-    mutationFn: async ({ provider, state }) => {
-      if (provider === "github") {
-        const verifier = await prepareGithubAuthorization();
+    mutationFn: async ({ provider }) => {
+        const verifier = await preparePortfolioAuthorization();
         const result = await portfolioAccountsService.getOAuthAuthorizationUrl(provider, undefined, verifier.challenge);
         const oauthState = new URL(result.url).searchParams.get("state");
-        if (!oauthState) throw new Error("No se pudo iniciar la conexión con GitHub.");
-        if (!saveGithubOAuthAttempt(oauthState, verifier.value)) throw new Error("No se pudo iniciar la conexión con GitHub.");
+        if (!oauthState) throw new Error("No se pudo iniciar la conexión.");
+        if (!savePortfolioOAuthAttempt(provider, oauthState, verifier.value)) throw new Error("No se pudo iniciar la conexión.");
         assignWindowLocation(result.url);
         return result;
-      }
-      const result = await portfolioAccountsService.getOAuthAuthorizationUrl(provider, state);
-      if (result?.url) {
-        assignWindowLocation(result.url);
-      }
-      return result;
     },
   });
 }

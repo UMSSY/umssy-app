@@ -5,7 +5,7 @@ function base64url(bytes: Uint8Array): string {
     .replace(/=+$/, '');
 }
 
-export async function prepareGithubAuthorization(): Promise<{
+export async function preparePortfolioAuthorization(): Promise<{
   value: string;
   challenge: string;
 }> {

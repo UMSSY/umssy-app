@@ -3,7 +3,9 @@ import * as storage from '@/shared/services/storage/browser-session-storage';
 import {
   saveGithubOAuthAttempt,
   takeGithubOAuthAttempt,
-} from './github-oauth-storage';
+  savePortfolioOAuthAttempt,
+  takePortfolioOAuthAttempt,
+} from './portfolio-oauth-storage';
 
 describe('GitHub OAuth pending attempt storage', () => {
   beforeEach(() => {
@@ -28,5 +30,18 @@ describe('GitHub OAuth pending attempt storage', () => {
   it('rejects malformed stored attempts', () => {
     storage.writeSessionStorage('umssy.github.oauth', '{');
     expect(takeGithubOAuthAttempt()).toBeNull();
+  });
+
+  it('keeps GitHub and GitLab authorization attempts separate', () => {
+    savePortfolioOAuthAttempt('github', 'github-state', 'github-verifier');
+    savePortfolioOAuthAttempt('gitlab', 'gitlab-state', 'gitlab-verifier');
+    expect(takePortfolioOAuthAttempt('gitlab')).toEqual({
+      state: 'gitlab-state',
+      verifier: 'gitlab-verifier',
+    });
+    expect(takePortfolioOAuthAttempt('github')).toEqual({
+      state: 'github-state',
+      verifier: 'github-verifier',
+    });
   });
 });

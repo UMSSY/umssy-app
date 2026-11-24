@@ -14,7 +14,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => currentSearchParams,
 }));
 
-vi.mock("../utils/github-oauth", () => ({ prepareGithubAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
+vi.mock("../utils/portfolio-oauth", () => ({ preparePortfolioAuthorization: vi.fn().mockResolvedValue({ value: "test-verifier", challenge: "test-challenge" }) }));
 
 vi.mock("../utils/assign-window-location", () => ({
   assignWindowLocation: vi.fn(),
@@ -69,7 +69,7 @@ describe("SocialAccountConnectButtons", () => {
 
   it.each([
     { provider: "github", label: "GitHub", url: "https://github.com/login/oauth/authorize?client_id=github-id&state=github-test-state" },
-    { provider: "gitlab", label: "GitLab", url: "https://gitlab.com/oauth/authorize?client_id=gitlab-id" },
+    { provider: "gitlab", label: "GitLab", url: "https://gitlab.com/oauth/authorize?client_id=gitlab-id&state=gitlab-test-state" },
   ])("requests the $label authorization URL and redirects on the same tab (CA-2)", async ({ provider, label, url }) => {
     const mockAuthUrl: PortfolioOAuthUrlResponse = {
       url,
@@ -84,8 +84,8 @@ describe("SocialAccountConnectButtons", () => {
     await waitFor(() => {
       expect(portfolioAccountsService.getOAuthAuthorizationUrl).toHaveBeenCalledWith(
         provider,
-        provider === "github" ? undefined : provider,
-        ...(provider === "github" ? ["test-challenge"] : []),
+        undefined,
+        "test-challenge",
       );
       expect(assignWindowLocation).toHaveBeenCalledWith(mockAuthUrl.url);
     });
@@ -134,7 +134,7 @@ describe("SocialAccountConnectButtons", () => {
   });
 
   it("handles user cancellation (error=access_denied) with Spanish message without connecting (CA-2, CA-9)", async () => {
-    currentSearchParams = new URLSearchParams("provider=github&error=access_denied");
+    currentSearchParams = new URLSearchParams("github_connection=cancelled");
 
     render(<SocialAccountConnectButtons />);
 
@@ -158,32 +158,10 @@ describe("SocialAccountConnectButtons", () => {
     ).toBeInTheDocument();
   });
 
-  it("handles 409 conflict error when account is already linked to another user", async () => {
-    currentSearchParams = new URLSearchParams("provider=gitlab&code=oauth-conflict-code");
-    const conflictError = {
-      isAxiosError: true,
-      response: {
-        status: 409,
-        data: {
-          statusCode: 409,
-          detail: "Social account is already linked to another user",
-          ok: false,
-        },
-      },
-    };
-    vi.mocked(portfolioAccountsService.completeOAuthCallback).mockRejectedValueOnce(conflictError);
-
+  it("shows a GitLab conflict after the callback", async () => {
+    currentSearchParams = new URLSearchParams("gitlab_connection=conflict");
     render(<SocialAccountConnectButtons />);
-
-    await waitFor(() => {
-      expect(portfolioAccountsService.completeOAuthCallback).toHaveBeenCalledWith("gitlab", {
-        code: "oauth-conflict-code",
-      });
-    });
-
-    expect(
-      await screen.findByText(PORTFOLIO_ACCOUNT_MESSAGES.conflictError),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(PORTFOLIO_ACCOUNT_MESSAGES.conflictError)).toBeInTheDocument();
   });
 
   it("handles generic failure during oauth start", async () => {

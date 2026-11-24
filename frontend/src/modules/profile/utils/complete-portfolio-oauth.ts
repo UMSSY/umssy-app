@@ -4,16 +4,24 @@ import {
   getAccessToken,
 } from '@/shared/services/storage/access-token-storage';
 import { portfolioAccountsService } from '../services/portfolio-accounts.service';
-import { takeGithubOAuthAttempt } from './github-oauth-storage';
+import { takePortfolioOAuthAttempt } from './portfolio-oauth-storage';
+import type { PortfolioProviderName } from '../types/portfolio-provider-name.types';
 
 export async function completeGithubOAuth(
+  params: URLSearchParams,
+): Promise<string> {
+  return completePortfolioOAuth('github', params);
+}
+
+export async function completePortfolioOAuth(
+  provider: PortfolioProviderName,
   params: URLSearchParams,
 ): Promise<string> {
   const code = params.get('code');
   const state = params.get('state');
   const error = params.get('error');
   try {
-    const pending = takeGithubOAuthAttempt();
+    const pending = takePortfolioOAuthAttempt(provider);
     if (
       !state ||
       pending?.state !== state ||
@@ -24,7 +32,7 @@ export async function completeGithubOAuth(
     if (error || !code) return 'error';
     await initializeAccessTokenStorage();
     if (!getAccessToken()) return 'error';
-    await portfolioAccountsService.completeOAuthCallback('github', {
+    await portfolioAccountsService.completeOAuthCallback(provider, {
       code,
       state,
       verifier: pending.verifier,
