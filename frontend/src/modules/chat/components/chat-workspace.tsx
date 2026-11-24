@@ -246,11 +246,7 @@ export function ChatWorkspace({
   const { status: connectionStatus, refreshMessages } = useChatConnection(selectedRequestId ? null : selectedId);
 
   const handleBackToList = () => {
-    if (
-      isCompact &&
-      (selectedConversation?.contextType === "POSTULACION" ||
-        Boolean(document.getElementById("recruiter-contact-button")))
-    ) {
+    if (isCompact && ui?.launcherId) {
       ui?.setIsPanelOpen(false);
       return;
     }

@@ -138,20 +138,12 @@ function ChatRoomContent({
   const conversationName = eventConversation
     ? eventConversation.eventTitle ?? 'Chat del evento'
     : conversation.contact?.fullName ?? '';
-  const contactTriggerDataset =
-    typeof document !== "undefined"
-      ? document.getElementById("recruiter-contact-button")?.dataset
-      : undefined;
   const contactSubtitle = !isEventConversation
     ? (conversation.contact?.academicTitle ??
-      contactTriggerDataset?.candidateHeadline ??
       conversation.contact?.roleName ??
       conversation.contact?.role ??
       null)
     : null;
-  const postulationVacancyTitle =
-    contactTriggerDataset?.vacancyTitle || "la empresa";
-  const postulationDefaultMessage = `Hola, ${conversationName}. Hemos visto tu perfil para la vacante de ${postulationVacancyTitle} y nos gustaría contactar contigo para conocer más sobre tu experiencia. ¿Tendrías disponibilidad para una breve llamada esta semana?`;
   const eventParticipantCount = eventConversation?.participants?.length ?? 0;
   const eventParticipantLabel =
     eventParticipantCount === 1
@@ -180,27 +172,6 @@ function ChatRoomContent({
       setLocalInputText(content);
     }
   };
-  useEffect(() => {
-    if (
-      conversation.contextType === "POSTULACION" &&
-      messages.length === 0 &&
-      !inputText
-    ) {
-      if (ui) {
-        ui.setDraft(conversation.id, postulationDefaultMessage);
-      } else {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLocalInputText(postulationDefaultMessage);
-      }
-    }
-  }, [
-    conversation.contextType,
-    conversation.id,
-    inputText,
-    messages.length,
-    postulationDefaultMessage,
-    ui,
-  ]);
   const isBlockedByMe = Boolean(conversation.isBlockedByMe);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<ScrollAnchor | null>(null);

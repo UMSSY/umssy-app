@@ -23,6 +23,8 @@ import { buildAreaDetail } from "../utils/build-area-detail";
 
 import type { RecruiterCandidatePanelProps } from "../types/recruiter-candidate-panel-props.types";
 
+const CONTACT_BUTTON_ID = "recruiter-contact-button";
+
 export function RecruiterCandidatePanel({
   candidate,
   vacancy,
@@ -89,6 +91,7 @@ export function RecruiterCandidatePanel({
         },
       );
 
+      messagingUi?.setLauncherId(CONTACT_BUTTON_ID);
       messagingUi?.setSelectedId(conversation.id);
       messagingUi?.setIsPanelOpen(true);
     } catch {
@@ -208,10 +211,8 @@ export function RecruiterCandidatePanel({
         </div>
 
         <Button
-          id="recruiter-contact-button"
+          id={CONTACT_BUTTON_ID}
           type="button"
-          data-vacancy-title={vacancy.title}
-          data-candidate-headline={candidateHeadline}
           className="min-h-11 w-full"
           disabled={isStartingChat}
           onClick={() => void openCandidateChat()}

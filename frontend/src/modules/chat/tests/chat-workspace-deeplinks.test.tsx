@@ -1,8 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChatWorkspace } from '../components/chat-workspace';
+import { MessagingUiProvider, useMessagingUi } from '../contexts/messaging-ui-context';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(window.location.search),
@@ -209,5 +211,56 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
 
     expect(screen.getByTestId('message-textarea')).toBeInTheDocument();
     expect(screen.queryByText('Error de conexión')).not.toBeInTheDocument();
+  });
+
+  it('closes the panel on back when another screen opened the chat', () => {
+    mockConversationState.hasSelectedConversation = true;
+    function OpenFromLauncher() {
+      const ui = useMessagingUi();
+      return (
+        <>
+          <Button
+            type="button"
+            onClick={() => {
+              ui?.setLauncherId('contact-button');
+              ui?.setIsPanelOpen(true);
+            }}
+          >
+            Abrir desde otra pantalla
+          </Button>
+          <span data-testid="panel-state">{ui?.isPanelOpen ? 'open' : 'closed'}</span>
+        </>
+      );
+    }
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MessagingUiProvider>
+          <OpenFromLauncher />
+          <ChatWorkspace isCompact />
+        </MessagingUiProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir desde otra pantalla' }));
+    expect(screen.getByTestId('panel-state')).toHaveTextContent('open');
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a la lista de chats' }));
+    expect(screen.getByTestId('panel-state')).toHaveTextContent('closed');
+    expect(mockClearSelectedConversation).not.toHaveBeenCalled();
+  });
+
+  it('goes back to the list when the chat was not opened from another screen', () => {
+    mockConversationState.hasSelectedConversation = true;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MessagingUiProvider>
+          <ChatWorkspace isCompact />
+        </MessagingUiProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a la lista de chats' }));
+    expect(mockClearSelectedConversation).toHaveBeenCalled();
   });
 });

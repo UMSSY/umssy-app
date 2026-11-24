@@ -33,20 +33,23 @@ export function ChatDock() {
   const canChat = roles.some((role) => getRouteRoles("/chat").includes(role));
   const isOpen = Boolean(ui?.isPanelOpen && canChat && pathname !== "/chat");
   const setIsPanelOpen = ui?.setIsPanelOpen;
+  const launcherId = ui?.launcherId ?? null;
+  const setLauncherId = ui?.setLauncherId;
+  const launcherRef = useRef<string | null>(null);
+  useEffect(() => { launcherRef.current = launcherId; }, [launcherId]);
   useEffect(() => { if (pathname === "/chat" || !canChat) setIsPanelOpen?.(false); }, [pathname, canChat, setIsPanelOpen]);
   useEffect(() => {
     if (isOpen) closeRef.current?.focus();
     else if (wasOpen.current) {
-      const target =
-        document.getElementById("recruiter-contact-button") ??
-        document.getElementById(TRIGGER_ID);
-      target?.focus();
+      const launcher = launcherRef.current ? document.getElementById(launcherRef.current) : null;
+      (launcher ?? document.getElementById(TRIGGER_ID))?.focus();
+      setLauncherId?.(null);
     }
     wasOpen.current = isOpen;
-  }, [isOpen]);
+  }, [isOpen, setLauncherId]);
   if (!ui || !canChat || pathname === "/chat") return null;
   return (
-    <div className={cn("fixed inset-0 z-50 h-[100dvh] w-full overflow-hidden bg-surface md:sticky md:inset-auto md:top-app-header md:h-app-sidebar md:w-auto md:self-start md:border-l md:border-sidebar-border md:transition-[width] md:duration-300 md:ease-out", isOpen ? "block md:w-chat-dock" : "hidden md:block md:w-0")}>
+    <div className={cn("fixed inset-0 z-50 h-dvh w-full overflow-hidden bg-surface md:sticky md:inset-auto md:top-app-header md:h-app-sidebar md:w-auto md:self-start md:border-l md:border-sidebar-border md:transition-[width] md:duration-300 md:ease-out", isOpen ? "block md:w-chat-dock" : "hidden md:block md:w-0")}>
       <div className="size-full min-w-0 overflow-hidden" inert={!isOpen} aria-hidden={!isOpen || undefined}>
         <aside id={DOCK_ID} aria-label="Mensajes rápidos" className="flex size-full flex-col border-l-0 border-sidebar-border bg-surface md:h-app-sidebar md:w-chat-dock md:border-l" onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.stopPropagation(); ui.setIsPanelOpen(false); } }}>
           <header className="flex items-center justify-between gap-3 border-b border-border bg-sidebar p-4">

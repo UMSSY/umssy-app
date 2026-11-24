@@ -375,9 +375,8 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
       'Inicio de la conversación',
     );
     expect(screen.getByTestId('date-separator-initial')).toBeInTheDocument();
-    expect(screen.getByTestId('message-textarea')).toHaveValue(
-      'Hola, Maria Fernandez. Hemos visto tu perfil para la vacante de la empresa y nos gustaría contactar contigo para conocer más sobre tu experiencia. ¿Tendrías disponibilidad para una breve llamada esta semana?',
-    );
+    expect(screen.getByTestId('message-textarea')).toHaveValue('');
+    expect(screen.getByTestId('send-button')).toBeDisabled();
     expect(onSendMessage).not.toHaveBeenCalled();
   });
 });
