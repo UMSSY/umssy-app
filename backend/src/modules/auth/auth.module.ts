@@ -9,6 +9,7 @@ import { PasswordHistoryRepository } from './repositories/password-history.repos
 import { PasswordHistoryService } from './services/password-history.service.js';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { RefreshTokenService } from './services/refresh-token.service.js';
+import { AuthSessionCookieService } from './services/auth-session-cookie.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SessionModule } from '../../common/session/session.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
@@ -39,8 +40,16 @@ import { MailModule } from '../mail/mail.module.js';
     PasswordHistoryService,
     RefreshTokenService,
     RefreshTokenRepository,
+    AuthSessionCookieService,
     JwtAuthGuard,
   ],
-  exports: [AuthService, GoogleAuthService, JwtModule, JwtAuthGuard, SessionModule],
+  exports: [
+    AuthService,
+    AuthSessionCookieService,
+    GoogleAuthService,
+    JwtModule,
+    JwtAuthGuard,
+    SessionModule,
+  ],
 })
 export class AuthModule {}
