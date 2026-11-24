@@ -177,7 +177,7 @@ describe("RequestDetailView", () => {
 
     expect(container.firstElementChild).toHaveClass("w-full", "min-w-0");
     expect(container.querySelector("section")).toHaveClass("w-full", "min-w-0", "gap-6");
-    expect(container.querySelector(".grid")?.className).toContain("lg:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]");
+    expect(container.querySelector(".grid")?.className).toContain("xl:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]");
     expect(container.querySelector("table")).toHaveClass("table-fixed");
     expect(screen.getByText("En el documento")).toBeInTheDocument();
   });
