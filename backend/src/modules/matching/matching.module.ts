@@ -32,7 +32,6 @@ import { RequirementsController } from './controllers/requirements.controller.js
 import { JobAlertPreferencesController } from './controllers/job-alert-preferences.controller.js';
 import { JobAlertPreferencesRepository } from './repositories/job-alert-preferences.repository.js';
 import { JobAlertPreferencesService } from './services/job-alert-preferences.service.js';
-import { JobAlertRecipientsService } from './services/job-alert-recipients.service.js';
 import { UsersModule } from '../users/users.module.js';
 
 @Module({
@@ -75,7 +74,6 @@ import { UsersModule } from '../users/users.module.js';
     JobRecommendationsService,
     JobAlertPreferencesRepository,
     JobAlertPreferencesService,
-    JobAlertRecipientsService,
   ],
   exports: [
     JobApplicationsService,
@@ -88,7 +86,6 @@ import { UsersModule } from '../users/users.module.js';
     VacancyRankingService,
     WeightedScoreService,
     JobAlertPreferencesService,
-    JobAlertRecipientsService,
   ],
 })
 export class MatchingModule {}

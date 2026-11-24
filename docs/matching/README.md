@@ -17,6 +17,7 @@ Owner: group 5. The module is shared in two places: the skill detection pipeline
 | List the applicants of a vacancy for its company                                        | `GET /companies/:companyId/job-offers/:jobOfferId/applications` |
 | Detect catalog skills in a work experience description (preview and persisted analysis) | `POST /work-experiences/:id/skills/preview` and `/analysis`     |
 | Detect catalog skills in the requirements text of a vacancy                             | `POST /matching/requirements/terms`                             |
+| Read and save the signed-in user’s vacancy alert preference                              | `GET/PUT /job-offers/alert-preference`                           |
 
 ## Architecture
 
@@ -140,6 +141,28 @@ sequenceDiagram
   end
 ```
 
+### Vacancy alert preferences
+
+The applicant can read and update a preference for **future published vacancy alerts**.
+This module stores and reads the preference; it does **not** dispatch vacancy-publication
+notifications. Integration with the notification producer is a separate responsibility.
+
+- `GET /job-offers/alert-preference` returns the effective preference for the authenticated
+  `estudiante` or `titulado`.
+- `PUT /job-offers/alert-preference` accepts `{ "mode": "ALL" | "MATCHING" | "HIGH_AFFINITY" }`
+  and returns the updated preference. Both endpoints return the normal HTTP success envelope
+  `{ statusCode, ok, detail, data }`.
+- `ALL` means every newly published vacancy. `MATCHING` means affinity strictly greater
+  than 0%, and `HIGH_AFFINITY` means affinity of at least 70%.
+- The response contains `mode` (currently effective), `savedMode` (persisted choice),
+  and `canFilterByProfile` (whether the user has any registered skills).
+- A user without skills can select only `ALL`. Saving another mode without skills
+  returns `422 JOB_ALERT_SKILLS_REQUIRED`; invalid request data returns `400 VALIDATION_ERROR`.
+- If the user previously saved a filtered mode but later has no skills, `savedMode`
+  remains unchanged while the effective `mode` becomes `ALL`. The saved mode applies
+  again once skills are present. With no saved preference, both modes default to `ALL`.
+- The preference is scoped to the authenticated user and is not a recruiter endpoint.
+
 ## Business rules
 
 - **Affinity is only about skills today.** The score is the share of required skills the person has, weighted by category. The categories are `skills` (60), `academicRequirements` (25), `experienceRequirements` (10) and `otherRequirements` (5), but only the skills category is filled, and empty categories are left out of the average. Categories without data are skipped, so they do not lower the score. The weights can be changed with the environment variables `MATCH_SCORE_WEIGHT_SKILLS`, `MATCH_SCORE_WEIGHT_ACADEMIC`, `MATCH_SCORE_WEIGHT_EXPERIENCE` and `MATCH_SCORE_WEIGHT_OTHER` (numbers greater than or equal to 0; an invalid value stops the application at startup).
@@ -166,6 +189,8 @@ sequenceDiagram
 | POST   | `/work-experiences/:id/skills/preview`                      | any signed-in user             | Detects skills in `{ text }` without saving   | 200 `{ experienceId, skills[], processingTimeMs }` | 404 `WORK_EXPERIENCE_NOT_FOUND`                                                                      |
 | POST   | `/work-experiences/:id/skills/analysis`                     | any signed-in user             | Detects and saves the skills of an experience | 200 same body                                      | 404 `WORK_EXPERIENCE_NOT_FOUND`                                                                      |
 | POST   | `/matching/requirements/terms`                              | any signed-in user             | Catalog skills recognized in `{ text }`       | 200 `[{ id, name }]`                               | 400 text too long or missing                                                                         |
+| GET    | `/job-offers/alert-preference`                              | titulado, estudiante           | Read effective/saved alert mode and capability| 200 `{ mode, savedMode, canFilterByProfile }`       | 401, 403                                                                                             |
+| PUT    | `/job-offers/alert-preference`                              | titulado, estudiante           | Save alert mode `{ mode }`                    | 200 `{ mode, savedMode, canFilterByProfile }`       | 400 `VALIDATION_ERROR`, 401, 403, 422 `JOB_ALERT_SKILLS_REQUIRED`                                      |
 
 The match and recommendation items include `jobOfferId`, `title`, `companyName`, `modality`, `score`, `publishedAt` and `expiresAt`; recommendations also include `skills`, `matchedSkills` and `locationUrl`, and the match detail adds `description`, `hasPendingRequirements` and the list of requirements with status `Cumple` or `Pendiente`.
 
@@ -214,3 +239,4 @@ Reads `job_offers`, `job_offer_skills`, `skills`, `user_skills`, `educations` an
 - Skill detection for work experience text and for vacancy requirements, including symbols, accents and case.
 - Publication and expiry dates in the recommended vacancies.
 - Configurable score weights through environment variables.
+- Vacancy alert preference read/save with `ALL`, `MATCHING`, and `HIGH_AFFINITY`, including profile-skill capability and saved/effective modes.

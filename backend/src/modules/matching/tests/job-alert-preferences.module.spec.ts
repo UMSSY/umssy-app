@@ -5,7 +5,6 @@ import { JobAlertPreferencesController } from '../controllers/job-alert-preferen
 import { MatchingModule } from '../matching.module.js';
 import { JobAlertPreferencesRepository } from '../repositories/job-alert-preferences.repository.js';
 import { JobAlertPreferencesService } from '../services/job-alert-preferences.service.js';
-import { JobAlertRecipientsService } from '../services/job-alert-recipients.service.js';
 
 describe('MatchingModule: preferencia de avisos de vacantes', () => {
   let moduleRef: TestingModule;
@@ -23,7 +22,6 @@ describe('MatchingModule: preferencia de avisos de vacantes', () => {
     JobAlertPreferencesController,
     JobAlertPreferencesService,
     JobAlertPreferencesRepository,
-    JobAlertRecipientsService,
   ])('resuelve %o', (provider) => {
     expect(moduleRef.get(provider)).toBeInstanceOf(provider);
   });
