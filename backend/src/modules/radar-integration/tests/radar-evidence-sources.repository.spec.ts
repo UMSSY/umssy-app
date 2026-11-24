@@ -23,6 +23,22 @@ const current = {
 };
 
 describe('RadarEvidenceSourcesRepository', () => {
+  it('returns the latest persisted radar scores for affinity', async () => {
+    const findFirst = vi.fn().mockResolvedValue({ scores: { desarrollo: 6 } });
+    const repository = new RadarEvidenceSourcesRepository({
+      radarScoreSnapshot: { findFirst },
+    } as unknown as PrismaService);
+
+    await expect(repository.findLatestScores('user')).resolves.toEqual({
+      desarrollo: 6,
+    });
+    expect(findFirst).toHaveBeenCalledExactlyOnceWith({
+      where: { userId: 'user' },
+      orderBy: { version: 'desc' },
+      select: { scores: true },
+    });
+  });
+
   it.each([
     'queued',
     'reading',

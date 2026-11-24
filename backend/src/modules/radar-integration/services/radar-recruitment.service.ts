@@ -458,14 +458,6 @@ export class RadarRecruitmentService {
       `application.${decision}`,
       applicationId,
     );
-    await this.applicationActions.notifyStateChanged({
-      recipientId: context.user_id,
-      applicationId,
-      previousStatus: context.status_title as ApplicationStatus,
-      newStatus: target,
-      jobTitle: context.job_title,
-      companyName: context.company_name,
-    });
     return { id: updated[0].id, state: decision };
   }
 }

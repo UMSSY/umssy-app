@@ -1,5 +1,6 @@
 import type { EventItem } from '../types/event-item.types';
 import type { EventDetail } from '../types/event-detail.types';
+import { parseRegistrationSessions } from '@/modules/event-registrations';
 import {
   readRecord,
   readString,
@@ -50,6 +51,10 @@ export function parseEventItem(value: unknown): EventItem {
     registrationCount: readCount(event.registrationCount),
     statusId: readString(event.statusId),
     modalityId: readString(event.modalityId),
+    // Respuestas antiguas sin `sessions` se tratan como taller de una sesión.
+    ...(event.sessions !== undefined && {
+      sessions: parseRegistrationSessions(event.sessions),
+    }),
   };
 }
 export function parseEventDetail(value: unknown): EventDetail {

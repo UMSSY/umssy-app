@@ -2,7 +2,7 @@
 export const mentorRequestStatusLabels: Record<string, string> = {
   PENDING: "Pendiente",
   OFFERED: "Cupo ofrecido",
-  ACTIVE: "Activa",
+  ACTIVE: "Aceptada",
   ENDED: "Finalizada",
   CANCELLED: "Cancelada",
   EXPIRED: "Vencida",

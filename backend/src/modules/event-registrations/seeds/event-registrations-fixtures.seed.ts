@@ -5,6 +5,266 @@ import type { FixtureContext } from '../../../common/database/fixture-context.js
 
 const REGISTRATION_PLANS = [
   {
+    eventKey: 'history-interviews-2026-11-23',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'history-interviews-2026-11-23-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'history-interviews-2026-11-23-token-1',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'history-interviews-2026-11-23-token-2',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'history-interviews-2026-11-23-token-3',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'history-interviews-2026-11-23-token-4',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'history-interviews-2026-11-23-token-5',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'history-interviews-2026-11-23-token-6',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'history-interviews-2026-11-23-token-7',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'history-interviews-2026-11-23-token-8',
+      },
+      {
+        key: 'history-interviews-2026-11-23-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'history-interviews-2026-11-23-token-9',
+      },
+    ],
+  },
+  {
+    eventKey: 'history-git-2026-11-23',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'history-git-2026-11-23-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'history-git-2026-11-23-token-1',
+      },
+      {
+        key: 'history-git-2026-11-23-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'history-git-2026-11-23-token-2',
+      },
+      {
+        key: 'history-git-2026-11-23-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'history-git-2026-11-23-token-3',
+      },
+      {
+        key: 'history-git-2026-11-23-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'history-git-2026-11-23-token-4',
+      },
+      {
+        key: 'history-git-2026-11-23-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'history-git-2026-11-23-token-5',
+      },
+      {
+        key: 'history-git-2026-11-23-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'history-git-2026-11-23-token-6',
+      },
+      {
+        key: 'history-git-2026-11-23-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'history-git-2026-11-23-token-7',
+      },
+      {
+        key: 'history-git-2026-11-23-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'history-git-2026-11-23-token-8',
+      },
+      {
+        key: 'history-git-2026-11-23-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'history-git-2026-11-23-token-9',
+      },
+    ],
+  },
+  {
+    eventKey: 'history-accessibility-2026-11-23',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'history-accessibility-2026-11-23-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'history-accessibility-2026-11-23-token-1',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'history-accessibility-2026-11-23-token-2',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'history-accessibility-2026-11-23-token-3',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'history-accessibility-2026-11-23-token-4',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'history-accessibility-2026-11-23-token-5',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'history-accessibility-2026-11-23-token-6',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'history-accessibility-2026-11-23-token-7',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'history-accessibility-2026-11-23-token-8',
+      },
+      {
+        key: 'history-accessibility-2026-11-23-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'history-accessibility-2026-11-23-token-9',
+      },
+    ],
+  },
+  {
+    eventKey: 'history-visualization-2026-11-23',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'history-visualization-2026-11-23-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'history-visualization-2026-11-23-token-1',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'history-visualization-2026-11-23-token-2',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'history-visualization-2026-11-23-token-3',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'history-visualization-2026-11-23-token-4',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'history-visualization-2026-11-23-token-5',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'history-visualization-2026-11-23-token-6',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'history-visualization-2026-11-23-token-7',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'history-visualization-2026-11-23-token-8',
+      },
+      {
+        key: 'history-visualization-2026-11-23-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'history-visualization-2026-11-23-token-9',
+      },
+    ],
+  },
+  {
+    eventKey: 'history-projects-2026-11-26',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'history-projects-2026-11-26-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'history-projects-2026-11-26-token-1',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'history-projects-2026-11-26-token-2',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'history-projects-2026-11-26-token-3',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'history-projects-2026-11-26-token-4',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'history-projects-2026-11-26-token-5',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'history-projects-2026-11-26-token-6',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'history-projects-2026-11-26-token-7',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'history-projects-2026-11-26-token-8',
+      },
+      {
+        key: 'history-projects-2026-11-26-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'history-projects-2026-11-26-token-9',
+      },
+    ],
+  },
+  {
     eventKey: 'qa-workshop-2026-11-19',
     base: 'anchor',
     startMinute: 0,

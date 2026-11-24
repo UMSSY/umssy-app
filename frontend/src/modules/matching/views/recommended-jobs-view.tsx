@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { JobAlertPreferenceSelector } from "../components/job-alert-preference-selector";
 import { JobFeedFilters } from "../components/job-feed-filters";
 import { JobRecommendationCard } from "../components/job-recommendation-card";
 import { JobsEmptyState } from "../components/jobs-empty-state";
@@ -34,6 +35,8 @@ export function RecommendedJobsView() {
           {JOB_MATCHING_MESSAGES.pageDescription}
         </p>
       </header>
+
+      <JobAlertPreferenceSelector />
 
       {isPending && (
         <div aria-busy="true" className="grid grid-cols-1 gap-4 lg:grid-cols-2">

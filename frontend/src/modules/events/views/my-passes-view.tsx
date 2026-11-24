@@ -21,12 +21,12 @@ import { CancelRegistrationDialog } from "../components/cancel-registration-dial
 import { RegistrationCancelledBanner } from "../components/registration-cancelled-banner";
 import { useMyPassesHistory } from "../hooks/use-my-passes";
 import { getHistoryErrorMessage } from "../utils/get-history-error-message";
-import {
-  getRegistrationEventTimestamp,
-  isConfirmedRegistrationStatus,
-} from "../utils/registration-format";
+import { isConfirmedRegistrationStatus } from "../utils/registration-format";
+import { getScheduleBounds } from "../utils/event-sessions";
 
 import type { MyPassesViewProps } from '../types/my-passes-view-props.types';
+
+const sectionTabClassName = "h-11 flex-none rounded-full border border-border-strong bg-transparent px-4 py-0 text-xs font-semibold text-foreground shadow-none hover:bg-muted data-active:border-transparent data-active:bg-primary data-active:text-primary-foreground data-active:hover:bg-brand-hover dark:data-active:bg-primary dark:data-active:text-primary-foreground";
 
 export function MyPassesView({
   onOpenWorkshopChat,
@@ -47,14 +47,15 @@ export function MyPassesView({
   const historyUnavailable = activeTab === "history" && !isOnline;
   const [now, setNow] = useState(Date.now);
   const currentRegistrations = registrations.filter((registration) => {
-    const closesAt = getRegistrationEventTimestamp(registration.date, registration.endTime);
+    // Un taller multisesión sigue vigente hasta el fin de su última sesión.
+    const closesAt = getScheduleBounds(registration).endsAt;
     return !Number.isFinite(closesAt) || now < closesAt;
   });
   const cancelTarget = cancelTargetId
     ? currentRegistrations.find((item) => item.id === cancelTargetId) ?? null
     : null;
   const cancelTargetStart = cancelTarget
-    ? getRegistrationEventTimestamp(cancelTarget.date, cancelTarget.startTime)
+    ? getScheduleBounds(cancelTarget).startsAt
     : Number.NaN;
   const canCancelTarget = Boolean(
     cancelTarget &&
@@ -65,7 +66,7 @@ export function MyPassesView({
 
   useEffect(() => {
     const deadlines = registrations
-      .map((registration) => getRegistrationEventTimestamp(registration.date, registration.endTime))
+      .map((registration) => getScheduleBounds(registration).endsAt)
       .filter((closesAt) => Number.isFinite(closesAt) && closesAt > now);
     if (canCancelTarget && Number.isFinite(cancelTargetStart) && cancelTargetStart > now) {
       deadlines.push(cancelTargetStart);
@@ -123,9 +124,9 @@ export function MyPassesView({
       ) : null}
       {cancelError ? <RequestFeedback message={cancelError} isError /> : null}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList aria-label="Secciones de mis inscripciones">
-          <TabsTrigger value="current">Vigentes</TabsTrigger>
-          <TabsTrigger value="history">Historial</TabsTrigger>
+        <TabsList aria-label="Secciones de mis inscripciones" className="h-auto flex-wrap justify-start gap-2 rounded-none bg-transparent p-0">
+          <TabsTrigger value="current" className={sectionTabClassName}>Vigentes</TabsTrigger>
+          <TabsTrigger value="history" className={sectionTabClassName}>Historial</TabsTrigger>
         </TabsList>
         <TabsContent value="current" className="pt-6">
       {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} onRetry={retry} /> : null}
@@ -155,6 +156,7 @@ export function MyPassesView({
                     endTime={item.endTime}
                     status={item.status}
                     location={item.location}
+                    sessions={item.sessions}
                     registrationId={item.id}
                     onOpenChat={onOpenWorkshopChat}
                     chatDisabledReason={offlineReason}
