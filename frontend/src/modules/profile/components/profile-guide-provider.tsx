@@ -482,7 +482,7 @@ function ProfileGuideSessionProvider({
                   className={cn(
                     'grid gap-6 p-5 sm:p-7',
                     side === 'left'
-                      ? 'lg:grid-cols-[15rem_minmax(0,1fr)]'
+                      ? 'xl:grid-cols-[15rem_minmax(0,1fr)]'
                       : 'lg:grid-cols-[minmax(0,1fr)_15rem]',
                   )}
                 >
