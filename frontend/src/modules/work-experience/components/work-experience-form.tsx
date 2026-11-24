@@ -244,7 +244,8 @@ export function WorkExperienceForm({
         <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-5">
           <Button
             type="button"
-            variant="outline"
+            variant="cancel"
+            size="lg"
             className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
             disabled={isPending}
             onClick={onCancel}
