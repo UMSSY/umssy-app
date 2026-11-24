@@ -154,19 +154,16 @@ export class GoogleAuthService {
       throw new InvalidCredentialsException('Firma de credencial de Google inválida');
     }
 
-    // Verify Issuer
     const validIssuers = ['https://accounts.google.com', 'accounts.google.com'];
     if (!validIssuers.includes(payload.iss)) {
       throw new InvalidCredentialsException(`Emisor de token de Google inválido: ${payload.iss}`);
     }
 
-    // Verify Expiration
     const nowInSeconds = Math.floor(Date.now() / 1000);
     if (typeof payload.exp !== 'number' || payload.exp <= nowInSeconds) {
       throw new InvalidCredentialsException('La credencial de Google ha expirado');
     }
 
-    // Verify Audience (mandatory: GOOGLE_CLIENT_ID must be configured and match payload.aud)
     const expectedAudience = process.env.GOOGLE_CLIENT_ID?.trim();
     if (!expectedAudience) {
       throw new InvalidCredentialsException(
@@ -177,7 +174,6 @@ export class GoogleAuthService {
       throw new InvalidCredentialsException('La credencial no corresponde a esta aplicación');
     }
 
-    // Verify Email and Verification status
     const isEmailVerified = payload.email_verified === true || payload.email_verified === 'true';
     if (!payload.email || !isEmailVerified) {
       throw new InvalidCredentialsException('El correo electrónico de Google no está verificado');

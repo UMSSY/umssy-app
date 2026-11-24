@@ -187,7 +187,6 @@ export class AuthService {
     user: AuthenticatedUser,
     verifiedGoogle: { email: string; sub: string; picture?: string },
   ): Promise<{ ok: boolean; detail: string }> {
-    // 1. Comprueba que la identidad Google corresponda al usuario autenticado
     if (
       user.email.trim().toLowerCase() !==
       verifiedGoogle.email.trim().toLowerCase()
@@ -195,7 +194,6 @@ export class AuthService {
       throw new GoogleEmailMismatchException();
     }
 
-    // 2. Verifica que la cuenta UMSSY exista en la base de datos
     const dbUser = await this.authRepository.findUserByEmailWithRoles(user.email);
     if (!dbUser) {
       throw new InvalidCredentialsException(
@@ -203,14 +201,12 @@ export class AuthService {
       );
     }
 
-    // 3. Comprueba que esté activa y habilitada
     if (dbUser.isActive === false) {
       throw new InvalidCredentialsException(
         'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
       );
     }
 
-    // 4. Comprueba que tenga un rol permitido: estudiante, titulado o mentor
     const assignedRoles = new Set(dbUser.roles.map(({ role }) => role.name));
     const hasAllowedRole = GOOGLE_ALLOWED_ROLES.some((r) => assignedRoles.has(r));
     if (!hasAllowedRole) {
@@ -219,7 +215,6 @@ export class AuthService {
       );
     }
 
-    // 5. Verifica que la identidad Google no esté vinculada a otro usuario
     const existingLink = await this.authRepository.findGoogleSocialAccountBySub(
       verifiedGoogle.sub,
     );
@@ -229,7 +224,6 @@ export class AuthService {
       );
     }
 
-    // 6. Si todas las validaciones pasaron, persistir la vinculación de forma atómica
     await this.authRepository.linkGoogleAccount(
       dbUser.id,
       verifiedGoogle.sub,
