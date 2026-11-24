@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   NativeSelect,
@@ -25,42 +24,58 @@ import type { RadarAreaScore } from '../types/radar-area-score.types';
 import { projectRadarScore } from '../utils/project-radar-score';
 import type { SkillItem } from '@/modules/skills/types/skill-item.types';
 import type { Epic2Skill } from '../types/epic2-skill.types';
-import { RADAR_SKILLS_CATALOG } from '../constants/radar-skills-catalog.constants';
-
-const areaBySkillName = new Map(
-  RADAR_SKILLS_CATALOG.map(({ name, areaId }) => [name.toLowerCase(), areaId]),
-);
+import type { Projection } from '../types/projection.types';
 
 export function SkillSimulationDialog({
   areas,
   initialArea,
   catalog = [],
   approved = [],
+  evidence = [],
+  onProjectionChange,
+  availability,
   onClose,
 }: {
   areas: RadarAreaScore[];
   initialArea: AreaId;
   catalog?: readonly SkillItem[];
   approved?: readonly Pick<Epic2Skill, 'id' | 'name'>[];
+  evidence?: readonly Epic2Skill[];
+  onProjectionChange?: (value: Projection) => void;
+  availability?: ReactNode;
   onClose: () => void;
 }) {
-  const [areaId, setAreaId] = useState(initialArea);
-  const [skillId, setSkillId] = useState<string | null>(null);
-  const area = areas.find((item) => item.id === areaId)!;
-  const [projection, setProjection] = useState(area.score);
-  const [draft, setDraft] = useState<string | null>(null);
-  const result = projectRadarScore(areas, areaId, projection);
-  const verifiedNames = new Set(approved.map(({ name }) => name.toLowerCase()));
-  const verifiedIds = new Set(approved.map(({ id }) => id));
-  const skills = catalog
-    .filter(
-      ({ id, name }) =>
-        !verifiedIds.has(id) && !verifiedNames.has(name.toLowerCase()),
-    )
-    .map((skill) => ({
-      ...skill,
-      areaId: areaBySkillName.get(skill.name.toLowerCase()),
-    }));
+  const [skillId, setSkillId] = useState('');
+  const verified = [
+    ...approved,
+    ...evidence.filter(({ verificationStatus }) => verificationStatus === 'approved'),
+  ];
+  const verifiedIds = new Set(verified.map(({ id }) => id));
+  const verifiedNames = new Set(verified.map(({ name }) => name.trim().toLowerCase()));
+  const skills = [...new Map(catalog.map((skill) => [skill.id, skill])).values()]
+    .filter(({ id, name, areaId, radarPoints }) =>
+      radarPoints !== undefined &&
+      areas.some((area) => area.id === areaId) &&
+      !verifiedIds.has(id) && !verifiedNames.has(name.trim().toLowerCase()),
+    );
+  const skill = skills.find(({ id }) => id === skillId);
+  const area = areas.find(({ id }) => id === (skill?.areaId ?? initialArea))!;
+  const highRelevance = evidence.some((item) =>
+    item.id === skill?.id && item.areaId === area.id &&
+    item.isHighRelevance && item.evidenceRefs.length > 0 &&
+    item.verificationStatus === 'pending',
+  );
+  const points = highRelevance
+    ? skill?.radarHighRelevancePoints ?? skill?.radarPoints
+    : skill?.radarPoints;
+  const result = projectRadarScore(areas, area.id, area.score + (points ?? 0));
+  const hasSkill = Boolean(skill);
+
+  useEffect(() => {
+    onProjectionChange?.(hasSkill ? { areaId: area.id, score: result.score } : null);
+    return () => onProjectionChange?.(null);
+  }, [area.id, hasSkill, onProjectionChange, result.score]);
+
   const decimal = (value: number) =>
     value.toLocaleString('es-BO', { maximumFractionDigits: 2 });
 
@@ -78,7 +93,7 @@ export function SkillSimulationDialog({
             <span className="mb-1 w-fit rounded-[2px] bg-[#ffedb8] px-2 py-1 text-[9px] leading-[14px] font-bold tracking-widest text-[#6c5624]">
               SIMULADA
             </span>
-            <DialogTitle className="[font-family:Georgia,serif] text-[27px] leading-8 font-semibold text-accent">
+            <DialogTitle className="text-[27px] leading-8 font-semibold text-accent" style={{ fontFamily: 'Georgia, serif' }}>
               Proyecta una habilidad
             </DialogTitle>
             <DialogDescription className="text-xs leading-5 text-text-secondary">
@@ -93,6 +108,7 @@ export function SkillSimulationDialog({
             </DialogClose>
           </DialogHeader>
           <div className="space-y-[18px] px-4 py-5 sm:px-7">
+            {availability}
             <div className="space-y-2">
               <Label
                 htmlFor="simulation-area"
@@ -104,26 +120,12 @@ export function SkillSimulationDialog({
                 className="w-full [&_select]:h-[46px] [&_select]:rounded-sm [&_select]:text-[13px]"
                 id="simulation-area"
                 aria-label="Competencia"
-                value={skillId ?? areaId}
-                onChange={(event) => {
-                  const skill = skills.find(
-                    ({ id }) => id === event.target.value,
-                  );
-                  const next = areas.find(
-                    (item) => item.id === (skill?.areaId ?? event.target.value),
-                  );
-                  if (!next) return;
-                  setAreaId(next.id);
-                  setSkillId(skill?.id ?? null);
-                  setProjection(next.score);
-                  setDraft(null);
-                }}
+                value={skill?.id ?? ''}
+                onChange={(event) => setSkillId(event.target.value)}
               >
+                <NativeSelectOption value="">Selecciona una habilidad</NativeSelectOption>
                 {areas.map((item) => (
                   <NativeSelectOptGroup key={item.id} label={item.name}>
-                    <NativeSelectOption value={item.id}>
-                      {item.name}
-                    </NativeSelectOption>
                     {skills
                       .filter((skill) => skill.areaId === item.id)
                       .map((skill) => (
@@ -135,8 +137,7 @@ export function SkillSimulationDialog({
                 ))}
               </NativeSelect>
               <p className="text-[11px] leading-4 text-text-secondary">
-                Selecciona un área o una habilidad del catálogo que aún no esté
-                verificada.
+                Selecciona una habilidad del catálogo pendiente de verificar.
               </p>
             </div>
             <section className="space-y-2 border border-border bg-surface-soft p-3 sm:p-5">
@@ -150,7 +151,7 @@ export function SkillSimulationDialog({
                   </h3>
                 </div>
                 <span className="rounded-[2px] bg-interaction px-2 py-1.5 text-[10px] font-semibold text-accent">
-                  Incremento: +{decimal(result.score - area.score)} pts
+                  Rúbrica: +{decimal(points ?? 0)} pts
                 </span>
               </div>
               <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 pt-2 sm:gap-5">
@@ -177,35 +178,23 @@ export function SkillSimulationDialog({
                     Proyección simulada
                   </Label>
                   <div className="mt-1 flex items-baseline gap-1 text-accent">
-                    <Input
-                      unstyled
+                    <output
                       id="simulation-score"
                       aria-label="Puntaje proyectado"
-                      type="number"
-                      min={area.score}
-                      max={10}
-                      step="0.1"
-                      value={draft ?? result.score}
-                      onChange={(event) => {
-                        setDraft(event.target.value);
-                        if (Number.isFinite(event.target.valueAsNumber))
-                          setProjection(event.target.valueAsNumber);
-                      }}
-                      onBlur={() => {
-                        setProjection(result.score);
-                        setDraft(null);
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') event.currentTarget.blur();
-                      }}
-                      className="w-full max-w-20 min-w-0 rounded-sm text-[26px] leading-8 font-semibold tabular-nums hover:bg-interaction focus-visible:outline-2 focus-visible:outline-accent"
-                    />
+                      className="text-[26px] leading-8 font-semibold tabular-nums"
+                    >
+                      {decimal(result.score)}
+                    </output>
                     <span className="shrink-0 text-xs">/ 10</span>
                   </div>
                 </div>
               </div>
               <div
                 aria-label="Comparación de puntajes"
+                role="meter"
+                aria-valuemin={0}
+                aria-valuemax={10}
+                aria-valuenow={result.score}
                 className="relative isolate flex h-5 items-center"
               >
                 <div className="absolute inset-x-0 h-2 rounded-[2px] bg-border" />
@@ -217,25 +206,6 @@ export function SkillSimulationDialog({
                   className="absolute left-0 h-2 rounded-l-[2px] bg-[#7793a6]"
                   style={{ width: `${area.score * 10}%` }}
                 />
-                <Input
-                  unstyled
-                  aria-label="Ajustar proyección"
-                  type="range"
-                  min={area.score}
-                  max={10}
-                  step="0.1"
-                  value={result.score}
-                  disabled={area.score === 10}
-                  onChange={(event) => {
-                    setDraft(null);
-                    setProjection(event.target.valueAsNumber);
-                  }}
-                  style={{
-                    marginLeft: `${area.score * 10}%`,
-                    width: `${100 - area.score * 10}%`,
-                  }}
-                  className="relative h-5 cursor-pointer appearance-none bg-transparent focus-visible:outline-2 focus-visible:outline-accent disabled:hidden [&::-moz-range-thumb]:size-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent [&::-webkit-slider-thumb]:size-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent"
-                />
               </div>
               <div
                 aria-live="polite"
@@ -246,7 +216,9 @@ export function SkillSimulationDialog({
                   <strong className="text-ink">
                     +{decimal(result.score - area.score)} pts
                   </strong>
-                  .
+                  .{points !== undefined && area.score + points > 10 && (
+                    <> Se aplica el límite de 10 puntos por eje.</>
+                  )}
                 </p>
                 <p>
                   Promedio global proyectado:{' '}

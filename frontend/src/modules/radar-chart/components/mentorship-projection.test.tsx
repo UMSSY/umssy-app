@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MentorshipProjection } from './mentorship-projection';
+import { MentorshipAvailability } from './mentorship-projection';
 import type { RadarAreaScore } from '../types/radar-area-score.types';
 
 const query = vi.hoisted(() => ({
@@ -11,7 +11,7 @@ const query = vi.hoisted(() => ({
   refetch: vi.fn(),
 }));
 const directory = vi.hoisted(() => vi.fn());
-vi.mock('@/modules/mentorship/hooks/use-mentor-directory', () => ({
+vi.mock('@/modules/mentorship', () => ({
   useMentorDirectory: (params: unknown) => {
     directory(params);
     return query;
@@ -33,52 +33,30 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe('proyección automática desde el radar', () => {
-  it('consulta la especialidad disponible y proyecta un solo punto sin controles ni mutaciones', () => {
+  it('consulta la especialidad disponible y muestra el total sin modificar los puntajes', () => {
     const original = structuredClone(areas);
-    render(<MentorshipProjection area={areas[0]} areas={areas} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
+    render(<MentorshipAvailability area={areas[0]} />);
     expect(directory).toHaveBeenCalledWith(
       expect.objectContaining({ area: 'Desarrollo', available: true }),
     );
-    expect(
-      screen.getByLabelText('Resumen de proyecci\u00f3n').textContent,
-    ).toContain('4 → 5 / 10');
-    expect(
-      screen.getByText(/Promedio global proyectado/).textContent,
-    ).toContain('5,17 / 10');
-    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+    expect(screen.getByText(/2 mentores disponibles/)).toBeInTheDocument();
     expect(areas).toEqual(original);
   });
-  it('conserva el puntaje cuando no existen mentores', () => {
+  it('muestra el directorio vacio', () => {
     query.data.totalItems = 0;
-    render(<MentorshipProjection area={areas[0]} areas={areas} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
+    render(<MentorshipAvailability area={areas[0]} />);
     expect(screen.getByText(/No hay mentores disponibles/)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText('Resumen de proyecci\u00f3n').textContent,
-    ).toContain('4 → 4 / 10');
-  });
-  it.each([0, 9.7, 10])('respeta la escala desde %s puntos', (score) => {
-    const area = { ...areas[0], score };
-    render(
-      <MentorshipProjection area={area} areas={[area, ...areas.slice(1)]} />,
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
-    expect(
-      screen.getByRole('meter', { name: 'Puntaje proyectado' }),
-    ).toHaveAttribute('aria-valuenow', String(Math.min(10, score + 1)));
   });
   it('no presenta una proyección mientras carga y distingue errores de un directorio vacío', () => {
     query.isPending = true;
-    const view = render(<MentorshipProjection area={areas[0]} areas={areas} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
+    const view = render(<MentorshipAvailability area={areas[0]} />);
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(
       screen.queryByLabelText('Resumen de proyecci\u00f3n'),
     ).not.toBeInTheDocument();
     query.isPending = false;
     query.isError = true;
-    view.rerender(<MentorshipProjection area={areas[0]} areas={areas} />);
+    view.rerender(<MentorshipAvailability area={areas[0]} />);
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(
       screen.queryByText(/No hay mentores disponibles/),
@@ -89,40 +67,12 @@ describe('proyección automática desde el radar', () => {
     expect(query.refetch).toHaveBeenCalledOnce();
   });
   it('usa la respuesta del área nueva al cambiar de selección', () => {
-    const view = render(<MentorshipProjection area={areas[0]} areas={areas} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
+    const view = render(<MentorshipAvailability area={areas[0]} />);
     query.data = { totalItems: 0 };
-    view.rerender(<MentorshipProjection area={areas[3]} areas={areas} />);
+    view.rerender(<MentorshipAvailability area={areas[3]} />);
     expect(directory).toHaveBeenLastCalledWith(
       expect.objectContaining({ area: 'QA' }),
     );
-    expect(
-      screen.getByLabelText('Resumen de proyecci\u00f3n').textContent,
-    ).toContain('6 → 6 / 10');
+    expect(screen.getByText(/No hay mentores disponibles/)).toBeInTheDocument();
   });
-});
-
-it('consulta solo al abrir y elimina la capa al cerrar la simulacion', () => {
-  const onProjectionChange = vi.fn();
-  render(
-    <MentorshipProjection
-      area={areas[0]}
-      areas={areas}
-      onProjectionChange={onProjectionChange}
-    />,
-  );
-  expect(directory).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
-  expect(onProjectionChange).toHaveBeenLastCalledWith({
-    areaId: 'desarrollo',
-    score: 5,
-  });
-  const meter = screen.getByRole('meter');
-  expect(meter.firstElementChild).toHaveStyle({ width: '50%' });
-  expect(meter.lastElementChild).toHaveStyle({ width: '40%' });
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Cerrar simulaci\u00f3n' }),
-  );
-  expect(onProjectionChange).toHaveBeenLastCalledWith(null);
-  expect(screen.queryByRole('meter')).not.toBeInTheDocument();
 });

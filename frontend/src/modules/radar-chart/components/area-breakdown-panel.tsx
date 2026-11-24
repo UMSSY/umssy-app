@@ -41,25 +41,35 @@ export function AreaBreakdownPanel({
           Desglose por área
         </h2>
         <ul className="mt-2 space-y-1">
-          {areas.map((area) => (
-            <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
-              <Button
-                type="button"
-                variant="ghost"
-                aria-label={`Seleccionar ${area.name}`}
-                aria-pressed={selectedArea === area.id}
-                className="h-auto min-h-9 w-full justify-between gap-2 px-2 py-1 text-sm"
-                onClick={() => onAreaClick?.(area.id)}
-              >
-                <span className="min-w-0 text-left whitespace-normal">
-                  {area.name}
-                </span>
-                <span className="shrink-0 tabular-nums">
-                  {formatDecimal(area.score, 1)} / 10
-                </span>
-              </Button>
-            </li>
-          ))}
+          {areas.map((area) => {
+            const level = getAreaLevel(area.score);
+            return (
+              <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  aria-label={`Seleccionar ${area.name}`}
+                  aria-pressed={selectedArea === area.id}
+                  className="h-auto min-h-12 w-full justify-between gap-2 px-2 py-1 text-sm"
+                  onClick={() => onAreaClick?.(area.id)}
+                >
+                  <span className="min-w-0 text-left whitespace-normal">
+                    {area.name}
+                  </span>
+                  <AreaLevelBadge level={level} />
+                  <span className="shrink-0 tabular-nums">
+                    {formatDecimal(area.score, 1)} / 10
+                  </span>
+                </Button>
+                <div className="mx-2 mb-2 h-1.5 rounded-full bg-border" aria-hidden="true">
+                  <div
+                    className={cn('h-full rounded-full', BAR_CLASS[level])}
+                    style={{ width: toPercent(area.score) }}
+                  />
+                </div>
+              </li>
+            );
+          })}
         </ul>
         <p className="mt-2 flex justify-between gap-2 border-t border-border pt-2 text-xs text-text-secondary">
           <span>Media global</span>
@@ -81,16 +91,16 @@ export function AreaBreakdownPanel({
 
           return (
             <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
-              <Button type="button" variant="ghost" onClick={() => onAreaClick?.(area.id)} aria-pressed={selectedArea === area.id} aria-label={`Seleccionar ${area.name}`} className={cn("flex h-10 w-full items-center gap-2 rounded-none px-2 text-left focus-visible:outline-2 focus-visible:outline-accent", selectedArea === area.id && "bg-interaction text-accent")}>
+              <Button type="button" variant="ghost" onClick={() => onAreaClick?.(area.id)} aria-pressed={selectedArea === area.id} aria-label={`Seleccionar ${area.name}`} className={cn("flex min-h-12 w-full items-center gap-2 rounded-none px-2 text-left focus-visible:outline-2 focus-visible:outline-accent", selectedArea === area.id && "bg-interaction text-accent")}>
                 <span className="min-w-0 flex-1 truncate text-xs text-ink-soft">
                   {area.name}
                 </span>
-                <span className="sr-only"><AreaLevelBadge level={level} /></span>
+                <AreaLevelBadge level={level} />
                 <span className="w-8 text-right text-xs font-semibold text-ink tabular-nums">
                   {formatDecimal(area.score, 1)}
                 </span>
               </Button>
-              <div className="sr-only" aria-hidden="true">
+              <div className="mx-2 mb-2 h-1.5 rounded-full bg-border" aria-hidden="true">
                 <div
                   className={cn('h-full rounded-full', BAR_CLASS[level])}
                   style={{ width: toPercent(area.score) }}

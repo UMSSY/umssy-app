@@ -1,12 +1,13 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { MentorshipProjection } from '../components/mentorship-projection';
+import { MentorshipAvailability } from '../components/mentorship-projection';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
+import { profileSkillsRadarService } from '@/modules/profile';
 import { skillsService } from '@/modules/skills/services/skills.service';
 import { RadarAreaActions } from '../components/radar-area-actions';
 import { SkillSimulationDialog } from '../components/skill-simulation-dialog';
@@ -68,7 +69,17 @@ export function RadarProfileView() {
     enabled: simulationArea !== null,
     staleTime: 5 * 60 * 1000,
   });
-  const [isSimulationOpen, setIsSimulationOpen] = useState(false);
+  const [showMentorship, setShowMentorship] = useState(false);
+  const simulationEvidence = useQuery({
+    queryKey: ['radar-simulation-evidence', data?.userId],
+    queryFn: profileSkillsRadarService.getSkills,
+    enabled: simulationArea !== null && !snapshotId,
+  });
+  const closeSimulation = () => {
+    setProjection(null);
+    setSimulationArea(null);
+    setShowMentorship(false);
+  };
   const [isEvidenceVisible, setIsEvidenceVisible] = useState(false);
   const [comparisonPreference, setComparisonPreference] = useState<{
     key: string;
@@ -83,7 +94,7 @@ export function RadarProfileView() {
   const selectedPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!selectedArea || isEvidenceVisible || isSimulationOpen || simulationArea) return;
+    if (!selectedArea || isEvidenceVisible || simulationArea) return;
     const dismissOutside = (event: PointerEvent) => {
       if (
         event.target instanceof Node &&
@@ -101,7 +112,7 @@ export function RadarProfileView() {
       document.removeEventListener('pointerdown', dismissOutside);
       document.removeEventListener('keydown', dismissWithEscape);
     };
-  }, [selectedArea, isEvidenceVisible, isSimulationOpen, simulationArea]);
+  }, [selectedArea, isEvidenceVisible, simulationArea]);
 
   const handleSelectArea = (id: AreaId) => {
     setSelectedArea(id);
@@ -296,7 +307,7 @@ export function RadarProfileView() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.06fr)_minmax(300px,1fr)]">
             <AffinityRadarChart
               projectedScores={
-                projection && projection.areaId === selectedArea
+                simulationArea && projection
                   ? { [projection.areaId]: projection.score }
                   : undefined
               }
@@ -327,14 +338,14 @@ export function RadarProfileView() {
                   className="space-y-3"
                 >
                   <RadarAreaActions area={selected} onSimulate={() => setSimulationArea(selected.id)} />
-                  {selectedArea && <MentorshipProjection
-                    key={selected.id}
-                    triggerLabel="Proyección con mentoría"
-                    area={selected}
-                    areas={areas}
-                    onProjectionChange={setProjection}
-                    onOpenChange={setIsSimulationOpen}
-                  />}
+                  {selectedArea && (
+                    <Button className="w-full" onClick={() => {
+                      setShowMentorship(true);
+                      setSimulationArea(selected.id);
+                    }}>
+                      Proyección con mentoría
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full"
@@ -430,7 +441,10 @@ export function RadarProfileView() {
               initialArea={simulationArea}
               catalog={simulationCatalog.data}
               approved={data.approved}
-              onClose={() => setSimulationArea(null)}
+              evidence={simulationEvidence.data?.userId === data.userId ? simulationEvidence.data.skills : undefined}
+              onProjectionChange={setProjection}
+              availability={showMentorship && selected ? <MentorshipAvailability area={selected} /> : null}
+              onClose={closeSimulation}
             />
           )}
           <p className="text-xs text-text-secondary">

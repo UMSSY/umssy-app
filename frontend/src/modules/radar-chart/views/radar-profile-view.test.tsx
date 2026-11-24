@@ -17,6 +17,7 @@ import { stubMatchMedia } from '@/shared/testing/stub-match-media';
 import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import { useLiveRadar } from '../hooks/use-live-radar';
 import { RADAR_AXIS_NAMES } from '../constants/radar-axis-names.constants';
+import { profileSkillsRadarService } from '@/modules/profile';
 import { RadarProfileView } from './radar-profile-view';
 
 function renderWithQuery(ui: ReactElement) {
@@ -48,6 +49,11 @@ vi.mock('@/modules/mentorship/services/mentor-directory.service', () => ({
     effectiveSort: 'default',
   }),
 }));
+vi.mock('@/modules/skills/services/skills.service', () => ({
+  skillsService: { getCatalog: vi.fn().mockResolvedValue([
+    { id: 'jest', name: 'Jest', areaId: 'qa', radarPoints: 1, radarHighRelevancePoints: 1.5 },
+  ]) },
+}));
 vi.mock('../hooks/use-live-radar', () => ({ useLiveRadar: vi.fn() }));
 vi.mock('recharts', async (importOriginal) => {
   const originalModule = await importOriginal<typeof import('recharts')>();
@@ -69,6 +75,8 @@ const source = {
   dictionaryVersion: '1',
   skills: [],
 };
+
+vi.spyOn(profileSkillsRadarService, 'getSkills').mockResolvedValue(source);
 
 const mockHook = vi.mocked(useLiveRadar);
 function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
@@ -242,7 +250,7 @@ describe('Radar personal integrado con Épica 2', () => {
     expect(screen.getByRole("region", { name: "Competencia seleccionada" })).toHaveTextContent(axis.name);
     fireEvent.click(screen.getByRole("button", { name: "Simular una habilidad" }));
     expect(screen.getByRole("dialog", { name: "Proyecta una habilidad" })).toBeInTheDocument();
-    expect(screen.getByRole("spinbutton")).toHaveValue(0);
+    expect(screen.getByLabelText("Puntaje proyectado")).toHaveTextContent("0");
   });
 
   it('muestra seis ejes en cero sin inventar datos ni mezclar perfiles', () => {
@@ -273,10 +281,10 @@ describe('Radar personal integrado con Épica 2', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Proyección con mentoría' }));
     expect(
       screen.getByRole('heading', {
-        name: 'Proyecci\u00f3n con mentor\u00eda',
+        name: 'Disponibilidad de mentor\u00eda',
       }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Puntaje proyectado")).toHaveTextContent("0");
   });
 
   it('muestra el desglose al inicio y lo restaura al pulsar fuera del panel', () => {
@@ -327,14 +335,18 @@ describe('Radar personal integrado con Épica 2', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
     fireEvent.click(screen.getByRole('button', { name: 'Proyección con mentoría' }));
     const dialog = await screen.findByRole('dialog', {
-      name: 'Simular habilidad: QA',
+      name: 'Proyecta una habilidad',
     });
+    await screen.findByRole('option', { name: 'Jest' });
+    fireEvent.change(within(dialog).getByRole('combobox'), { target: { value: 'jest' } });
+    await waitFor(() => expect(screen.getByText(/l\u00ednea verde discontinua/)).toBeInTheDocument());
     fireEvent.pointerDown(dialog);
     expect(dialog).toBeInTheDocument();
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
     await waitFor(() =>
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
     );
+    expect(screen.queryByText(/l\u00ednea verde discontinua/)).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Seleccionar QA' }),
     ).toHaveAttribute('aria-pressed', 'true');
