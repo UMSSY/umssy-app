@@ -1,7 +1,11 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { JobRecommendationCard } from "./job-recommendation-card";
 import type { RecommendedJob } from "../types/recommended-job.types";
+
+vi.mock("../hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
 
 const job: RecommendedJob = {
   jobOfferId: "123",

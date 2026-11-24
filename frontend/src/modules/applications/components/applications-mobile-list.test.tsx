@@ -6,7 +6,7 @@ import { ApplicationsMobileList } from "./applications-mobile-list";
 afterEach(cleanup);
 
 describe("ApplicationsMobileList", () => {
-  it("shows the vacancy, the company, the affinity and the status of every application", () => {
+  it("shows the vacancy, company and affinity without displaying application status", () => {
     render(
       <ApplicationsMobileList
         applications={[buildApplication()]}
@@ -20,7 +20,7 @@ describe("ApplicationsMobileList", () => {
     expect(screen.getByText("Desarrollador Backend Python / FastAPI")).toBeInTheDocument();
     expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
     expect(screen.getByText("Afinidad: 92%")).toBeInTheDocument();
-    expect(screen.getByText("En revisión")).toBeInTheDocument();
+    expect(screen.queryByText("En revisión")).not.toBeInTheDocument();
   });
 
   it("lets the person withdraw an application that is still open", () => {
@@ -72,7 +72,7 @@ describe("ApplicationsMobileList", () => {
     expect(onContact).toHaveBeenCalledWith(application);
   });
 
-  it("disables the withdraw button of an application that already has a decision", () => {
+  it("allows withdrawing an application regardless of previous decision", () => {
     render(
       <ApplicationsMobileList
         applications={[buildApplication({ status: "No seleccionado" })]}
@@ -83,7 +83,7 @@ describe("ApplicationsMobileList", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Retirar" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Retirar" })).toBeEnabled();
     expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
   });
 
