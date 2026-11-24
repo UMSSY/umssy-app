@@ -62,22 +62,11 @@ import { PortfolioService } from '../services/portfolio.service.js';
 import { SocialOAuthService } from '../services/social-oauth.service.js';
 import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 
-const OAUTH_ERROR_SCHEMA = {
-  type: 'object' as const,
-  properties: {
-    statusCode: { type: 'number' as const },
-    ok: { type: 'boolean' as const, example: false },
-    detail: { type: 'string' as const },
-    code: { type: 'string' as const },
-    data: { nullable: true },
-  },
-};
-
 @ApiTags('profile')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
   description: 'A valid access token is required',
-  schema: OAUTH_ERROR_SCHEMA,
+  schema: { $ref: '#/components/schemas/ApiErrorResponse' },
 })
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ResponseInterceptor)
@@ -209,12 +198,12 @@ export class PortfolioController {
   })
   @ApiBadRequestResponse({
     description: 'Unsupported provider or missing or invalid GitHub challenge',
-    schema: OAUTH_ERROR_SCHEMA,
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiServiceUnavailableResponse({
     description:
       'GitHub OAuth credentials or callback configuration are unavailable',
-    schema: OAUTH_ERROR_SCHEMA,
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   getOAuthUrl(
     @CurrentUserId() userId: string,
@@ -268,19 +257,19 @@ export class PortfolioController {
   })
   @ApiBadRequestResponse({
     description: 'Invalid OAuth authorization code or provider exchange error',
-    schema: OAUTH_ERROR_SCHEMA,
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiConflictResponse({
     description: 'Social account is already linked to another user',
-    schema: OAUTH_ERROR_SCHEMA,
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiBadGatewayResponse({
     description: 'GitHub or GitLab is unavailable',
-    schema: OAUTH_ERROR_SCHEMA,
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiServiceUnavailableResponse({
     description: 'GitHub OAuth configuration is unavailable',
-    schema: OAUTH_ERROR_SCHEMA,
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   connectOAuthAccount(
     @CurrentUserId() userId: string,

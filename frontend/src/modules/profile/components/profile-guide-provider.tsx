@@ -364,8 +364,10 @@ function ProfileGuideSessionProvider({
                 size="sm"
                 onClick={() => {
                   if (isComplete) {
-                    setBubbleOpen(false);
-                    const navigate = () => router.push('/profile');
+                    const navigate = () => {
+                      setBubbleOpen(false);
+                      router.push('/profile');
+                    };
                     requestGuardedNavigation(navigate);
                   } else start();
                 }}

@@ -1,6 +1,7 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useLeaveGuard } from "./use-leave-guard";
+import { requestGuardedNavigation } from "@/shared/hooks/use-unsaved-changes-guard";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -80,6 +81,21 @@ describe("useLeaveGuard", () => {
     act(() => result.current.cancelLeave());
 
     expect(push).not.toHaveBeenCalled();
+    expect(result.current.isLeaveDialogOpen).toBe(false);
+  });
+
+  it("confirma o cancela la navegación solicitada por un botón", () => {
+    const { result } = renderHook(() => useLeaveGuard(true));
+    const navigate = vi.fn();
+    act(() => requestGuardedNavigation(navigate));
+    expect(result.current.isLeaveDialogOpen).toBe(true);
+    expect(navigate).not.toHaveBeenCalled();
+    act(() => result.current.cancelLeave());
+    expect(result.current.isLeaveDialogOpen).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+    act(() => requestGuardedNavigation(navigate));
+    act(() => result.current.confirmLeave());
+    expect(navigate).toHaveBeenCalledOnce();
     expect(result.current.isLeaveDialogOpen).toBe(false);
   });
 

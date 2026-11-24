@@ -57,12 +57,14 @@ export function useUnsavedChangesGuard(isActive: boolean) {
       event.preventDefault();
       event.stopPropagation();
       const url = new URL(anchor.href, window.location.href);
+      setPendingAction(null);
       setPendingHref(`${url.pathname}${url.search}${url.hash}`);
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     const handleOfflineNavigation = (event: Event) => {
       event.preventDefault();
+      setPendingAction(null);
       setPendingHref((event as CustomEvent<string>).detail);
     };
     window.addEventListener(BEFORE_OFFLINE_NAVIGATION, handleOfflineNavigation);
@@ -70,6 +72,7 @@ export function useUnsavedChangesGuard(isActive: boolean) {
       const action = (event as CustomEvent<unknown>).detail;
       if (typeof action !== 'function') return;
       event.preventDefault();
+      setPendingHref(null);
       setPendingAction(() => action as () => void);
     };
     window.addEventListener(BEFORE_BUTTON_NAVIGATION, handleButtonNavigation);
