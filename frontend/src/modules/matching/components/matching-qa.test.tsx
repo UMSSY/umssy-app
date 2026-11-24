@@ -252,6 +252,7 @@ describe("QA HU3 y conexión HU4", () => {
     ].map((name) => screen.getByRole("button", { name }));
     expect(actions[0].parentElement).toHaveClass("grid", "grid-cols-3");
     expect(actions[1]).toHaveClass("text-accent");
-    expect(actions[2]).toHaveClass("text-danger");
+    expect(actions[2]).toHaveClass("border-border-strong", "bg-transparent");
+    expect(actions[2]).not.toHaveClass("text-danger");
   });
 });
