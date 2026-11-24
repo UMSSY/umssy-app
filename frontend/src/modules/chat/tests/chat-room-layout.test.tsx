@@ -349,6 +349,7 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
   });
 
   it('muestra el subtítulo del postulante, Inicio de la conversación y el separador de fecha actual cuando no hay historial previo', () => {
+    const onSendMessage = vi.fn();
     render(
       <ChatRoom
         conversation={{
@@ -363,7 +364,7 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
         messages={[]}
         currentUserId="current-user"
         onBack={vi.fn()}
-        onSendMessage={vi.fn()}
+        onSendMessage={onSendMessage}
       />
     );
 
@@ -374,9 +375,10 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
       'Inicio de la conversación',
     );
     expect(screen.getByTestId('date-separator-initial')).toBeInTheDocument();
-    expect(screen.getByTestId('postulation-default-message')).toHaveTextContent(
-      'Hola, Maria Fernandez. Hemos visto tu perfil para la vacante de',
+    expect(screen.getByTestId('message-textarea')).toHaveValue(
+      'Hola, Maria Fernandez. Hemos visto tu perfil para la vacante de la empresa y nos gustaría contactar contigo para conocer más sobre tu experiencia. ¿Tendrías disponibilidad para una breve llamada esta semana?',
     );
+    expect(onSendMessage).not.toHaveBeenCalled();
   });
 });
 
