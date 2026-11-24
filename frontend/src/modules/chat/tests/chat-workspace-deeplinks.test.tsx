@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChatWorkspace } from '../components/chat-workspace';
@@ -233,7 +233,7 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
       );
     }
 
-    render(
+    const { container } = render(
       <QueryClientProvider client={queryClient}>
         <MessagingUiProvider>
           <OpenFromLauncher />
@@ -244,7 +244,7 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Abrir desde otra pantalla' }));
     expect(screen.getByTestId('panel-state')).toHaveTextContent('open');
-    fireEvent.click(screen.getByRole('button', { name: 'Volver a la lista de chats' }));
+    fireEvent.click(within(container).getByTestId('chat-back-button'));
     expect(screen.getByTestId('panel-state')).toHaveTextContent('closed');
     expect(mockClearSelectedConversation).not.toHaveBeenCalled();
   });
@@ -252,7 +252,7 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
   it('goes back to the list when the chat was not opened from another screen', () => {
     mockConversationState.hasSelectedConversation = true;
 
-    render(
+    const { container } = render(
       <QueryClientProvider client={queryClient}>
         <MessagingUiProvider>
           <ChatWorkspace isCompact />
@@ -260,7 +260,7 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Volver a la lista de chats' }));
+    fireEvent.click(within(container).getByTestId('chat-back-button'));
     expect(mockClearSelectedConversation).toHaveBeenCalled();
   });
 });
