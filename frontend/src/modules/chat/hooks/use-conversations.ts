@@ -19,8 +19,8 @@ import {
 import { setStoredConversationUnreadCount } from "../services/message-storage";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 import { CONVERSATIONS_QUERY_KEY } from "../constants/conversations-query-key";
-import { findConversationByContext } from "../utils/find-conversation-by-context";
 import { upsertConversation } from "../utils/upsert-conversation";
+import { useResolveContextualConversation } from "./use-resolve-contextual-conversation";
 
 const PAGE_SIZE = 10;
 
@@ -61,6 +61,8 @@ export function useConversations() {
 
   const isLoading = query.isFetching;
   const isError = query.isError && !query.isFetching;
+
+  const resolveContextualConversation = useResolveContextualConversation();
 
   const setConversationsData = useCallback(
     (update: (current: Conversation[]) => Conversation[]) => {
@@ -357,17 +359,8 @@ export function useConversations() {
     contactId: string,
     context: { contextType: string; contextId: string },
   ) => {
-    const existing = findConversationByContext(
-      conversationsData,
-      context.contextId,
-    );
-    if (existing) {
-      handleSelectConversation(existing);
-      return existing;
-    }
-    const conversation = await getOrCreateConversation(contactId, context);
-    setConversationsData((prev) => upsertConversation(prev, conversation));
-    setSelectedId(conversation.id);
+    const conversation = await resolveContextualConversation({ contactId, context });
+    handleSelectConversation(conversation);
     return conversation;
   };
 

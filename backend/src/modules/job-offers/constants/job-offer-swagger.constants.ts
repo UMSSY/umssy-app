@@ -4,9 +4,13 @@ import { ForbiddenRoleException } from '../../../common/exceptions/forbidden-rol
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import {
   CompanyNotFoundException,
+  DuplicateJobOfferSkillsException,
+  JobOfferCatalogNotFoundException,
   JobOfferExpiryInPastException,
   JobOfferNotClosableException,
   JobOfferNotFoundException,
+  JobOfferSkillNotFoundException,
+  TooManyJobOfferSkillsException,
 } from '../exceptions/index.js';
 import type { JobOfferErrorExample } from '../types/job-offer-error-example.type.js';
 import { JOB_OFFER_VALIDATION_MESSAGES } from './job-offer.constants.js';
@@ -196,16 +200,42 @@ export const CLOSE_JOB_OFFER_ERROR_RESPONSES: ApiResponseOptions[] = [
       },
     },
   ),
-];
-
-export const CREATE_JOB_OFFER_EXPIRY_ERROR_RESPONSE: ApiResponseOptions =
   errorResponse(
     422,
-    'La fecha de cierre no es posterior al momento de publicar (`JOB_OFFER_EXPIRY_IN_PAST`), o una habilidad o un valor de catálogo no es válido',
+    'Falta el estado Cerrada en el catálogo (`JOB_OFFER_CATALOG_NOT_FOUND`)',
+    {
+      catalogNotFound: {
+        summary: 'Estado inexistente',
+        error: new JobOfferCatalogNotFoundException('estado'),
+      },
+    },
+  ),
+];
+
+export const CREATE_JOB_OFFER_UNPROCESSABLE_RESPONSE: ApiResponseOptions =
+  errorResponse(
+    422,
+    'La fecha de cierre no es posterior al momento de publicar, una habilidad no es válida o un valor de catálogo no existe',
     {
       expiryInPast: {
         summary: 'Fecha de cierre pasada',
         error: new JobOfferExpiryInPastException(),
+      },
+      skillNotFound: {
+        summary: 'Habilidad inexistente',
+        error: new JobOfferSkillNotFoundException(),
+      },
+      duplicateSkills: {
+        summary: 'Habilidades duplicadas',
+        error: new DuplicateJobOfferSkillsException(),
+      },
+      tooManySkills: {
+        summary: 'Demasiadas habilidades',
+        error: new TooManyJobOfferSkillsException(),
+      },
+      catalogNotFound: {
+        summary: 'Modalidad, tipo de contrato o estado inexistente',
+        error: new JobOfferCatalogNotFoundException('modalidad'),
       },
     },
   );

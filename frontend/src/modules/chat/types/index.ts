@@ -11,6 +11,7 @@ export * from './chat-workspace-props.types';
 export * from './connection-request.types';
 export * from './conversation.types';
 export * from './open-contextual-chat-params.types';
+export * from './resolve-contextual-conversation-params.types';
 export * from './use-open-contextual-chat-result.types';
 export * from './event-chat-room-view-props.types';
 export * from './event-room-participant.types';

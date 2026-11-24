@@ -56,9 +56,12 @@ describe('job offers OpenAPI contracts', () => {
     expect(JSON.stringify(close?.responses['404'])).toContain(
       'JOB_OFFER_NOT_FOUND',
     );
+    expect(JSON.stringify(close?.responses['422'])).toContain(
+      'JOB_OFFER_CATALOG_NOT_FOUND',
+    );
   });
 
-  it('documents expiresAt and the 422 for a past closing date when publishing', async () => {
+  it('documents expiresAt and every 422 code returned when publishing', async () => {
     const document = await buildDocument();
     const create = document.paths['/api/companies/{companyId}/job-offers']?.post;
 
@@ -66,8 +69,15 @@ describe('job offers OpenAPI contracts', () => {
     expect(JSON.stringify(create?.requestBody)).toContain(
       'cierre automático',
     );
-    expect(JSON.stringify(create?.responses['422'])).toContain(
+    const unprocessable = JSON.stringify(create?.responses['422']);
+    for (const code of [
       'JOB_OFFER_EXPIRY_IN_PAST',
-    );
+      'JOB_OFFER_SKILL_NOT_FOUND',
+      'DUPLICATE_JOB_OFFER_SKILLS',
+      'TOO_MANY_JOB_OFFER_SKILLS',
+      'JOB_OFFER_CATALOG_NOT_FOUND',
+    ]) {
+      expect(unprocessable).toContain(code);
+    }
   });
 });
