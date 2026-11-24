@@ -81,6 +81,7 @@ describe('WorkExperienceGuideStep', () => {
     );
     await screen.findByRole('form', { name: 'Agregar experiencia' });
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await user.click(screen.getByRole('button', { name: /Tecnored/ }));
     await user.click(
       screen.getByRole('button', { name: 'Editar Desarrollador' }),
     );
@@ -120,6 +121,7 @@ describe('WorkExperienceGuideStep', () => {
     expect(onDirtyChange).not.toHaveBeenCalledWith(true);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await user.click(screen.getByRole('button', { name: /Tecnored/ }));
     await user.click(
       screen.getByRole('button', { name: 'Editar Desarrollador' }),
     );
@@ -161,6 +163,7 @@ describe('WorkExperienceGuideStep', () => {
     const { user, onSaved, onDirtyChange } = setupStep();
     await screen.findByRole('form', { name: 'Agregar experiencia' });
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await user.click(screen.getByRole('button', { name: /Tecnored/ }));
     await user.click(
       screen.getByRole('button', { name: 'Editar Desarrollador' }),
     );
@@ -223,11 +226,13 @@ describe('WorkExperienceGuideStep', () => {
     });
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
     await waitFor(() => expect(onSaved).toHaveBeenCalledOnce());
+    await user.click(screen.getByRole('button', { name: /UMSS/ }));
     expect(
       await screen.findByRole('button', {
         name: 'Editar Auxiliar de laboratorio',
       }),
     ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Tecnored/ }));
     expect(
       screen.getByRole('button', { name: 'Editar Desarrollador' }),
     ).toBeInTheDocument();

@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { WORK_EXPERIENCE_VALIDATION_MESSAGES } from '../constants/work-experience-validation.constants.js';
 
@@ -34,4 +35,5 @@ export const workExperienceDescriptionSchema = z
   .string(WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
   .trim()
   .min(1, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
-  .max(5000, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong);
+  .max(5000, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong)
+  .transform((value) => value.toLowerCase());
