@@ -119,6 +119,127 @@ describe("googleAuthService.linkGoogleAccount", () => {
       "No se pudo conectar con el servidor para vincular la cuenta. Inténtalo de nuevo."
     );
   });
+
+  it("devuelve role_not_allowed cuando el rol no está permitido para vinculación (403)", async () => {
+    vi.mocked(apiClient.post).mockRejectedValueOnce({
+      response: {
+        status: 403,
+        data: {
+          code: "ROLE_NOT_ASSIGNED",
+          detail: "La vinculación con Google solo está permitida para estudiantes, titulados y mentores.",
+        },
+      },
+    });
+
+    const result = await googleAuthService.linkGoogleAccount(
+      "admin@umss.edu",
+      "admin@umss.edu"
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: "role_not_allowed",
+      message: "La vinculación con Google solo está permitida para estudiantes, titulados y mentores.",
+    });
+  });
+});
+
+describe("googleAuthService.loginWithGoogle", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("inicia sesión exitosamente y extrae la sesión", async () => {
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: {
+        accessToken: "jwt-token-xyz",
+        roleTag: "titulado",
+        roles: ["titulado"],
+      },
+    });
+
+    const result = await googleAuthService.loginWithGoogle("dania@umss.edu", "id-token-123");
+
+    expect(apiClient.post).toHaveBeenCalledWith("/auth/google/login", {
+      email: "dania@umss.edu",
+      credential: "id-token-123",
+      idToken: "id-token-123",
+    });
+    expect(result).toEqual({
+      success: true,
+      session: {
+        accessToken: "jwt-token-xyz",
+        roleTag: "titulado",
+        roles: ["titulado"],
+      },
+    });
+  });
+
+  it("devuelve role_not_allowed cuando el backend responde 403", async () => {
+    vi.mocked(apiClient.post).mockRejectedValueOnce({
+      response: {
+        status: 403,
+        data: {
+          code: "ROLE_NOT_ASSIGNED",
+          detail: "El acceso con Google solo está permitido para estudiantes, titulados y mentores.",
+        },
+      },
+    });
+
+    const result = await googleAuthService.loginWithGoogle("admin@umss.edu");
+
+    expect(result).toEqual({
+      success: false,
+      reason: "role_not_allowed",
+      message: "El acceso con Google solo está permitido para estudiantes, titulados y mentores.",
+    });
+  });
+
+  it("devuelve not_registered cuando el backend responde 404 o 401", async () => {
+    vi.mocked(apiClient.post).mockRejectedValueOnce({
+      response: {
+        status: 404,
+        data: { detail: "Esta cuenta de Google no está registrada en el sistema." },
+      },
+    });
+
+    const result = await googleAuthService.loginWithGoogle("desconocido@gmail.com");
+
+    expect(result).toEqual({
+      success: false,
+      reason: "not_registered",
+      message: "Esta cuenta de Google no está registrada en el sistema.",
+    });
+  });
+
+  it("devuelve server_error ante un fallo genérico o error de servidor", async () => {
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error("Server down"));
+
+    const result = await googleAuthService.loginWithGoogle("dania@umss.edu");
+
+    expect(result).toEqual({
+      success: false,
+      reason: "server_error",
+      message: "Ocurrió un error al intentar iniciar sesión con Google.",
+    });
+  });
+});
+
+describe("googleAuthService.promptSelectAccount", () => {
+  it("rechaza sin llamar a alert() si NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado", async () => {
+    const originalEnv = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    delete process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+
+    await expect(googleAuthService.promptSelectAccount()).rejects.toThrow(
+      "NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado."
+    );
+
+    expect(alertSpy).not.toHaveBeenCalled();
+
+    alertSpy.mockRestore();
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID = originalEnv;
+  });
 });
 
 describe("decodeGoogleIdToken", () => {

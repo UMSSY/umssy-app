@@ -13,6 +13,7 @@ export interface HeatmapToolbarProps {
   onMonthChange: (month?: string) => void;
   onOpenDateRange: () => void;
   onClearDateRange: () => void;
+  onClearFilters: () => void;
   onExport: (format: HeatmapExportFormat) => void;
   canExport: boolean;
   aside?: ReactNode;

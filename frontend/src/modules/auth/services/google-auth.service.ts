@@ -48,19 +48,20 @@ export interface GoogleProfile {
 export interface LinkGoogleResult {
   success: boolean;
   message?: string;
-  reason?: "email_mismatch" | "server_error";
+  reason?: "email_mismatch" | "role_not_allowed" | "server_error";
 }
 
 export interface GoogleLoginResult {
   success: boolean;
   session?: LoginResponse;
   message?: string;
-  reason?: "not_registered" | "server_error";
+  reason?: "not_registered" | "role_not_allowed" | "server_error";
 }
 
 export const googleAuthService = {
   /**
-   * Triggers the official native Google Identity Services ID Token flow (google.accounts.id).
+   * Triggers the official native Google Identity Services ID Token flow (google.accounts.id)
+   * or falls back to Google OAuth redirect / popup flow (/oauth/google/callback).
    */
   promptSelectAccount: (options: GoogleOAuthRequestOptions = {}): Promise<GoogleProfile> => {
     return new Promise((resolve, reject) => {
@@ -72,9 +73,6 @@ export const googleAuthService = {
         process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || "";
 
       if (!clientId) {
-        alert(
-          "Para que Google muestre tus cuentas en su interfaz oficial, necesitas configurar tu Client ID en frontend/.env.local (NEXT_PUBLIC_GOOGLE_CLIENT_ID=tu_id.apps.googleusercontent.com)."
-        );
         return reject(
           new Error("NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado.")
         );
@@ -194,6 +192,14 @@ export const googleAuthService = {
         (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
         "No se pudo conectar con el servidor para vincular la cuenta. Inténtalo de nuevo.";
 
+      if ((err as { response?: { status?: number } })?.response?.status === 403) {
+        return {
+          success: false,
+          reason: "role_not_allowed",
+          message: errorDetail,
+        };
+      }
+
       return {
         success: false,
         reason: "server_error",
@@ -228,6 +234,17 @@ export const googleAuthService = {
       };
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 403) {
+        const errorDetail =
+          (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
+          (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
+          "El acceso con Google solo está permitido para estudiantes, titulados y mentores.";
+        return {
+          success: false,
+          reason: "role_not_allowed",
+          message: errorDetail,
+        };
+      }
       if (status === 404 || status === 401 || status === 400) {
         return {
           success: false,

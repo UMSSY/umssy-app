@@ -343,6 +343,46 @@ describe("LoginView", () => {
     expect(screen.getByRole("button", { name: /probar con otra cuenta/i })).toBeInTheDocument();
   });
 
+  it("muestra la pantalla Acceso no permitido con mensaje de roles cuando el rol no está permitido", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({
+      email: "empresa@umss.edu",
+    });
+    vi.mocked(googleAuthService.loginWithGoogle).mockResolvedValue({
+      success: false,
+      reason: "role_not_allowed",
+      message: "El acceso con Google solo está permitido para estudiantes, titulados y mentores.",
+    });
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+    render(<LoginView />);
+
+    fireEvent.click(screen.getByRole("button", { name: /continuar con google/i }));
+
+    expect(await screen.findByText("Acceso no permitido")).toBeInTheDocument();
+    expect(
+      screen.getByText(/El acceso con Google solo está permitido para estudiantes, titulados y mentores/i),
+    ).toBeInTheDocument();
+
+    // Permite volver al formulario de inicio de sesión con contraseña
+    fireEvent.click(screen.getByRole("button", { name: /iniciar sesión con contraseña/i }));
+    expect(screen.getByPlaceholderText("nombre@ejemplo.com")).toBeInTheDocument();
+  });
+
+  it("muestra un alert en el formulario si falta configurar el client ID sin usar alert()", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockRejectedValueOnce(
+      new Error("NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado."),
+    );
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+    render(<LoginView />);
+
+    fireEvent.click(screen.getByRole("button", { name: /continuar con google/i }));
+
+    expect(
+      await screen.findByText(/El servicio de inicio de sesión con Google no está disponible en este momento/i),
+    ).toBeInTheDocument();
+    // El formulario continúa disponible
+    expect(screen.getByPlaceholderText("nombre@ejemplo.com")).toBeInTheDocument();
+  });
+
   it("muestra el aviso de sesión expirada cuando reason=SESSION_EXPIRED (CA6)", () => {
     window.history.replaceState({}, "", "/login?reason=SESSION_EXPIRED&next=/profile");
     vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });

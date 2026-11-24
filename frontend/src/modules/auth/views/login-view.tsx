@@ -54,7 +54,13 @@ export function LoginView() {
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isAccessDenied, setIsAccessDenied] = useState(false);
+  const [accessDeniedState, setAccessDeniedState] = useState<{
+    reason: 'not_registered' | 'role_not_allowed';
+    message?: string;
+  } | null>(null);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  const isAccessDenied = accessDeniedState !== null;
 
   const [isExpiredNoticeVisible] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -62,11 +68,14 @@ export function LoginView() {
     return reason === 'SESSION_EXPIRED' || reason === 'session_expired';
   });
 
+
+
   useRedirectAuthenticated(!isSigningIn);
   const loginRestriction = restrictions.getRestriction('login', email);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setGoogleError(null);
     if (isLoading || isSigningIn || restrictions.isBlocked('login', email))
       return;
     const errors = validateLoginFields(email, password);
@@ -93,10 +102,13 @@ export function LoginView() {
 
   async function handleGoogleLogin() {
     setIsGoogleLoading(true);
-    setIsAccessDenied(false);
+    setAccessDeniedState(null);
+    setGoogleError(null);
 
     try {
-      const googleProfile = await googleAuthService.promptSelectAccount();
+      const googleProfile = await googleAuthService.promptSelectAccount({
+        intent: 'login',
+      });
       if (!googleProfile?.email) return;
 
       const credential = googleProfile.idToken || googleProfile.credential;
@@ -116,10 +128,35 @@ export function LoginView() {
             next,
           ),
         );
+      } else if (result.reason === 'role_not_allowed') {
+        setAccessDeniedState({
+          reason: 'role_not_allowed',
+          message:
+            result.message ||
+            'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
+        });
+      } else if (result.reason === 'not_registered') {
+        setAccessDeniedState({
+          reason: 'not_registered',
+          message:
+            result.message ||
+            'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.',
+        });
       } else {
-        setIsAccessDenied(true);
+        setGoogleError(
+          result.message ||
+            'Ocurrió un error al intentar iniciar sesión con Google.',
+        );
       }
-    } catch {
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        err.message.includes('NEXT_PUBLIC_GOOGLE_CLIENT_ID')
+      ) {
+        setGoogleError(
+          'El servicio de inicio de sesión con Google no está disponible en este momento. Por favor, inicia sesión con tu correo y contraseña.',
+        );
+      }
       // User closed Google popup or cancelled
     } finally {
       setIsGoogleLoading(false);
@@ -160,28 +197,54 @@ export function LoginView() {
                 Acceso no permitido
               </h1>
               <p className="mt-3 mb-8 text-base leading-relaxed text-text-secondary">
-                Esta cuenta de Google no está registrada en el sistema. Por
-                favor, inicia sesión con un correo electrónico previamente
-                registrado.
+                {accessDeniedState?.reason === 'role_not_allowed'
+                  ? accessDeniedState.message ||
+                    'El acceso con Google solo está permitido para estudiantes, titulados y mentores. Si eres empresa o administrativo, por favor inicia sesión con tu correo electrónico y contraseña.'
+                  : 'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.'}
               </p>
-              <Button
-                type="button"
-                variant="institutional"
-                onClick={handleGoogleLogin}
-                className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
-              >
-                PROBAR CON OTRA CUENTA →
-              </Button>
-              <div className="mt-6 text-center">
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={() => setIsAccessDenied(false)}
-                  className="text-sm font-semibold text-accent hover:underline"
-                >
-                  Volver a iniciar sesión
-                </Button>
-              </div>
+              {accessDeniedState?.reason === 'role_not_allowed' ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="institutional"
+                    onClick={() => setAccessDeniedState(null)}
+                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+                  >
+                    INICIAR SESIÓN CON CONTRASEÑA →
+                  </Button>
+                  <div className="mt-6 text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={handleGoogleLogin}
+                      className="text-sm font-semibold text-accent hover:underline"
+                    >
+                      Probar con otra cuenta de Google
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="institutional"
+                    onClick={handleGoogleLogin}
+                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+                  >
+                    PROBAR CON OTRA CUENTA →
+                  </Button>
+                  <div className="mt-6 text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => setAccessDeniedState(null)}
+                      className="text-sm font-semibold text-accent hover:underline"
+                    >
+                      Volver a iniciar sesión
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <form
@@ -345,6 +408,15 @@ export function LoginView() {
                   <CircleAlert aria-hidden="true" />
                   <AlertDescription className="font-medium text-danger">
                     {error}
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {googleError ? (
+                <Alert className="mb-4 border-danger/25 bg-surface text-danger">
+                  <CircleAlert aria-hidden="true" />
+                  <AlertDescription className="font-medium text-danger">
+                    {googleError}
                   </AlertDescription>
                 </Alert>
               ) : null}
