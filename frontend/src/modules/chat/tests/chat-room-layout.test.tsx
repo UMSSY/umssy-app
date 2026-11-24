@@ -374,6 +374,9 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
       'Inicio de la conversación',
     );
     expect(screen.getByTestId('date-separator-initial')).toBeInTheDocument();
+    expect(screen.getByTestId('postulation-default-message')).toHaveTextContent(
+      'Hola, Maria Fernandez. Hemos visto tu perfil para la vacante de',
+    );
   });
 });
 
