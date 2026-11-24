@@ -108,7 +108,7 @@ describe("apiClient session errors", () => {
     },
   );
 
-  it("broadcasts SESSION_CLOSED when 401 response includes a session closure code (CA7, CA10)", async () => {
+  it("broadcasts SESSION_CLOSED when 401 response includes a session closure code", async () => {
     const broadcastSpy = vi.spyOn(authBroadcast, "broadcastAuthEvent").mockImplementation(() => {});
     await saveAccessToken("expired-token");
 

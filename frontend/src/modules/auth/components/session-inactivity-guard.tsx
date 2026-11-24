@@ -1,12 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useOptionalAuth } from "@/shared/contexts/auth-context";
 import { authService } from "../services/auth.service";
 import { endSession } from "../utils/session";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { useSessionInactivity } from "../hooks/use-session-inactivity";
-import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
+import {
+  broadcastAuthEvent,
+  type AuthCloseReason,
+  useAuthBroadcastSync,
+} from "../utils/auth-broadcast";
 import type { SessionInactivityGuardProps } from "../types/session-inactivity-guard-props.types";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
@@ -24,6 +28,7 @@ export function SessionInactivityGuard({
   absoluteExpiresAt,
 }: SessionInactivityGuardProps = {}) {
   const router = useOptionalRouter();
+  const auth = useOptionalAuth();
 
   const navigateTo = (path: string) => {
     if (router) {
@@ -33,7 +38,6 @@ export function SessionInactivityGuard({
     }
   };
 
-  // Sincroniza el cierre de sesión entre pestañas del navegador (CA10)
   useAuthBroadcastSync((message) => {
     if (
       message.type === "SESSION_CLOSED" ||
@@ -46,16 +50,11 @@ export function SessionInactivityGuard({
     }
   });
 
-  // Lee la sesión activa del servidor para obtener los tiempos dinámicos del backend
-  const { data: session } = useQuery({
-    queryKey: ["auth-session-timings"],
-    queryFn: () => authService.getSession(),
-    staleTime: 60 * 1000,
-    retry: false,
-  });
-
-  const handleTimeout = () => {
-    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_EXPIRED" });
+  const closeAndRedirect = (
+    broadcastReason: AuthCloseReason,
+    redirectReason: AuthCloseReason,
+  ) => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: broadcastReason });
     endSession();
     void authService.logout();
     if (typeof window !== "undefined") {
@@ -63,42 +62,23 @@ export function SessionInactivityGuard({
       try {
         sessionStorage.setItem("umssy_post_login_redirect", currentPath);
       } catch {
-        // ignore storage error
+        // Ignore private browsing quota errors
       }
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
-      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+      navigateTo(`${loginUrl}${separator}reason=${redirectReason}`);
     } else {
-      navigateTo("/login?reason=SESSION_EXPIRED");
-    }
-  };
-
-  const handleCloseSession = () => {
-    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
-    endSession();
-    void authService.logout();
-    if (typeof window !== "undefined") {
-      const currentPath = `${window.location.pathname}${window.location.search}`;
-      try {
-        sessionStorage.setItem("umssy_post_login_redirect", currentPath);
-      } catch {
-        // ignore storage error
-      }
-      const loginUrl = buildLoginUrl(currentPath);
-      const separator = loginUrl.includes("?") ? "&" : "?";
-      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
-    } else {
-      navigateTo("/login?reason=SESSION_EXPIRED");
+      navigateTo(`/login?reason=${redirectReason}`);
     }
   };
 
   const { isWarningOpen, secondsLeft, isRefreshing, stayConnected } =
     useSessionInactivity({
-      idleTimeoutSeconds: idleTimeoutSeconds ?? session?.idleTimeoutSeconds,
-      warningSeconds: warningSeconds ?? session?.warningSeconds,
-      absoluteExpiresAt: absoluteExpiresAt ?? session?.absoluteExpiresAt,
+      idleTimeoutSeconds: idleTimeoutSeconds ?? auth?.idleTimeoutSeconds,
+      warningSeconds: warningSeconds ?? auth?.warningSeconds,
+      absoluteExpiresAt: absoluteExpiresAt ?? auth?.absoluteExpiresAt,
       enabled: true,
-      onTimeout: handleTimeout,
+      onTimeout: () => closeAndRedirect("SESSION_EXPIRED", "SESSION_EXPIRED"),
       onRefresh: async () => {
         await authService.refreshSession();
       },
@@ -110,7 +90,7 @@ export function SessionInactivityGuard({
       secondsLeft={secondsLeft}
       isRefreshing={isRefreshing}
       onStayConnected={stayConnected}
-      onCloseSession={handleCloseSession}
+      onCloseSession={() => closeAndRedirect("SESSION_REVOKED", "SESSION_EXPIRED")}
     />
   );
 }

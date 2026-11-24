@@ -12,8 +12,9 @@ export type AuthCloseReason =
   | string;
 
 export interface AuthBroadcastMessage {
-  type: "SESSION_CLOSED" | "LOGOUT" | "SESSION_EXPIRED";
+  type: "SESSION_CLOSED" | "LOGOUT" | "SESSION_EXPIRED" | "ACTIVITY";
   reason?: AuthCloseReason;
+  timestamp?: number;
 }
 
 /**

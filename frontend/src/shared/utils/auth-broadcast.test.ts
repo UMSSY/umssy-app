@@ -106,5 +106,15 @@ describe("auth-broadcast", () => {
       unmount();
     }).not.toThrow();
   });
+
+  it("transmite eventos de actividad con timestamp entre pestañas", () => {
+    const timestamp = 1_732_500_000_000;
+    broadcastAuthEvent({ type: "ACTIVITY", timestamp });
+
+    expect(mockPostMessage).toHaveBeenCalledWith({
+      type: "ACTIVITY",
+      timestamp,
+    });
+  });
 });
 

@@ -383,7 +383,7 @@ describe("LoginView", () => {
     expect(screen.getByPlaceholderText("nombre@ejemplo.com")).toBeInTheDocument();
   });
 
-  it("muestra el aviso de sesión expirada cuando reason=SESSION_EXPIRED (CA6)", () => {
+  it("muestra el aviso de sesión expirada cuando reason=SESSION_EXPIRED", () => {
     window.history.replaceState({}, "", "/login?reason=SESSION_EXPIRED&next=/profile");
     vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
 
@@ -397,7 +397,7 @@ describe("LoginView", () => {
     ).toBeInTheDocument();
   });
 
-  it("regresa a la página anterior guardada en sessionStorage tras iniciar sesión (CA9)", async () => {
+  it("regresa a la página anterior guardada en sessionStorage tras iniciar sesión", async () => {
     sessionStorage.setItem("umssy_post_login_redirect", "/profile?tab=cv");
     const login = vi.fn().mockResolvedValue({
       accessToken: "token-123",

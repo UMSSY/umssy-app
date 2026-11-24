@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import nextConfig, { securityHeaders } from "../../../next.config";
 
-describe("next.config security headers (HU15 - CA3)", () => {
+describe("next.config security headers", () => {
   it("exporta cabeceras de seguridad requeridas", () => {
     const keys = securityHeaders.map((header) => header.key);
     expect(keys).toContain("Content-Security-Policy");
