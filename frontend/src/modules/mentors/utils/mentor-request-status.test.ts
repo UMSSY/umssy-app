@@ -9,7 +9,7 @@ describe("mentor request status HU14", () => {
   it.each([
     ["PENDING", "Pendiente"],
     ["OFFERED", "Cupo ofrecido"],
-    ["ACTIVE", "Activa"],
+    ["ACTIVE", "Aceptada"],
     ["ENDED", "Finalizada"],
     ["CANCELLED", "Cancelada"],
     ["EXPIRED", "Vencida"],
