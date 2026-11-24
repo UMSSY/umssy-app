@@ -29,6 +29,7 @@ export type PasswordHistoryMinAggregateOutputType = {
   userId: string | null
   passwordHash: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type PasswordHistoryMaxAggregateOutputType = {
@@ -36,6 +37,7 @@ export type PasswordHistoryMaxAggregateOutputType = {
   userId: string | null
   passwordHash: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type PasswordHistoryCountAggregateOutputType = {
@@ -43,6 +45,7 @@ export type PasswordHistoryCountAggregateOutputType = {
   userId: number
   passwordHash: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -52,6 +55,7 @@ export type PasswordHistoryMinAggregateInputType = {
   userId?: true
   passwordHash?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type PasswordHistoryMaxAggregateInputType = {
@@ -59,6 +63,7 @@ export type PasswordHistoryMaxAggregateInputType = {
   userId?: true
   passwordHash?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type PasswordHistoryCountAggregateInputType = {
@@ -66,6 +71,7 @@ export type PasswordHistoryCountAggregateInputType = {
   userId?: true
   passwordHash?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -146,6 +152,7 @@ export type PasswordHistoryGroupByOutputType = {
   userId: string
   passwordHash: string
   createdAt: Date
+  updatedAt: Date
   _count: PasswordHistoryCountAggregateOutputType | null
   _min: PasswordHistoryMinAggregateOutputType | null
   _max: PasswordHistoryMaxAggregateOutputType | null
@@ -174,6 +181,7 @@ export type PasswordHistoryWhereInput = {
   userId?: Prisma.UuidFilter<"PasswordHistory"> | string
   passwordHash?: Prisma.StringFilter<"PasswordHistory"> | string
   createdAt?: Prisma.DateTimeFilter<"PasswordHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"PasswordHistory"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -182,6 +190,7 @@ export type PasswordHistoryOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -193,6 +202,7 @@ export type PasswordHistoryWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.UuidFilter<"PasswordHistory"> | string
   passwordHash?: Prisma.StringFilter<"PasswordHistory"> | string
   createdAt?: Prisma.DateTimeFilter<"PasswordHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"PasswordHistory"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -201,6 +211,7 @@ export type PasswordHistoryOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.PasswordHistoryCountOrderByAggregateInput
   _max?: Prisma.PasswordHistoryMaxOrderByAggregateInput
   _min?: Prisma.PasswordHistoryMinOrderByAggregateInput
@@ -214,12 +225,14 @@ export type PasswordHistoryScalarWhereWithAggregatesInput = {
   userId?: Prisma.UuidWithAggregatesFilter<"PasswordHistory"> | string
   passwordHash?: Prisma.StringWithAggregatesFilter<"PasswordHistory"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PasswordHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PasswordHistory"> | Date | string
 }
 
 export type PasswordHistoryCreateInput = {
   id?: string
   passwordHash: string
   createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPasswordHistoriesInput
 }
 
@@ -228,12 +241,14 @@ export type PasswordHistoryUncheckedCreateInput = {
   userId: string
   passwordHash: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type PasswordHistoryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPasswordHistoriesNestedInput
 }
 
@@ -242,6 +257,7 @@ export type PasswordHistoryUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PasswordHistoryCreateManyInput = {
@@ -249,12 +265,14 @@ export type PasswordHistoryCreateManyInput = {
   userId: string
   passwordHash: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type PasswordHistoryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PasswordHistoryUncheckedUpdateManyInput = {
@@ -262,6 +280,7 @@ export type PasswordHistoryUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PasswordHistoryListRelationFilter = {
@@ -279,6 +298,7 @@ export type PasswordHistoryCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type PasswordHistoryMaxOrderByAggregateInput = {
@@ -286,6 +306,7 @@ export type PasswordHistoryMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type PasswordHistoryMinOrderByAggregateInput = {
@@ -293,6 +314,7 @@ export type PasswordHistoryMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type PasswordHistoryCreateNestedManyWithoutUserInput = {
@@ -341,12 +363,14 @@ export type PasswordHistoryCreateWithoutUserInput = {
   id?: string
   passwordHash: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type PasswordHistoryUncheckedCreateWithoutUserInput = {
   id?: string
   passwordHash: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type PasswordHistoryCreateOrConnectWithoutUserInput = {
@@ -383,30 +407,35 @@ export type PasswordHistoryScalarWhereInput = {
   userId?: Prisma.UuidFilter<"PasswordHistory"> | string
   passwordHash?: Prisma.StringFilter<"PasswordHistory"> | string
   createdAt?: Prisma.DateTimeFilter<"PasswordHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"PasswordHistory"> | Date | string
 }
 
 export type PasswordHistoryCreateManyUserInput = {
   id?: string
   passwordHash: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type PasswordHistoryUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PasswordHistoryUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PasswordHistoryUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -416,6 +445,7 @@ export type PasswordHistorySelect<ExtArgs extends runtime.Types.Extensions.Inter
   userId?: boolean
   passwordHash?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["passwordHistory"]>
 
@@ -424,6 +454,7 @@ export type PasswordHistorySelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   userId?: boolean
   passwordHash?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["passwordHistory"]>
 
@@ -432,6 +463,7 @@ export type PasswordHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   userId?: boolean
   passwordHash?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["passwordHistory"]>
 
@@ -440,9 +472,10 @@ export type PasswordHistorySelectScalar = {
   userId?: boolean
   passwordHash?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type PasswordHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "passwordHash" | "createdAt", ExtArgs["result"]["passwordHistory"]>
+export type PasswordHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "passwordHash" | "createdAt" | "updatedAt", ExtArgs["result"]["passwordHistory"]>
 export type PasswordHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -463,6 +496,7 @@ export type $PasswordHistoryPayload<ExtArgs extends runtime.Types.Extensions.Int
     userId: string
     passwordHash: string
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["passwordHistory"]>
   composites: {}
 }
@@ -891,6 +925,7 @@ export interface PasswordHistoryFieldRefs {
   readonly userId: Prisma.FieldRef<"PasswordHistory", 'String'>
   readonly passwordHash: Prisma.FieldRef<"PasswordHistory", 'String'>
   readonly createdAt: Prisma.FieldRef<"PasswordHistory", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"PasswordHistory", 'DateTime'>
 }
     
 
