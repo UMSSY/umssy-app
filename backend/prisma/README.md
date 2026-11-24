@@ -583,6 +583,7 @@ erDiagram
     timestamptz closing_soon_notified_at "nullable"
     timestamptz closed_notified_at "nullable"
     timestamptz last_reminder_sent_at "nullable"
+    varchar_7 published_notified_period "nullable"
     timestamptz created_at
     timestamptz updated_at
   }
@@ -644,6 +645,7 @@ Encuesta de empleabilidad creada por un administrativo.
 | `closingSoonNotifiedAt` | `closing_soon_notified_at` | `TIMESTAMPTZ(6)` | Sí | | Momento en que se avisó al creador del cierre próximo. `NULL` = aún no avisado |
 | `closedNotifiedAt` | `closed_notified_at` | `TIMESTAMPTZ(6)` | Sí | | Momento en que se avisó al creador del cierre (y se evaluaron las variaciones). `NULL` = aún no avisado |
 | `lastReminderSentAt` | `last_reminder_sent_at` | `TIMESTAMPTZ(6)` | Sí | | Último recordatorio manual entregado a la audiencia pendiente |
+| `publishedNotifiedPeriod` | `published_notified_period` | `VARCHAR(7)` | Sí | | Semestre (`I-AAAA` o `II-AAAA`) en que se avisó a la audiencia de la publicación (`SURVEY_PUBLISHED`). Garantiza un solo aviso por encuesta y semestre. `NULL` = aún no avisado |
 | `createdAt` | `created_at` | `TIMESTAMPTZ(6)` | No | `now()` | Alta |
 | `updatedAt` | `updated_at` | `TIMESTAMPTZ(6)` | No | `@updatedAt` | Última modificación |
 
@@ -998,7 +1000,7 @@ erDiagram
 - Intake operation catalog values are ACTIVATE, REQUEST and LEGACY; the operation compatibility trigger keeps operation and operationId synchronized. `mentor_intake_attempts_identity` and its legacy compatibility index enforce user/operation/idempotency-key uniqueness. Sanction and attempt legacy records have the exact time fields listed above, not invented createdAt/updatedAt fields.
 - Technical/orientation joins have their own UUID PK and unique mentor/catalog pairs; deleting a user cascades selections, but deleting a referenced catalog is restricted. Current role participation is distinct from availability and requests.
 
-Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`. Reconcile against the synchronized schema before applying this proposal; no migration was run.
+Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`.
 
 ## Appointments
 
@@ -1150,10 +1152,58 @@ All of them have `id`, a unique `title` (varchar(100)), an optional `description
 
 Both Sprint 3 migrations only add nullable columns and new tables; they do not change existing rows.
 
+## Workshop sessions and attendance
+
+```mermaid
+erDiagram
+  events ||--o{ event_sessions : "event_id"
+  events ||--o{ event_registrations : "event_id"
+  event_registrations ||--o{ event_attendances : "registration_id"
+  event_sessions |o--o{ event_attendances : "session_id"
+  users |o--o{ event_attendances : "checked_in_by_id"
+
+  events {
+    uuid id PK
+    date event_date
+    time start_time
+    time end_time
+  }
+  event_sessions {
+    uuid id PK
+    uuid event_id FK
+    timestamptz starts_at
+    timestamptz ends_at
+    string location
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  event_registrations {
+    uuid id PK
+    uuid event_id FK
+    uuid user_id FK
+  }
+  event_attendances {
+    uuid id PK
+    uuid registration_id FK
+    uuid session_id FK
+    timestamptz checked_in_at
+    uuid checked_in_by_id FK
+    boolean checked_in_offline
+    timestamptz synced_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+```
+
+`event_sessions` has one row per workshop session, with UTC instants in `starts_at` and `ends_at`, nullable `location`, and audit timestamps. `event_id` references `events.id` with cascade deletion. The table has separate indexes on `event_id`, `starts_at` and `ends_at`, with no uniqueness constraint beyond its primary key. The original `events.event_date`, `start_time` and `end_time` retain the first session for compatibility; registrations and attendance use all session rows when present. The migration backfills one session for every existing event.
+
+`event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
+
 ## Sprint History
 
 ### Sprint 3
 
+- Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.
 - Unique `(job_offer_id, user_id)` on applications, which supports withdrawing and applying again on the same row.
@@ -1161,6 +1211,8 @@ Both Sprint 3 migrations only add nullable columns and new tables; they do not c
 - Migración `20261115120000_add_survey_alert_configs_and_notification_flags`:
   - Nueva tabla `survey_alert_configs` (`SurveyAlertConfig`) con relación 1:0..1 con `surveys`, índice único sobre `survey_id` y borrado en cascada.
   - Nuevas columnas nullable en `surveys`: `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, que permiten un único aviso de cierre próximo y de cierre por encuesta y registran el último recordatorio manual.
+- Migración `20261119120000_add_survey_published_notified_period`:
+  - Nueva columna nullable `published_notified_period` (`VARCHAR(7)`) en `surveys`. Guarda el semestre en que se notificó la publicación de la encuesta, así se envía un solo aviso `SURVEY_PUBLISHED` por encuesta y semestre. No modifica filas existentes.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
 - Mentor network (Sprint 3): documented participation models, requests, FIFO offers, capacity, technical selections, catalogs, idempotency, sanctions, indexes, SQL constraints, relationships, and deletion behavior.
 - Documented the Appointments tables: `appointments` with the new `cancellation_reason` and `cancelled_at`, `appointment_notifications` and its three catalogs (`appointment_notification_events`, `appointment_notification_channels`, `appointment_notification_statuses`), with keys, relationships, indexes and deletion behavior.

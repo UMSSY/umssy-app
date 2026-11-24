@@ -1,16 +1,9 @@
+import { getNotificationInboxPath, NOTIFICATION_INBOX_FILTER_LABELS } from "@/modules/notifications";
 import type { SurveyNotificationStatus } from "../types/survey-notification-status.types";
 
-export const SURVEY_NOTIFICATIONS_PATH = "/surveys";
-export const SURVEY_NOTIFICATIONS_LABEL = "Notificaciones de encuestas";
-
-export const EMPTY_STATE_RAY_CLASSES = [
-  "-left-7 top-1/2 -translate-y-1/2",
-  "-right-7 top-1/2 -translate-y-1/2",
-  "-left-4 top-3 -rotate-45",
-  "-right-4 top-3 rotate-45",
-  "-left-4 bottom-3 rotate-45",
-  "-right-4 bottom-3 -rotate-45",
-];
+export const SURVEY_ANSWER_PATH = "/surveys";
+export const SURVEY_NOTIFICATIONS_PATH = getNotificationInboxPath("SURVEYS");
+export const SURVEY_NOTIFICATIONS_LABEL = NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS;
 
 export const SURVEY_NOTIFICATIONS_QUERY_KEYS = {
   notifications: ["surveys", "notifications"] as const,

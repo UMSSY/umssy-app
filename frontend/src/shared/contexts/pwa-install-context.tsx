@@ -21,12 +21,15 @@ const InstallContext = createContext<{
 const standaloneQuery = '(display-mode: standalone)';
 
 function subscribeToDisplayMode(onChange: () => void) {
+  if (typeof window.matchMedia !== 'function') return () => {};
   const mode = window.matchMedia(standaloneQuery);
   mode.addEventListener('change', onChange);
   return () => mode.removeEventListener('change', onChange);
 }
 
-const isStandalone = () => window.matchMedia(standaloneQuery).matches;
+const isStandalone = () =>
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia(standaloneQuery).matches;
 
 export function PwaInstallProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<InstallPromptEvent | null>(null);

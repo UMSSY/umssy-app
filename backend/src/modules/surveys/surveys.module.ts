@@ -8,7 +8,6 @@ import { CareersRepository } from './repositories/careers.repository.js';
 import { SurveyEmploymentResponsesRepository } from './repositories/survey-employment-responses.repository.js';
 import { SurveysRepository } from './repositories/surveys.repository.js';
 import { ReportsModule } from '../reports/reports.module.js';
-import { AccessRequestsModule } from '../access-requests/access-requests.module.js';
 import { NotificationsModule } from '../notifications/notifications.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { CareersService } from './services/careers.service.js';
@@ -26,7 +25,6 @@ import { SurveyLifecycleWorkerService } from './services/survey-lifecycle-worker
     ReportsModule,
     NotificationsModule,
     UsersModule,
-    AccessRequestsModule,
   ],
   controllers: [
     SurveyNotificationsController,

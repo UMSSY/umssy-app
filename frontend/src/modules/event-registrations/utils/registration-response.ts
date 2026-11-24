@@ -1,5 +1,6 @@
 import { readRecord, readString } from '@/shared/utils/response-validation';
 import type { Registration } from "../types/registration.types";
+import { parseRegistrationSessions } from "./registration-session-response";
 
 export function parseRegistration(value: unknown): Registration {
   const registration = readRecord(value);
@@ -18,6 +19,10 @@ export function parseRegistration(value: unknown): Registration {
   }
   if (typeof registration.cancelledAt === "string" || registration.cancelledAt === null) {
     parsed.cancelledAt = registration.cancelledAt as string | null;
+  }
+  // Respuestas antiguas sin `sessions` se tratan como taller de una sesión.
+  if (registration.sessions !== undefined) {
+    parsed.sessions = parseRegistrationSessions(registration.sessions);
   }
   return parsed;
 }

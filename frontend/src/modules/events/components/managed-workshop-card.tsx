@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { formatRegistrationDate, formatRegistrationTime } from '../utils/registration-format';
 import type { ManagedWorkshop } from '../types/managed-workshop.types';
+import { formatSessionCount, formatSessionDateRange, getSortedSessions } from '../utils/event-sessions';
 
 interface ManagedWorkshopCardProps {
   workshop: ManagedWorkshop;
@@ -13,6 +14,8 @@ interface ManagedWorkshopCardProps {
 }
 
 export function ManagedWorkshopCard({ workshop, finished, onFinishedClick }: ManagedWorkshopCardProps) {
+  const sessions = getSortedSessions(workshop);
+  const isMultiSession = sessions.length > 1;
   return (
     <Card className="flex flex-col gap-4 rounded-lg border-border bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-2">
@@ -22,8 +25,8 @@ export function ManagedWorkshopCard({ workshop, finished, onFinishedClick }: Man
             {finished ? 'Finalizado' : 'Activo'}
           </span>
         </div>
-        <p className="flex items-center gap-2 text-sm text-text-secondary"><CalendarDays aria-hidden="true" className="size-4 shrink-0" />{formatRegistrationDate(workshop.eventDate)}</p>
-        <p className="flex items-center gap-2 text-sm text-text-secondary"><Clock3 aria-hidden="true" className="size-4 shrink-0" />{formatRegistrationTime(workshop.startTime)} – {formatRegistrationTime(workshop.endTime)}</p>
+        <p className="flex items-center gap-2 text-sm text-text-secondary"><CalendarDays aria-hidden="true" className="size-4 shrink-0" />{isMultiSession ? formatSessionDateRange(sessions) : formatRegistrationDate(workshop.eventDate)}</p>
+        <p className="flex items-center gap-2 text-sm text-text-secondary"><Clock3 aria-hidden="true" className="size-4 shrink-0" />{isMultiSession ? formatSessionCount(sessions.length) : `${formatRegistrationTime(workshop.startTime)} – ${formatRegistrationTime(workshop.endTime)}`}</p>
         <p className="flex items-center gap-2 text-sm text-text-secondary"><MapPin aria-hidden="true" className="size-4 shrink-0" />{workshop.location?.trim() || 'Lugar por confirmar'}</p>
       </div>
       {finished ? (

@@ -150,4 +150,46 @@ describe("jobOffersService", () => {
     await expect(jobOffersService.reopen(COMPANY_ID, "offer-1")).resolves.toEqual(reopened);
     expect(apiClient.patch).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1/reopen`);
   });
+  it("cierra una vacante con PATCH y devuelve su estado actualizado", async () => {
+    const closed = { id: "offer-1", status: "Cerrada" };
+
+    vi.mocked(apiClient.patch).mockResolvedValue({
+      data: {
+        statusCode: 200,
+        ok: true,
+        detail: "",
+        data: closed,
+      },
+    });
+
+    await expect(
+      jobOffersService.close(COMPANY_ID, "offer-1"),
+    ).resolves.toEqual(closed);
+
+    expect(apiClient.patch).toHaveBeenCalledOnce();
+
+    expect(apiClient.patch).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1/close`,
+    );
+  });
+
+  it.each([409, 500])(
+    "propaga el error HTTP %s al cerrar una vacante",
+    async (status) => {
+      const error = Object.assign(new Error("No se pudo cerrar la vacante"), {
+        response: { status },
+      });
+
+      vi.mocked(apiClient.patch).mockRejectedValue(error);
+
+      await expect(
+        jobOffersService.close(COMPANY_ID, "offer-1"),
+      ).rejects.toBe(error);
+
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        `/companies/${COMPANY_ID}/job-offers/offer-1/close`,
+      );
+    },
+  );
+
 });

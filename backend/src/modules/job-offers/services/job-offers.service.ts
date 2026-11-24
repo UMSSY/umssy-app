@@ -5,6 +5,7 @@ import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
   JobOfferExpiryInPastException,
+  JobOfferNotClosableException,
   JobOfferNotFoundException,
   JobOfferNotReopenableException,
 } from '../exceptions/index.js';
@@ -179,6 +180,42 @@ export class JobOffersService {
     }
 
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
+  }
+
+  async close(
+  companyId: string,
+  jobOfferId: string,
+  ): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+
+    const existing = await this.jobOffersRepository.findByCompanyAndId(
+      companyId,
+      jobOfferId,
+    );
+
+    if (!existing) {
+      throw new JobOfferNotFoundException();
+    }
+
+    if (existing.status.title !== JobOfferStatus.PUBLISHED) {
+      throw new JobOfferNotClosableException();
+    }
+
+    const closedStatusId = await this.jobOffersRepository.findStatusId(
+      JobOfferStatus.CLOSED,
+    );
+
+    if (!closedStatusId) {
+      throw new JobOfferCatalogNotFoundException('estado');
+    }
+
+    const record = await this.jobOffersRepository.closePublished(
+      companyId,
+      jobOfferId,
+      closedStatusId,
+    );
+
+    return this.jobOfferMapper.toResponse(record);
   }
 
   async reopen(

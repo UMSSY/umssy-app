@@ -3,6 +3,7 @@ import type { NotificationMailContent } from '../../notifications/types/notifica
 import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
 import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
+import { toAbsoluteSurveyUrl } from '../utils/survey-frontend-url.js';
 
 const GRADUATE_FALLBACK_NAME = 'titulado';
 const ADMIN_FALLBACK_NAME = 'Administrador';
@@ -12,8 +13,9 @@ const loadSurveyMailTemplate = (name: string): Promise<string> =>
 
 export async function renderSurveyReminderMail(
   { surveyTitle, closesAtFormatted }: NotificationPayloadMap[NotificationType.SURVEY_REMINDER],
-  { recipientName, actionUrl }: NotificationMailContext,
+  { recipientName, actionUrl: contextActionUrl }: NotificationMailContext,
 ): Promise<NotificationMailContent> {
+  const actionUrl = toAbsoluteSurveyUrl(contextActionUrl);
   const name = recipientName || GRADUATE_FALLBACK_NAME;
   return {
     mjml: await loadSurveyMailTemplate('survey-reminder'),
@@ -25,8 +27,9 @@ export async function renderSurveyReminderMail(
 
 export async function renderSurveyClosingSoonMail(
   { surveyTitle, closesAtFormatted, responsesCount }: NotificationPayloadMap[NotificationType.SURVEY_CLOSING_SOON],
-  { recipientName, actionUrl }: NotificationMailContext,
+  { recipientName, actionUrl: contextActionUrl }: NotificationMailContext,
 ): Promise<NotificationMailContent> {
+  const actionUrl = toAbsoluteSurveyUrl(contextActionUrl);
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
     mjml: await loadSurveyMailTemplate('survey-closing-soon'),
@@ -44,8 +47,9 @@ export async function renderSurveyClosingSoonMail(
 
 export async function renderSurveyClosedMail(
   { surveyTitle, closesAtFormatted, responsesCount }: NotificationPayloadMap[NotificationType.SURVEY_CLOSED],
-  { recipientName, actionUrl }: NotificationMailContext,
+  { recipientName, actionUrl: contextActionUrl }: NotificationMailContext,
 ): Promise<NotificationMailContent> {
+  const actionUrl = toAbsoluteSurveyUrl(contextActionUrl);
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
     mjml: await loadSurveyMailTemplate('survey-closed'),
@@ -63,8 +67,9 @@ export async function renderSurveyClosedMail(
 
 export async function renderSurveyVariationAlertMail(
   { surveyTitle, threshold, summaryText }: NotificationPayloadMap[NotificationType.SURVEY_VARIATION_ALERT],
-  { recipientName, actionUrl }: NotificationMailContext,
+  { recipientName, actionUrl: contextActionUrl }: NotificationMailContext,
 ): Promise<NotificationMailContent> {
+  const actionUrl = toAbsoluteSurveyUrl(contextActionUrl);
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
     mjml: await loadSurveyMailTemplate('survey-variation-alert'),
@@ -77,5 +82,19 @@ export async function renderSurveyVariationAlertMail(
       shiftsContent: summaryText,
       actionUrl,
     },
+  };
+}
+
+export async function renderSurveyPublishedMail(
+  { surveyTitle, currentPeriod, change }: NotificationPayloadMap[NotificationType.SURVEY_PUBLISHED],
+  { recipientName, actionUrl: contextActionUrl }: NotificationMailContext,
+): Promise<NotificationMailContent> {
+  const actionUrl = toAbsoluteSurveyUrl(contextActionUrl);
+  const name = recipientName || GRADUATE_FALLBACK_NAME;
+  return {
+    mjml: await loadSurveyMailTemplate('survey-published'),
+    subject: `Nueva encuesta publicada: «${surveyTitle}»`,
+    text: `Hola ${name}, ya está disponible la encuesta «${surveyTitle}» del semestre ${currentPeriod}.\n${change}\nVer en: ${actionUrl}`,
+    values: { recipientName: name, surveyTitle, currentPeriod, changesContent: change, actionUrl },
   };
 }

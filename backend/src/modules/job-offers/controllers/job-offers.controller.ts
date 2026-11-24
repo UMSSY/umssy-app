@@ -241,6 +241,35 @@ export class JobOffersController {
     return this.jobOffersService.update(companyId, jobOfferId, request);
   }
 
+  @Patch('companies/:companyId/job-offers/:jobOfferId/close')
+  @UseGuards(JwtAuthGuard, RolesGuard, CompanyOwnershipGuard)
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    description: 'Se requiere una sesión válida',
+  })
+  @ApiForbiddenResponse({
+    description: 'La cuenta no pertenece a esta empresa',
+  })
+  @Roles('empresa')
+  @ApiOperation({
+    summary: 'Cierra manualmente una vacante publicada de la empresa',
+  })
+  @ApiOkResponse({
+    description: 'Vacante cerrada exitosamente con estado Cerrada',
+  })
+  @ApiNotFoundResponse({
+    description: 'La vacante no existe o no pertenece a la empresa',
+  })
+  @ApiConflictResponse({
+    description: 'Solo se pueden cerrar vacantes publicadas',
+  })
+  close(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.close(companyId, jobOfferId);
+  }
+
   @Patch('companies/:companyId/job-offers/:jobOfferId/reopen')
   @UseGuards(JwtAuthGuard, RolesGuard, CompanyOwnershipGuard)
   @ApiBearerAuth()

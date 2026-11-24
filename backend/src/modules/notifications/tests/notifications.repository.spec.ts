@@ -67,19 +67,43 @@ describe('NotificationsRepository', () => {
     const count = await repository.countUnread('user-1');
 
     expect(mockPrisma.notification.count).toHaveBeenCalledWith({
-      where: { recipientId: 'user-1', readAt: null,
+      where: {
+        recipientId: 'user-1',
+        readAt: null,
         type: { code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] } },
-       },
+      },
     });
     expect(count).toBe(5);
+  });
+
+  it('comprueba de forma durable un grupo por tipo y destinatario', async () => {
+    mockPrisma.notification.findFirst.mockResolvedValue({ id: 'n1' });
+
+    await expect(
+      repository.hasGroupedNotification(
+        'user-1',
+        'MENTOR_SLOT_OFFERED',
+        'mentor-slot-offer:offer-1',
+      ),
+    ).resolves.toBe(true);
+    expect(mockPrisma.notification.findFirst).toHaveBeenCalledWith({
+      where: {
+        recipientId: 'user-1',
+        groupKey: 'mentor-slot-offer:offer-1',
+        type: { code: 'MENTOR_SLOT_OFFERED' },
+      },
+      select: { id: true },
+    });
   });
 
   it('debe marcar todas las notificaciones como leídas', async () => {
     await repository.markAllAsRead('user-1');
     expect(mockPrisma.notification.updateMany).toHaveBeenCalledWith({
-      where: { recipientId: 'user-1', readAt: null,
+      where: {
+        recipientId: 'user-1',
+        readAt: null,
         type: { code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] } },
-       },
+      },
       data: { readAt: expect.any(Date) },
     });
   });

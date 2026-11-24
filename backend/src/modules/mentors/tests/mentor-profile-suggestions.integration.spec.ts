@@ -25,6 +25,7 @@ describe('compiled MentorsModule suggestions integration', () => {
       import { PrismaService } from './dist/common/prisma/prisma.service.js';
       import { ResponseInterceptor } from './dist/common/interceptors/response.interceptor.js';
       import { DomainExceptionFilter } from './dist/common/filters/domain-exception.filter.js';
+      import { PushDispatcherService } from './dist/modules/notifications/services/push-dispatcher.service.js';
       const reads = [];
       const prisma = { user: { findFirst: async ({ where, select }) => {
         reads.push(where.id);
@@ -35,7 +36,9 @@ describe('compiled MentorsModule suggestions integration', () => {
         return [{ photoByteLength: null, aboutMe: null, hasTechnicalAreas: false, hasWorkExperience: false }];
       } };
       const module = await Test.createTestingModule({ imports: [MentorsModule] })
-        .overrideProvider(PrismaService).useValue(prisma).compile();
+        .overrideProvider(PrismaService).useValue(prisma)
+        .overrideProvider(PushDispatcherService).useValue({ dispatchToUsers: async () => ({ status: 'skipped', deliveries: [] }) })
+        .compile();
       const app = module.createNestApplication({ logger: false });
       try {
         app.setGlobalPrefix('api');

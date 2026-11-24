@@ -19,6 +19,13 @@ export const SEED_USERS: ReadonlyArray<
     roles: ['titulado'],
   },
   {
+    key: 'historyGraduate',
+    firstName: 'Usuario',
+    lastName: 'Historial',
+    email: 'historial@umss.edu.bo',
+    roles: ['titulado'],
+  },
+  {
     key: 'mentorA',
     firstName: 'Mentor',
     lastName: 'Alfa',

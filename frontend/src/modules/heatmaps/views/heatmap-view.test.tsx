@@ -225,7 +225,9 @@ describe("HeatmapView", () => {
     expect(within(dialog).getByText(HEATMAP_FILTER_TEXT.rangeError)).toBeInTheDocument();
   });
 
-  it("exporta CSV y avisa que el PDF está pendiente de integración", async () => {
+  it("exporta CSV y descarga el PDF generado por el backend", async () => {
+    const pdf = new Blob(["%PDF-1.4"], { type: "application/pdf" });
+    vi.spyOn(heatmapsService, "exportHeatmapPdf").mockResolvedValue({ file: pdf, fileName: "mapa-calor-skills-by-experience.pdf" });
     const user = userEvent.setup();
     await renderView();
 
@@ -235,7 +237,9 @@ describe("HeatmapView", () => {
 
     await user.click(screen.getByRole("button", { name: HEATMAP_TEXT.export }));
     await user.click(await screen.findByRole("menuitem", { name: /Exportar PDF/ }));
-    expect(toast.info).toHaveBeenCalledWith(HEATMAP_TEXT.pdfPending, expect.anything());
+    await waitFor(() => expect(downloadFile).toHaveBeenCalledWith(pdf, "mapa-calor-skills-by-experience.pdf"));
+    expect(heatmapsService.exportHeatmapPdf).toHaveBeenCalledWith("skills-by-experience", expect.any(Object));
+    expect(toast.success).toHaveBeenCalledWith(HEATMAP_TEXT.pdfReady, expect.anything());
   });
 
   it("muestra el estado vacío cuando no hay base procesada", async () => {
