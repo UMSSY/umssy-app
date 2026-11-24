@@ -7,6 +7,7 @@ import { SkillSimulationDialog } from "./skill-simulation-dialog";
 
 const areas = RADAR_AXIS_NAMES.map((axis, index) => ({ ...axis, score: [0, 4.5, 10, 2, 6, 3][index] }));
 const jestSkill = { id: 'jest', name: 'Jest', areaId: 'qa', radarPoints: 1, radarHighRelevancePoints: 1.5 };
+const verified = { approved: [], highRelevanceSkillIds: [] };
 afterEach(cleanup);
 
 describe("Simulación temporal de habilidades", () => {
@@ -37,7 +38,7 @@ describe("Simulación temporal de habilidades", () => {
   it("actualiza el promedio y descarta la proyección al desmontar", () => {
     const close = vi.fn();
     const onProjectionChange = vi.fn();
-    const { unmount } = render(<SkillSimulationDialog areas={areas} initialArea="desarrollo" catalog={[jestSkill]} onProjectionChange={onProjectionChange} onClose={close} />);
+    const { unmount } = render(<SkillSimulationDialog areas={areas} initialArea="desarrollo" verification={verified} catalog={[jestSkill]} onProjectionChange={onProjectionChange} onClose={close} />);
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "jest" } });
     expect(onProjectionChange).toHaveBeenLastCalledWith({ areaId: "qa", score: 3 });
     expect(screen.getByLabelText("Puntaje proyectado")).toHaveTextContent("3");
@@ -53,7 +54,7 @@ describe("Simulación temporal de habilidades", () => {
   it("agrupa habilidades reales no verificadas y selecciona el eje correspondiente", () => {
     render(<SkillSimulationDialog areas={areas} initialArea="desarrollo" onClose={vi.fn()}
       catalog={[{ ...jestSkill, id: "react", name: "React" }, jestSkill, jestSkill]}
-      approved={[{ id: "react", name: "React" }]} />);
+      verification={{ ...verified, approved: [{ id: "react", name: "React" }] }} />);
 
     expect(screen.queryByRole("option", { name: "React" })).not.toBeInTheDocument();
     expect(screen.getAllByRole("option", { name: "Jest" })).toHaveLength(1);
@@ -62,15 +63,32 @@ describe("Simulación temporal de habilidades", () => {
     expect(screen.getByLabelText("Puntaje proyectado")).toHaveTextContent("3");
   });
 
-  it.each([[[], 3], [[{ type: 'cv', id: 'cv-id' }], 3.5]] as const)(
-    "aplica la relevancia solo con evidencia (%j)",
-    (evidenceRefs, expected) => {
+  it.each([[[], 3], [["jest"], 3.5]] as const)(
+    "uses the bonus only when the backend confirms eligibility (%j)",
+    (highRelevanceSkillIds, expected) => {
       render(<SkillSimulationDialog areas={areas} initialArea="qa" catalog={[jestSkill]} onClose={vi.fn()}
-        evidence={[{ ...jestSkill, text: 'Jest', source: 'nlp', isHighRelevance: true,
-          verificationStatus: 'pending', evidenceRefs: [...evidenceRefs] }]} />);
+        verification={{ approved: [], highRelevanceSkillIds: [...highRelevanceSkillIds] }} />);
       fireEvent.change(screen.getByRole("combobox"), { target: { value: "jest" } });
       expect(screen.getByRole("meter")).toHaveAttribute("aria-valuenow", String(expected));
       expect(screen.getByLabelText("Puntaje proyectado").tagName).toBe("OUTPUT");
     },
   );
+
+  it("clears selection and projection when eligibility changes", () => {
+    const onProjectionChange = vi.fn();
+    const props = { areas, initialArea: "qa" as const, catalog: [jestSkill], onClose: vi.fn(), onProjectionChange };
+    const view = render(<SkillSimulationDialog {...props} verification={verified} />);
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "jest" } });
+    expect(onProjectionChange).toHaveBeenLastCalledWith({ areaId: "qa", score: 3 });
+
+    view.rerender(<SkillSimulationDialog {...props} />);
+    expect(screen.getByRole("combobox")).toBeDisabled();
+    expect(screen.queryByRole("option", { name: "Jest" })).not.toBeInTheDocument();
+    expect(onProjectionChange).toHaveBeenLastCalledWith(null);
+
+    view.rerender(<SkillSimulationDialog {...props} verification={{ approved: [], highRelevanceSkillIds: ["jest"] }} />);
+    expect(screen.getByRole("combobox")).toHaveValue("");
+    expect(screen.getByRole("meter")).toHaveAttribute("aria-valuenow", "2");
+    expect(onProjectionChange).toHaveBeenLastCalledWith(null);
+  });
 });

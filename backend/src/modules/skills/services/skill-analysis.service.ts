@@ -69,8 +69,13 @@ export class SkillAnalysisService {
     ).length;
   }
 
-  findProfileSkillRows(userId: string): Promise<ProfileSkillRowResponse[]> {
-    return this.repository.findProfileSkillRows(userId);
+  findProfileSkillRows(
+    userId: string,
+    context?: TransactionContext,
+  ): Promise<ProfileSkillRowResponse[]> {
+    return context
+      ? this.repository.findProfileSkillRows(userId, context)
+      : this.repository.findProfileSkillRows(userId);
   }
 
   findApprovedPublicationSkills(userId: string, context: TransactionContext) {

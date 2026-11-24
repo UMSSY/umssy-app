@@ -103,6 +103,16 @@ function setup() {
             review_status: 'pending',
             extraction_status: 'ready',
           },
+          {
+            cv_id: 'extracting-cv',
+            review_status: 'approved',
+            extraction_status: 'pending',
+          },
+          {
+            cv_id: 'rejected-cv',
+            review_status: 'rejected',
+            extraction_status: 'ready',
+          },
         ];
       if (sql.includes('FROM radar_score_snapshots')) return rows;
       if (sql.includes('INSERT INTO radar_score_snapshots')) {
@@ -131,16 +141,18 @@ function setup() {
     })),
   };
   const events = new ProfileSkillsEvents();
-  const evidence = {
-    countPendingPublicationSkills: () => db.userSkill.count(),
-    read: async () =>
-      Promise.all([
+  const readEvidence = async () =>
+    Promise.all([
         db.userSkill.findMany(),
         db.$queryRaw`SELECT cv_id,review_status,extraction_status FROM radar_cv_evidence`,
         db.workExperience.findMany(),
         db.education.findMany(),
         db.certification.findMany(),
-      ]),
+      ]);
+  const evidence = {
+    countPendingPublicationSkills: () => db.userSkill.count(),
+    read: readEvidence,
+    readSimulation: readEvidence,
   };
   const notifications = {
     notify: vi.fn().mockResolvedValue({ inAppCount: 1 }),
@@ -162,6 +174,50 @@ function setup() {
   );
   return { service, db, state, rows, insertions, nlp, events, notifications };
 }
+
+describe('Radar simulation eligibility', () => {
+  it.each([
+    ['normal skill with valid evidence', 'work-experience', 'own-experience', false, false],
+    ['high relevance with valid evidence', 'work-experience', 'own-experience', true, true],
+    ['approved CV extracted successfully', 'cv', 'approved-cv', true, true],
+    ['CV awaiting approval', 'cv', 'pending-cv', true, false],
+    ['CV awaiting extraction', 'cv', 'extracting-cv', true, false],
+    ['rejected CV', 'cv', 'rejected-cv', true, false],
+    ['nonexistent source', 'work-experience', 'missing', true, false],
+  ])('matches official relevance for %s', async (_case, type, id, isHighRelevance, expected) => {
+    const { service, db, insertions, notifications } = setup();
+    const candidate = { ...skill('candidate', 'nlp', [{ type, id }]), isHighRelevance };
+    db.userSkill.findMany.mockResolvedValueOnce([
+      { ...candidate, verificationStatus: 'pending' },
+      { ...skill('recently-approved'), verificationStatus: 'approved' },
+      { ...skill('rejected'), verificationStatus: 'rejected' },
+    ]);
+
+    await expect(service.simulationEligibility(userId)).resolves.toEqual({
+      approved: [{ id: 'recently-approved', name: 'recently-approved' }],
+      highRelevanceSkillIds: expected ? ['candidate'] : [],
+    });
+    expect(db.$executeRaw).not.toHaveBeenCalled();
+    expect(insertions).toHaveLength(0);
+    expect(notifications.notify).not.toHaveBeenCalled();
+
+    db.userSkill.findMany.mockResolvedValueOnce([candidate]);
+    const published = await service.recalculate(userId, null);
+    expect(published?.skills.some((item) => item.isHighRelevance)).toBe(expected);
+  });
+
+  it('withholds bonuses while analysis is out of date', async () => {
+    const { service, state, db } = setup();
+    state.processedRevision = state.inputRevision - 1;
+    db.userSkill.findMany.mockResolvedValueOnce([
+      { ...skill('candidate'), verificationStatus: 'pending' },
+    ]);
+    await expect(service.simulationEligibility(userId)).resolves.toEqual({
+      approved: [],
+      highRelevanceSkillIds: [],
+    });
+  });
+});
 
 describe('Radar publication consistency', () => {
   it('reads NLP under the publication lock with the same transaction', async () => {

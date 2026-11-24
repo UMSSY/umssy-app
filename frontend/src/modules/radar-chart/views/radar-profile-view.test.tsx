@@ -17,7 +17,6 @@ import { stubMatchMedia } from '@/shared/testing/stub-match-media';
 import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import { useLiveRadar } from '../hooks/use-live-radar';
 import { RADAR_AXIS_NAMES } from '../constants/radar-axis-names.constants';
-import { profileSkillsRadarService } from '@/modules/profile';
 import { RadarProfileView } from './radar-profile-view';
 
 function renderWithQuery(ui: ReactElement) {
@@ -76,7 +75,7 @@ const source = {
   skills: [],
 };
 
-vi.spyOn(profileSkillsRadarService, 'getSkills').mockResolvedValue(source);
+const mockEligibility = vi.spyOn(radarIntegrationApi, 'simulationEligibility');
 
 const mockHook = vi.mocked(useLiveRadar);
 function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
@@ -120,6 +119,7 @@ function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
 describe('Radar personal integrado con Épica 2', () => {
   beforeEach(() => {
     stubMatchMedia();
+    mockEligibility.mockReset().mockResolvedValue({ approved: [], highRelevanceSkillIds: [] });
     setRadar();
     window.history.replaceState(null, '', '/profile/radar');
   });
@@ -353,6 +353,32 @@ describe('Radar personal integrado con Épica 2', () => {
     expect(
       screen.getByRole('button', { name: 'Proyección con mentoría' }),
     ).toBeInTheDocument();
+  });
+
+  it('blocks the catalog until current eligibility succeeds and retries a failed read', async () => {
+    let rejectEligibility: (error: Error) => void = () => undefined;
+    mockEligibility.mockImplementationOnce(() => new Promise((_resolve, reject) => {
+      rejectEligibility = reject;
+    })).mockResolvedValueOnce({
+      approved: [{ id: 'jest', name: 'Jest' }],
+      highRelevanceSkillIds: [],
+    });
+    renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Simular una habilidad' }));
+    const dialog = within(await screen.findByRole('dialog', { name: 'Proyecta una habilidad' }));
+    expect(dialog.getByText(/Consultando el estado/)).toBeInTheDocument();
+    expect(dialog.getByRole('combobox')).toBeDisabled();
+    expect(dialog.queryByRole('option', { name: 'Jest' })).not.toBeInTheDocument();
+
+    rejectEligibility(new Error('Eligibility unavailable'));
+    expect(await dialog.findByRole('alert')).toHaveTextContent(/No pudimos verificar/);
+    expect(dialog.getByRole('combobox')).toBeDisabled();
+    fireEvent.click(dialog.getByRole('button', { name: 'Reintentar' }));
+
+    await waitFor(() => expect(dialog.getByRole('combobox')).toBeEnabled());
+    expect(dialog.queryByRole('option', { name: 'Jest' })).not.toBeInTheDocument();
+    expect(mockEligibility).toHaveBeenCalledTimes(2);
   });
 
   it('abre el detalle del eje seleccionado y permite cerrarlo', () => {

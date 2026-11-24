@@ -24,6 +24,7 @@ import type { RadarAreaScore } from '../types/radar-area-score.types';
 import { projectRadarScore } from '../utils/project-radar-score';
 import type { SkillItem } from '@/modules/skills/types/skill-item.types';
 import type { Epic2Skill } from '../types/epic2-skill.types';
+import type { RadarSimulationEligibility } from '../types/radar-simulation-eligibility.types';
 import type { Projection } from '../types/projection.types';
 
 export function SkillSimulationDialog({
@@ -31,7 +32,9 @@ export function SkillSimulationDialog({
   initialArea,
   catalog = [],
   approved = [],
-  evidence = [],
+  verification,
+  verificationError = false,
+  onRetry,
   onProjectionChange,
   availability,
   onClose,
@@ -40,31 +43,36 @@ export function SkillSimulationDialog({
   initialArea: AreaId;
   catalog?: readonly SkillItem[];
   approved?: readonly Pick<Epic2Skill, 'id' | 'name'>[];
-  evidence?: readonly Epic2Skill[];
+  verification?: RadarSimulationEligibility;
+  verificationError?: boolean;
+  onRetry?: () => void;
   onProjectionChange?: (value: Projection) => void;
   availability?: ReactNode;
   onClose: () => void;
 }) {
-  const [skillId, setSkillId] = useState('');
-  const verified = [
-    ...approved,
-    ...evidence.filter(({ verificationStatus }) => verificationStatus === 'approved'),
-  ];
+  const [selection, setSelection] = useState<{
+    id: string;
+    verification: RadarSimulationEligibility;
+  } | null>(null);
+  if (selection && (verificationError || (verification && selection.verification !== verification))) {
+    setSelection(null);
+  }
+  const verified = [...approved, ...(verification?.approved ?? [])];
   const verifiedIds = new Set(verified.map(({ id }) => id));
   const verifiedNames = new Set(verified.map(({ name }) => name.trim().toLowerCase()));
-  const skills = [...new Map(catalog.map((skill) => [skill.id, skill])).values()]
-    .filter(({ id, name, areaId, radarPoints }) =>
-      radarPoints !== undefined &&
-      areas.some((area) => area.id === areaId) &&
-      !verifiedIds.has(id) && !verifiedNames.has(name.trim().toLowerCase()),
-    );
-  const skill = skills.find(({ id }) => id === skillId);
+  const skills = verification
+    ? [...new Map(catalog.map((skill) => [skill.id, skill])).values()]
+        .filter(({ id, name, areaId, radarPoints }) =>
+          radarPoints !== undefined &&
+          areas.some((area) => area.id === areaId) &&
+          !verifiedIds.has(id) && !verifiedNames.has(name.trim().toLowerCase()),
+        )
+    : [];
+  const skill = selection?.verification === verification
+    ? skills.find(({ id }) => id === selection?.id)
+    : undefined;
   const area = areas.find(({ id }) => id === (skill?.areaId ?? initialArea))!;
-  const highRelevance = evidence.some((item) =>
-    item.id === skill?.id && item.areaId === area.id &&
-    item.isHighRelevance && item.evidenceRefs.length > 0 &&
-    item.verificationStatus === 'pending',
-  );
+  const highRelevance = skill && verification?.highRelevanceSkillIds.includes(skill.id);
   const points = highRelevance
     ? skill?.radarHighRelevancePoints ?? skill?.radarPoints
     : skill?.radarPoints;
@@ -121,7 +129,12 @@ export function SkillSimulationDialog({
                 id="simulation-area"
                 aria-label="Competencia"
                 value={skill?.id ?? ''}
-                onChange={(event) => setSkillId(event.target.value)}
+                disabled={!verification}
+                onChange={(event) => {
+                  if (verification) {
+                    setSelection({ id: event.target.value, verification });
+                  }
+                }}
               >
                 <NativeSelectOption value="">Selecciona una habilidad</NativeSelectOption>
                 {areas.map((item) => (
@@ -136,9 +149,24 @@ export function SkillSimulationDialog({
                   </NativeSelectOptGroup>
                 ))}
               </NativeSelect>
-              <p className="text-[11px] leading-4 text-text-secondary">
-                Selecciona una habilidad del catálogo pendiente de verificar.
-              </p>
+              {verificationError ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <p role="alert" className="text-[11px] leading-4 text-text-secondary">
+                    No pudimos verificar las habilidades disponibles.
+                  </p>
+                  <Button type="button" size="sm" variant="outline" onClick={onRetry}>
+                    Reintentar
+                  </Button>
+                </div>
+              ) : !verification ? (
+                <p role="status" className="text-[11px] leading-4 text-text-secondary">
+                  Consultando el estado de las habilidades…
+                </p>
+              ) : (
+                <p className="text-[11px] leading-4 text-text-secondary">
+                  Selecciona una habilidad del catálogo pendiente de verificar.
+                </p>
+              )}
             </div>
             <section className="space-y-2 border border-border bg-surface-soft p-3 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">

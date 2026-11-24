@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { profileSkillsRadarService } from '@/modules/profile';
+import { radarIntegrationApi } from '../services/radar-integration.service';
 import { skillsService } from '@/modules/skills/services/skills.service';
 import { RadarAreaActions } from '../components/radar-area-actions';
 import { SkillSimulationDialog } from '../components/skill-simulation-dialog';
@@ -70,11 +70,20 @@ export function RadarProfileView() {
     staleTime: 5 * 60 * 1000,
   });
   const [showMentorship, setShowMentorship] = useState(false);
-  const simulationEvidence = useQuery({
-    queryKey: ['radar-simulation-evidence', data?.userId],
-    queryFn: profileSkillsRadarService.getSkills,
-    enabled: simulationArea !== null && !snapshotId,
+  const simulationEligibility = useQuery({
+    queryKey: ['radar-simulation-eligibility', data?.userId],
+    queryFn: radarIntegrationApi.simulationEligibility,
+    enabled: simulationArea !== null,
+    refetchInterval: 30_000,
+    retry: false,
   });
+  const simulationLoading =
+    simulationEligibility.isFetching || simulationCatalog.isFetching;
+  const simulationError =
+    simulationEligibility.isError || simulationCatalog.isError ||
+    simulationEligibility.isPaused || simulationCatalog.isPaused;
+  const simulationReady = !simulationLoading && !simulationError &&
+    simulationEligibility.isSuccess && simulationCatalog.isSuccess;
   const closeSimulation = () => {
     setProjection(null);
     setSimulationArea(null);
@@ -441,7 +450,12 @@ export function RadarProfileView() {
               initialArea={simulationArea}
               catalog={simulationCatalog.data}
               approved={data.approved}
-              evidence={simulationEvidence.data?.userId === data.userId ? simulationEvidence.data.skills : undefined}
+              verification={simulationReady ? simulationEligibility.data : undefined}
+              verificationError={!simulationLoading && simulationError}
+              onRetry={() => {
+                void simulationEligibility.refetch();
+                void simulationCatalog.refetch();
+              }}
               onProjectionChange={setProjection}
               availability={showMentorship && selected ? <MentorshipAvailability area={selected} /> : null}
               onClose={closeSimulation}

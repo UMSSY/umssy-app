@@ -1,4 +1,5 @@
 import type { CvRescanResponse } from '../types/cv-rescan-response.types';
+import type { RadarSimulationEligibility } from '../types/radar-simulation-eligibility.types';
 import { apiClient } from '@/shared/services/api-client';
 import type { ApiResponse } from '@/shared/types/api-response.types';
 import type {
@@ -25,6 +26,28 @@ export type { RadarReviewOperationResult } from '../types/radar-review-operation
 export const radarIntegrationApi = {
   me: async () =>
     extract(await apiClient.get<ApiResponse<IntegrationRadar>>(root)),
+
+  simulationEligibility: async () => {
+    const eligibility = extract(
+      await apiClient.get<ApiResponse<Partial<RadarSimulationEligibility>>>(
+        `${root}/simulation-eligibility`,
+      ),
+    );
+    if (
+      !Array.isArray(eligibility?.approved) ||
+      !eligibility.approved.every(
+        (skill) => typeof skill?.id === 'string' && typeof skill.name === 'string',
+      ) ||
+      !Array.isArray(eligibility.highRelevanceSkillIds) ||
+      !eligibility.highRelevanceSkillIds.every((id) => typeof id === 'string')
+    ) {
+      throw new Error('Invalid radar simulation eligibility');
+    }
+    return {
+      approved: eligibility.approved,
+      highRelevanceSkillIds: eligibility.highRelevanceSkillIds,
+    };
+  },
 
   historical: async (id: string) =>
     extract(
