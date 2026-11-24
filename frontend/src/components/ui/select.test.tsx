@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 import {
@@ -81,11 +81,16 @@ describe("Select", () => {
     async (variant) => {
       const user = userEvent.setup()
       renderSelect({ variant })
-      await user.click(screen.getByRole("combobox", { name: "Ciudad" }))
+      await user.tab()
+      expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveFocus()
+      await user.keyboard("{ArrowDown}")
+      const listbox = await screen.findByRole("listbox")
+      await waitFor(() => expect(listbox).toContainElement(document.activeElement))
+
       await user.keyboard("{End}")
       const option = screen.getByRole("option", { name: "La Paz" })
 
-      expect(option).toHaveAttribute("data-highlighted")
+      await waitFor(() => expect(option).toHaveAttribute("data-highlighted"))
       expect(option).toHaveClass("focus:text-ink")
       expect(option.className).not.toContain("text-accent-foreground")
       if (variant === "default") {
