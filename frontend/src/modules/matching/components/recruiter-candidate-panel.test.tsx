@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { radarRecruiterApi } from "../services/radar-recruiter.service";
 import { RADAR_AXES } from "../constants/radar-axes.constants";
+import * as chatModule from "@/modules/chat";
+import { MessagingUiProvider } from "@/modules/chat";
 import type { AreaEvidence } from "../types/area-evidence.types";
 import type { RecruiterApplicant } from "../types/recruiter-applicant.types";
 import type { RecruiterTarget } from "../types/recruiter-target.types";
@@ -100,11 +102,13 @@ const EVIDENCE: AreaEvidence = {
 
 function renderPanel(candidate: RecruiterApplicant | null) {
   return renderWithQuery(
-    <RecruiterCandidatePanel
-      candidate={candidate}
-      vacancy={TARGET}
-      axes={RADAR_AXES}
-    />,
+    <MessagingUiProvider>
+      <RecruiterCandidatePanel
+        candidate={candidate}
+        vacancy={TARGET}
+        axes={RADAR_AXES}
+      />
+    </MessagingUiProvider>,
   );
 }
 
@@ -127,6 +131,18 @@ describe("RecruiterCandidatePanel", () => {
     vi.spyOn(radarRecruiterApi, "recruiterCv").mockResolvedValue(
       new Blob(["pdf"], { type: "application/pdf" }),
     );
+    vi.spyOn(chatModule, "getOrCreateConversation").mockResolvedValue({
+      id: "conversation-carlos",
+      contact: {
+        id: "user-carlos",
+        fullName: "Carlos Mendoza Ríos",
+        isOnline: false,
+      },
+      unreadCount: 0,
+      updatedAt: "2026-11-20T20:00:00.000Z",
+      contextType: "POSTULACION",
+      contextId: "app-carlos",
+    });
   });
 
   afterEach(() => {
@@ -180,6 +196,40 @@ describe("RecruiterCandidatePanel", () => {
     expect(
       screen.queryByRole("button", { name: "Revisar CV" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("abre o reutiliza el chat directo del postulante", async () => {
+    renderPanel(CARLOS);
+
+    fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
+
+    await waitFor(() => {
+      expect(chatModule.getOrCreateConversation).toHaveBeenCalledWith(
+        "user-carlos",
+        {
+          contextType: "POSTULACION",
+          contextId: "app-carlos",
+        },
+      );
+    });
+  });
+
+  it("permite reintentar si no se puede abrir el chat", async () => {
+    vi.mocked(chatModule.getOrCreateConversation).mockRejectedValueOnce(
+      new Error("sin conexión"),
+    );
+    renderPanel(CARLOS);
+
+    fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
+
+    expect(
+      await screen.findByRole("alert"),
+    ).toHaveTextContent(
+      "No se pudo abrir el chat del postulante",
+    );
+    expect(
+      screen.getByRole("button", { name: "Reintentar Contactar" }),
+    ).toBeInTheDocument();
   });
 
   it("carga la evidencia autorizada al elegir un eje y la cierra", async () => {
@@ -263,62 +313,17 @@ describe("RecruiterCandidatePanel", () => {
     ).toBeInTheDocument();
   });
 
-  it("registra la decisión de aceptar la postulación", async () => {
+  it("no muestra botones de aceptar ni rechazar postulación", () => {
     renderPanel(CARLOS);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Aceptar postulación" }),
-    );
-
-    await waitFor(() => {
-      expect(radarRecruiterApi.decide).toHaveBeenCalledWith(
-        "app-carlos",
-        "hired",
-      );
-    });
-  });
-
-  it("registra la decisión de rechazar la postulación", async () => {
-    renderPanel(CARLOS);
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "Rechazar postulación" }),
-    );
-
-    await waitFor(() => {
-      expect(radarRecruiterApi.decide).toHaveBeenCalledWith(
-        "app-carlos",
-        "rejected",
-      );
-    });
-  });
-
-  it("informa cuando la decisión no se puede registrar", async () => {
-    vi.mocked(radarRecruiterApi.decide).mockRejectedValueOnce(
-      new Error("conflicto"),
-    );
-    renderPanel(CARLOS);
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "Aceptar postulación" }),
-    );
-
-    expect(
-      await screen.findByText(
-        "No se pudo registrar la decisión. Intenta nuevamente.",
-      ),
-    ).toBeInTheDocument();
-  });
-
-  it("oculta las acciones cuando la postulación ya tiene una decisión", () => {
-    renderPanel({ ...CARLOS, state: "hired" });
-
-    expect(screen.getByText("Contratado.")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Aceptar postulación" }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Rechazar postulación" }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Contactar" }),
+    ).toHaveAttribute("id", "recruiter-contact-button");
   });
 });

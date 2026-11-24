@@ -33,22 +33,30 @@ export function ChatDock() {
   const canChat = roles.some((role) => getRouteRoles("/chat").includes(role));
   const isOpen = Boolean(ui?.isPanelOpen && canChat && pathname !== "/chat");
   const setIsPanelOpen = ui?.setIsPanelOpen;
+  const launcherId = ui?.launcherId ?? null;
+  const setLauncherId = ui?.setLauncherId;
+  const launcherRef = useRef<string | null>(null);
+  useEffect(() => { launcherRef.current = launcherId; }, [launcherId]);
   useEffect(() => { if (pathname === "/chat" || !canChat) setIsPanelOpen?.(false); }, [pathname, canChat, setIsPanelOpen]);
   useEffect(() => {
     if (isOpen) closeRef.current?.focus();
-    else if (wasOpen.current) document.getElementById(TRIGGER_ID)?.focus();
+    else if (wasOpen.current) {
+      const launcher = launcherRef.current ? document.getElementById(launcherRef.current) : null;
+      (launcher ?? document.getElementById(TRIGGER_ID))?.focus();
+      setLauncherId?.(null);
+    }
     wasOpen.current = isOpen;
-  }, [isOpen]);
+  }, [isOpen, setLauncherId]);
   if (!ui || !canChat || pathname === "/chat") return null;
   return (
-    <div className={cn("sticky top-app-header h-app-sidebar min-w-0 shrink-0 self-start overflow-hidden transition-[width] duration-300 ease-out", isOpen ? "w-chat-dock" : "w-0")}>
-      <div className="min-w-0 overflow-hidden" inert={!isOpen} aria-hidden={!isOpen || undefined}>
-        <aside id={DOCK_ID} aria-label="Mensajes rápidos" className="flex h-app-sidebar w-chat-dock flex-col border-l border-sidebar-border bg-surface" onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.stopPropagation(); ui.setIsPanelOpen(false); } }}>
+    <div className={cn("fixed inset-0 z-50 h-dvh w-full overflow-hidden bg-surface md:sticky md:inset-auto md:top-app-header md:h-app-sidebar md:w-auto md:self-start md:border-l md:border-sidebar-border md:transition-[width] md:duration-300 md:ease-out", isOpen ? "block md:w-chat-dock" : "hidden md:block md:w-0")}>
+      <div className="size-full min-w-0 overflow-hidden" inert={!isOpen} aria-hidden={!isOpen || undefined}>
+        <aside id={DOCK_ID} aria-label="Mensajes rápidos" className="flex size-full flex-col border-l-0 border-sidebar-border bg-surface md:h-app-sidebar md:w-chat-dock md:border-l" onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.stopPropagation(); ui.setIsPanelOpen(false); } }}>
           <header className="flex items-center justify-between gap-3 border-b border-border bg-sidebar p-4">
             <h2 className="font-bold text-ink">Mensajes</h2>
             <div className="flex items-center gap-1">
-              <Link href="/chat" onClick={() => ui.setIsPanelOpen(false)} aria-label="Abrir mensajes en pantalla completa" className={buttonVariants({ variant: "ghost", size: "icon-sm" })}><Maximize2 aria-hidden="true" /></Link>
-              <Button ref={closeRef} variant="ghost" size="icon-sm" aria-label="Cerrar mensajes rápidos" onClick={() => ui.setIsPanelOpen(false)}><X aria-hidden="true" /></Button>
+              <Link href="/chat" onClick={() => ui.setIsPanelOpen(false)} aria-label="Abrir mensajes en pantalla completa" className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }), "size-11 md:size-8")}><Maximize2 aria-hidden="true" /></Link>
+              <Button ref={closeRef} variant="ghost" size="icon-sm" aria-label="Cerrar mensajes rápidos" onClick={() => ui.setIsPanelOpen(false)} className="size-11 md:size-8"><X aria-hidden="true" /></Button>
             </div>
           </header>
           <div className="flex min-h-0 flex-1 flex-col">{isOpen ? <ChatWorkspace isCompact /> : null}</div>
