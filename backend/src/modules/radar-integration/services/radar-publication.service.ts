@@ -31,7 +31,6 @@ export class RadarPublicationService {
     let revision = publication?.inputRevision ?? 0;
     let attemptStartedAt = new Date();
     let publishedSnapshotId: string | null = null;
-    let publishedVersion = 0;
     let result;
     try {
       result = await this.repository.withTransaction(async (store, context) => {
@@ -139,7 +138,6 @@ export class RadarPublicationService {
         );
 
         publishedSnapshotId = inserted[0].id;
-        publishedVersion = version;
 
         return this.mapper.snapshotResponse(
           { ...inserted[0], source_revision: revision, skills: accepted },
@@ -158,15 +156,15 @@ export class RadarPublicationService {
       } catch {}
       throw error;
     }
-    if (publishedSnapshotId) {
+    if (publishedSnapshotId && result) {
       const snapshotId = String(publishedSnapshotId);
       try {
         await this.notifications.notify({
           recipientIds: [userId],
           type: NotificationType.RADAR_PUBLISHED,
           payload: radarPublishedPayloadSchema.parse({
-            radarVersion: String(publishedVersion),
-            publishedAt: new Date().toISOString(),
+            radarVersion: String(result.version),
+            publishedAt: result.updatedAt.toISOString(),
           }),
           actionUrl: `/profile/radar?snapshot=${snapshotId}`,
           groupKey: `radar:${snapshotId}`,

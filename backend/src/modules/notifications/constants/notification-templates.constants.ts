@@ -1,3 +1,4 @@
+import { formatBoliviaDateTime } from '../../../common/utils/date-time.js';
 import { APPOINTMENT_BOOKED_TEMPLATE } from '../../appointments/notification/appointment-booked.template.js';
 import { APPOINTMENT_CANCELLED_TEMPLATE } from '../../appointments/notification/appointment-cancelled.template.js';
 import { NotificationType } from '../types/notification-type.enum.js';
@@ -41,7 +42,9 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   [NotificationType.RADAR_PUBLISHED]: {
     renderTitle: () => 'Nueva versión del Radar publicada',
     renderBody: (p) =>
-      truncate(`Tu radar ha sido actualizado (Versión: ${p.radarVersion}).`),
+      truncate(
+        `La versión ${p.radarVersion} de tu radar se publicó el ${formatBoliviaDateTime(p.publishedAt)} (hora de Bolivia).`,
+      ),
   },
 
   [NotificationType.APPOINTMENT_CANCELLED]: APPOINTMENT_CANCELLED_TEMPLATE,

@@ -187,6 +187,10 @@ describe('Radar publication consistency', () => {
       expect.objectContaining({
         recipientIds: [userId],
         type: 'RADAR_PUBLISHED',
+        payload: {
+          radarVersion: '4',
+          publishedAt: '2026-10-26T12:00:00.000Z',
+        },
         groupKey: 'radar:bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         actionUrl:
           '/profile/radar?snapshot=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
