@@ -725,7 +725,7 @@ function ProfileGuideSessionProvider({
                   Seguir editando
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  variant="destructive"
+                  variant="outline"
                   onClick={() => {
                     const action = pendingActionRef.current;
                     pendingActionRef.current = null;

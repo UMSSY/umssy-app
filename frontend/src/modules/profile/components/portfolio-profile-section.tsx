@@ -147,7 +147,7 @@ export function PortfolioProfileSection({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-xs hover:bg-critical-action/20"
+              className="h-6 px-2 text-xs text-ink hover:bg-surface-soft"
               onClick={() => setSyncErrorMessage(null)}
             >
               Descartar
