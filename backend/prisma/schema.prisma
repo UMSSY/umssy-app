@@ -193,6 +193,7 @@ model User {
   portfolioProjects    UserPortfolioProject[]
 
   notificationPreferences NotificationPreference?
+  jobOfferNotificationPreference JobOfferNotificationPreference?
   receivedNotifications   Notification[]           @relation("ReceivedNotifications")
   triggeredNotifications  Notification[]           @relation("TriggeredNotifications")
   pushSubscriptions       PushSubscription[]
@@ -1820,6 +1821,31 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
+}
+
+model JobAlertMode {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  preferences JobOfferNotificationPreference[]
+
+  @@map("job_alert_modes")
+}
+
+model JobOfferNotificationPreference {
+  userId    String   @id @map("user_id") @db.Uuid
+  modeId    String   @map("mode_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode JobAlertMode @relation(fields: [modeId], references: [id], onDelete: Restrict)
+
+  @@index([modeId])
+  @@map("job_offer_notification_preferences")
 }
 
 model RadarDocumentStatus {

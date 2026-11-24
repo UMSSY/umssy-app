@@ -14,7 +14,7 @@ export function ContactApplicationButton({
     <Button
       size="sm"
       className={className}
-      disabled={contactingId !== null}
+      disabled={isContacting}
       aria-busy={isContacting}
       onClick={() => onContact(application)}
     >

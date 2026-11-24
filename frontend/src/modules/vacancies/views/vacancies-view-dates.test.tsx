@@ -7,6 +7,10 @@ import { vacanciesService } from "../services/vacancies.service";
 import { buildVacancy } from "../testing/vacancy-fixtures";
 import { VacanciesView } from "./vacancies-view";
 
+vi.mock("@/modules/matching/hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
+
 vi.mock("../services/vacancies.service", () => ({
   vacanciesService: { listPublished: vi.fn() },
 }));
