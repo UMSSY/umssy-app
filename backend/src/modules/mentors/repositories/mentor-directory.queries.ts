@@ -2,15 +2,14 @@ import { resolveMentorAreas } from '../constants/radar-mentor-areas.constants.js
 import { Prisma } from '../../../prisma/client.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import { containsNormalizedText } from '../../../common/prisma/contains-normalized-text.js';
+import { matchesUserSkill } from '../../skills/user-skills-search.js';
+import { matchesWorkExperience } from '../../work-experience/work-experience-search.js';
 
 export type DirectoryFilters = Pick<
   MentorDirectoryQuery,
   'search' | 'area' | 'areaIds' | 'orientation' | 'available'
 >;
-
-function normalized(value: Prisma.Sql): Prisma.Sql {
-  return Prisma.sql`lower(regexp_replace(normalize(${value}, NFD), ${'[\u0300-\u036f]'}, '', 'g'))`;
-}
 
 export function directoryPredicate(
   filters: DirectoryFilters,
@@ -43,17 +42,14 @@ export function directoryPredicate(
   )`);
   for (const term of filters.search.trim().split(/\s+/).filter(Boolean)) {
     conditions.push(Prisma.sql`(
-      strpos(${normalized(Prisma.sql`u.first_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
-      OR strpos(${normalized(Prisma.sql`u.last_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
-      OR strpos(${normalized(Prisma.sql`coalesce(u.headline, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
-      OR strpos(${normalized(Prisma.sql`coalesce(u.about_me, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
-      OR EXISTS (SELECT 1 FROM work_experiences we WHERE we.user_id = u.id
-        AND (strpos(${normalized(Prisma.sql`we.position`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
-          OR strpos(${normalized(Prisma.sql`coalesce(we.description, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0))
+      ${containsNormalizedText(Prisma.sql`u.first_name`, term)}
+      OR ${containsNormalizedText(Prisma.sql`u.last_name`, term)}
+      OR ${containsNormalizedText(Prisma.sql`coalesce(u.headline, '')`, term)}
+      OR ${containsNormalizedText(Prisma.sql`coalesce(u.about_me, '')`, term)}
+      OR ${matchesWorkExperience(Prisma.sql`u.id`, term)}
       OR EXISTS (SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
-        WHERE mta.mentor_id = u.id AND strpos(${normalized(Prisma.sql`ta.name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0)
-      OR EXISTS (SELECT 1 FROM user_skills us JOIN skills s ON s.id = us.skill_id
-        WHERE us.user_id = u.id AND strpos(${normalized(Prisma.sql`s.name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0)
+        WHERE mta.mentor_id = u.id AND ${containsNormalizedText(Prisma.sql`ta.name`, term)})
+      OR ${matchesUserSkill(Prisma.sql`u.id`, term)}
     )`);
   }
   return Prisma.join(conditions, ' AND ');

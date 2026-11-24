@@ -6,9 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
-import { radarIntegrationApi } from '../services/radar-integration.service';
-import { skillsService } from '@/modules/skills/services/skills.service';
+import { useSkillCatalog } from '@/modules/skills';
+import { useRadarSimulationEligibility } from '../hooks/use-radar-simulation-eligibility';
 import { RadarAreaActions } from '../components/radar-area-actions';
 import { SkillSimulationDialog } from '../components/skill-simulation-dialog';
 import { cn } from '@/lib/utils';
@@ -63,20 +62,12 @@ export function RadarProfileView() {
     score: number;
   } | null>(null);
   const [simulationArea, setSimulationArea] = useState<AreaId | null>(null);
-  const simulationCatalog = useQuery({
-    queryKey: ['radar-simulation-catalog', data?.userId],
-    queryFn: skillsService.getCatalog,
-    enabled: simulationArea !== null,
-    staleTime: 5 * 60 * 1000,
-  });
+  const simulationCatalog = useSkillCatalog(simulationArea !== null);
   const [showMentorship, setShowMentorship] = useState(false);
-  const simulationEligibility = useQuery({
-    queryKey: ['radar-simulation-eligibility', data?.userId],
-    queryFn: radarIntegrationApi.simulationEligibility,
-    enabled: simulationArea !== null,
-    refetchInterval: 30_000,
-    retry: false,
-  });
+  const simulationEligibility = useRadarSimulationEligibility(
+    data?.userId,
+    simulationArea !== null,
+  );
   const simulationLoading =
     simulationEligibility.isFetching || simulationCatalog.isFetching;
   const simulationError =

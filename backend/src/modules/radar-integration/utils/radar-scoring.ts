@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { radarSkillPoints } from '../../../common/radar/radar-skill-rubric.js';
 
 export const AREA_IDS = [
   'desarrollo',
@@ -20,9 +21,6 @@ export interface EvidenceSkill {
   isHighRelevance: boolean;
   evidenceRefs?: readonly { type: string; id: string }[];
 }
-export const radarSkillPoints = (isHighRelevance: boolean): number =>
-  1 + (isHighRelevance ? 0.5 : 0);
-
 export function scoreVerifiedSkills(skills: readonly EvidenceSkill[]): {
   scores: Scores;
   evidence: Record<string, { id: string; name: string }[]>;

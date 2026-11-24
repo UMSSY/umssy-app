@@ -1,7 +1,6 @@
 import type { AreaId } from "@/modules/radar-chart/types/area-id.types";
 import type { TechnicalAreaResponse } from "../types/technical-area-response.types";
 
-// Resolve against the live catalog; never fabricate UUIDs or substitute unrelated specialties.
 const CATALOG_NAMES: Record<AreaId, readonly string[]> = {
   desarrollo: ["Desarrollo", "Desarrollo de Software", "Desarrollo Web", "Backend"],
   "cloud-devops": ["Cloud/DevOps", "Cloud & DevOps", "Cloud", "DevOps"],
