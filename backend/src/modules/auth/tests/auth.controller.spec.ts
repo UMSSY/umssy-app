@@ -123,7 +123,7 @@ describe('AuthController', () => {
     );
   });
 
-  it('rotates the session on refresh without returning any token in the body', async () => {
+  it('rotates the session on refresh and answers with the renewed access token', async () => {
     const refreshTokens = buildRefreshTokens();
     refreshTokens.rotate.mockResolvedValue({
       accessToken: 'new-access',
@@ -157,7 +157,11 @@ describe('AuthController', () => {
       'new-refresh',
       expect.objectContaining({ path: '/api/auth' }),
     );
-    expect(result).toEqual({ roleTag: 'titulado', roles: ['titulado'] });
+    expect(result).toEqual({
+      accessToken: 'new-access',
+      roleTag: 'titulado',
+      roles: ['titulado'],
+    });
   });
 
   it('clears both cookies and rethrows when refresh is rejected', async () => {

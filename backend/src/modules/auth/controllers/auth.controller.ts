@@ -184,7 +184,11 @@ export class AuthController {
         session.refreshToken,
         buildRefreshTokenCookieOptions(session.refreshMaxAgeMs),
       );
-      return { roleTag: session.roleTag, roles: session.roles };
+      return {
+        accessToken: session.accessToken,
+        roleTag: session.roleTag,
+        roles: session.roles,
+      };
     } catch (error) {
       if (error instanceof DomainException && error.statusCode === 401) {
         response.clearCookie(

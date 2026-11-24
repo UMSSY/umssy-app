@@ -68,7 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     >
       {children}
       {Boolean(accessToken || session.data?.id) ? (
-        <SessionInactivityGuard />
+        <SessionInactivityGuard session={session.data} />
       ) : null}
     </AuthContext.Provider>
   );

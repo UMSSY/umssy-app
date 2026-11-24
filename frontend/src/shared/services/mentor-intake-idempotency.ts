@@ -1,6 +1,9 @@
 import { isApiError } from "@/shared/services/api-client";
 import { getAccessToken, initializeAccessTokenStorage } from "@/shared/services/storage/access-token-storage";
-import { getCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
+import {
+  getCurrentSessionUserId,
+  initializeSessionUserId,
+} from "@/shared/services/storage/session-user-id-storage";
 import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import {
   readSessionStorage,
@@ -57,6 +60,7 @@ function clearLegacyIntention(operation: MentorIntakeOperation): void {
 export async function clearMentorIntakeIntentions(
   operations: readonly MentorIntakeOperation[] = ["activate", "request"],
 ): Promise<void> {
+  await initializeSessionUserId();
   for (const operation of operations) clearLegacyIntention(operation);
   await Promise.all(
     operations.map((operation) =>
@@ -71,6 +75,7 @@ export async function withMentorIntakeKey<T>(
   submit: (key: string) => Promise<T>,
 ): Promise<T> {
   await initializeAccessTokenStorage();
+  await initializeSessionUserId();
   const name = storageKey(operation);
   const fingerprint = JSON.stringify({
     technicalAreaIds: [...preferences.technicalAreaIds].sort(),

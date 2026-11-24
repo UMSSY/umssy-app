@@ -6,6 +6,7 @@ import {
   DEFAULT_WARNING_SECONDS,
   DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS,
 } from "../constants/session-timing.constants";
+import { readSessionActivity, recordSessionActivity } from "@/shared/utils/session-activity";
 import { executeSharedRefresh } from "../utils/session-refresh-lock";
 
 export interface UseSessionInactivityOptions {
@@ -61,16 +62,15 @@ export function useSessionInactivity({
     }
   }, []);
 
-  // Actualiza la última actividad del usuario ante interacción
+  // Con la advertencia abierta la sesión solo se extiende pulsando "Seguir conectado"
   const recordActivity = useCallback(() => {
-    // Si la advertencia ya está abierta, la actividad no la cierra silenciosamente:
-    // debe pulsar "Seguir conectado" expresamente (CA5).
     if (!isWarningOpenRef.current) {
-      lastActivityRef.current = Date.now();
+      const now = Date.now();
+      lastActivityRef.current = now;
+      recordSessionActivity(now);
     }
   }, []);
 
-  // Escucha eventos de actividad del usuario (clics, teclado, scroll, touch)
   useEffect(() => {
     if (!enabled) return;
 
@@ -97,7 +97,6 @@ export function useSessionInactivity({
     };
   }, [enabled, recordActivity]);
 
-  // Bucle de comprobación periódica del estado de inactividad
   useEffect(() => {
     if (!enabled) return;
 
@@ -106,7 +105,14 @@ export function useSessionInactivity({
       const idleTimeoutMs = idleTimeoutSeconds * 1000;
       const warningMs = warningSeconds * 1000;
       const warningThresholdMs = idleTimeoutMs - warningMs;
-      const lastActive = lastActivityRef.current || now;
+      // La sesión es compartida: cuenta la última actividad de cualquier pestaña.
+      // Una marca futura viene de un reloj desfasado y no extiende la sesión.
+      const sharedActivity = readSessionActivity();
+      const lastActive =
+        Math.max(
+          lastActivityRef.current,
+          sharedActivity > now ? 0 : sharedActivity,
+        ) || now;
       const elapsedMs = now - lastActive;
 
       let absoluteRemainingMs = Number.POSITIVE_INFINITY;
@@ -117,7 +123,6 @@ export function useSessionInactivity({
         }
       }
 
-      // 1. Expiración total (inactividad superó el límite o se alcanzó el tope absoluto de 8h)
       if (elapsedMs >= idleTimeoutMs || absoluteRemainingMs <= 0) {
         setIsWarningOpen(false);
         setSecondsLeft(0);
@@ -125,7 +130,6 @@ export function useSessionInactivity({
         return;
       }
 
-      // 2. Ventana de advertencia (falta poco para expirar)
       const idleRemainingSeconds = Math.max(
         0,
         Math.ceil((idleTimeoutMs - elapsedMs) / 1000),
@@ -147,7 +151,6 @@ export function useSessionInactivity({
         setSecondsLeft(warningSeconds);
       }
 
-      // Renovación automática periódica mientras haya actividad (~10 minutos)
       const autoRefreshIntervalMs = autoRefreshIntervalSeconds * 1000;
       const timeSinceLastRefresh = now - (lastRefreshRef.current || now);
       const hadActivitySinceLastRefresh = lastActive > lastRefreshRef.current;
@@ -173,7 +176,6 @@ export function useSessionInactivity({
     checkIntervalMs,
   ]);
 
-  // Acción para "Seguir conectado" (CA5)
   const stayConnected = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -183,6 +185,7 @@ export function useSessionInactivity({
       const now = Date.now();
       lastActivityRef.current = now;
       lastRefreshRef.current = now;
+      recordSessionActivity(now);
       setIsWarningOpen(false);
       setSecondsLeft(warningSeconds);
     } finally {
@@ -191,7 +194,9 @@ export function useSessionInactivity({
   }, [warningSeconds]);
 
   const resetActivity = useCallback(() => {
-    lastActivityRef.current = Date.now();
+    const now = Date.now();
+    lastActivityRef.current = now;
+    recordSessionActivity(now);
     setIsWarningOpen(false);
     setSecondsLeft(warningSeconds);
   }, [warningSeconds]);
