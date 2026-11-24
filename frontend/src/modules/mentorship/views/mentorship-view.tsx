@@ -19,6 +19,10 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import {
+  hasCookieSession,
+  subscribeCookieSession,
+} from '@/shared/services/storage/cookie-session-state';
 import { activateMentor } from '../services/mentor-activation.service';
 import { OrientationStep } from '../components/orientation/orientation-step';
 import { ParticipationStep } from '../components/participation/participation-step';
@@ -61,11 +65,17 @@ export function MentorshipView() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { currentUserId, refreshRoles } = useAuth();
-  const token = useSyncExternalStore(
+  const bearerToken = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
     () => null,
   );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    () => false,
+  );
+  const token = bearerToken ?? (cookieSession ? 'cookie' : null);
   const participation = useParticipation(token, 'always');
   const request = useQuery({
     queryKey: ['mentor-participation-requests', token],

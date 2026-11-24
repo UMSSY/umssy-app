@@ -7,6 +7,7 @@ import { endSession } from "../utils/session";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { useSessionInactivity } from "../hooks/use-session-inactivity";
 import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
+import type { SessionInactivityGuardProps } from "../types/session-inactivity-guard-props.types";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
 function useOptionalRouter() {
@@ -17,7 +18,11 @@ function useOptionalRouter() {
   }
 }
 
-export function SessionInactivityGuard() {
+export function SessionInactivityGuard({
+  idleTimeoutSeconds,
+  warningSeconds,
+  absoluteExpiresAt,
+}: SessionInactivityGuardProps = {}) {
   const router = useOptionalRouter();
 
   const navigateTo = (path: string) => {
@@ -89,9 +94,9 @@ export function SessionInactivityGuard() {
 
   const { isWarningOpen, secondsLeft, isRefreshing, stayConnected } =
     useSessionInactivity({
-      idleTimeoutSeconds: session?.idleTimeoutSeconds,
-      warningSeconds: session?.warningSeconds,
-      absoluteExpiresAt: session?.absoluteExpiresAt,
+      idleTimeoutSeconds: idleTimeoutSeconds ?? session?.idleTimeoutSeconds,
+      warningSeconds: warningSeconds ?? session?.warningSeconds,
+      absoluteExpiresAt: absoluteExpiresAt ?? session?.absoluteExpiresAt,
       enabled: true,
       onTimeout: handleTimeout,
       onRefresh: async () => {

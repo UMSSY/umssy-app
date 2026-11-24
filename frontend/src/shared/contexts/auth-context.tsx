@@ -11,27 +11,57 @@ import {
 } from "@/modules/auth";
 import {
   getAccessToken,
-  subscribeAccessToken,
   isAccessTokenReady,
+  subscribeAccessToken,
 } from "@/shared/services/storage/access-token-storage";
+import {
+  hasCookieSession,
+  markCookieSessionActive,
+  subscribeCookieSession,
+} from "@/shared/services/storage/cookie-session-state";
 import { setCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
+import { readAccessTokenSubject } from "@/shared/utils/read-access-token-subject";
+import { hasSessionMarker } from "@/shared/utils/session-marker";
 import type { AuthContextValue } from "@/shared/types/auth-context-value.types";
 import type { AuthProviderProps } from "@/shared/types/auth-provider-props.types";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const getServerToken = () => null;
+const getServerFalse = () => false;
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const accessToken = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const accessToken = useSyncExternalStore(
+    subscribeAccessToken,
+    getAccessToken,
+    getServerToken,
+  );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    getServerFalse,
+  );
   const isStorageReady = useSyncExternalStore(
     subscribeAccessToken,
     isAccessTokenReady,
-    () => false,
+    getServerFalse,
   );
+  const hasMarker = useSyncExternalStore(
+    subscribeAccessToken,
+    hasSessionMarker,
+    getServerFalse,
+  );
+
+  const sessionEnabled = Boolean(accessToken) || cookieSession || hasMarker;
+  const sessionScopeKey = accessToken
+    ? (readAccessTokenSubject(accessToken) ?? accessToken)
+    : sessionEnabled
+      ? "cookie"
+      : "anonymous";
+
   const session = useQuery({
-    queryKey: ["auth-session", accessToken],
+    queryKey: ["auth-session", sessionScopeKey],
     queryFn: () => authService.getSession(accessToken),
-    enabled: Boolean(accessToken),
+    enabled: sessionEnabled,
     networkMode: "offlineFirst",
     retry: false,
     staleTime: 0,
@@ -39,49 +69,79 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   useEffect(() => {
-    if (isApiError(session.error) && session.error.response?.status === 401) endSession();
+    if (isApiError(session.error) && session.error.response?.status === 401) {
+      endSession();
+    }
   }, [session.error]);
 
   useEffect(() => {
     if (session.data?.id) {
       setCurrentSessionUserId(session.data.id);
+      if (!accessToken && !cookieSession) {
+        markCookieSessionActive();
+      }
     }
-  }, [session.data?.id]);
+  }, [session.data?.id, accessToken, cookieSession]);
 
   async function refreshRoles() {
-    if (!accessToken) return;
+    if (!sessionEnabled) return;
     await session.refetch();
   }
+
+  const isAuthenticated = Boolean(
+    session.data?.id || accessToken || cookieSession,
+  );
 
   return (
     <AuthContext.Provider
       value={{
-        company: accessToken ? (session.data?.company ?? null) : null,
-        currentUserId: accessToken ? (session.data?.id ?? null) : null,
-        roles: accessToken
+        company: sessionEnabled ? (session.data?.company ?? null) : null,
+        currentUserId: sessionEnabled ? (session.data?.id ?? null) : null,
+        roles: sessionEnabled
           ? (session.data?.roles ?? getSessionRoles(accessToken))
           : [],
-        isLoading:
-          !isStorageReady || (Boolean(accessToken) && session.isPending),
+        isLoading: !isStorageReady || (sessionEnabled && session.isPending),
+        isAuthenticated,
+        idleTimeoutSeconds: session.data?.idleTimeoutSeconds,
+        warningSeconds: session.data?.warningSeconds,
+        absoluteExpiresAt: session.data?.absoluteExpiresAt,
         refreshRoles,
       }}
     >
       {children}
-      {Boolean(accessToken || session.data?.id) ? (
-        <SessionInactivityGuard />
+      {isAuthenticated ? (
+        <SessionInactivityGuard
+          idleTimeoutSeconds={session.data?.idleTimeoutSeconds}
+          warningSeconds={session.data?.warningSeconds}
+          absoluteExpiresAt={session.data?.absoluteExpiresAt}
+        />
       ) : null}
     </AuthContext.Provider>
   );
 }
 
+export function useOptionalAuth(): AuthContextValue | null {
+  return useContext(AuthContext);
+}
+
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
-  const accessToken = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const accessToken = useSyncExternalStore(
+    subscribeAccessToken,
+    getAccessToken,
+    getServerToken,
+  );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    getServerFalse,
+  );
   return (
     context ?? {
       currentUserId: null,
       roles: getSessionRoles(accessToken),
       isLoading: false,
+      isAuthenticated: Boolean(accessToken) || cookieSession,
       refreshRoles: async () => {},
     }
   );

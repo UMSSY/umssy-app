@@ -17,12 +17,14 @@ import { PageHeading } from "@/shared/components/layout";
 import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
 import { CARD_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
 import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
+import { useOptionalAuth } from "@/shared/contexts/auth-context";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { getInitials } from "@/shared/utils/get-initials";
 import { useVacancies } from "../hooks/use-vacancies";
-import { canApplyToVacancies } from "../utils/can-apply-to-vacancies";
+import { canApplyToVacancies, canApplyWithRoles } from "../utils/can-apply-to-vacancies";
 
 export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesViewProps = {}) {
+  const auth = useOptionalAuth();
   const [selectedId, setSelectedId] = useState<string | null>(initialVacancyId ?? null);
   function openVacancy(event: MouseEvent<HTMLAnchorElement>, id: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -33,7 +35,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
     setSelectedId(null);
     onInitialClose?.();
   }
-  const canApply = canApplyToVacancies(getAccessToken());
+  const canApply = auth ? canApplyWithRoles(auth.roles) : canApplyToVacancies(getAccessToken());
   const { search, setSearch, vacancies, filteredVacancies, isLoading, isError, retry } = useVacancies();
 
   return (

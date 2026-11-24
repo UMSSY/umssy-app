@@ -11,6 +11,8 @@ import type {
   VerifyResetCodePayload,
   ResetPasswordPayload,
 } from "../types/forgot-password.types";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { markCookieSessionActive } from "@/shared/services/storage/cookie-session-state";
 import { withOfflineSessionCopy } from "@/shared/services/storage/offline-session-copy";
 
 function isLoginResponse(value: unknown): value is LoginResponse {
@@ -47,12 +49,23 @@ export const authService = {
   },
   refreshSession: async (): Promise<{ ok: boolean }> => {
     try {
-      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/refresh");
+      const response = await apiClient.post<
+        | ApiResponse<{ ok?: boolean; accessToken?: string }>
+        | { ok?: boolean; accessToken?: string }
+      >("/auth/refresh");
       const res = response.data;
-      if (res && typeof res === "object" && "data" in res && res.data) {
-        return res.data;
+      const payload =
+        res && typeof res === "object" && "data" in res && res.data
+          ? res.data
+          : (res as { ok?: boolean; accessToken?: string } | undefined);
+
+      if (payload?.accessToken) {
+        await saveAccessToken(payload.accessToken);
+      } else {
+        markCookieSessionActive();
       }
-      return (res as { ok: boolean }) ?? { ok: true };
+
+      return { ok: payload?.ok ?? true };
     } catch (err: unknown) {
       extractApiError(err, "No se pudo renovar la sesión");
     }

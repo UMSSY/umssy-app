@@ -1,52 +1,64 @@
-const SESSION_USER_ID_STORAGE_KEY = "umssy_current_user_id";
+import {
+  readIndexedDb,
+  removeIndexedDb,
+  writeIndexedDb,
+} from "./browser-indexed-db";
+
+const SESSION_USER_ID_KEY = "umssy:session:current-user-id";
 
 let inMemoryUserId: string | null = null;
+let pendingWrites: Promise<void> = Promise.resolve();
+const listeners = new Set<() => void>();
 
-/**
- * Guarda el ID de usuario de la sesión activa en memoria y en sessionStorage.
- * El ID de usuario no es confidencial y permite conservar la identidad
- * ante recargas de página (F5) para servicios como la idempotencia de intenciones.
- */
-export function setCurrentSessionUserId(userId: string | null): void {
-  inMemoryUserId = userId;
-  if (typeof window !== "undefined") {
-    try {
-      if (userId) {
-        sessionStorage.setItem(SESSION_USER_ID_STORAGE_KEY, userId);
-      } else {
-        sessionStorage.removeItem(SESSION_USER_ID_STORAGE_KEY);
-      }
-    } catch {
-      // Ignorar errores de acceso a sessionStorage
-    }
-  }
+function emit(): void {
+  for (const listener of listeners) listener();
 }
 
-/**
- * Retorna el ID de usuario de la sesión actual:
- * 1. Desde memoria si está disponible.
- * 2. Desde sessionStorage tras una recarga de módulo o página.
- * 3. Null si no hay identidad activa.
- */
-export function getCurrentSessionUserId(): string | null {
-  if (inMemoryUserId) return inMemoryUserId;
-  if (typeof window !== "undefined") {
-    try {
-      const stored = sessionStorage.getItem(SESSION_USER_ID_STORAGE_KEY);
-      if (stored) {
-        inMemoryUserId = stored;
-        return stored;
-      }
-    } catch {
-      return null;
+export function setCurrentSessionUserId(userId: string | null): void {
+  const changed = inMemoryUserId !== userId;
+  inMemoryUserId = userId;
+  if (changed) emit();
+
+  const op = pendingWrites.then(async () => {
+    if (userId) {
+      await writeIndexedDb(SESSION_USER_ID_KEY, userId).catch(() => {});
+    } else {
+      await removeIndexedDb(SESSION_USER_ID_KEY).catch(() => {});
     }
+  });
+  pendingWrites = op.catch(() => {});
+}
+
+export function getCurrentSessionUserId(): string | null {
+  return inMemoryUserId;
+}
+
+export async function readCurrentSessionUserId(): Promise<string | null> {
+  if (inMemoryUserId) return inMemoryUserId;
+  try {
+    const stored = await readIndexedDb<unknown>(SESSION_USER_ID_KEY);
+    if (typeof stored === "string" && stored.length > 0) {
+      inMemoryUserId = stored;
+      emit();
+      return stored;
+    }
+  } catch {
+    return null;
   }
   return null;
 }
 
-/**
- * Limpia el ID de usuario en memoria y en sessionStorage.
- */
 export function clearCurrentSessionUserId(): void {
   setCurrentSessionUserId(null);
+}
+
+export function subscribeSessionUserId(onChange: () => void): () => void {
+  listeners.add(onChange);
+  return () => {
+    listeners.delete(onChange);
+  };
+}
+
+export async function waitForSessionUserIdWrites(): Promise<void> {
+  await pendingWrites;
 }

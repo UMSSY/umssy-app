@@ -1,4 +1,8 @@
-import { SESSION_MARKER_COOKIE_NAME, SESSION_MARKER_COOKIE_VALUE } from '../constants/session.constants';
+import {
+  SESSION_MARKER_COOKIE_NAME,
+  SESSION_MARKER_COOKIE_VALUE,
+} from "../constants/session.constants";
+import { hasSessionMarker } from "@/shared/utils/session-marker";
 
 function cookieAttributes(): string {
   const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
@@ -15,7 +19,4 @@ export function clearSessionMarker(): void {
   document.cookie = `${SESSION_MARKER_COOKIE_NAME}=; Max-Age=0${cookieAttributes()}`;
 }
 
-export function hasSessionMarker(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie.split("; ").includes(`${SESSION_MARKER_COOKIE_NAME}=${SESSION_MARKER_COOKIE_VALUE}`);
-}
+export { hasSessionMarker };

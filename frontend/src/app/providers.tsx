@@ -14,6 +14,12 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import {
+  getCookieSessionSubject,
+  hasCookieSession,
+  subscribeCookieSession,
+} from '@/shared/services/storage/cookie-session-state';
+import { hasSessionMarker } from '@/shared/utils/session-marker';
 import { OfflinePassesSessionSync } from '@/shared/components/offline-passes-session-sync';
 import { PwaInstallProvider } from '@/shared/contexts/pwa-install-context';
 import { SocketProvider } from '@/modules/chat/contexts/socket-context';
@@ -40,18 +46,41 @@ function SessionProviders({ children }: { children: ReactNode }) {
   );
 }
 
-const getServerToken = () => null;
+const getServerNull = () => null;
+const getServerFalse = () => false;
 
 export function Providers({ children }: { children: ReactNode }) {
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
-    getServerToken,
+    getServerNull,
   );
+  const subject = useSyncExternalStore(
+    subscribeCookieSession,
+    getCookieSessionSubject,
+    getServerNull,
+  );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    getServerFalse,
+  );
+  const hasMarker = useSyncExternalStore(
+    subscribeAccessToken,
+    hasSessionMarker,
+    getServerFalse,
+  );
+
+  const sessionKey = token
+    ? (subject ?? token)
+    : cookieSession || hasMarker
+      ? (subject ?? 'cookie-session')
+      : 'anonymous';
+
   return (
     <PwaInstallProvider>
       <OfflinePassesSessionSync />
-      <SessionProviders key={token ?? 'anonymous'}>{children}</SessionProviders>
+      <SessionProviders key={sessionKey}>{children}</SessionProviders>
     </PwaInstallProvider>
   );
 }

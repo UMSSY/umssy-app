@@ -1,6 +1,9 @@
 import { isApiError } from "@/shared/services/api-client";
 import { getAccessToken, initializeAccessTokenStorage } from "@/shared/services/storage/access-token-storage";
-import { getCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
+import {
+  getCurrentSessionUserId,
+  readCurrentSessionUserId,
+} from "@/shared/services/storage/session-user-id-storage";
 import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import {
   readSessionStorage,
@@ -11,9 +14,10 @@ import type { MentorIntakeIntention } from "@/shared/types/mentor-intake-intenti
 import type { MentorIntakeOperation } from "@/shared/types/mentor-intake-operation.types";
 import type { LegacyMentorIntakeIntention } from "@/shared/types/legacy-mentor-intake-intention.types";
 
-function currentSubject(): string {
+async function currentSubject(): Promise<string> {
   try {
-    const sessionUserId = getCurrentSessionUserId();
+    const sessionUserId =
+      getCurrentSessionUserId() ?? (await readCurrentSessionUserId());
     if (sessionUserId) return sessionUserId;
 
     const payload = getAccessToken()?.split(".")[1];
@@ -27,11 +31,12 @@ function currentSubject(): string {
   }
 }
 
-function storageKey(operation: MentorIntakeOperation): string {
-  return `hu7:intake:${currentSubject()}:${operation}`;
+function storageKey(subject: string, operation: MentorIntakeOperation): string {
+  return `hu7:intake:${subject}:${operation}`;
 }
 
 function legacyIntention(
+  subject: string,
   operation: MentorIntakeOperation,
 ): MentorIntakeIntention | null {
   try {
@@ -39,7 +44,7 @@ function legacyIntention(
       readSessionStorage(`hu7:intake:${operation}`) ?? "null",
     );
     const saved = value as Partial<LegacyMentorIntakeIntention> | null;
-    return saved?.subject === currentSubject() &&
+    return saved?.subject === subject &&
       typeof saved.fingerprint === "string" &&
       typeof saved.key === "string"
       ? { fingerprint: saved.fingerprint, key: saved.key }
@@ -49,18 +54,22 @@ function legacyIntention(
   }
 }
 
-function clearLegacyIntention(operation: MentorIntakeOperation): void {
-  if (legacyIntention(operation))
+function clearLegacyIntention(
+  subject: string,
+  operation: MentorIntakeOperation,
+): void {
+  if (legacyIntention(subject, operation))
     removeSessionStorage(`hu7:intake:${operation}`);
 }
 
 export async function clearMentorIntakeIntentions(
   operations: readonly MentorIntakeOperation[] = ["activate", "request"],
 ): Promise<void> {
-  for (const operation of operations) clearLegacyIntention(operation);
+  const subject = await currentSubject();
+  for (const operation of operations) clearLegacyIntention(subject, operation);
   await Promise.all(
     operations.map((operation) =>
-      updateIndexedDb(storageKey(operation), () => null),
+      updateIndexedDb(storageKey(subject, operation), () => null),
     ),
   );
 }
@@ -71,12 +80,13 @@ export async function withMentorIntakeKey<T>(
   submit: (key: string) => Promise<T>,
 ): Promise<T> {
   await initializeAccessTokenStorage();
-  const name = storageKey(operation);
+  const subject = await currentSubject();
+  const name = storageKey(subject, operation);
   const fingerprint = JSON.stringify({
     technicalAreaIds: [...preferences.technicalAreaIds].sort(),
     orientationTypeIds: [...preferences.orientationTypeIds].sort(),
   });
-  const legacy = legacyIntention(operation);
+  const legacy = legacyIntention(subject, operation);
   const intention = await updateIndexedDb<MentorIntakeIntention>(
     name,
     (stored) => {
@@ -96,7 +106,7 @@ export async function withMentorIntakeKey<T>(
   );
   const key = intention!.key;
   const clear = () => {
-    clearLegacyIntention(operation);
+    clearLegacyIntention(subject, operation);
     return updateIndexedDb<MentorIntakeIntention>(name, (saved) =>
       saved?.key === key ? null : saved,
     );

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ENV_CONFIG } from "@/shared/config/env.config";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { markCookieSessionActive } from "@/shared/services/storage/cookie-session-state";
 
 export const REFRESH_LOCK_NAME = "umssy_auth_refresh";
 export const LAST_REFRESH_STORAGE_KEY = "umssy_last_refresh_timestamp";
@@ -41,6 +42,8 @@ async function defaultPerformRefresh(): Promise<void> {
   const newToken = resData?.data?.accessToken || resData?.accessToken;
   if (newToken) {
     await saveAccessToken(newToken);
+  } else {
+    markCookieSessionActive();
   }
 }
 

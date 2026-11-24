@@ -5,6 +5,7 @@ import type { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { getAccessToken, subscribeAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession, subscribeCookieSession } from '@/shared/services/storage/cookie-session-state';
 import { getChatSocket, resetChatSocket } from '../services/chat-socket';
 
 import type { Message, Conversation } from '../types/conversation.types';
@@ -21,9 +22,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
   const queryClient = useQueryClient();
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, () => null);
+  const cookieSession = useSyncExternalStore(subscribeCookieSession, hasCookieSession, () => false);
+  const hasSession = Boolean(token) || cookieSession;
 
   useEffect(() => {
-    if (!token) return;
+    if (!hasSession) return;
 
     let socketInstance: Socket;
     try {
@@ -102,7 +105,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setSocket(null);
       setIsConnected(false);
     };
-  }, [token, queryClient]);
+  }, [hasSession, queryClient]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

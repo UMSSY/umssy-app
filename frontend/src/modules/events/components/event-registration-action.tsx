@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { buildLoginUrl } from "@/modules/auth";
 import { useRegistration, useRegistrationActions, useRegistrationSession } from "@/modules/event-registrations";
 import { getRegistrationErrorMessage } from "@/modules/event-registrations";
+import { useCookieSession } from "@/shared/hooks/use-cookie-session";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { RequestFeedback } from "./request-feedback";
 import { RegistrationConfirmationDialog } from "./registration-confirmation-dialog";
@@ -23,6 +24,8 @@ export function EventRegistrationAction({
   const router = useRouter();
   const hasFinished = useEventFinished(event);
   const session = useRegistrationSession();
+  const cookieSession = useCookieSession();
+  const hasSession = Boolean(session) || cookieSession;
   const own = useRegistration(event.id);
   const action = useRegistrationActions(event.id);
   const [open, setOpen] = useState(false);
@@ -46,7 +49,7 @@ export function EventRegistrationAction({
 
   function start() {
     if (disabled) return;
-    if (!session) {
+    if (!hasSession) {
       router.push(buildLoginUrl("/events"));
       return;
     }
