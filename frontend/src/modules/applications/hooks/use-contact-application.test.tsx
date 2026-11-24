@@ -100,15 +100,17 @@ describe("useContactApplication", () => {
     expect(getContact).toHaveBeenCalledTimes(1);
   });
 
-  it("warns about the restriction without calling the server when the application is closed", () => {
+  it("uses the backend restriction when the application is withdrawn", async () => {
+    getContact.mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
     const { result } = renderHook(() => useContactApplication());
 
     act(() => result.current.contact(buildApplication({ status: "Retirada" })));
 
-    expect(toast.error).toHaveBeenCalledWith(
+    await waitFor(() => expect(getContact).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(
       "Esta postulación ya no permite la comunicación directa con el reclutador.",
-    );
-    expect(getContact).not.toHaveBeenCalled();
+    ));
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("shows the error and stays on the page when the server refuses the contact", async () => {

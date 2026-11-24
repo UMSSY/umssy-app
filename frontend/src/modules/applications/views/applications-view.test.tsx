@@ -356,18 +356,18 @@ describe("ApplicationsView", () => {
 );
   });
 
-  it("prevents contacting the recruiter of a withdrawn application", async () => {
-
+  it("shows the backend restriction when contacting a withdrawn application", async () => {
     getMine.mockResolvedValue([buildApplication({ status: "Retirada" })]);
+    getContact.mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
     renderWithQuery(<ApplicationsView />);
 
     await userEvent.click(await screen.findByRole("button", { name: "Postulaciones retiradas" }));
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
-    expect(toast.error).toHaveBeenCalledWith(
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(
       "Esta postulación ya no permite la comunicación directa con el reclutador.",
-    );
-    expect(getContact).not.toHaveBeenCalled();
+    ));
+    expect(getContact).toHaveBeenCalledTimes(1);
     expect(router.push).not.toHaveBeenCalled();
   });
 

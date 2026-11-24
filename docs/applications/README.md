@@ -189,7 +189,7 @@ Tables `job_applications` and `job_application_statuses` (see [backend/prisma/RE
 - Route: `/vacancies/my-applications` (`ApplicationsView`).
 - Responsive: table on desktop, cards on mobile. Status filter, sort selector (ten options), "show withdrawn" toggle and empty/error states with retry.
 - Withdraw and reactivate use confirmation dialogs; the reactivation button and dialog use the green `success` color of the design tokens.
-- The contact action shows a toast when the call fails for a retryable reason (network or 5xx) and offers to retry; restricted statuses are blocked in the client before calling the API.
+- The contact action shows a toast when the call fails for a retryable reason (network or 5xx) and offers to retry; restricted statuses are rejected by the backend before recruiter data is returned.
 
 ## Design decisions
 
