@@ -14,28 +14,30 @@ export function DocumentsCvView() {
       title="Documentos y CV"
       description="Gestiona tus CV y consulta su verificación automática para el radar de afinidad."
     >
-      <DocumentsCvContent />
-
-      <section
-        aria-label="Verificación automática de documentos"
-        className="mt-8 space-y-4"
-      >
-        {history.isError && !history.data ? (
-          <p role="alert">
-            El historial de verificaciones no está disponible.{' '}
-            <Button variant="ghost" onClick={() => void history.refetch()}>
-              Reintentar verificación
-            </Button>
-          </p>
-        ) : history.data ? (
-          <VerificationDashboard
-            rows={history.data}
-            refresh={history.refetch}
-          />
-        ) : (
-          <p aria-busy="true">Cargando verificaciones…</p>
-        )}
-      </section>
+      <DocumentsCvContent
+        verification={
+          <section
+            aria-label="Verificación automática de documentos"
+            className="space-y-4"
+          >
+            {history.isError && !history.data ? (
+              <p role="alert">
+                El historial de verificaciones no está disponible.{' '}
+                <Button variant="ghost" onClick={() => void history.refetch()}>
+                  Reintentar verificación
+                </Button>
+              </p>
+            ) : history.data ? (
+              <VerificationDashboard
+                rows={history.data}
+                refresh={history.refetch}
+              />
+            ) : (
+              <p aria-busy="true">Cargando verificaciones…</p>
+            )}
+          </section>
+        }
+      />
     </ProfilePageLayout>
   );
 }
