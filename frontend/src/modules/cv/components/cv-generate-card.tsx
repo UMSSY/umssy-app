@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CvExportDialog } from "./cv-export-dialog";
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CvExportDialog } from './cv-export-dialog';
 
 export function CvGenerateCard() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,15 +11,15 @@ export function CvGenerateCard() {
   return (
     <section
       aria-label="Generar CV con los datos del perfil"
-      className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface p-5"
+      className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-5"
     >
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1 basis-64">
         <h2 className="text-base font-semibold text-ink">
           ¿Sin CV? Crea uno con los datos de tu perfil
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-          Genera automáticamente un documento PDF profesional con la información registrada en tu
-          perfil de titulado.
+          Genera automáticamente un documento PDF profesional con la información
+          registrada en tu perfil de titulado.
         </p>
       </div>
       <Button
