@@ -1,5 +1,6 @@
 import { CompanyOwnershipGuard } from '../../../common/guards/company-ownership.guard.js';
 import {
+  applyDecorators,
   Body,
   Controller,
   Delete,
@@ -27,7 +28,9 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
@@ -42,6 +45,15 @@ import {
   JOB_OFFER_TITLE_MAX_LENGTH,
   JOB_OFFER_VALIDATION_MESSAGES,
 } from '../constants/job-offer.constants.js';
+import {
+  INTERNAL_ERROR_RESPONSE,
+  UNAUTHENTICATED_RESPONSE,
+} from '../../../common/constants/api-error-swagger.constants.js';
+import {
+  CLOSE_JOB_OFFER_ERROR_RESPONSES,
+  CLOSE_JOB_OFFER_OK_RESPONSE,
+  CREATE_JOB_OFFER_EXPIRY_ERROR_RESPONSE,
+} from '../constants/job-offer-swagger.constants.js';
 import {
   createJobOfferSchema,
   type CreateJobOfferRequest,
@@ -127,6 +139,7 @@ export class JobOffersController {
   @ApiOperation({ summary: 'Publica una nueva vacante de la empresa' })
   @ApiBody(toApiBody(createJobOfferSchema))
   @ApiCreatedResponse({ description: 'Vacante publicada' })
+  @ApiResponse(CREATE_JOB_OFFER_EXPIRY_ERROR_RESPONSE)
   create(
     @Param('companyId', companyIdPipe) companyId: string,
     @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
@@ -244,25 +257,31 @@ export class JobOffersController {
   @Patch('companies/:companyId/job-offers/:jobOfferId/close')
   @UseGuards(JwtAuthGuard, RolesGuard, CompanyOwnershipGuard)
   @ApiBearerAuth()
-  @ApiUnauthorizedResponse({
-    description: 'Se requiere una sesión válida',
-  })
-  @ApiForbiddenResponse({
-    description: 'La cuenta no pertenece a esta empresa',
-  })
   @Roles('empresa')
   @ApiOperation({
+    operationId: 'closeCompanyJobOffer',
     summary: 'Cierra manualmente una vacante publicada de la empresa',
+    description:
+      'Solo cierra vacantes en estado Publicada. La vacante deja de recibir postulaciones y pasa a Cerrada; se puede reabrir desde el historial.',
   })
-  @ApiOkResponse({
-    description: 'Vacante cerrada exitosamente con estado Cerrada',
+  @ApiParam({
+    name: 'companyId',
+    format: 'uuid',
+    description: 'UUID de la empresa de la sesión',
+    example: '5f0c8a52-3d4b-4c1e-9a7f-2b6d8e1c4a90',
   })
-  @ApiNotFoundResponse({
-    description: 'La vacante no existe o no pertenece a la empresa',
+  @ApiParam({
+    name: 'jobOfferId',
+    format: 'uuid',
+    description: 'UUID de la vacante de la empresa',
+    example: '9b1d7e3a-6c2f-4e8b-a5d1-0f4c3b2a7e61',
   })
-  @ApiConflictResponse({
-    description: 'Solo se pueden cerrar vacantes publicadas',
-  })
+  @ApiResponse(CLOSE_JOB_OFFER_OK_RESPONSE)
+  @ApiResponse(UNAUTHENTICATED_RESPONSE)
+  @ApiResponse(INTERNAL_ERROR_RESPONSE)
+  @applyDecorators(
+    ...CLOSE_JOB_OFFER_ERROR_RESPONSES.map((options) => ApiResponse(options)),
+  )
   close(
     @Param('companyId', companyIdPipe) companyId: string,
     @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,

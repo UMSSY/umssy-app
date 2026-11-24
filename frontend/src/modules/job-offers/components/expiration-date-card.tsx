@@ -4,16 +4,10 @@ import { CalendarCheck, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import type { ExpirationDate } from "../hooks/use-expiration-date";
+import type { ExpirationDateCardProps } from "../types/expiration-date-card-props.types";
 import { formatDaysLeft, formatExpirationDate } from "../utils/format-expiration-date";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ExpirationCalendar } from "./expiration-calendar";
-
-interface ExpirationDateCardProps {
-  expiration: ExpirationDate;
-  /** Se puede pasar en los tests para fijar el "hoy". */
-  today?: Date;
-}
 
 export function ExpirationDateCard({ expiration, today = new Date() }: ExpirationDateCardProps) {
   const {

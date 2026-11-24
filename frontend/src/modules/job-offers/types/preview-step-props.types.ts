@@ -1,7 +1,7 @@
 import type { VacancyConditions } from "./vacancy-conditions.types";
 import type { CurrentCompany } from "./current-company.types";
 import type { PublishError } from "./publish-error.types";
-import type { ExpirationDate } from "../hooks/use-expiration-date";
+import type { ExpirationDate } from "./expiration-date.types";
 
 export interface PreviewStepProps {
   conditions: VacancyConditions;

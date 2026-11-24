@@ -19,6 +19,8 @@ Group 5 contribution: published listing, skill selection and real-time skill det
 | Edit a vacancy                                                  | `PUT /companies/:companyId/job-offers/:jobOfferId`, `/recruiters/job-offers/[id]/edit` |
 | History of the company's vacancies with filters and sorting     | `GET /companies/:companyId/job-offers`, `/recruiters/history`                          |
 | Reopen a closed vacancy, delete a vacancy                       | `PATCH .../reopen`, `DELETE .../:jobOfferId`                                           |
+| Close a published vacancy by hand                               | `PATCH .../:jobOfferId/close`, "Cerrar" button in the company portal                    |
+| Close vacancies automatically when their closing date passes    | `JobOfferExpirationScheduler` (every 5 minutes)                                        |
 | Detect required skills while the company writes the description | `POST /matching/requirements/terms` (from [matching](../matching/README.md))           |
 
 ## Architecture
@@ -100,7 +102,10 @@ sequenceDiagram
 - **Skills.** At least 1 and at most 10, all of them must exist in the catalog and none repeated. The errors are 422 `JOB_OFFER_SKILL_NOT_FOUND`, `DUPLICATE_JOB_OFFER_SKILLS` and `TOO_MANY_JOB_OFFER_SKILLS`.
 - **Other requirements.** Optional lists of required careers and other requirements (up to 10 items of 120 characters each) and minimum years of experience between 0 and 40.
 - **Ownership.** Company endpoints require the role `empresa` and the `CompanyOwnershipGuard`, so a company can only manage its own vacancies. A vacancy that does not belong to the company answers 404.
-- **Reopen** works only on `Cerrada` vacancies (409 `JOB_OFFER_NOT_REOPENABLE`) and puts them back in `Publicada` with a new publication date.
+- **Closing date.** `expiresAt` is optional. When it is sent on publish it must be later than the current moment, otherwise the answer is 422 `JOB_OFFER_EXPIRY_IN_PAST`. The form only offers future days and sends the end of the chosen day (23:59, Bolivia time).
+- **Automatic close.** `JobOfferExpirationScheduler` runs every 5 minutes and moves every `Publicada` vacancy whose `expiresAt` is already reached to `Cerrada` in one update. A run is skipped while the previous one is still working, and an error is logged without stopping the next runs. So a vacancy can stay published up to 5 minutes after its closing date, but applicants stop seeing it at once because the published listing also filters by `expiresAt`.
+- **Manual close** works only on `Publicada` vacancies (409 `JOB_OFFER_NOT_CLOSABLE`). The update checks the status in the same query, so two clicks at the same time close the vacancy only once.
+- **Reopen** works only on `Cerrada` vacancies (409 `JOB_OFFER_NOT_REOPENABLE`) and puts them back in `Publicada` with a new publication date. If the closing date had already passed, it is cleared (`expiresAt` becomes null) so the scheduler does not close the vacancy again; a future closing date is kept.
 - **Delete** is logical: the status changes to `Eliminada`. The company history still lists and can read it, but it cannot be edited, reopened or deleted again (404).
 - **History filters.** By modality, contract type, publication date range (Bolivia time, both days included), text in the title (up to 60 characters, case-insensitive), and sorting by publication date or by number of applicants (ties broken by date), ascending or descending (default newest first).
 - **Detection while writing.** After 500 ms without typing, the description is analyzed and the recognized catalog skills are added to the selection until the limit of 10 is reached. Once the person removes a skill, it is not added again. Detection only starts after the person types, so an existing vacancy opened for editing keeps its skills.
@@ -112,10 +117,11 @@ sequenceDiagram
 | ------ | ----------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------- |
 | GET    | `/job-offers`                                         | public          | Published vacancies                                                                                | 200 `PublishedJobOfferResponse[]` | -                                                                     |
 | GET    | `/job-offers/skills`                                  | public          | Skill catalog for the form                                                                         | 200 `JobOfferSkillResponse[]`     | -                                                                     |
-| POST   | `/companies/:companyId/job-offers`                    | empresa (owner) | Publishes a vacancy                                                                                | 201                               | 400 validation, 404 `COMPANY_NOT_FOUND`, 422 skills or catalog values |
+| POST   | `/companies/:companyId/job-offers`                    | empresa (owner) | Publishes a vacancy, with an optional `expiresAt`                                                  | 201                               | 400 validation, 404 `COMPANY_NOT_FOUND`, 422 skills, catalog values or `JOB_OFFER_EXPIRY_IN_PAST` |
 | GET    | `/companies/:companyId/job-offers`                    | empresa (owner) | History with filters `modality`, `contractType`, `dateFrom`, `dateTo`, `search`, `sortBy`, `order` | 200 `JobOfferResponse[]`          | 400 invalid filter                                                    |
 | GET    | `/companies/:companyId/job-offers/:jobOfferId`        | empresa (owner) | One vacancy, including deleted ones                                                                | 200 `JobOfferResponse`            | 404 `JOB_OFFER_NOT_FOUND`                                             |
 | PUT    | `/companies/:companyId/job-offers/:jobOfferId`        | empresa (owner) | Edits a vacancy                                                                                    | 200 `JobOfferResponse`            | 400, 404, 422                                                         |
+| PATCH  | `/companies/:companyId/job-offers/:jobOfferId/close`  | empresa (owner) | Closes a published vacancy (`operationId: closeCompanyJobOffer`)                                   | 200 `JobOfferResponse`            | 400 invalid UUID, 404, 409 `JOB_OFFER_NOT_CLOSABLE`                   |
 | PATCH  | `/companies/:companyId/job-offers/:jobOfferId/reopen` | empresa (owner) | Reopens a closed vacancy                                                                           | 200 `JobOfferResponse`            | 404, 409 `JOB_OFFER_NOT_REOPENABLE`                                   |
 | DELETE | `/companies/:companyId/job-offers/:jobOfferId`        | empresa (owner) | Deletes (logical)                                                                                  | 204                               | 404 `JOB_OFFER_NOT_FOUND`                                             |
 
@@ -160,3 +166,4 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - Source of vacancies for the affinity calculation and recommendations.
 - Company side (shared): publish, edit, history with filters, reopen and delete.
 - Company vacancy list in the company portal: cards with time open and expiry date, title search, and a message for accounts that are not linked to a company.
+- Closing date when publishing, automatic close every 5 minutes and manual close with confirmation.

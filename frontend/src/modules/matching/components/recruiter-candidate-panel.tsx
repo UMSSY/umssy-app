@@ -6,14 +6,9 @@ import {
 } from "./candidate-comparison-panel";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { AreaDetailPanel } from "@/modules/radar-chart";
-import {
-  getOrCreateConversation,
-  useMessagingUi,
-  type Conversation,
-} from "@/modules/chat";
+import { useOpenContextualChat } from "@/modules/chat";
 import { useRecruiterAreaEvidence } from "../hooks/use-radar-recruiter";
 import { useRecruiterCv } from "../hooks/use-recruiter-cv";
 import { EMPTY_AREA_EVIDENCE } from "../constants/empty-area-evidence.constants";
@@ -33,10 +28,9 @@ export function RecruiterCandidatePanel({
   const [selectedAreaId, setSelectedAreaId] = useState<RadarAxisId | null>(
     null,
   );
-  const [isStartingChat, setIsStartingChat] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
-  const messagingUi = useMessagingUi();
-  const queryClient = useQueryClient();
+  const { openContextualChat, isOpening: isStartingChat } =
+    useOpenContextualChat();
   const cv = useRecruiterCv(candidate?.applicationId ?? "");
   const evidenceQuery = useRecruiterAreaEvidence(
     candidate?.applicationId ?? "",
@@ -51,55 +45,26 @@ export function RecruiterCandidatePanel({
     RECRUITER_APPLICATION_STATE_LABELS[candidate.state] ?? candidate.state;
   const candidateUserId = candidate.userId;
   const candidateApplicationId = candidate.applicationId;
-  const candidateHeadline = candidate.headline || "Perfil sin presentación";
+  const candidateHeadline = candidate.headline;
 
   async function openCandidateChat() {
     if (isStartingChat) return;
 
-    setIsStartingChat(true);
     setChatError(null);
-
     try {
-      const rawConversation = await getOrCreateConversation(candidateUserId, {
-        contextType: "POSTULACION",
-        contextId: candidateApplicationId,
-      });
-      const conversation: Conversation = rawConversation.contact
-        ? {
-            ...rawConversation,
-            contact: {
-              ...rawConversation.contact,
-              academicTitle:
-                rawConversation.contact.academicTitle ?? candidateHeadline,
-            },
-          }
-        : rawConversation;
-
-      queryClient.setQueryData(
-        ["chat", "conversations"],
-        (current: Conversation[] | undefined) => {
-          const conversations = current ?? [];
-          const existingIndex = conversations.findIndex(
-            (item) => item.id === conversation.id,
-          );
-          if (existingIndex >= 0) {
-            return conversations.map((item, index) =>
-              index === existingIndex ? conversation : item,
-            );
-          }
-          return [conversation, ...conversations];
+      await openContextualChat({
+        contactId: candidateUserId,
+        context: {
+          contextType: "POSTULACION",
+          contextId: candidateApplicationId,
         },
-      );
-
-      messagingUi?.setLauncherId(CONTACT_BUTTON_ID);
-      messagingUi?.setSelectedId(conversation.id);
-      messagingUi?.setIsPanelOpen(true);
+        contactHeadline: candidateHeadline,
+        launcherId: CONTACT_BUTTON_ID,
+      });
     } catch {
       setChatError(
         "No se pudo abrir el chat del postulante. Verifica tu conexión e intenta nuevamente.",
       );
-    } finally {
-      setIsStartingChat(false);
     }
   }
 
