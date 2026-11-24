@@ -99,7 +99,7 @@ describe("Directory and profile query flows", () => {
     renderWithQuery(<MentorDirectoryView />);
 
     expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Ver perfil/ })).not.toBeInTheDocument();
 
     expect(
       await screen.findAllByRole("link", { name: /Ver perfil de/ }),
@@ -121,7 +121,7 @@ describe("Directory and profile query flows", () => {
       await screen.findByText("No hay mentores disponibles por el momento"),
     ).toBeInTheDocument();
 
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Ver perfil/ })).not.toBeInTheDocument();
   });
 
   it("retries a failed directory query and replaces the error with results", async () => {

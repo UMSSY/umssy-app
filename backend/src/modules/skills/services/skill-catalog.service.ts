@@ -1,3 +1,4 @@
+import { radarSkillPoints } from '../../radar-integration/utils/radar-scoring.js';
 import { Injectable } from '@nestjs/common';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';
@@ -16,7 +17,12 @@ export class SkillCatalogService {
     const skills = await this.skillRepository.findCatalog(
       request.search || undefined,
     );
-    return skills.map((skill) => this.skillMapper.toResponse(skill));
+    return skills.map((skill) => ({
+      ...this.skillMapper.toResponse(skill),
+      areaId: skill.areaId,
+      radarPoints: radarSkillPoints(false),
+      radarHighRelevancePoints: radarSkillPoints(true),
+    }));
   }
 
   async createCustomSkill(

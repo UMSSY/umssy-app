@@ -16,6 +16,7 @@ import { MentorIntakeRepository } from './mentor-intake.repository.js';
 import {
   directoryPredicate,
   directoryOrder,
+  type DirectoryFilters,
 } from './mentor-directory.queries.js';
 
 const directorySelect = {
@@ -38,13 +39,6 @@ const directorySelect = {
     select: { technicalArea: { select: { name: true } } },
   },
 } satisfies Prisma.UserSelect;
-
-interface DirectoryFilters {
-  search: string;
-  area?: string;
-  orientation?: string;
-  available: boolean;
-}
 
 type MentorDirectorySort = 'default' | 'name_asc' | 'name_desc';
 
@@ -306,9 +300,17 @@ export class MentorsRepository extends MentorIntakeRepository {
       where.isAvailableForMentoring = true;
     }
 
-    if (filters.area) {
+    if (filters.areaIds?.length) {
       where.mentorTechnicalAreas = {
-        some: { technicalArea: { name: { in: resolveMentorAreas(filters.area) } } },
+        some: { technicalAreaId: { in: filters.areaIds } },
+      };
+    } else if (filters.area) {
+      where.mentorTechnicalAreas = {
+        some: {
+          technicalArea: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(filters.area)
+            ? { id: filters.area }
+            : { name: { in: resolveMentorAreas(filters.area) } },
+        },
       };
     }
 

@@ -370,6 +370,8 @@ describe('MentorAffinityService', () => {
       'u.headline',
       'u.about_me',
       'we.position',
+      'we.description',
+      's.name',
       'ta.name',
     ]) {
       expect(candidateQuery.sql).toContain(field);

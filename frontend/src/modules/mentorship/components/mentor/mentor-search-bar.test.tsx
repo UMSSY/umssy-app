@@ -21,7 +21,7 @@ describe("MentorSearchBar", () => {
       screen.getByRole("searchbox", {
         name: "Buscar mentores por nombre",
       }),
-    ).toHaveAttribute("placeholder", "Nombre, cargo o palabra clave");
+    ).toHaveAttribute("placeholder", "Buscar por nombre, cargo o palabra clave");
   });
 
   it("actualiza la búsqueda al dejar de escribir sin presionar Enter", () => {
