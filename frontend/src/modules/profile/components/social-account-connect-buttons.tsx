@@ -124,7 +124,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
 
   return (
     <div role="group" aria-label={PORTFOLIO_ACCOUNT_MESSAGES.sectionTitle} className={cn("flex min-w-0 flex-col gap-2", className)}>
-      <div className="grid min-w-0 grid-cols-2 gap-2">
+      <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
         {PORTFOLIO_PROVIDERS.map((provider) => {
           const account = getProviderAccount(accounts, provider);
           const isPending = pendingProvider === provider;
@@ -138,7 +138,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
             return (
               <div
                 key={provider}
-                className="col-span-2 flex min-h-11 min-w-0 flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface-soft px-3 py-2"
+                className="col-span-1 flex min-h-11 min-w-0 flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface-soft px-3 py-2 sm:col-span-2"
               >
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <Image src={`/icons/${provider}.svg`} alt="" width={24} height={24} className="size-6 shrink-0" aria-hidden="true" />

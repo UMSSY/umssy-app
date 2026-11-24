@@ -102,7 +102,7 @@ export function PortfolioProfileSection({
         }
         description={PORTFOLIO_PROJECTS_MESSAGES.description}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
             {displayCount > 0 ? (
               <Button
                 type="button"
@@ -140,7 +140,7 @@ export function PortfolioProfileSection({
         {syncErrorMessage ? (
           <div
             role="alert"
-            className="mb-4 flex items-center justify-between rounded-md border border-critical-action/30 bg-critical-action/10 p-3 text-sm text-critical-action"
+            className="mb-4 flex flex-col items-start justify-between gap-2 rounded-md border border-critical-action/30 bg-critical-action/10 p-3 text-sm text-critical-action sm:flex-row sm:items-center"
           >
             <span>{syncErrorMessage}</span>
             <Button

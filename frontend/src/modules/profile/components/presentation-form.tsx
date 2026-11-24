@@ -111,21 +111,21 @@ export function PresentationForm({
           </FormField>
 
           </FormFieldset>
-          <div className="flex flex-wrap items-center justify-end gap-4 border-t border-border pt-5">
+          <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-text-secondary">
               Los cambios se muestran al guardar.
             </p>
-            <div className="flex gap-3">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
-                className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+                className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
                 disabled={isSaving}
                 onClick={handleCancel}
               >
                 Cancelar
               </Button>
-              <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+              <Button type="submit" className={cn("h-10 w-full bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover sm:w-auto sm:min-w-44")} disabled={isSaving}>
                 {isSaving ? "Guardando..." : saveLabel}
               </Button>
             </div>
