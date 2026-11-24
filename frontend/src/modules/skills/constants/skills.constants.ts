@@ -14,7 +14,7 @@ export const SKILLS_ANALYSIS_MUTATION_KEY = ["skills", "analysis"] as const;
 export const DETECTED_SKILLS_TEXTS = {
   title: "Habilidades detectadas",
   description:
-    "Se detectan en experiencia, formación, certificaciones y el CV vigente. Las pendientes de revisión no aumentan el radar verificado.",
+    "Se detectan en la presentación profesional (titular y descripción), la experiencia, la formación, las certificaciones y el CV vigente. Las pendientes de revisión no aumentan el radar verificado.",
   loading: "Cargando habilidades detectadas…",
   loadError: "No se pudieron cargar las habilidades detectadas.",
   pending:
