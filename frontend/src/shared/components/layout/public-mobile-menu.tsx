@@ -24,7 +24,7 @@ export function PublicMobileMenu() {
         </nav>
         <SheetFooter className="shrink-0 gap-3">
           <Link href="/login" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-surface text-ink hover:bg-surface/85")}>{PUBLIC_NAV_LABELS.login}</Link>
-          <Link href="/request-access" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-danger text-surface hover:bg-danger/85")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
+          <Link href="/request-access" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-surface text-ink hover:bg-surface-soft")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
         </SheetFooter>
       </SheetContent>
     </Sheet>

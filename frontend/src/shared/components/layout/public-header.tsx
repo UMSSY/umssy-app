@@ -17,7 +17,7 @@ export function PublicHeader({ showInstitutionalSeal = false }: PublicHeaderProp
         </nav>
         <div className="ml-auto flex items-center gap-4 xl:ml-0">
           <Link href="/login" className={cn(PUBLIC_NAV_LINK_CLASS, "hidden lg:inline")}>{PUBLIC_NAV_LABELS.login}</Link>
-          <Link href="/request-access" className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "hidden bg-danger text-surface hover:bg-danger/85 lg:inline-flex")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
+          <Link href="/request-access" className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "hidden bg-surface text-ink hover:bg-surface-soft lg:inline-flex")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
           <PublicMobileMenu />
         </div>
       </div>
