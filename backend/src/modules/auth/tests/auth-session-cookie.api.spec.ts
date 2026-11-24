@@ -148,7 +148,11 @@ describe('session cookie over HTTP', () => {
       .set('Cookie', 'umssy_refresh=refresh-1');
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ roleTag: 'titulado', roles: ['titulado'] });
+    expect(response.body).toEqual({
+      accessToken: token,
+      roleTag: 'titulado',
+      roles: ['titulado'],
+    });
     expect(refreshTokens.rotate).toHaveBeenCalledWith(
       'refresh-1',
       'test-agent',

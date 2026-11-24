@@ -1,11 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authService } from "../services/auth.service";
 import { endSession } from "../utils/session";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { useSessionInactivity } from "../hooks/use-session-inactivity";
+import type { SessionInactivityGuardProps } from "../types/session-inactivity-guard-props.types";
 import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
@@ -17,7 +17,7 @@ function useOptionalRouter() {
   }
 }
 
-export function SessionInactivityGuard() {
+export function SessionInactivityGuard({ session }: SessionInactivityGuardProps = {}) {
   const router = useOptionalRouter();
 
   const navigateTo = (path: string) => {
@@ -28,7 +28,6 @@ export function SessionInactivityGuard() {
     }
   };
 
-  // Sincroniza el cierre de sesión entre pestañas del navegador (CA10)
   useAuthBroadcastSync((message) => {
     if (
       message.type === "SESSION_CLOSED" ||
@@ -39,14 +38,6 @@ export function SessionInactivityGuard() {
       const reason = message.reason || "SESSION_REVOKED";
       navigateTo(`/session-closed?reason=${reason}`);
     }
-  });
-
-  // Lee la sesión activa del servidor para obtener los tiempos dinámicos del backend
-  const { data: session } = useQuery({
-    queryKey: ["auth-session-timings"],
-    queryFn: () => authService.getSession(),
-    staleTime: 60 * 1000,
-    retry: false,
   });
 
   const handleTimeout = () => {

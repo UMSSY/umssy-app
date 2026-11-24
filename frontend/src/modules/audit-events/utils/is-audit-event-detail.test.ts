@@ -15,7 +15,7 @@ const VALID_DETAIL = {
   responsible: {
     id: "user-1",
     name: "Admin",
-    role: "admin",
+    role: "administrativo",
   },
   rejectionReason: null,
   documentType: "Diploma",

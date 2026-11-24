@@ -1,5 +1,14 @@
+import { AUDIT_ACTION_STYLES, AUDIT_ROLE_LABELS } from "../constants/audit-actions.constants";
 import type { AuditEventDetail } from "../types/audit-event-detail.types";
 import { isRecord } from "./to-audit-failure";
+
+function isAuditAction(value: unknown): boolean {
+  return typeof value === "string" && Object.hasOwn(AUDIT_ACTION_STYLES, value);
+}
+
+function isAuditActorRole(value: unknown): boolean {
+  return typeof value === "string" && Object.hasOwn(AUDIT_ROLE_LABELS, value);
+}
 
 export function isAuditEventDetail(val: unknown): val is AuditEventDetail {
   if (!isRecord(val)) return false;
@@ -8,7 +17,7 @@ export function isAuditEventDetail(val: unknown): val is AuditEventDetail {
     typeof val.id !== "string" ||
     typeof val.code !== "string" ||
     typeof val.occurredAt !== "string" ||
-    typeof val.action !== "string"
+    !isAuditAction(val.action)
   ) {
     return false;
   }
@@ -34,7 +43,7 @@ export function isAuditEventDetail(val: unknown): val is AuditEventDetail {
     !isRecord(val.responsible) ||
     (val.responsible.id !== null && typeof val.responsible.id !== "string") ||
     typeof val.responsible.name !== "string" ||
-    typeof val.responsible.role !== "string"
+    !isAuditActorRole(val.responsible.role)
   ) {
     return false;
   }

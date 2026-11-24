@@ -33,6 +33,28 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
+type RetriedRequest = { headers?: unknown };
+
+function applyRenewedCredential(request: RetriedRequest, token: string | null): void {
+  const headers = request.headers as
+    | { set?: (name: string, value: string) => void; delete?: (name: string) => void }
+    | Record<string, string>
+    | undefined;
+  if (!headers) return;
+
+  const authorization = token ? `${BEARER_PREFIX}${token}` : null;
+  if (typeof (headers as { set?: unknown }).set === "function") {
+    const typed = headers as { set: (name: string, value: string) => void; delete?: (name: string) => void };
+    if (authorization) typed.set("Authorization", authorization);
+    else typed.delete?.("Authorization");
+    return;
+  }
+
+  const plain = headers as Record<string, string>;
+  if (authorization) plain["Authorization"] = authorization;
+  else delete plain["Authorization"];
+}
+
 export const isApiError = axios.isAxiosError;
 
 export { AxiosError as ApiError } from "axios";
@@ -75,14 +97,7 @@ apiClient.interceptors.response.use(
           if (!success) {
             throw new Error("No se pudo renovar la sesión");
           }
-          const newToken = getAccessToken();
-          if (newToken && originalRequest.headers) {
-            if (typeof originalRequest.headers.set === "function") {
-              originalRequest.headers.set("Authorization", `${BEARER_PREFIX}${newToken}`);
-            } else {
-              (originalRequest.headers as Record<string, string>)["Authorization"] = `${BEARER_PREFIX}${newToken}`;
-            }
-          }
+          applyRenewedCredential(originalRequest, getAccessToken());
           return apiClient(originalRequest);
         } catch {
           const token = getAccessToken();
