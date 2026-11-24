@@ -84,6 +84,7 @@ sequenceDiagram
 - **Email.** The domain can pass `renderMail(context)` in the request itself (`NotifyRequest.renderMail`, type `NotificationMailRenderer`); the `NOTIFICATION_TEMPLATES` catalog only defines the in-app title and body. `renderMail` receives `recipientName` and `actionUrl` and returns a promise with `mjml`, `subject`, `text` and `values`, so the domain can read its own `.mjml` template with `loadMailTemplate`. Without `renderMail`, the generic `mail/mjml/notification.mjml` template is used, loaded only once per send; title and body are truncated and the "Ver en UMSSY" button gets an absolute link built with the shared `frontendBaseUrl()` from the mail module (`FRONTEND_URL`, otherwise the first `CORS_ORIGIN`). Links to another origin are replaced by the frontend home.
 - **Result.** Each channel is summarized as `sent` (everything sent), `partial`, `failed` or `skipped`. `deliveries` contains `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. A critical failure in one dispatcher marks its channel as `failed` without cancelling the others.
 - **Survey notifications.** `SURVEY_PUBLISHED` and `SURVEY_REMINDER` (push and email), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (email only). Their payloads are validated with Zod and their emails are rendered in `backend/src/modules/surveys/notification/`; `notifications` only defines the in-app title and body.
+- **Job offer notifications.** `JOB_OFFER_PUBLISHED` (push only) is triggered by the job offers domain when a vacancy is created. The payload contains `jobTitle` and `companyName`. The notification is always stored in the in-app inbox, and push is sent only to users who have it enabled as their channel. Emails are not sent for this type (`sends_email = false` in the catalog). It is sent once per vacancy creation, never on edits, closure, or reopening. The `actionUrl` points to `/vacancies/:jobOfferId`, so the frontend resolves the exact vacancy. This type replaces the deprecated `APPLICATION_STATUS_CHANGED`, which is kept only for backward compatibility with older application status flow code.
 
 ## Endpoints
 
@@ -106,7 +107,7 @@ All require JWT (any role). The WebSocket authenticates with `handshake.auth.tok
 
 ### Exported service
 
-`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), and [radar-integration](../radar-integration/README.md).
+`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), [vacancies](../vacancies/README.md)and [radar-integration](../radar-integration/README.md).
 
 ## Dependencies
 
