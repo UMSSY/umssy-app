@@ -8,7 +8,6 @@ export function ShowWithdrawnToggle({ pressed, onPressedChange }: ShowWithdrawnT
       type="button"
       variant={pressed ? "default" : "outline"}
       aria-pressed={pressed}
-      className="rounded-full"
       onClick={() => onPressedChange(!pressed)}
     >
       {APPLICATION_MESSAGES.withdrawnApplications}
