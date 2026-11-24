@@ -35,7 +35,7 @@ export function RecordEditorDialog({ title, description, isBusy = false, hasUnsa
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Seguir editando</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={onClose}>Descartar cambios</AlertDialogAction>
+              <AlertDialogAction variant="outline" onClick={onClose}>Descartar cambios</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
