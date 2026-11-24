@@ -217,6 +217,8 @@ export function WorkExperienceForm({
                 errors.description,
               )}
               name="description"
+              spellCheck
+              lang="es"
               maxLength={WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
               rows={4}
               placeholder="Describe las funciones que desempeñaste en este cargo"

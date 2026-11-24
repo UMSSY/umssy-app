@@ -227,12 +227,12 @@ export function MentorCapacityView() {
               </p>
             </div>
             <form
-              className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end"
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
               onSubmit={handleSave}
             >
               <div>
                 <label
-                  className="mb-2 block text-xs font-semibold tracking-wide text-text-secondary uppercase"
+                  className="mb-2 flex h-8 items-end text-xs font-semibold tracking-wide text-text-secondary uppercase"
                   htmlFor="mentor-capacity-percentage"
                 >
                   Porcentaje máximo de participación (%)
@@ -274,7 +274,7 @@ export function MentorCapacityView() {
               </div>
               <div>
                 <label
-                  className="mb-2 block text-xs font-semibold tracking-wide text-text-secondary uppercase"
+                  className="mb-2 flex h-8 items-end text-xs font-semibold tracking-wide text-text-secondary uppercase"
                   htmlFor="mentor-capacity-maximum"
                 >
                   Número de cupos máximos (cantidad)
@@ -310,6 +310,7 @@ export function MentorCapacityView() {
                 ) : null}
               </div>
               <Button
+                className="md:col-span-2 md:justify-self-end xl:col-span-1 xl:mt-10 xl:self-start"
                 disabled={
                   savePercentage.isPending || Boolean(capacityValidationError)
                 }

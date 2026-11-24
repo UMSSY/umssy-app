@@ -8,6 +8,7 @@ import type {
   EventItemResponse,
 } from '../types/events.types.js';
 import { formatUtcDate, formatUtcTime } from '../utils/event-date-time.js';
+import { mapEventSessions } from './event-session.mapper.js';
 
 export function mapEventToResponse(
   record: EventWithRelations,
@@ -28,6 +29,7 @@ export function mapEventToResponse(
     startTime: formatUtcTime(record.startTime),
     endTime: formatUtcTime(record.endTime),
     location: record.location,
+    sessions: mapEventSessions(record.sessions),
     capacity: record.capacity,
     availableSpots,
     registrationCount: supportCount,

@@ -21,7 +21,10 @@ function buildRecord(): EventWithRelations {
     votingDeadline: null,
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
-    category: { id: 'cat-1', namee: 'Tecnologia' },
+    category: { id: 'cat-1', name: 'Tecnologia' },
+    coverMimeType: null,
+    registrations: [],
+    sessions: [],
     _count: { registrations: 3 },
   };
 }
@@ -37,9 +40,16 @@ describe('EventsService', () => {
     repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
     service = new EventsService(new EventsRepository({} as never));
     vi.spyOn(service, 'findAndCount').mockImplementation(
-      repositoryMock.findAndCount,
+      repositoryMock.findAndCount as (
+        payload: Parameters<EventsService['findAndCount']>[0],
+      ) => ReturnType<EventsService['findAndCount']>,
     );
-    vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
+    vi.spyOn(service, 'findById').mockImplementation(
+      repositoryMock.findById as (
+        id: string,
+        userId?: string,
+      ) => ReturnType<EventsService['findById']>,
+    );
     vi.spyOn(service, 'expireOverdueProposals').mockResolvedValue(0);
   });
 
@@ -87,7 +97,6 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: 'status-uuid',
-      isPublishedOnly: false,
       search: 'workshop',
       userId: undefined,
       skip: 10,
@@ -115,7 +124,6 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: undefined,
-      isPublishedOnly: true,
       search: 'Node',
       userId: undefined,
       skip: 10,

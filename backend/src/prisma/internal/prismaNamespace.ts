@@ -433,6 +433,7 @@ export const ModelName = {
   AppointmentNotification: 'AppointmentNotification',
   EventCategory: 'EventCategory',
   Event: 'Event',
+  EventSession: 'EventSession',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
   JobOffer: 'JobOffer',
@@ -500,6 +501,8 @@ export const ModelName = {
   CompanyLogo: 'CompanyLogo',
   CompanyAccessRequest: 'CompanyAccessRequest',
   CompanyActivationOtp: 'CompanyActivationOtp',
+  JobAlertMode: 'JobAlertMode',
+  JobOfferNotificationPreference: 'JobOfferNotificationPreference',
   RadarDocumentStatus: 'RadarDocumentStatus',
   RadarDocumentSourceType: 'RadarDocumentSourceType'
 } as const
@@ -517,7 +520,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "appointmentNotificationEvent" | "appointmentNotificationChannel" | "appointmentNotificationStatus" | "appointmentNotification" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "mentorCapacitySetting" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordHistory" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyAlertConfig" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "refreshToken" | "notificationPreference" | "companyProfile" | "companyLogo" | "companyAccessRequest" | "companyActivationOtp" | "radarDocumentStatus" | "radarDocumentSourceType"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "appointmentNotificationEvent" | "appointmentNotificationChannel" | "appointmentNotificationStatus" | "appointmentNotification" | "eventCategory" | "event" | "eventSession" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "mentorCapacitySetting" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordHistory" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyAlertConfig" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "refreshToken" | "notificationPreference" | "companyProfile" | "companyLogo" | "companyAccessRequest" | "companyActivationOtp" | "jobAlertMode" | "jobOfferNotificationPreference" | "radarDocumentStatus" | "radarDocumentSourceType"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3182,6 +3185,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.EventCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.EventCountAggregateOutputType> | number
+        }
+      }
+    }
+    EventSession: {
+      payload: Prisma.$EventSessionPayload<ExtArgs>
+      fields: Prisma.EventSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EventSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EventSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.EventSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EventSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>
+        }
+        findMany: {
+          args: Prisma.EventSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>[]
+        }
+        create: {
+          args: Prisma.EventSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>
+        }
+        createMany: {
+          args: Prisma.EventSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EventSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.EventSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>
+        }
+        update: {
+          args: Prisma.EventSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.EventSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EventSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EventSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.EventSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EventSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.EventSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEventSession>
+        }
+        groupBy: {
+          args: Prisma.EventSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EventSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EventSessionCountAggregateOutputType> | number
         }
       }
     }
@@ -8143,6 +8220,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    JobAlertMode: {
+      payload: Prisma.$JobAlertModePayload<ExtArgs>
+      fields: Prisma.JobAlertModeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JobAlertModeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JobAlertModeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>
+        }
+        findFirst: {
+          args: Prisma.JobAlertModeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JobAlertModeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>
+        }
+        findMany: {
+          args: Prisma.JobAlertModeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>[]
+        }
+        create: {
+          args: Prisma.JobAlertModeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>
+        }
+        createMany: {
+          args: Prisma.JobAlertModeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.JobAlertModeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>[]
+        }
+        delete: {
+          args: Prisma.JobAlertModeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>
+        }
+        update: {
+          args: Prisma.JobAlertModeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>
+        }
+        deleteMany: {
+          args: Prisma.JobAlertModeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JobAlertModeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.JobAlertModeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>[]
+        }
+        upsert: {
+          args: Prisma.JobAlertModeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobAlertModePayload>
+        }
+        aggregate: {
+          args: Prisma.JobAlertModeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJobAlertMode>
+        }
+        groupBy: {
+          args: Prisma.JobAlertModeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JobAlertModeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JobAlertModeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JobAlertModeCountAggregateOutputType> | number
+        }
+      }
+    }
+    JobOfferNotificationPreference: {
+      payload: Prisma.$JobOfferNotificationPreferencePayload<ExtArgs>
+      fields: Prisma.JobOfferNotificationPreferenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JobOfferNotificationPreferenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JobOfferNotificationPreferenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>
+        }
+        findFirst: {
+          args: Prisma.JobOfferNotificationPreferenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JobOfferNotificationPreferenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>
+        }
+        findMany: {
+          args: Prisma.JobOfferNotificationPreferenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>[]
+        }
+        create: {
+          args: Prisma.JobOfferNotificationPreferenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>
+        }
+        createMany: {
+          args: Prisma.JobOfferNotificationPreferenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.JobOfferNotificationPreferenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>[]
+        }
+        delete: {
+          args: Prisma.JobOfferNotificationPreferenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>
+        }
+        update: {
+          args: Prisma.JobOfferNotificationPreferenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>
+        }
+        deleteMany: {
+          args: Prisma.JobOfferNotificationPreferenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JobOfferNotificationPreferenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.JobOfferNotificationPreferenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>[]
+        }
+        upsert: {
+          args: Prisma.JobOfferNotificationPreferenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobOfferNotificationPreferencePayload>
+        }
+        aggregate: {
+          args: Prisma.JobOfferNotificationPreferenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJobOfferNotificationPreference>
+        }
+        groupBy: {
+          args: Prisma.JobOfferNotificationPreferenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JobOfferNotificationPreferenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JobOfferNotificationPreferenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JobOfferNotificationPreferenceCountAggregateOutputType> | number
+        }
+      }
+    }
     RadarDocumentStatus: {
       payload: Prisma.$RadarDocumentStatusPayload<ExtArgs>
       fields: Prisma.RadarDocumentStatusFieldRefs
@@ -8813,6 +9038,19 @@ export const EventScalarFieldEnum = {
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
+export const EventSessionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  location: 'location',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventSessionScalarFieldEnum = (typeof EventSessionScalarFieldEnum)[keyof typeof EventSessionScalarFieldEnum]
+
+
 export const EventRegistrationScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
@@ -8831,6 +9069,7 @@ export type EventRegistrationScalarFieldEnum = (typeof EventRegistrationScalarFi
 export const EventAttendanceScalarFieldEnum = {
   id: 'id',
   registrationId: 'registrationId',
+  sessionId: 'sessionId',
   checkedInAt: 'checkedInAt',
   checkedInById: 'checkedInById',
   checkedInOffline: 'checkedInOffline',
@@ -9763,6 +10002,27 @@ export const CompanyActivationOtpScalarFieldEnum = {
 export type CompanyActivationOtpScalarFieldEnum = (typeof CompanyActivationOtpScalarFieldEnum)[keyof typeof CompanyActivationOtpScalarFieldEnum]
 
 
+export const JobAlertModeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobAlertModeScalarFieldEnum = (typeof JobAlertModeScalarFieldEnum)[keyof typeof JobAlertModeScalarFieldEnum]
+
+
+export const JobOfferNotificationPreferenceScalarFieldEnum = {
+  userId: 'userId',
+  modeId: 'modeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferNotificationPreferenceScalarFieldEnum = (typeof JobOfferNotificationPreferenceScalarFieldEnum)[keyof typeof JobOfferNotificationPreferenceScalarFieldEnum]
+
+
 export const RadarDocumentStatusScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -10130,6 +10390,7 @@ export type GlobalOmitConfig = {
   appointmentNotification?: Prisma.AppointmentNotificationOmit
   eventCategory?: Prisma.EventCategoryOmit
   event?: Prisma.EventOmit
+  eventSession?: Prisma.EventSessionOmit
   eventRegistration?: Prisma.EventRegistrationOmit
   eventAttendance?: Prisma.EventAttendanceOmit
   jobOffer?: Prisma.JobOfferOmit
@@ -10197,6 +10458,8 @@ export type GlobalOmitConfig = {
   companyLogo?: Prisma.CompanyLogoOmit
   companyAccessRequest?: Prisma.CompanyAccessRequestOmit
   companyActivationOtp?: Prisma.CompanyActivationOtpOmit
+  jobAlertMode?: Prisma.JobAlertModeOmit
+  jobOfferNotificationPreference?: Prisma.JobOfferNotificationPreferenceOmit
   radarDocumentStatus?: Prisma.RadarDocumentStatusOmit
   radarDocumentSourceType?: Prisma.RadarDocumentSourceTypeOmit
 }

@@ -3,6 +3,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
 import type { UserSkillRecord } from '../types/user-skill-record.type.js';
 import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
+import { resolveSkillOrigins } from '../utils/resolve-skill-origins.js';
 import { skillSelect } from './skill.repository.js';
 
 const userSkillSelect = {
@@ -21,17 +22,34 @@ const sourceRowSelect = {
 export class UserSkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findAffinitySkillNames(userId: string): Promise<string[]> {
+    const rows = await this.prisma.userSkill.findMany({
+      where: { userId, verificationStatus: { notIn: ['rejected', 'revoked'] } },
+      select: { skill: { select: { name: true } } },
+    });
+    return rows.map(({ skill }) => skill.name);
+  }
+
   findAllByUserId(userId: string): Promise<UserSkillRecord[]> {
     return this.listSkills(userId);
   }
 
   findByUserId(userId: string): Promise<UserSkillRecord[]> {
-    return this.listSkills(userId, USER_SKILL_SOURCES.manual);
+    return this.listSkills(userId).then((rows) =>
+      rows.filter(
+        (row) =>
+          row.source === USER_SKILL_SOURCES.manual ||
+          resolveSkillOrigins(row.source, row.evidenceRefs).includes('experience'),
+      ),
+    );
   }
 
-  private listSkills(userId: string, source?: string): Promise<UserSkillRecord[]> {
+  private listSkills(
+    userId: string,
+    source?: string,
+  ): Promise<UserSkillRecord[]> {
     return this.prisma.userSkill.findMany({
-      where: { userId, ...(source && {source}) },
+      where: { userId, ...(source && { source }) },
       orderBy: { skill: { name: 'asc' } },
       select: userSkillSelect,
     });

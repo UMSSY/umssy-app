@@ -7,11 +7,18 @@ import { Label } from '@/components/ui/label';
 import { AttendanceQrCamera } from './attendance-qr-camera';
 import { AttendanceResultPanel } from './attendance-result-panel';
 import { useAttendanceCheckIn } from '../hooks/use-attendance-check-in';
+import { AttendanceSessionSelect } from './attendance-session-select';
+import { getNextSession, getSortedSessions } from '../utils/event-sessions';
 import type { AttendanceMobileScannerProps } from '../types/attendance-mobile-scanner-props.types';
 
-export function AttendanceMobileScanner({ workshopId }: AttendanceMobileScannerProps) {
+export function AttendanceMobileScanner({ workshopId, sessions }: AttendanceMobileScannerProps) {
   const [reference, setReference] = useState('');
-  const { panel, capture, dismiss: dismissCheckIn } = useAttendanceCheckIn(workshopId);
+  const sortedSessions = getSortedSessions({ sessions });
+  const isMultiSession = sortedSessions.length > 1;
+  const [sessionId, setSessionId] = useState(
+    () => (getNextSession(sortedSessions) ?? sortedSessions[0])?.id ?? '',
+  );
+  const { panel, capture, dismiss: dismissCheckIn } = useAttendanceCheckIn(workshopId, sortedSessions);
 
   function dismiss() {
     dismissCheckIn();
@@ -20,11 +27,19 @@ export function AttendanceMobileScanner({ workshopId }: AttendanceMobileScannerP
 
   function submit(value: string) {
     setReference('');
-    return capture(value);
+    return capture(value, isMultiSession && sessionId ? sessionId : undefined);
   }
 
   return (
     <div className="space-y-5">
+      {isMultiSession && (
+        <AttendanceSessionSelect
+          sessions={sortedSessions}
+          value={sessionId}
+          onChange={setSessionId}
+          disabled={Boolean(panel)}
+        />
+      )}
       <AttendanceQrCamera paused={Boolean(panel)} onDetected={submit} />
       <form
         className="space-y-3 rounded-lg border border-border bg-surface p-4"

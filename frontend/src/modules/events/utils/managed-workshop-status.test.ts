@@ -21,4 +21,13 @@ describe('managed workshop check-in window', () => {
     expect(isManagedWorkshopFinished({ ...workshop, endTime: 'bad-time' }, Date.now())).toBe(false);
     expect(isManagedWorkshopFinished({ ...workshop, eventDate: 'bad-date' }, Date.now())).toBe(false);
   });
+
+  it('keeps a multi-session workshop open until its last session ends', () => {
+    const sessions = [
+      { id: 's1', startsAt: '2026-11-17T13:00:00.000Z', endsAt: '2026-11-17T16:00:00.000Z', location: null },
+      { id: 's2', startsAt: '2026-11-24T13:00:00.000Z', endsAt: '2026-11-24T16:00:00.000Z', location: null },
+    ];
+    expect(isManagedWorkshopFinished({ ...workshop, sessions }, Date.parse('2026-11-20T12:00:00.000Z'))).toBe(false);
+    expect(isManagedWorkshopFinished({ ...workshop, sessions }, Date.parse('2026-11-24T16:00:00.000Z'))).toBe(true);
+  });
 });

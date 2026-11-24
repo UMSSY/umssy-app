@@ -1,5 +1,6 @@
 export type { RegistrationResponse } from "./types/registration-response.types";
 export type { Registration } from "./types/registration.types";
+export type { RegistrationSession } from "./types/registration-session.types";
 export type { RegistrationErrorCode } from "./types/registration-error-code.types";
 export type { RegistrationMutation, CancelRegistrationMutation } from "./types/registration-mutation.types";
 export { REGISTRATION_ERROR_MESSAGES, DEFAULT_REGISTRATION_ERROR_MESSAGE } from "./constants/registration-errors.constants";
@@ -12,3 +13,4 @@ export { useRegistrationActions } from "./hooks/use-registration-actions";
 export { useCancelRegistration } from './hooks/use-cancel-registration';
 export { useRegistrationSession } from "./hooks/use-registration-session";
 export { parseRegistration } from './utils/registration-response';
+export { parseRegistrationSessions } from './utils/registration-session-response';

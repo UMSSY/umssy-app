@@ -4,7 +4,6 @@ import { formatBoliviaDate } from "@/shared/utils/date-time";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
 import { ApplicationActions } from "./application-actions";
-import { ApplicationStatusBadge } from "./application-status-badge";
 
 const HEADER_CELL_CLASS = "first:rounded-l-lg last:rounded-r-lg";
 
@@ -27,7 +26,6 @@ export function ApplicationsTable({
           <TableHead className={HEADER_CELL_CLASS}>{APPLICATION_MESSAGES.vacancyAndCompany}</TableHead>
           <TableHead className={cn(HEADER_CELL_CLASS, "text-center")}>{APPLICATION_MESSAGES.affinity}</TableHead>
           <TableHead className={cn(HEADER_CELL_CLASS, "text-center")}>{APPLICATION_MESSAGES.date}</TableHead>
-          <TableHead className={cn(HEADER_CELL_CLASS, "text-center")}>{APPLICATION_MESSAGES.status}</TableHead>
           <TableHead className={cn(HEADER_CELL_CLASS, "text-center")}>{APPLICATION_MESSAGES.actions}</TableHead>
         </TableRow>
       </TableHeader>
@@ -43,9 +41,6 @@ export function ApplicationsTable({
             </TableCell>
             <TableCell className={cn(CARD_CELL_CLASS, "text-center text-text-secondary")}>
               {formatBoliviaDate(application.appliedDate)}
-            </TableCell>
-            <TableCell className={cn(CARD_CELL_CLASS, "text-center")}>
-              <ApplicationStatusBadge status={application.status} />
             </TableCell>
             <TableCell className={CARD_CELL_CLASS}>
               <ApplicationActions

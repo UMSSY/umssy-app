@@ -12,6 +12,11 @@ describe('GetEventsSchema', () => {
     expect(parsed.search).toBeUndefined();
   });
 
+  it('does not expose the internal visibility decision as a query parameter', () => {
+    const parsed = GetEventsSchema.parse({ isPublishedOnly: 'false' });
+    expect(parsed).not.toHaveProperty('isPublishedOnly');
+  });
+
   it('trims leading and trailing whitespace from search', () => {
     const parsed = GetEventsSchema.parse({ search: '   workshop   ' });
     expect(parsed.search).toBe('workshop');
@@ -72,5 +77,18 @@ describe('GetEventsSchema', () => {
     });
     expect(parsed.categoryId).toBe('22222222-2222-2222-2222-222222222221');
     expect(parsed.statusId).toBe('22222222-2222-2222-2222-222222222224');
+  });
+});
+
+describe('GetEventsSchema sort', () => {
+  it('accepts the supported sort options', () => {
+    expect(GetEventsSchema.parse({ sort: 'popular' }).sort).toBe('popular');
+    expect(GetEventsSchema.parse({ sort: 'recommended' }).sort).toBe(
+      'recommended',
+    );
+  });
+
+  it('rejects an unknown sort option', () => {
+    expect(GetEventsSchema.safeParse({ sort: 'date' }).success).toBe(false);
   });
 });

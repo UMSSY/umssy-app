@@ -1,94 +1,105 @@
-"use client";
-import type { PendingParticipationProps } from "../../types/pending-participation-props.types";
+'use client';
+import type { PendingParticipationProps } from '../../types/pending-participation-props.types';
 
-import { Label } from "@/components/ui/label";
-import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
+import { Label } from '@/components/ui/label';
+import { BOLIVIA_TIME_ZONE } from '@/shared/constants/date-time.constants';
 
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AtSign, CalendarDays, Clock, FileText, Info, Pencil, Trash2, TriangleAlert, UsersRound } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  AtSign,
+  CalendarDays,
+  Clock,
+  FileText,
+  Info,
+  Pencil,
+  Trash2,
+  TriangleAlert,
+  UsersRound,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { PageHeading } from "@/shared/components/layout/page-heading";
-import { useMentorshipCatalogs } from "@/modules/mentorship";
-import { isApiError } from "@/shared/services/api-client";
-import { mentorParticipationService } from "../../services/mentor-participation.service";
+} from '@/components/ui/dialog';
+import { PageHeading } from '@/shared/components/layout/page-heading';
+import { useMentorshipCatalogs } from '@/modules/mentorship';
+import { isApiError } from '@/shared/services/api-client';
+import { mentorParticipationService } from '../../services/mentor-participation.service';
 
 function getErrorMessage(error: unknown): string {
   if (isApiError(error)) {
     const status = error.response?.status;
 
     if (status === 401) {
-      return "Tu sesión ha caducado. Inicia sesión nuevamente.";
+      return 'Tu sesión ha caducado. Inicia sesión nuevamente.';
     }
 
     if (status === 403) {
-      return "No tienes autorización para realizar esta operación.";
+      return 'No tienes autorización para realizar esta operación.';
     }
 
     if (status === 404) {
-      return "La solicitud ya no existe o no está disponible.";
+      return 'La solicitud ya no existe o no está disponible.';
     }
 
     if (status === 409) {
-      return "La solicitud cambió de estado. Actualiza la página.";
+      return 'La solicitud cambió de estado. Actualiza la página.';
     }
 
     if (status === 429) {
-      return "Has superado el límite de intentos. Se ha aplicado una sanción temporal de 72 horas.";
+      return 'Has superado el límite de intentos. Se ha aplicado una sanción temporal de 72 horas.';
     }
 
     const body = error.response?.data;
 
-    if (body && typeof body === "object") {
+    if (body && typeof body === 'object') {
       const details = body as Record<string, unknown>;
 
-      if (typeof details.detail === "string" && details.detail) {
+      if (typeof details.detail === 'string' && details.detail) {
         return details.detail;
       }
 
-      if (typeof details.message === "string" && details.message) {
+      if (typeof details.message === 'string' && details.message) {
         return details.message;
       }
     }
   }
 
-  return "No se pudo completar la operación. Intenta nuevamente.";
+  return 'No se pudo completar la operación. Intenta nuevamente.';
 }
 
 function formatDate(value?: string): string {
-  if (!value) return "Fecha no disponible";
+  if (!value) return 'Fecha no disponible';
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Fecha no disponible";
+    return 'Fecha no disponible';
   }
 
-  return new Intl.DateTimeFormat("es-BO", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Intl.DateTimeFormat('es-BO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
     timeZone: BOLIVIA_TIME_ZONE,
   }).format(date);
 }
 
 function formatElapsed(value: string, now: number): string {
   const timestamp = new Date(value).getTime();
-  if (!Number.isFinite(timestamp)) return "Fecha de envío no disponible";
+  if (!Number.isFinite(timestamp)) return 'Fecha de envío no disponible';
   const hours = Math.floor(Math.max(0, now - timestamp) / 3600000);
-  if (hours < 1) return "Solicitud enviada hace menos de una hora";
-  if (hours < 24) return `Solicitud enviada hace ${hours} ${hours === 1 ? "hora" : "horas"}`;
+  if (hours < 1) return 'Solicitud enviada hace menos de una hora';
+  if (hours < 24)
+    return `Solicitud enviada hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
   const days = Math.floor(hours / 24);
-  return `Solicitud enviada hace ${days} ${days === 1 ? "día" : "días"}`;
+  return `Solicitud enviada hace ${days} ${days === 1 ? 'día' : 'días'}`;
 }
 
 export function PendingParticipation({
@@ -110,7 +121,9 @@ export function PendingParticipation({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [openedAt, setOpenedAt] = useState(() => Date.now());
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
-  const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
+  const [selectedOrientations, setSelectedOrientations] = useState<string[]>(
+    [],
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const requestAreaIds = request.technicalAreaIds ?? [];
@@ -119,10 +132,7 @@ export function PendingParticipation({
   const resolveNames = (
     ids: string[],
     catalog: { id: string; name: string }[],
-  ) =>
-    ids.map(
-      (id) => catalog.find((entry) => entry.id === id)?.name ?? id,
-    );
+  ) => ids.map((id) => catalog.find((entry) => entry.id === id)?.name ?? id);
 
   const areaNames = resolveNames(requestAreaIds, technicalAreas);
   const orientationNames = resolveNames(
@@ -138,12 +148,12 @@ export function PendingParticipation({
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-requests"],
+        queryKey: ['mentor-participation-requests'],
       });
 
       setEditOpen(false);
       setSuccessMessage(
-        "Tus preferencias se actualizaron correctamente. Conservas tu fecha original en la cola FIFO.",
+        'Tus preferencias se actualizaron correctamente. Conservas tu fecha original en la cola FIFO.',
       );
     },
   });
@@ -154,7 +164,7 @@ export function PendingParticipation({
       setCancelOpen(false);
 
       await queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-requests"],
+        queryKey: ['mentor-participation-requests'],
       });
 
       onCancelled?.();
@@ -199,19 +209,19 @@ export function PendingParticipation({
       )}
 
       <section className="space-y-5 rounded-lg border border-border bg-surface p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-1 items-start gap-3">
+        <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-start md:justify-between">
+          <div className="flex min-w-0 items-start gap-3 md:flex-1 md:basis-64">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-notice text-notice-foreground">
               <UsersRound className="size-6" aria-hidden="true" />
             </div>
-            <div className="space-y-1">
+            <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-bold text-ink">Estado de participación</h2>
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-notice px-2 py-1 text-xs font-semibold text-notice-foreground">
                   <span
                     aria-hidden="true"
                     className="size-2 rounded-full bg-notice-foreground"
-                  />{" "}
+                  />{' '}
                   PENDIENTE
                 </span>
               </div>
@@ -221,7 +231,7 @@ export function PendingParticipation({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 md:shrink-0">
             <Button
               variant="outline"
               onClick={() => {
@@ -246,9 +256,13 @@ export function PendingParticipation({
 
         <div className="space-y-5 border-t border-border pt-5">
           <section className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="font-bold text-ink">Áreas técnicas</h3>
-              <Button variant="outline" onClick={openEdit}>
+              <Button
+                variant="outline"
+                onClick={openEdit}
+                className="h-auto min-h-9 max-w-full py-2 whitespace-normal"
+              >
                 <Pencil className="size-4" aria-hidden="true" />
                 Editar áreas técnicas
               </Button>
@@ -258,7 +272,7 @@ export function PendingParticipation({
               {areaNames.map((name) => (
                 <span
                   key={name}
-                  className="rounded-md bg-interaction px-3 py-2 text-sm text-availability-foreground"
+                  className="max-w-full rounded-md bg-interaction px-3 py-2 text-sm wrap-anywhere text-availability-foreground"
                 >
                   {name}
                 </span>
@@ -267,9 +281,13 @@ export function PendingParticipation({
           </section>
 
           <section className="space-y-3 border-t border-border pt-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="font-bold text-ink">Tipos de orientación</h3>
-              <Button variant="outline" onClick={openEdit}>
+              <Button
+                variant="outline"
+                onClick={openEdit}
+                className="h-auto min-h-9 max-w-full py-2 whitespace-normal"
+              >
                 <Pencil className="size-4" aria-hidden="true" />
                 Editar tipos de orientación
               </Button>
@@ -279,10 +297,10 @@ export function PendingParticipation({
               {orientationNames.map((name) => (
                 <span
                   key={name}
-                  className="inline-flex items-center gap-2 rounded-md bg-interaction px-3 py-2 text-sm text-availability-foreground"
+                  className="inline-flex max-w-full items-center gap-2 rounded-md bg-interaction px-3 py-2 text-sm text-availability-foreground"
                 >
-                  <FileText aria-hidden="true" className="size-4" />
-                  {name}
+                  <FileText aria-hidden="true" className="size-4 shrink-0" />
+                  <span className="wrap-anywhere">{name}</span>
                 </span>
               ))}
             </div>
@@ -346,9 +364,9 @@ export function PendingParticipation({
             <p className="flex min-w-0 items-start gap-3 text-sm text-text-secondary">
               <AtSign aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
               <span>
-                Correo institucional:{" "}
+                Correo institucional:{' '}
                 <span className="font-semibold break-all text-ink">
-                  {request.email ?? "No disponible"}
+                  {request.email ?? 'No disponible'}
                 </span>
               </span>
             </p>
@@ -402,7 +420,7 @@ export function PendingParticipation({
                         toggleId(area.id, selectedAreas, setSelectedAreas)
                       }
                     />
-                    {area.name}
+                    <span className="wrap-anywhere">{area.name}</span>
                   </Label>
                 ))}
               </fieldset>
@@ -428,7 +446,7 @@ export function PendingParticipation({
                         )
                       }
                     />
-                    {orientation.name}
+                    <span className="wrap-anywhere">{orientation.name}</span>
                   </Label>
                 ))}
               </fieldset>
@@ -460,7 +478,7 @@ export function PendingParticipation({
               }
               onClick={() => updateMutation.mutate()}
             >
-              {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
+              {updateMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
             </Button>
           </div>
         </DialogContent>
@@ -533,8 +551,8 @@ export function PendingParticipation({
             >
               <Trash2 aria-hidden="true" className="size-4" />
               {cancelMutation.isPending
-                ? "Cancelando..."
-                : "Confirmar cancelación"}
+                ? 'Cancelando...'
+                : 'Confirmar cancelación'}
             </Button>
           </div>
         </DialogContent>

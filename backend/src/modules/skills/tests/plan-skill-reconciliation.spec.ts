@@ -132,3 +132,42 @@ describe('planSkillReconciliation after deleting a work experience (HU-09)', () 
     ]);
   });
 });
+
+describe('Automatically approved experience skills', () => {
+  it('consolidates two experiences into one skill with both references', () => {
+    const plan = planSkillReconciliation(
+      [],
+      [
+        detected('python', [deletedExperience]),
+        detected('python', [remainingExperience]),
+      ],
+    );
+    expect(plan.creates).toEqual([
+      {
+        skillId: 'python',
+        evidenceRefs: [deletedExperience, remainingExperience],
+      },
+    ]);
+  });
+
+  it('retains an approved skill until its final experience is removed', () => {
+    const approved = row({
+      skillId: 'python',
+      verificationStatus: 'approved',
+      radarAutoVerified: true,
+      evidenceRefs: [deletedExperience, remainingExperience],
+    });
+    const first = planSkillReconciliation(
+      [approved],
+      [detected('python', [remainingExperience])],
+    );
+    expect(first.creates).toEqual([]);
+    expect(first.deleteIds).toEqual([]);
+    expect(first.updates[0]?.evidenceRefs).toEqual([remainingExperience]);
+    const last = planSkillReconciliation(
+      [{ ...approved, evidenceRefs: [remainingExperience] }],
+      [],
+    );
+    expect(last.deleteIds).toEqual(['python-row']);
+  });
+});
