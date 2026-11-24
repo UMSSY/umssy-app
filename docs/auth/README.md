@@ -88,10 +88,67 @@ sequenceDiagram
   S->>DB: transaction: remove owner + offline-passes:<userId> (only that user)
 ```
 
+## Signing in with Google
+
+A user who already exists in UMSSY can sign in, or link their account, with a Google credential. The credential is verified in the backend against Google's public keys before anything else: the signature, the issuer, the expiry, the audience declared in `GOOGLE_CLIENT_ID` and the verified state of the email. Only then is the identity matched against the UMSSY account.
+
+Linking is allowed only for students, graduates and mentors, only when the Google email matches the email of the authenticated account, only when that account is active, and only when the Google identity is not already linked to someone else. The link is persisted in the same transaction that validates it.
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant F as auth (frontend)
+  participant C as AuthController
+  participant G as GoogleAuthService
+  participant A as AuthService
+  U->>F: Continue with Google
+  F->>C: POST /auth/google/login or /auth/google/link
+  C->>G: verifyCredential(credential)
+  G->>G: signature, issuer, expiry, audience and verified email
+  G-->>C: verified identity
+  C->>A: loginWithGoogle or linkGoogle
+  A-->>C: session or link confirmation
+  C-->>F: access token in the body and in the cookie
+```
+
+## Renewing the session
+
+The session is carried by two cookies: the access token, short lived, and the refresh token, which belongs to a family. Renewing rotates the refresh token: the used one is marked and a new one is issued inside the same family, with the absolute expiry of the family unchanged. If a refresh token that was already used is presented again, the whole family is revoked, because that is the signature of a stolen token.
+
+`POST /auth/refresh` answers with the new access token in the body and sets both cookies, so the header the frontend sends and the cookie the backend reads always carry the same credential. A request that failed with `401` is retried once with the renewed credential.
+
+Renewal is coordinated between tabs with a Web Lock and a shared timestamp, so several tabs reacting to the same `401` produce one call to the backend, not one per tab.
+
+```mermaid
+sequenceDiagram
+  participant F as api-client
+  participant L as session refresh lock
+  participant C as AuthController
+  participant R as RefreshTokenService
+  F->>F: request answered 401
+  F->>L: executeSharedRefresh (one per browser)
+  L->>C: POST /auth/refresh with the refresh cookie
+  C->>R: rotate(refreshToken)
+  R->>R: mark the used token and issue the next of the family
+  R-->>C: access token, refresh token and role
+  C-->>L: access token in the body, both cookies set
+  L-->>F: renewed credential stored
+  F->>C: original request retried once
+```
+
+## Closing the session by inactivity
+
+Inactivity is measured for the session, not for the tab. Every interaction writes the moment of the last activity in a place shared by all the tabs of the browser, and the timer reads the most recent one before warning or closing. A tab left open in the background therefore cannot end a session the user is still working on in another tab.
+
+When the remaining time enters the warning window the user is offered to stay connected, which renews the session and resets the countdown. When the time runs out, or the absolute limit of the session is reached, the session is closed, the other tabs are told through the broadcast channel and the user is sent to the login page keeping the path they were on.
+
 ## Sprint History
 
 ### Sprint 3
 
+- Signing in and linking with Google, with the credential verified against Google's public keys before touching the UMSSY account.
+- Session renewal with rotating refresh tokens by family, coordinated between tabs, and the failed request retried once with the renewed credential.
+- Closing by inactivity measured over the whole session, shared between tabs, with a warning before the session ends.
 - Offline session:
   - The session, workshops, categories and passes are kept in IndexedDB as copies tied to the user, not to the token. The passes can be opened after reopening the PWA without a token; the other copies need a valid token in memory.
   - Logout or `401` ends the offline session and removes only that user's passes in one transaction. Another user's login removes the previous passes.
