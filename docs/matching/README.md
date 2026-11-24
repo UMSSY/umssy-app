@@ -4,7 +4,7 @@
 
 Connects applicants with vacancies. It calculates how well a person fits a vacancy (the **affinity**), ranks the published vacancies for them ("Vacantes para ti"), shows which requirements they meet and which are pending, and creates the job application. It also hosts the text analysis that recognizes catalog skills inside free text (work experience descriptions and vacancy requirements).
 
-Owner: group 5. The module is shared in two places: the skill detection pipeline of the profile (module `nlp`) and the recruiter radar views (module `radar-integration`) are owned by other teams and only referenced here.
+The skill detection pipeline in `nlp` and the recruiter-facing views in `radar-integration` are separate modules referenced here where they integrate with matching.
 
 ## Functionality
 
@@ -17,6 +17,24 @@ Owner: group 5. The module is shared in two places: the skill detection pipeline
 | List the applicants of a vacancy for its company                                        | `GET /companies/:companyId/job-offers/:jobOfferId/applications` |
 | Detect catalog skills in a work experience description (preview and persisted analysis) | `POST /work-experiences/:id/skills/preview` and `/analysis`     |
 | Detect catalog skills in the requirements text of a vacancy                             | `POST /matching/requirements/terms`                             |
+| Get or update the authenticated user's job alert preference                             | `GET/PUT /job-offers/alert-preference`                            |
+
+### Job alert preferences
+
+The `GET /job-offers/alert-preference` endpoint returns the authenticated user's effective `mode`, stored `savedMode` and `canFilterByProfile` capability. The `PUT /job-offers/alert-preference` endpoint accepts `{ "mode": "ALL" | "MATCHING" | "HIGH_AFFINITY" }` and returns the updated preference. Both endpoints require an authenticated `estudiante` or `titulado`.
+
+| Mode | Meaning |
+| ---- | ------- |
+| `ALL` | Receive alerts without an affinity filter. |
+| `MATCHING` | Request alerts for vacancies with affinity above 0. |
+| `HIGH_AFFINITY` | Request alerts for vacancies with affinity of at least 70. |
+
+| Capability | Behavior |
+| ---------- | -------- |
+| `canFilterByProfile: true` | The user's profile has skills, so affinity-based modes are available. |
+| `canFilterByProfile: false` | The effective `mode` is `ALL`; `savedMode` retains the stored choice. Attempting to save a filtered mode raises `JOB_ALERT_SKILLS_REQUIRED`. |
+
+The preference endpoints store and retrieve choices; candidate selection and delivery are separate concerns. The `nlp` and `radar-integration` modules retain their own responsibilities.
 
 ## Architecture
 
@@ -159,6 +177,8 @@ sequenceDiagram
 | Method | Path                                                        | Roles                          | Description                                   | Success                                            | Errors                                                                                               |
 | ------ | ----------------------------------------------------------- | ------------------------------ | --------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | GET    | `/job-offers/recommendations`                               | titulado, estudiante           | Vacancies ranked by affinity                  | 200 `{ isProfileComplete, items[] }`               | 401, 403                                                                                             |
+| GET    | `/job-offers/alert-preference`                            | titulado, estudiante           | Read effective and saved alert preference       | 200 `{ mode, savedMode, canFilterByProfile }`      | 401, 403                                                                                             |
+| PUT    | `/job-offers/alert-preference`                            | titulado, estudiante           | Save alert preference `{ mode }`               | 200 `{ mode, savedMode, canFilterByProfile }`      | 400 invalid mode, 400 `JOB_ALERT_SKILLS_REQUIRED`, 401, 403                                         |
 | GET    | `/job-offers/:id/match`                                     | titulado, estudiante           | Score and requirements of one vacancy         | 200 `JobMatchResponse`                             | 404 `JOB_OFFER_NOT_AVAILABLE`                                                                        |
 | POST   | `/job-offers/:id/applications`                              | titulado, estudiante           | Applies with consents                         | 201 `JobApplicationResponse`                       | 400 `JOB_APPLICATION_CONSENT_REQUIRED`, 404 `JOB_OFFER_UNAVAILABLE`, 409 `DUPLICATE_JOB_APPLICATION` |
 | GET    | `/job-offers/:id/applications/me`                           | titulado, estudiante           | Own application for the vacancy               | 200 `{ hasApplied, application }`                  | 401, 403                                                                                             |
