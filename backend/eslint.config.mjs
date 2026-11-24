@@ -9,6 +9,7 @@ export default defineConfig([
     'coverage/**',
     'node_modules/**',
     'src/generated/**',
+    'src/prisma/**',
   ]),
 
   {
