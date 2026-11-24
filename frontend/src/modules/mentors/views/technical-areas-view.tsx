@@ -208,7 +208,7 @@ export function TechnicalAreasView() {
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <Button
           type="button"
-          variant="outline"
+          variant="cancel"
           onClick={handleCancel}
           disabled={isSaving}
           className="h-auto gap-2 rounded-lg px-4 py-2 text-sm"

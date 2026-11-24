@@ -132,6 +132,10 @@ sequenceDiagram
 | Uses      | events                                        | Event room name for group notifications                       |
 | Used by   | notifications (frontend)                      | `getActiveConversationId()` to skip the toast of the open chat |
 
+## Action styling
+
+Blocking is a moderation action with a confirmation dialog. Its controls use neutral styling and the dismissal action uses the shared Cancel treatment.
+
 ## Sprint History
 
 ### Sprint 3

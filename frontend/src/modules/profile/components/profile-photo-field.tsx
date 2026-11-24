@@ -73,7 +73,8 @@ export function ProfilePhotoField({
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="cancel"
+                size="lg"
                 className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
                 disabled={isBusy}
                 onClick={onCancelPhoto}

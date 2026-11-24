@@ -115,6 +115,10 @@ Signing out tries to delete the current device subscription (`DELETE /push/subsc
 | Uses      | [notifications](../notifications/README.md)   | `useNotificationPreferences` and the preference endpoints       |
 | Uses      | shared                                        | `usePushNotifications`, push prompt and guide dialogs, `sw.js`  |
 
+## Profile editor
+
+The profile client reads `GET /profile/me`, updates personal information and presentation through their `PATCH /profile/me` subroutes, and loads supported cities through `GET /profile/cities`. Photo retrieval, replacement and deletion use `GET`, `PUT` and `DELETE /profile/me/photo`. The completeness guide reads `GET /profile/completeness` to show remaining requirements.
+
 ## Sprint History
 
 ### Sprint 3

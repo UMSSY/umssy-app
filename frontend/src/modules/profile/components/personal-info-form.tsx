@@ -203,7 +203,8 @@ export function PersonalInfoForm({
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="cancel"
+              size="lg"
               className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
               disabled={isSaving}
               onClick={handleCancel}
