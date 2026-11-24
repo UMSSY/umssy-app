@@ -1,3 +1,4 @@
+
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -41,8 +42,12 @@ describe('WorkExperienceListCard', () => {
     cleanup();
   });
 
-  it('wraps a long position inside the card and keeps its actions available', () => {
+  it('wraps a long position inside the card and keeps its actions available', async () => {
+    const user = userEvent.setup();
+
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
+
+    await user.click(screen.getByRole('button', { name: /Banco/ }));
 
     const heading = screen.getByRole('heading', {
       level: 4,
@@ -246,18 +251,85 @@ describe('WorkExperienceListCard', () => {
     ).toHaveClass('h-auto', 'whitespace-normal');
   });
 
-  it('does not offer to collapse a company with a single position and always shows it', () => {
+  it('shows a company with a single position collapsed by default', () => {
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
 
     expect(
-      screen.getByRole('heading', { level: 3, name: /Banco/ }),
-    ).toBeInTheDocument();
+      screen.getByRole('button', { name: /Banco/ }),
+    ).toHaveAttribute('aria-expanded', 'false');
+
     expect(
-      screen.queryByRole('button', { name: /Banco/ }),
+      screen.queryByRole('heading', { level: 4, name: LONG_POSITION }),
     ).not.toBeInTheDocument();
+  });
+
+  it('expands and collapses a company with a single position', async () => {
+    const user = userEvent.setup();
+
+    render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
+
+    const companyButton = screen.getByRole('button', { name: /Banco/ });
+
+    expect(companyButton).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(companyButton);
+
+    expect(companyButton).toHaveAttribute('aria-expanded', 'true');
     expect(
       screen.getByRole('heading', { level: 4, name: LONG_POSITION }),
     ).toBeVisible();
+
+    await user.click(companyButton);
+
+    expect(companyButton).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.queryByRole('heading', { level: 4, name: LONG_POSITION }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('starts all company groups collapsed, including companies with one position', () => {
+    const experiences = [
+      createExperience(
+        'andes-1',
+        'Pasante de análisis de datos',
+        '2025-01-01',
+        null,
+        true,
+        'Andes Data Labs',
+      ),
+      createExperience(
+        'software-1',
+        'Apoyo frontend',
+        '2018-10-01',
+        '2019-05-01',
+        false,
+        'Software Solutions',
+      ),
+    ];
+
+    render(<WorkExperienceListCard experiences={experiences} />);
+
+    expect(
+      screen.getByRole('button', { name: /Andes Data Labs/ }),
+    ).toHaveAttribute('aria-expanded', 'false');
+
+    expect(
+      screen.getByRole('button', { name: /Software Solutions/ }),
+    ).toHaveAttribute('aria-expanded', 'false');
+
+    expect(
+      screen.queryByRole('heading', {
+        level: 4,
+        name: 'Pasante de análisis de datos',
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole('heading', {
+        level: 4,
+        name: 'Apoyo frontend',
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it('identifies the first recorded position and current status for multiple positions', () => {
@@ -353,8 +425,8 @@ describe('WorkExperienceListCard', () => {
     expect(companyHeading).not.toHaveTextContent('Primer cargo');
     expect(companyHeading).not.toHaveTextContent('Tiene un cargo actual');
 
-    expect(
-      screen.getByText(/Feb.*2020.*Jul.*2023/),
-    ).toBeInTheDocument();
+    expect(companyHeading).not.toHaveTextContent(
+      /Feb.*2020.*Jul.*2023/,
+    );
   });
 });
