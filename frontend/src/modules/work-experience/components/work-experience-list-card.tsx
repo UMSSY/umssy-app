@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -66,6 +65,8 @@ export function WorkExperienceListCard({
             const groupId = group.id;
             const positionsId = `${groupId}-positions`;
             const isExpanded = expandedGroups[groupId] ?? false;
+            const singlePosition =
+              group.positions.length === 1 ? group.positions[0] : undefined;
 
             return (
               <li key={groupId} className="py-5 first:pt-0 last:pb-0">
@@ -93,11 +94,22 @@ export function WorkExperienceListCard({
                       <span className="mt-1 block text-sm font-normal text-text-secondary">
                         {group.positions.length}{' '}
                         {group.positions.length === 1 ? 'cargo' : 'cargos'}
-                        {group.positions.length > 1 && (
+                        {group.positions.length > 1 ? (
                           <>
                             {' · '}
                             {getCompanyGroupPeriod(group.positions)}
                           </>
+                        ) : (
+                          singlePosition && (
+                            <>
+                              {' · '}
+                              {formatWorkPeriod(
+                                singlePosition.startDate,
+                                singlePosition.endDate,
+                                singlePosition.isCurrent,
+                              )}
+                            </>
+                          )
                         )}
                       </span>
                     </span>

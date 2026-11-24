@@ -1,9 +1,9 @@
-
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { WorkExperienceItem } from '../types/work-experience-item.types';
+import { formatWorkPeriod } from '../utils/format-work-period';
 import { WorkExperienceListCard } from './work-experience-list-card';
 
 const LONG_POSITION = 'a'.repeat(1200);
@@ -413,7 +413,7 @@ describe('WorkExperienceListCard', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not repeat the company period when there is only one position', () => {
+  it('shows the formatted period when there is only one position', () => {
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
 
     const companyHeading = screen.getByRole('heading', {
@@ -421,12 +421,14 @@ describe('WorkExperienceListCard', () => {
       name: /Banco/,
     });
 
-    expect(companyHeading).toHaveTextContent('1 cargo');
+    const expectedPeriod = formatWorkPeriod(
+      EXPERIENCE.startDate,
+      EXPERIENCE.endDate,
+      EXPERIENCE.isCurrent,
+    );
+
+    expect(companyHeading).toHaveTextContent(`1 cargo · ${expectedPeriod}`);
     expect(companyHeading).not.toHaveTextContent('Primer cargo');
     expect(companyHeading).not.toHaveTextContent('Tiene un cargo actual');
-
-    expect(companyHeading).not.toHaveTextContent(
-      /Feb.*2020.*Jul.*2023/,
-    );
   });
 });
