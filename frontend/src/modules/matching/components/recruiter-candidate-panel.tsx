@@ -210,6 +210,8 @@ export function RecruiterCandidatePanel({
         <Button
           id="recruiter-contact-button"
           type="button"
+          data-vacancy-title={vacancy.title}
+          data-candidate-headline={candidateHeadline}
           className="min-h-11 w-full"
           disabled={isStartingChat}
           onClick={() => void openCandidateChat()}

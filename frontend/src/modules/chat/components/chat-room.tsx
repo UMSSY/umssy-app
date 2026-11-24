@@ -19,6 +19,7 @@ import { EventRoomInfoPanel } from "./event-room-info-panel";
 import { ChatErrorState } from "./chat-error-state";
 import {
   formatMessageDateSeparator,
+  formatTime12h,
   getInitials,
 } from "../utils/date-formatter";
 import { getEventRoomSenderName } from "../utils/get-event-room-sender-name";
@@ -138,12 +139,20 @@ function ChatRoomContent({
   const conversationName = eventConversation
     ? eventConversation.eventTitle ?? 'Chat del evento'
     : conversation.contact?.fullName ?? '';
+  const contactTriggerDataset =
+    typeof document !== "undefined"
+      ? document.getElementById("recruiter-contact-button")?.dataset
+      : undefined;
   const contactSubtitle = !isEventConversation
     ? (conversation.contact?.academicTitle ??
+      contactTriggerDataset?.candidateHeadline ??
       conversation.contact?.roleName ??
       conversation.contact?.role ??
       null)
     : null;
+  const postulationVacancyTitle =
+    contactTriggerDataset?.vacancyTitle || "la empresa";
+  const postulationDefaultMessage = `Hola, ${conversationName}. Hemos visto tu perfil para la vacante de ${postulationVacancyTitle} y nos gustaría contactar contigo para conocer más sobre tu experiencia. ¿Tendrías disponibilidad para una breve llamada esta semana?`;
   const eventParticipantCount = eventConversation?.participants?.length ?? 0;
   const eventParticipantLabel =
     eventParticipantCount === 1
@@ -690,6 +699,23 @@ function ChatRoomContent({
           isEventConversation ? (
             <div className="flex h-full flex-col items-center justify-center p-6 text-center">
               <EventRoomEmptyState description="Aún no hay mensajes. Envía el primero para comenzar la conversación." />
+            </div>
+          ) : conversation.contextType === "POSTULACION" ? (
+            <div className="space-y-3">
+              <div
+                data-testid="postulation-default-message"
+                onClick={() => setInputText(postulationDefaultMessage)}
+                className="flex w-full min-w-0 justify-end gap-2"
+              >
+                <div className="max-w-[85%] min-w-0 cursor-pointer rounded-2xl rounded-tr-xs bg-accent px-3.5 py-2.5 text-sm [overflow-wrap:anywhere] break-words text-accent-foreground shadow-xs transition-opacity hover:opacity-95 md:max-w-[70%]">
+                  <span className="leading-relaxed whitespace-pre-wrap">
+                    {postulationDefaultMessage}
+                  </span>
+                  <div className="mt-1.5 flex items-center justify-end gap-1.5 text-[10px] text-surface/80">
+                    <span>{formatTime12h(new Date())}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="flex h-full flex-col items-center justify-center p-6 text-center text-text-secondary">
