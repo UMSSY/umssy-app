@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { buildApplication } from "../testing/application-fixtures";
-import { filterApplicationsByStatus } from "./filter-applications-by-status";
 import { nextApplicationSort, sortApplications } from "./sort-applications";
 
 const APPLICATIONS = [
@@ -33,25 +32,15 @@ describe("sortApplications", () => {
 
 describe("nextApplicationSort", () => {
   it("starts ascending, then toggles to descending on the same column", () => {
-    const first = nextApplicationSort(null, "status");
-    expect(first).toEqual({ key: "status", direction: "asc" });
-    expect(nextApplicationSort(first, "status")).toEqual({ key: "status", direction: "desc" });
+    const first = nextApplicationSort(null, "vacancy");
+    expect(first).toEqual({ key: "vacancy", direction: "asc" });
+    expect(nextApplicationSort(first, "vacancy")).toEqual({ key: "vacancy", direction: "desc" });
   });
 
   it("restarts ascending when another column is chosen", () => {
-    expect(nextApplicationSort({ key: "status", direction: "desc" }, "company")).toEqual({
+    expect(nextApplicationSort({ key: "vacancy", direction: "desc" }, "company")).toEqual({
       key: "company",
       direction: "asc",
     });
-  });
-});
-
-describe("filterApplicationsByStatus", () => {
-  it("returns every application for the all tab", () => {
-    expect(ids(filterApplicationsByStatus(APPLICATIONS, "all"))).toEqual(["a", "b", "c"]);
-  });
-
-  it("returns only the applications in the chosen status", () => {
-    expect(ids(filterApplicationsByStatus(APPLICATIONS, "Entrevista"))).toEqual(["b"]);
   });
 });
