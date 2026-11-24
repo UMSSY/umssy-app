@@ -1,6 +1,5 @@
-export interface OpenContextualChatParams {
-  contactId: string;
-  context: { contextType: string; contextId: string };
-  contactHeadline?: string | null;
+import type { ResolveContextualConversationParams } from "./resolve-contextual-conversation-params.types";
+
+export interface OpenContextualChatParams extends ResolveContextualConversationParams {
   launcherId?: string | null;
 }

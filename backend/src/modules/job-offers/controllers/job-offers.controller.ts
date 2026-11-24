@@ -52,7 +52,7 @@ import {
 import {
   CLOSE_JOB_OFFER_ERROR_RESPONSES,
   CLOSE_JOB_OFFER_OK_RESPONSE,
-  CREATE_JOB_OFFER_EXPIRY_ERROR_RESPONSE,
+  CREATE_JOB_OFFER_UNPROCESSABLE_RESPONSE,
 } from '../constants/job-offer-swagger.constants.js';
 import {
   createJobOfferSchema,
@@ -139,7 +139,7 @@ export class JobOffersController {
   @ApiOperation({ summary: 'Publica una nueva vacante de la empresa' })
   @ApiBody(toApiBody(createJobOfferSchema))
   @ApiCreatedResponse({ description: 'Vacante publicada' })
-  @ApiResponse(CREATE_JOB_OFFER_EXPIRY_ERROR_RESPONSE)
+  @ApiResponse(CREATE_JOB_OFFER_UNPROCESSABLE_RESPONSE)
   create(
     @Param('companyId', companyIdPipe) companyId: string,
     @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
