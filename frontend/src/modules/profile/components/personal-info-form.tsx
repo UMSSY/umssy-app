@@ -91,11 +91,11 @@ export function PersonalInfoForm({
 
   return (
     <div className="rounded-lg border border-border bg-surface">
-      <div className="border-b border-border p-6 lg:px-8">
+      <div className="border-b border-border p-4 sm:p-6 lg:px-8">
       <ProfilePhotoField {...photo} idPrefix={idPrefix} />
 
       </div>
-      <form onSubmit={handleSubmit} noValidate className="px-6 pt-6 lg:px-8">
+      <form onSubmit={handleSubmit} noValidate className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
         <FormSection title="Identidad" description="Tu nombre en la comunidad.">
           <div className="grid gap-5 md:grid-cols-2">
           <FormField id={fieldIds.firstName} label="Nombres" isRequired error={errors.firstName}>
@@ -198,19 +198,19 @@ export function PersonalInfoForm({
           </div>
           </div>
         </FormSection>
-        <div className="-mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
+        <div className="-mx-4 flex flex-col gap-4 rounded-b-lg border-t border-border bg-surface p-4 sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5 lg:-mx-8 lg:px-8">
           <p className="text-sm text-text-secondary">* Campos obligatorios</p>
-          <div className="flex w-full flex-wrap justify-end gap-3 sm:w-auto">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="outline"
-              className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+              className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
               disabled={isSaving}
               onClick={handleCancel}
             >
               Cancelar
             </Button>
-            <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+            <Button type="submit" className={cn("h-10 w-full bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover sm:w-auto sm:min-w-44")} disabled={isSaving}>
               {isSaving ? "Guardando..." : saveLabel}
             </Button>
           </div>

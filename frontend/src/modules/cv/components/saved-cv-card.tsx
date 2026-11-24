@@ -97,7 +97,7 @@ export function SavedCvCard({
           <Button
             type="button"
             variant="outline"
-            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
             disabled={isBusy || isAutofilling}
             onClick={onAutofill}
           >
@@ -115,7 +115,7 @@ export function SavedCvCard({
           <Button
             type="button"
             variant="outline"
-            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
             onClick={onOpenHistory}
           >
             <History aria-hidden="true" className="size-4" />

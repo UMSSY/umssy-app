@@ -70,7 +70,7 @@ export function CvUploadCard({
       <div className="mt-6 flex justify-end">
         <Button
           type="button"
-          className="h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
+          className="h-10 w-full bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover sm:w-auto"
           disabled={!selectedFile || isBusy}
           onClick={selectedFile ? () => onConfirmUpload(selectedFile) : undefined}
         >

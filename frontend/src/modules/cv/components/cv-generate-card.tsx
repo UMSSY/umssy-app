@@ -24,7 +24,7 @@ export function CvGenerateCard() {
       </div>
       <Button
         type="button"
-        className="h-11 shrink-0 self-start bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover sm:self-auto"
+        className="h-11 w-full shrink-0 self-start bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover sm:w-auto sm:self-auto"
         onClick={() => setIsOpen(true)}
       >
         <Plus aria-hidden="true" className="size-4" />
