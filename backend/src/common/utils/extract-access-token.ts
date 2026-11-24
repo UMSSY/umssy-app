@@ -3,13 +3,12 @@ import {
   ACCESS_TOKEN_COOKIE,
   BEARER_PREFIX,
 } from '../constants/auth.constants.js';
+import type {
+  AccessTokenSource,
+  ExtractedAccessToken,
+} from '../types/extracted-access-token.types.js';
 
-export type AccessTokenSource = 'bearer' | 'cookie';
-
-export interface ExtractedAccessToken {
-  token: string;
-  source: AccessTokenSource;
-}
+export type { AccessTokenSource, ExtractedAccessToken };
 
 export function extractAccessToken(
   request: Pick<Request, 'headers' | 'cookies'>,

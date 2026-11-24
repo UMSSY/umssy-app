@@ -6,6 +6,7 @@ import type { AuditEventDetail } from "../types/audit-event-detail.types";
 import type { AuditEventPage } from "../types/audit-event-page.types";
 import type { AuditEventTimeline } from "../types/audit-event-timeline.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
+import { isAuditEventDetail } from "../utils/is-audit-event-detail";
 import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 
 const NO_EVIDENCE_MESSAGE = "Este evento no tiene un documento asociado.";
@@ -67,10 +68,10 @@ async function getEventDetail(eventId: string): Promise<AuditApiResult<AuditEven
 
     const body: unknown = response.data;
     const payload = isRecord(body) && isRecord(body.data) ? body.data : null;
-    if (!payload || typeof payload.id !== "string" || !isRecord(payload.request) || !isRecord(payload.applicant)) {
+    if (!isAuditEventDetail(payload)) {
       return { ok: false, status: 0, message: GENERIC_ERROR_MESSAGE };
     }
-    return { ok: true, data: payload as unknown as AuditEventDetail };
+    return { ok: true, data: payload };
   } catch {
     return { ok: false, status: 0, message: NETWORK_ERROR_MESSAGE };
   }

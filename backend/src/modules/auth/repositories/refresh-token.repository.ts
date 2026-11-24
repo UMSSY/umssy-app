@@ -1,16 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { RefreshRevocationReason } from '../constants/refresh-token.constants.js';
+import type { NewRefreshToken } from '../types/new-refresh-token.types.js';
 
-export interface NewRefreshToken {
-  userId: string;
-  familyId: string;
-  roleTag: string;
-  tokenHash: string;
-  expiresAt: Date;
-  absoluteExpiresAt: Date;
-  userAgent: string | null;
-}
+export type { NewRefreshToken };
 
 @Injectable()
 export class RefreshTokenRepository {

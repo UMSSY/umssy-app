@@ -68,7 +68,7 @@ export function LoginView() {
     return reason === 'SESSION_EXPIRED' || reason === 'session_expired';
   });
 
-  
+
 
   useRedirectAuthenticated(!isSigningIn);
   const loginRestriction = restrictions.getRestriction('login', email);

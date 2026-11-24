@@ -266,5 +266,3 @@ describe("decodeGoogleIdToken", () => {
     expect(decodeGoogleIdToken("invalid-token")).toEqual({});
   });
 });
-
-
