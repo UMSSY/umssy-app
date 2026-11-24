@@ -16,6 +16,7 @@ function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
     message: "Quiero revisar mi CV",
     requestedAt: "2026-10-20T22:42:00.000Z",
     document: null,
+    cancellation: null,
     ...overrides,
   };
 }
@@ -87,6 +88,102 @@ describe("AppointmentCard", () => {
 
     expect(screen.getByText("Cancelada")).not.toHaveClass("text-success");
   });
+
+  it("muestra «Cancelada por ti» cuando el usuario canceló la cita", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por ti")).toBeInTheDocument();
+  });
+
+  it("muestra «Cancelada por el mentor» cuando canceló la otra persona", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "MENTOR", cancelledByMe: false, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por el mentor")).toBeInTheDocument();
+  });
+
+  it("muestra el motivo de la cancelación cuando existe", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: {
+            cancelledBy: "STUDENT",
+            cancelledByMe: false,
+            reason: "Me surgió un imprevisto",
+            cancelledAt: "2026-10-25T00:00:00.000Z",
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Me surgió un imprevisto")).toBeInTheDocument();
+  });
+
+  it("no muestra motivo en una cita cancelada sin razón registrada", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "STUDENT", cancelledByMe: false, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por el titulado")).toBeInTheDocument();
+  });
+
+  it("pinta en rojo el texto de cancelación cuando se sabe quién canceló", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por ti")).toHaveClass("text-destructive");
+  });
+
+  it("no pinta en rojo el «Cancelada» genérico sin dato de quién canceló", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({ status: "CANCELLED", cancellation: null })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada")).not.toHaveClass("text-destructive");
+  });
+
+  it.each(["mentor", "student"] as const)(
+    "muestra Completada con estilo neutro para una cita con %s",
+    (role) => {
+      render(<AppointmentCard appointment={makeAppointment({
+        status: "COMPLETED",
+        counterpart: { id: "other-1", fullName: "Otra persona", role },
+      })} />);
+
+      expect(screen.getByText("Completada")).toHaveClass(
+        "h-6", "px-2.5", "text-sm", "bg-muted", "text-text-secondary", "border-transparent",
+      );
+      expect(screen.getByText("Completada")).not.toHaveClass("text-success");
+      expect(screen.queryByText("Confirmada")).not.toBeInTheDocument();
+    },
+  );
 
   it("notifica la selección al hacer clic en la tarjeta", async () => {
     const user = userEvent.setup();

@@ -55,9 +55,10 @@ Organized by permanent business domain (`modules/auth`, `modules/billing`, `modu
 
 Every View and hook using React state, TanStack Query, or browser APIs (camera, IndexedDB) must explicitly declare `'use client'`.
 
-#### 1.2.3 Shared Components Layer (shared/components/)
+#### 1.2.3 Shared Components Layer
 
-Retains `ui/` (shadcn primitives) and `layout/` (Navbar, Sidebar, Shell). Adds `AuthGate` and `RoleGate` as pure layout components that receive the role/session state through props or context and decide what to render. They never fetch data directly.
+- `src/components/ui/` contains shadcn/ui primitives.
+- `src/shared/components/` contains shared application components, including layouts such as Navbar, Sidebar, and Shell. `AuthGate` and `RoleGate` receive role and session state through props or context and decide what to render. They never fetch data directly.
 
 #### 1.2.4 Core Services Layer (shared/services/)
 
@@ -89,7 +90,7 @@ src/
 │   │       └── page.tsx
 │   │
 │   ├── (app)/                              # Grupo de rutas AUTENTICADAS
-│   │   ├── layout.tsx                      # <AuthGate><RoleGate><Shell>  "use client"
+│   │   ├── layout.tsx                      # Server Component que renderiza AppRouteLayout
 │   │   ├── loading.tsx                     # Skeleton global de la sección
 │   │   ├── error.tsx                       # Error boundary del segmento
 │   │   ├── dashboard/
@@ -116,9 +117,11 @@ src/
 │   ├── enrollment/
 │        └── ...
 │
+├── components/
+│   └── ui/                                 # shadcn/ui
+│
 ├── shared/
 │   ├── components/
-│   │   ├── ui/                             # shadcn/ui
 │   │   └── layout/                         # Navbar, Sidebar, Shell, AuthGate, RoleGate
 │   ├── contexts/                           # AuthContext
 │   ├── hooks/                              # useOnlineStatus, useWindowSize
@@ -282,4 +285,4 @@ Any component instance requiring margins or external layout adjustments must rec
 - Editing files in `components/ui` for design adjustments is allowed, but the PR must identify those edits because rerunning `shadcn add` overwrites them.
 - Business logic does not belong in `components/ui`: this layer must not import services or data libraries.
 - Allowed native HTML: `div`, `section`, `main`, `nav`, `header`, `footer`, `aside`, `article`, `ul`, `ol`, `li`, `p`, `span`, `h1` through `h6`, `form` (composed with Field), anchors through `next/link`, images through `next/image`, and Lucide SVGs.
-- Native HTML is prohibited when a component exists: `button` (Button), `input` (Input), `textarea` (Textarea), `select` (Select or NativeSelect), `label` (Label), checkbox and radio (Checkbox, RadioGroup), `table` (Table), `dialog` (Dialog or AlertDialog), and `progress` (Progress). Exceptions: `<input type="file">` and `<input type="hidden">` without equivalents, justified in the PR. ESLint warns about native `button`, `input`, and `select` elements while existing modules are being migrated.
+- Native HTML is prohibited when a component exists: `button` (Button), `input` (Input), `textarea` (Textarea), `select` (Select or NativeSelect), `label` (Label), checkbox and radio (Checkbox, RadioGroup), `table` (Table), `dialog` (Dialog or AlertDialog), and `progress` (Progress). Outside `src/components/ui/`, ESLint reports native `button`, `input`, and `select` as errors. Native inputs with an explicit literal `type` of `file` or `hidden` are allowed when there is no equivalent component and the PR explains the exception.

@@ -43,7 +43,6 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
   {
     id: "heatmaps", label: "Mapas de calor", icon: LayoutGrid, patterns: [/^\/backoffice\/reports\/heatmaps(?:\/|$)/],
     items: [
-      { label: "Mapas de calor", href: "/backoffice/reports/heatmaps" },
       { label: "Habilidades por Carrera", href: "/backoffice/reports/heatmaps/skills-by-career" },
       { label: "Habilidades vs. Rango Salarial", href: "/backoffice/reports/heatmaps/skills-by-salary" },
       { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability" },
@@ -65,7 +64,12 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Crear encuesta", href: "/backoffice/surveys/create" },
     ],
   },
-  { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
+  {
+    id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [
+      { label: "Solicitudes de acceso", href: "/backoffice/solicitudes" },
+      { label: "Control de cupos", href: "/backoffice/mentor-capacity" },
+    ],
+  },
   { id: "radar-review", label: "Revisión de radares", icon: Radar, patterns: [/^\/affinity-radar\/review-queue\/?$/], items: [] },
   {
     id: "vacancies",

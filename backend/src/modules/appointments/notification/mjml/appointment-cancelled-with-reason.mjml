@@ -1,0 +1,17 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Cita cancelada</mj-text>
+    <mj-text>{{ intro }}</mj-text>
+    <mj-divider />
+    <mj-text mj-class="secondary" padding="0">Canceló</mj-text>
+    <mj-text>{{ cancelledByName }}</mj-text>
+    <mj-text mj-class="secondary" padding="0">Fecha</mj-text>
+    <mj-text>{{ date }}</mj-text>
+    <mj-text mj-class="secondary" padding="0">Hora</mj-text>
+    <mj-text>{{ time }}</mj-text>
+    <mj-text mj-class="secondary" padding="0">Motivo</mj-text>
+    <mj-text>{{ reason }}</mj-text>
+    <mj-divider />
+    <mj-button href="{{ actionUrl }}">Ver mis citas</mj-button>
+  </mj-column>
+</mj-section>

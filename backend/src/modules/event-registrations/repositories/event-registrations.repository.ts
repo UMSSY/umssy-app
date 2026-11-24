@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
+import { PUBLISHED_STATUS_TITLE } from '../../events/index.js';
 import {
-  FINISHED_STATUS_TITLE,
-  PUBLISHED_STATUS_TITLE,
-} from '../../events/index.js';
-import type { FinishedEventThreshold } from '../../events/index.js';
-import { REGISTRATION_SELECT } from '../constants/registrations.constants.js';
+  MY_REGISTRATION_EVENT_SELECT,
+  REGISTRATION_SELECT,
+} from '../constants/registrations.constants.js';
 import type { CreateEventRegistrationPayload } from '../types/event-registrations.types.js';
 
 @Injectable()
@@ -154,6 +153,7 @@ export class EventRegistrationsRepository {
             endTime: true,
             location: true,
             description: true,
+            sessions: MY_REGISTRATION_EVENT_SELECT.sessions,
           },
         },
         user: {
@@ -194,15 +194,7 @@ export class EventRegistrationsRepository {
         registeredAt: true,
         cancelledAt: true,
         status: { select: { title: true } },
-        event: {
-          select: {
-            title: true,
-            eventDate: true,
-            startTime: true,
-            endTime: true,
-            location: true,
-          },
-        },
+        event: { select: MY_REGISTRATION_EVENT_SELECT },
       },
       orderBy: { event: { eventDate: 'asc' } },
     });
@@ -210,7 +202,7 @@ export class EventRegistrationsRepository {
 
   async findFinishedByUserId(
     userId: string,
-    threshold: FinishedEventThreshold,
+    event: Prisma.EventWhereInput,
     skip: number,
     take: number,
   ) {
@@ -218,18 +210,7 @@ export class EventRegistrationsRepository {
       userId,
       cancelledAt: null,
       status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-      event: {
-        status: {
-          title: { in: [PUBLISHED_STATUS_TITLE, FINISHED_STATUS_TITLE] },
-        },
-        OR: [
-          { eventDate: { lt: threshold.eventDate } },
-          {
-            eventDate: threshold.eventDate,
-            endTime: { lte: threshold.endTime },
-          },
-        ],
-      },
+      event,
     };
     const [items, total] = await this.prisma.$transaction([
       this.prisma.eventRegistration.findMany({
@@ -240,15 +221,7 @@ export class EventRegistrationsRepository {
           registeredAt: true,
           cancelledAt: true,
           status: { select: { title: true } },
-          event: {
-            select: {
-              title: true,
-              eventDate: true,
-              startTime: true,
-              endTime: true,
-              location: true,
-            },
-          },
+          event: { select: MY_REGISTRATION_EVENT_SELECT },
         },
         orderBy: [
           { event: { eventDate: 'desc' } },

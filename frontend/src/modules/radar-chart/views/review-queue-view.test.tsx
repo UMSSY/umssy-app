@@ -1,7 +1,7 @@
 import { cleanup, screen, waitFor } from '@testing-library/react';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { radarIntegrationApi } from '../services/radar-integration.service';
 import { verificationApi, type DocumentVerification } from '@/modules/cv';
 import { ReviewQueueView } from './review-queue-view';
@@ -53,10 +53,6 @@ const row: DocumentVerification = {
   radarVersion: null,
 };
 
-beforeEach(() => {
-  vi.spyOn(radarIntegrationApi, 'reviews').mockResolvedValue([]);
-});
-
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -77,6 +73,9 @@ it('permite revisar un único documento con su motivo y confirmar la decisión',
   render(<ReviewQueueView />);
 
   await screen.findByText(/Nombre distinto/);
+  expect(
+    screen.queryByRole('heading', { name: 'Revisión de habilidades' }),
+  ).not.toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Aprobar documento' }));
 

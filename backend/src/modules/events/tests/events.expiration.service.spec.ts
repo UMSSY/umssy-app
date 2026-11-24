@@ -24,36 +24,29 @@ describe('EventsService - vencimiento automático', () => {
     vi.spyOn(service, 'findById').mockImplementation(findById);
   });
 
-  it('vence las propuestas con plazo cumplido antes de listar', async () => {
+  it('lists without changing proposal status', async () => {
     await service.findAll({ page: 1, limit: 10 });
 
-    expect(expireOverdueProposals).toHaveBeenCalledOnce();
-    expect(expireOverdueProposals).toHaveBeenCalledWith(expect.any(Date));
-    expect(expireOverdueProposals.mock.invocationCallOrder[0]).toBeLessThan(
-      findAndCount.mock.invocationCallOrder[0],
-    );
+    expect(expireOverdueProposals).not.toHaveBeenCalled();
+    expect(findAndCount).toHaveBeenCalledOnce();
   });
 
-  it('vence las propuestas con plazo cumplido antes de consultar el detalle', async () => {
+  it('reads a proposal without changing its status', async () => {
     await expect(service.findOne('event-1')).rejects.toBeInstanceOf(
       EventNotFoundException,
     );
 
-    expect(expireOverdueProposals).toHaveBeenCalledOnce();
-    expect(expireOverdueProposals.mock.invocationCallOrder[0]).toBeLessThan(
-      findById.mock.invocationCallOrder[0],
-    );
+    expect(expireOverdueProposals).not.toHaveBeenCalled();
+    expect(findById).toHaveBeenCalledOnce();
   });
 
-  it('evalúa el plazo con la hora actual', async () => {
+  it('keeps a read side-effect free at the expiry instant', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-12T23:59:00.000Z'));
     try {
       await service.findAll({ page: 1, limit: 10 });
 
-      expect(expireOverdueProposals).toHaveBeenCalledWith(
-        new Date('2026-10-12T23:59:00.000Z'),
-      );
+      expect(expireOverdueProposals).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }

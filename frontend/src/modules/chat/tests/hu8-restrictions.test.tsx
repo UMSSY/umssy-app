@@ -27,7 +27,8 @@ vi.mock("../hooks/use-send-connection-request", () => ({
   }),
 }));
 
-vi.mock("@tanstack/react-query", () => ({
+vi.mock("@tanstack/react-query", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@tanstack/react-query")>()),
   useQuery: () => ({
     data: [
       {

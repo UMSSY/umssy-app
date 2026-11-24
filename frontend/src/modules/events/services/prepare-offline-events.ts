@@ -1,3 +1,4 @@
+import { DEFAULT_EVENT_SORT } from '../constants/events.constants';
 import { eventsService } from './events.service';
 import { eventCategoriesService } from '@/modules/event-categories/services/event-categories.service';
 
@@ -6,7 +7,7 @@ export async function prepareOfflineEvents(token: string, signal: AbortSignal) {
   let page = 1;
   while (!signal.aborted) {
     const result = await eventsService.getEvents(
-      { page, limit: 50, includeProposals: true },
+      { page, limit: 50, includeProposals: true, sort: DEFAULT_EVENT_SORT },
       signal,
       token,
       true,

@@ -1,5 +1,8 @@
 import { registrationsService } from './registrations.service';
-import { updateSessionOfflinePasses } from '../utils/offline-passes-store';
+import {
+  claimSessionOfflinePasses,
+  updateSessionOfflinePasses,
+} from '../utils/offline-passes-store';
 import type { OfflinePass } from '../types/offline-pass.types';
 import { reconcileOfflinePasses } from './offline-passes.service';
 
@@ -7,6 +10,7 @@ export async function prepareOfflinePasses(
   accessToken: string,
   signal: AbortSignal,
 ) {
+  await claimSessionOfflinePasses(accessToken);
   const registrations = await registrationsService.getMine(signal, accessToken);
   await reconcileOfflinePasses(registrations, accessToken, signal);
   const passes: OfflinePass[] = [];

@@ -12,6 +12,13 @@ import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
 import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
+import { resolveNotificationChannel } from '../utils/resolve-notification-channel.js';
+import { truncateNotificationText } from '../utils/truncate-notification-text.js';
+
+const EMAIL_EXCLUDED_TYPES: ReadonlySet<NotificationType> = new Set([
+  NotificationType.CHAT_MESSAGE,
+  NotificationType.CHAT_GROUP_MESSAGE,
+]);
 
 @Injectable()
 export class NotificationsService {
@@ -27,6 +34,18 @@ export class NotificationsService {
     private readonly appVisibilityService: AppVisibilityService,
   ) {}
 
+  hasGroupedNotification(
+    recipientId: string,
+    type: NotificationType,
+    groupKey: string,
+  ): Promise<boolean> {
+    return this.notificationsRepository.hasGroupedNotification(
+      recipientId,
+      type,
+      groupKey,
+    );
+  }
+
   async notify(request: NotifyRequest): Promise<NotifyResult> {
     const {
       recipientIds,
@@ -36,7 +55,11 @@ export class NotificationsService {
       actionUrl,
       groupKey,
       renderMail,
+      channels,
     } = request;
+    const includeInApp = !channels || channels.includes('IN_APP');
+    const includePush = !channels || channels.includes('PUSH');
+    const includeEmail = !channels || channels.includes('EMAIL');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
@@ -85,37 +108,48 @@ export class NotificationsService {
     }
 
     const normalizedPayload = normalizeNotificationPayload(payload);
-    const title = template.renderTitle(normalizedPayload);
-    const body = template.renderBody(normalizedPayload);
+    const title = truncateNotificationText(
+      template.renderTitle(normalizedPayload),
+    );
+    const body = truncateNotificationText(
+      template.renderBody(normalizedPayload),
+    );
+    const typeSendsEmail =
+      typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
 
     const preferences =
       await this.preferencesRepository.findManyByUserIds(validRecipients);
+    const preferenceByUserId = new Map(preferences.map((p) => [p.userId, p]));
 
     const pushTargets: string[] = [];
     const emailTargets: string[] = [];
 
     for (const recipientId of validRecipients) {
-      const userPref = preferences.find((p) => p.userId === recipientId);
-      const pushEnabled = userPref ? userPref.pushEnabled : false;
-      const emailEnabled = userPref ? userPref.emailEnabled : true;
+      const channel = resolveNotificationChannel(
+        preferenceByUserId.get(recipientId),
+      );
 
-      const appVisible = this.appVisibilityService.isVisible(recipientId);
-      if (typeRecord.sendsPush && pushEnabled && !appVisible)
-        pushTargets.push(recipientId);
-      if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
+      if (channel === 'push') {
+        const appVisible = this.appVisibilityService.isVisible(recipientId);
+        if (typeRecord.sendsPush && !appVisible) pushTargets.push(recipientId);
+      } else if (channel === 'email') {
+        if (typeSendsEmail) emailTargets.push(recipientId);
+      }
     }
 
-    const createdNotifications = await this.notificationsRepository.createMany(
-      validRecipients.map((id) => ({
-        recipientId: id,
-        actorId: actorId,
-        typeId: typeRecord.id,
-        title,
-        body,
-        link: actionUrl,
-        groupKey,
-      })),
-    );
+    const createdNotifications = includeInApp
+      ? await this.notificationsRepository.createMany(
+          validRecipients.map((id) => ({
+            recipientId: id,
+            actorId: actorId,
+            typeId: typeRecord.id,
+            title,
+            body,
+            link: actionUrl,
+            groupKey,
+          })),
+        )
+      : [];
     const inAppCount = createdNotifications.length;
     const notificationIdsByRecipient = new Map(
       createdNotifications.map((notification) => [
@@ -124,12 +158,16 @@ export class NotificationsService {
       ]),
     );
 
-    const createdPushTargets = pushTargets.filter((id) =>
-      notificationIdsByRecipient.has(id),
-    );
-    const createdEmailTargets = emailTargets.filter((id) =>
-      notificationIdsByRecipient.has(id),
-    );
+    const createdPushTargets = includePush
+      ? pushTargets.filter(
+          (id) => !includeInApp || notificationIdsByRecipient.has(id),
+        )
+      : [];
+    const createdEmailTargets = includeEmail
+      ? emailTargets.filter(
+          (id) => !includeInApp || notificationIdsByRecipient.has(id),
+        )
+      : [];
 
     for (const recipientId of notificationIdsByRecipient.keys()) {
       this.notificationGateway.emitToUser(recipientId, 'notification:new', {

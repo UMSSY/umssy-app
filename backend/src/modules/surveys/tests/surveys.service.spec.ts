@@ -85,6 +85,7 @@ describe('SurveysService', () => {
       new SurveyMapper(),
       pdfService as never,
       reportHistoryService as never,
+      { notifyPublished: vi.fn().mockResolvedValue(undefined) } as never,
     );
   });
 

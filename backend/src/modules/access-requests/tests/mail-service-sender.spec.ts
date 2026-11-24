@@ -3,7 +3,7 @@ import { MailTemplateService } from '../../mail/services/mail-template.service.j
 import {
   buildFrontendUrl,
   frontendBaseUrl,
-} from '../mail/helpers/frontend-url.js';
+} from '../../mail/helpers/frontend-url.js';
 import { MailServiceSender } from '../mail/mail-service-sender.js';
 import type { MailService } from '../../mail/services/mail.service.js';
 import type { RejectionMailLinkService } from '../services/rejection-mail-link.service.js';

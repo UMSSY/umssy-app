@@ -19,6 +19,7 @@ function buildTarget(
     academicPeriod: '2020',
     closesAt: new Date('2026-12-01T00:00:00.000Z'),
     lastReminderSentAt: null,
+    publishedNotifiedPeriod: null,
     status: { title: 'published' },
     targetAudience: { title: 'graduates' },
     career: { id: 'career-1', title: 'Ingeniería de Sistemas' },

@@ -3,5 +3,6 @@ export type ParticipationOverviewProps = {
   areas: string[];
   orientations: string[];
   onAction: () => void;
+  onPreview: () => void;
   actionEnabled?: boolean;
 };

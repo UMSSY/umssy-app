@@ -18,7 +18,8 @@ export function AffinityRadarAxisTick({
       y={y}
       textAnchor={textAnchor}
       verticalAnchor={verticalAnchor}
-      width={84}
+      width={76}
+      lineHeight={13}
       fontSize={11}
       className="fill-ink-soft text-[11px] font-semibold sm:text-sm"
     >
@@ -46,6 +47,7 @@ export function AffinityRadarAxisTick({
       onKeyDown={handleKeyDown}
       className="cursor-pointer outline-none hover:[&_text]:fill-accent focus-visible:[&_text]:fill-accent focus-visible:[&_text]:underline [&_text]:motion-safe:transition-colors"
     >
+      <circle cx={x} cy={y} r={24} fill="transparent" />
       {label}
     </g>
   );

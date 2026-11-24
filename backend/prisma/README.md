@@ -36,6 +36,8 @@ erDiagram
   users ||--o{ job_applications : "user_id"
   job_application_statuses ||--o{ job_applications : "status_id"
   job_applications ||--o| radar_application_consents : "application_id"
+  users ||--o| job_offer_notification_preferences : "user_id"
+  job_alert_modes ||--o{ job_offer_notification_preferences : "mode_id"
 
   work_experiences {
     uuid id PK
@@ -90,6 +92,15 @@ erDiagram
     boolean consent_to_recruiter
     boolean consent_to_cv
     boolean consent_to_contact
+  }
+  job_offer_notification_preferences {
+    uuid user_id PK, FK
+    uuid mode_id FK
+  }
+  job_alert_modes {
+    uuid id PK
+    string title UK
+    string description
   }
 ```
 
@@ -214,16 +225,42 @@ Consents given when applying. Prisma model `RadarApplicationConsent`.
 
 Relationship: 1:1 with the application (`application_id` is unique). The row is written by the radar-integration module when the application is created, after the matching module has checked that the three consents were given.
 
+### `job_offer_notification_preferences`
+
+Which newly published vacancies a student or graduate wants to be notified about (HU-15). One row per person; a person who never chose has no row and is treated as `ALL`. Module: matching. Prisma model `JobOfferNotificationPreference`.
+
+| Column                     | Type           | Null | Notes                                    |
+| -------------------------- | -------------- | ---- | ---------------------------------------- |
+| `user_id`                  | uuid           | no   | Primary key and FK to `users.id`, cascade |
+| `mode_id`                  | uuid           | no   | FK to `job_alert_modes.id`, restrict     |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                          |
+
+Constraints: the primary key is `user_id`, so there is one preference per person. Indexes: `mode_id` (the primary key covers `user_id`). The row is written by the matching module through `PUT /job-offers/alert-preference`; the notification service never reads or writes it.
+
+### `job_alert_modes`
+
+Catalog of the values of the preference. Prisma model `JobAlertMode`.
+
+| Column                     | Type           | Null | Notes                                                                       |
+| -------------------------- | -------------- | ---- | --------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                 |
+| `title`                    | varchar(30)    | no   | Unique. Stable code used by the API and the code: `ALL`, `MATCHING`, `HIGH_AFFINITY` |
+| `description`              | varchar(255)   | no   | What the mode means, in Spanish                                             |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                             |
+
+The three rows are inserted by the migration. `MATCHING` means an affinity above 0 % and `HIGH_AFFINITY` an affinity of 70 % or more.
+
 ### Catalog tables
 
-All of them have `id`, a unique `title` (varchar(100)), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
+All of them have `id`, a unique `title` (varchar(100), except in `job_alert_modes`, whose `title` is varchar(30) and which also has a `description`), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
 
-| Table                      | Used by                       | Values                                                                 |
-| -------------------------- | ----------------------------- | ---------------------------------------------------------------------- |
-| `job_application_statuses` | `job_applications.status_id`  | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
-| `job_offer_statuses`       | `job_offers.status_id`        | `Publicada`, `Cerrada`, `Eliminada`                                    |
-| `job_offer_modalities`     | `job_offers.modality_id`      | `Presencial`, `Remoto`, `Híbrido`                                      |
-| `job_offer_contract_types` | `job_offers.contract_type_id` | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| Table                      | Used by                                      | Values                                                                 |
+| -------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| `job_application_statuses` | `job_applications.status_id`                 | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
+| `job_offer_statuses`       | `job_offers.status_id`                       | `Publicada`, `Cerrada`, `Eliminada`                                    |
+| `job_offer_modalities`     | `job_offers.modality_id`                     | `Presencial`, `Remoto`, `Híbrido`                                      |
+| `job_offer_contract_types` | `job_offers.contract_type_id`                | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| `job_alert_modes`          | `job_offer_notification_preferences.mode_id` | `ALL`, `MATCHING`, `HIGH_AFFINITY`                                     |
 
 ### Referenced tables owned by other modules
 
@@ -239,6 +276,8 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
 | One skill per person; one skill per vacancy; one application per person and vacancy                                                                          | Unique constraints                    |
 | A person's data disappears with the person                                                                                                                   | Cascade from `users`                  |
+| A person without a row in `job_offer_notification_preferences` is notified of every vacancy (`ALL`); `MATCHING` and `HIGH_AFFINITY` can only be saved by someone with at least one skill, and someone who loses all their skills is notified as `ALL` while the saved choice is kept | Application |
+| A notification mode cannot be deleted while a preference uses it                                                                                             | Restrict                              |
 | A skill, status, modality, contract type or company of an experience cannot be deleted while in use                                                          | Restrict                              |
 | A vacancy removes its skills and applications when deleted for good                                                                                          | Cascade from `job_offers`             |
 | Vacancy deletion by a company is logical (`Eliminada`)                                                                                                       | Application                           |
@@ -257,6 +296,7 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | `20261029120000_add_withdrawn_application_status`      | `Retirada` status                                                             |
 | `20261103120000_add_job_offer_published_at`            | `published_at` of vacancies                                                   |
 | `20261106000000_add_radar_application_consents`        | Consents of an application                                                    |
+| `20261122180000_add_job_offer_notification_preferences` | Vacancy alert modes catalog and the preference of each person (HU-15)        |
 
 ## Radar and document verification
 
@@ -583,6 +623,7 @@ erDiagram
     timestamptz closing_soon_notified_at "nullable"
     timestamptz closed_notified_at "nullable"
     timestamptz last_reminder_sent_at "nullable"
+    varchar_7 published_notified_period "nullable"
     timestamptz created_at
     timestamptz updated_at
   }
@@ -644,6 +685,7 @@ Encuesta de empleabilidad creada por un administrativo.
 | `closingSoonNotifiedAt` | `closing_soon_notified_at` | `TIMESTAMPTZ(6)` | Sí | | Momento en que se avisó al creador del cierre próximo. `NULL` = aún no avisado |
 | `closedNotifiedAt` | `closed_notified_at` | `TIMESTAMPTZ(6)` | Sí | | Momento en que se avisó al creador del cierre (y se evaluaron las variaciones). `NULL` = aún no avisado |
 | `lastReminderSentAt` | `last_reminder_sent_at` | `TIMESTAMPTZ(6)` | Sí | | Último recordatorio manual entregado a la audiencia pendiente |
+| `publishedNotifiedPeriod` | `published_notified_period` | `VARCHAR(7)` | Sí | | Semestre (`I-AAAA` o `II-AAAA`) en que se avisó a la audiencia de la publicación (`SURVEY_PUBLISHED`). Garantiza un solo aviso por encuesta y semestre. `NULL` = aún no avisado |
 | `createdAt` | `created_at` | `TIMESTAMPTZ(6)` | No | `now()` | Alta |
 | `updatedAt` | `updated_at` | `TIMESTAMPTZ(6)` | No | `@updatedAt` | Última modificación |
 
@@ -697,10 +739,511 @@ Configuración opcional de las alertas de variación de una encuesta. Cuando la 
 
 `NotificationType` (`notification_types`): PK `id`, `code` `VARCHAR(50)` único, `name` `VARCHAR(100)`, `sends_push` y `sends_email` `BOOLEAN` (por defecto `false`). Lo referencia `Notification.typeId`. La semilla del catálogo hace upsert por `code`.
 
+## Mentor network
+
+Prisma optional fields use `?`; arrays use `[]`. Scalar fields below list PostgreSQL types and exact Prisma attributes, including mapped column names, PK, defaults and uniqueness. `uuid()` is generated by Prisma; `dbgenerated` expressions run in PostgreSQL. `@updatedAt` is Prisma-managed, not an implicit database trigger. No audit field is assumed when absent.
+
+The model is not a separate Mentor table: `User` and current `UserRole` rows identify mentors. `User.id` is a UUID PK in `users`; `UserRole.roleId` references `Role.id`. Eligibility additionally reads `AccessRequest.approvedUserId` (nullable unique UUID -> `User.id`, SetNull) and `statusId` (UUID -> `AccessRequestStatus.id`, Restrict). Those are eligibility inputs, not FKs from capacity settings. Profile suggestions read `User.photoUrl` (Bytes/bytea), `aboutMe` (String?/text) and `WorkExperience.userId` (UUID -> User.id, Cascade), without storing suggestions.
+
+### MentorTechnicalArea (`mentor_technical_areas`)
+
+| Field / column                          | Prisma / PostgreSQL           | Definition                                              |
+| --------------------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                             | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                         |
+| `mentorId` / `mentor_id`                | `String` / `uuid`             | `@map("mentor_id") @db.Uuid`                            |
+| `technicalAreaId` / `technical_area_id` | `String` / `uuid`             | `@map("technical_area_id") @db.Uuid`                    |
+| `createdAt` / `created_at`              | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at`              | `DateTime` / `timestamptz(6)` | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+| Relation        | Foreign key                             | Cardinality                                  | Delete / update parent              |
+| --------------- | --------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| `mentor`        | `mentorId` -> `User.id`                 | 1 parent per child; 0..N children per parent | Cascade / Cascade (Prisma default)  |
+| `technicalArea` | `technicalAreaId` -> `TechnicalArea.id` | 1 parent per child; 0..N children per parent | Restrict / Cascade (Prisma default) |
+
+Model indexes and composite constraints: `@@unique([mentorId, technicalAreaId])`; `@@index([technicalAreaId])`.
+
+### MentorOrientationType (`mentor_orientation_types`)
+
+| Field / column                              | Prisma / PostgreSQL           | Definition                                              |
+| ------------------------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                                 | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                         |
+| `mentorId` / `mentor_id`                    | `String` / `uuid`             | `@map("mentor_id") @db.Uuid`                            |
+| `orientationTypeId` / `orientation_type_id` | `String` / `uuid`             | `@map("orientation_type_id") @db.Uuid`                  |
+| `createdAt` / `created_at`                  | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at`                  | `DateTime` / `timestamptz(6)` | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+| Relation          | Foreign key                                 | Cardinality                                  | Delete / update parent              |
+| ----------------- | ------------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| `mentor`          | `mentorId` -> `User.id`                     | 1 parent per child; 0..N children per parent | Cascade / Cascade (Prisma default)  |
+| `orientationType` | `orientationTypeId` -> `OrientationType.id` | 1 parent per child; 0..N children per parent | Restrict / Cascade (Prisma default) |
+
+Model indexes and composite constraints: `@@unique([mentorId, orientationTypeId])`; `@@index([orientationTypeId])`.
+
+### MentorParticipationRequest (`mentor_participation_requests`)
+
+| Field / column                                | Prisma / PostgreSQL           | Definition                                                                                         |
+| --------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `id` / `id`                                   | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                                                                    |
+| `userId` / `user_id`                          | `String` / `uuid`             | `@map("user_id") @db.Uuid`                                                                         |
+| `status` / `status`                           | `String` / `varchar(20)`      | `@default("PENDING") @db.VarChar(20)`                                                              |
+| `queuedAt` / `queued_at`                      | `DateTime` / `timestamptz(6)` | `@default(now()) @map("queued_at") @db.Timestamptz(6)`                                             |
+| `createdAt` / `created_at`                    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)`                                            |
+| `technicalAreaIds` / `technical_area_ids`     | `String[]` / `uuid[]`         | `@map("technical_area_ids") @db.Uuid`                                                              |
+| `orientationTypeIds` / `orientation_type_ids` | `String[]` / `uuid[]`         | `@map("orientation_type_ids") @db.Uuid`                                                            |
+| `updatedAt` / `updated_at`                    | `DateTime` / `timestamptz(6)` | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)`                                 |
+| `statusId` / `status_id`                      | `String` / `uuid`             | `@default(dbgenerated("mentor_participation_status('PENDING'::text)")) @map("status_id") @db.Uuid` |
+
+| Relation        | Foreign key                                  | Cardinality                                  | Delete / update parent              |
+| --------------- | -------------------------------------------- | -------------------------------------------- | ----------------------------------- |
+| `user`          | `userId` -> `User.id`                        | 1 parent per child; 0..N children per parent | Restrict / Cascade (Prisma default) |
+| `statusCatalog` | `statusId` -> `MentorParticipationStatus.id` | 1 parent per child; 0..N children per parent | Restrict / Restrict                 |
+
+Model indexes and composite constraints: `@@index([status, queuedAt, id])`; `@@index([userId])`; `@@index([statusId])`.
+
+### MentorSlotOffer (`mentor_slot_offers`)
+
+| Field / column                 | Prisma / PostgreSQL            | Definition                                                                                 |
+| ------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `id` / `id`                    | `String` / `uuid`              | `@id @default(uuid()) @db.Uuid`                                                            |
+| `userId` / `user_id`           | `String` / `uuid`              | `@map("user_id") @db.Uuid`                                                                 |
+| `status` / `status`            | `String` / `varchar(20)`       | `@default("OFFERED") @db.VarChar(20)`                                                      |
+| `offeredAt` / `offered_at`     | `DateTime` / `timestamptz(6)`  | `@default(now()) @map("offered_at") @db.Timestamptz(6)`                                    |
+| `expiresAt` / `expires_at`     | `DateTime` / `timestamptz(6)`  | `@map("expires_at") @db.Timestamptz(6)`                                                    |
+| `requestId` / `request_id`     | `String?` / `uuid`             | `@unique @map("request_id") @db.Uuid`                                                      |
+| `confirmedAt` / `confirmed_at` | `DateTime?` / `timestamptz(6)` | `@map("confirmed_at") @db.Timestamptz(6)`                                                  |
+| `createdAt` / `created_at`     | `DateTime` / `timestamptz(6)`  | `@default(now()) @map("created_at") @db.Timestamptz(6)`                                    |
+| `updatedAt` / `updated_at`     | `DateTime` / `timestamptz(6)`  | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)`                         |
+| `statusId` / `status_id`       | `String` / `uuid`              | `@default(dbgenerated("mentor_offer_status('OFFERED'::text)")) @map("status_id") @db.Uuid` |
+
+| Relation        | Foreign key                                    | Cardinality                                     | Delete / update parent              |
+| --------------- | ---------------------------------------------- | ----------------------------------------------- | ----------------------------------- |
+| `user`          | `userId` -> `User.id`                          | 1 parent per child; 0..N children per parent    | Restrict / Cascade (Prisma default) |
+| `request`       | `requestId` -> `MentorParticipationRequest.id` | 0..1 parent per child; 0..1 children per parent | Restrict / Cascade (Prisma default) |
+| `statusCatalog` | `statusId` -> `MentorOfferStatus.id`           | 1 parent per child; 0..N children per parent    | Restrict / Restrict                 |
+
+Model indexes and composite constraints: `@@index([status, expiresAt])`; `@@index([userId])`; `@@index([statusId])`.
+
+### MentorCapacitySetting (`mentor_capacity_settings`)
+
+| Field / column              | Prisma / PostgreSQL           | Definition                                              |
+| --------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                 | `Int` / `integer`             | `@id`                                                   |
+| `percentage` / `percentage` | `Int` / `integer`             | `@default(40)`                                          |
+| `updatedAt` / `updated_at`  | `DateTime` / `timestamptz(6)` | `@default(now()) @map("updated_at") @db.Timestamptz(6)` |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### MentorParticipationAttemptLimit (`mentor_participation_attempt_limits`)
+
+| Field / column                          | Prisma / PostgreSQL            | Definition                                     |
+| --------------------------------------- | ------------------------------ | ---------------------------------------------- |
+| `userId` / `user_id`                    | `String` / `uuid`              | `@id @map("user_id") @db.Uuid`                 |
+| `attemptCount` / `attempt_count`        | `Int` / `integer`              | `@default(0) @map("attempt_count")`            |
+| `windowStartedAt` / `window_started_at` | `DateTime?` / `timestamptz(6)` | `@map("window_started_at") @db.Timestamptz(6)` |
+| `blockedUntil` / `blocked_until`        | `DateTime?` / `timestamptz(6)` | `@map("blocked_until") @db.Timestamptz(6)`     |
+
+| Relation | Foreign key           | Cardinality                                  | Delete / update parent             |
+| -------- | --------------------- | -------------------------------------------- | ---------------------------------- |
+| `user`   | `userId` -> `User.id` | 1 parent per child; 0..1 children per parent | Cascade / Cascade (Prisma default) |
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### MentorIntakeAttempt (`mentor_intake_attempts`)
+
+| Field / column                       | Prisma / PostgreSQL           | Definition                                                                                       |
+| ------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| `operationId` / `operation_id`       | `String` / `uuid`             | `@default(dbgenerated("mentor_intake_operation('LEGACY'::text)")) @map("operation_id") @db.Uuid` |
+| `id` / `id`                          | `String` / `uuid`             | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid`                                        |
+| `userId` / `user_id`                 | `String` / `uuid`             | `@map("user_id") @db.Uuid`                                                                       |
+| `operation` / `operation`            | `String` / `varchar(20)`      | `@db.VarChar(20)`                                                                                |
+| `idempotencyKey` / `idempotency_key` | `String` / `uuid`             | `@map("idempotency_key") @db.Uuid`                                                               |
+| `payloadHash` / `payload_hash`       | `String` / `varchar(64)`      | `@map("payload_hash") @db.VarChar(64)`                                                           |
+| `occurredAt` / `occurred_at`         | `DateTime` / `timestamptz(6)` | `@default(dbgenerated("clock_timestamp()")) @map("occurred_at") @db.Timestamptz(6)`              |
+| `counted` / `counted`                | `Boolean` / `boolean`         | `@default(true)`                                                                                 |
+| `responseStatus` / `response_status` | `Int` / `integer`             | `@map("response_status")`                                                                        |
+| `responseData` / `response_data`     | `Json` / `jsonb`              | `@map("response_data")`                                                                          |
+
+| Relation          | Foreign key                                 | Cardinality                                  | Delete / update parent |
+| ----------------- | ------------------------------------------- | -------------------------------------------- | ---------------------- |
+| `intakeOperation` | `operationId` -> `MentorIntakeOperation.id` | 1 parent per child; 0..N children per parent | Restrict / NoAction    |
+| `user`            | `userId` -> `User.id`                       | 1 parent per child; 0..N children per parent | Restrict / NoAction    |
+
+Model indexes and composite constraints: `@@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")`; `@@index([operationId])`.
+
+### MentorParticipationSanction (`mentor_participation_sanctions`)
+
+| Field / column                            | Prisma / PostgreSQL           | Definition                                                |
+| ----------------------------------------- | ----------------------------- | --------------------------------------------------------- |
+| `id` / `id`                               | `String` / `uuid`             | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| `userId` / `user_id`                      | `String` / `uuid`             | `@map("user_id") @db.Uuid`                                |
+| `triggerAttemptId` / `trigger_attempt_id` | `String?` / `uuid`            | `@unique @map("trigger_attempt_id") @db.Uuid`             |
+| `startedAt` / `started_at`                | `DateTime` / `timestamptz(6)` | `@map("started_at") @db.Timestamptz(6)`                   |
+| `endsAt` / `ends_at`                      | `DateTime` / `timestamptz(6)` | `@map("ends_at") @db.Timestamptz(6)`                      |
+
+| Relation         | Foreign key                                    | Cardinality                                     | Delete / update parent |
+| ---------------- | ---------------------------------------------- | ----------------------------------------------- | ---------------------- |
+| `user`           | `userId` -> `User.id`                          | 1 parent per child; 0..N children per parent    | Restrict / NoAction    |
+| `triggerAttempt` | `triggerAttemptId` -> `MentorIntakeAttempt.id` | 0..1 parent per child; 0..1 children per parent | Restrict / NoAction    |
+
+Model indexes and composite constraints: `@@index([userId, endsAt], map: "mentor_participation_sanctions_active")`.
+
+### MentorIntakeOperation (`mentor_intake_operations`)
+
+| Field / column                | Prisma / PostgreSQL           | Definition                                                         |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `id` / `id`                   | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                                    |
+| `title` / `title`             | `String` / `varchar(30)`      | `@unique @db.VarChar(30)`                                          |
+| `description` / `description` | `String?` / `text`            | `No explicit default or constraints`                               |
+| `createdAt` / `created_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)`            |
+| `updatedAt` / `updated_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### MentorParticipationStatus (`mentor_request_statuses`)
+
+| Field / column                | Prisma / PostgreSQL           | Definition                                                         |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `id` / `id`                   | `String` / `uuid`             | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid`          |
+| `title` / `title`             | `String` / `varchar(20)`      | `@unique @db.VarChar(20)`                                          |
+| `description` / `description` | `String?` / `text`            | `No explicit default or constraints`                               |
+| `createdAt` / `created_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)`            |
+| `updatedAt` / `updated_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### MentorOfferStatus (`mentor_offer_statuses`)
+
+| Field / column                | Prisma / PostgreSQL           | Definition                                                         |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `id` / `id`                   | `String` / `uuid`             | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid`          |
+| `title` / `title`             | `String` / `varchar(20)`      | `@unique @db.VarChar(20)`                                          |
+| `description` / `description` | `String?` / `text`            | `No explicit default or constraints`                               |
+| `createdAt` / `created_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)`            |
+| `updatedAt` / `updated_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### TechnicalArea (`technical_areas`)
+
+| Field / column                | Prisma / PostgreSQL           | Definition                                              |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                   | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                         |
+| `name` / `name`               | `String` / `varchar(80)`      | `@unique @db.VarChar(80)`                               |
+| `description` / `description` | `String?` / `text`            | `No explicit default or constraints`                    |
+| `createdAt` / `created_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at`    | `DateTime` / `timestamptz(6)` | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### OrientationType (`orientation_types`)
+
+| Field / column                | Prisma / PostgreSQL           | Definition                                              |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                   | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                         |
+| `name` / `name`               | `String` / `varchar(60)`      | `@unique @db.VarChar(60)`                               |
+| `description` / `description` | `String?` / `text`            | `No explicit default or constraints`                    |
+| `isActive` / `is_active`      | `Boolean` / `boolean`         | `@default(true) @map("is_active")`                      |
+| `createdAt` / `created_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at`    | `DateTime` / `timestamptz(6)` | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### Role (`roles`)
+
+| Field / column             | Prisma / PostgreSQL           | Definition                                              |
+| -------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                         |
+| `name` / `name`            | `String` / `varchar(50)`      | `@unique @db.VarChar(50)`                               |
+| `createdAt` / `created_at` | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at` | `DateTime` / `timestamptz(6)` | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+### UserRole (`user_roles`)
+
+| Field / column             | Prisma / PostgreSQL            | Definition                                              |
+| -------------------------- | ------------------------------ | ------------------------------------------------------- |
+| `id` / `id`                | `String` / `uuid`              | `@id @default(uuid()) @db.Uuid`                         |
+| `userId` / `user_id`       | `String` / `uuid`              | `@map("user_id") @db.Uuid`                              |
+| `roleId` / `role_id`       | `String` / `uuid`              | `@map("role_id") @db.Uuid`                              |
+| `startAt` / `start_at`     | `DateTime` / `timestamptz(6)`  | `@default(now()) @map("start_at") @db.Timestamptz(6)`   |
+| `deletedAt` / `deleted_at` | `DateTime?` / `timestamptz(6)` | `@map("deleted_at") @db.Timestamptz(6)`                 |
+| `createdAt` / `created_at` | `DateTime` / `timestamptz(6)`  | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at` | `DateTime` / `timestamptz(6)`  | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+| Relation | Foreign key           | Cardinality                                  | Delete / update parent              |
+| -------- | --------------------- | -------------------------------------------- | ----------------------------------- |
+| `user`   | `userId` -> `User.id` | 1 parent per child; 0..N children per parent | Cascade / Cascade (Prisma default)  |
+| `role`   | `roleId` -> `Role.id` | 1 parent per child; 0..N children per parent | Restrict / Cascade (Prisma default) |
+
+Model indexes and composite constraints: `@@unique([userId, roleId, startAt])`; `@@index([roleId])`; `@@index([userId])`.
+
+### AccessRequestStatus (`access_request_statuses`)
+
+| Field / column                | Prisma / PostgreSQL           | Definition                                              |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `id` / `id`                   | `String` / `uuid`             | `@id @default(uuid()) @db.Uuid`                         |
+| `title` / `title`             | `String` / `varchar(100)`     | `@unique @db.VarChar(100)`                              |
+| `description` / `description` | `String?` / `text`            | `No explicit default or constraints`                    |
+| `createdAt` / `created_at`    | `DateTime` / `timestamptz(6)` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` / `updated_at`    | `DateTime` / `timestamptz(6)` | `@updatedAt @map("updated_at") @db.Timestamptz(6)`      |
+
+No outgoing foreign keys.
+
+Model indexes and composite constraints: none beyond the PK and field-level unique constraints listed above.
+
+## Relationships
+
+```mermaid
+erDiagram
+  User ||--o{ MentorTechnicalArea : "mentorId"
+  TechnicalArea ||--o{ MentorTechnicalArea : "technicalAreaId"
+  User ||--o{ MentorOrientationType : "mentorId"
+  OrientationType ||--o{ MentorOrientationType : "orientationTypeId"
+  User ||--o{ MentorParticipationRequest : "userId"
+  MentorParticipationStatus ||--o{ MentorParticipationRequest : "statusId"
+  User ||--o{ MentorSlotOffer : "userId"
+  MentorParticipationRequest |o--o| MentorSlotOffer : "requestId"
+  MentorOfferStatus ||--o{ MentorSlotOffer : "statusId"
+  User ||--o| MentorParticipationAttemptLimit : "userId"
+  MentorIntakeOperation ||--o{ MentorIntakeAttempt : "operationId"
+  User ||--o{ MentorIntakeAttempt : "userId"
+  User ||--o{ MentorParticipationSanction : "userId"
+  MentorIntakeAttempt |o--o| MentorParticipationSanction : "triggerAttemptId"
+  User ||--o{ UserRole : "userId"
+  Role ||--o{ UserRole : "roleId"
+```
+
+## SQL constraints, catalogs and audit behavior
+
+- Requests: `mentor_participation_requests_preferences_check` requires both UUID arrays to have positive cardinality. Array elements are not SQL FKs to catalogs; services validate selected IDs and uniqueness. Catalog deactivation does not cascade through these arrays.
+- `mentor_participation_requests_one_open_per_user` is unique on `user_id` only for PENDING/OFFERED requests. `mentor_requests_legacy_open` repeats that partial rule for compatibility; `mentor_requests_legacy_fifo` indexes status/queued_at/id.
+- Slot offers have a nullable unique `request_id`: a request has zero or one offer; legacy offers can have no request. `mentor_offers_legacy_open` enforces one OFFERED offer per user. SQL also retains `mentor_slot_offers_one_offer_per_user` for the same partial condition. `mentor_slot_offers_expiry_check` requires expires_at > offered_at. Expiry is explicit, not a column default of 24 hours.
+- `MentorCapacitySetting` is the existing integer singleton, not a UUID entity. SQL restricts `id = 1` and percentage to 1..100. It has no FK, createdAt, or Prisma `@updatedAt`; updates explicitly set its timestamp. Default percentage is 40.
+- Request catalog titles: PENDING, OFFERED, ACTIVE, CANCELLED, EXPIRED, ENDED. Offer catalog titles: OFFERED, CONFIRMED, EXPIRED. `status` remains for SQL compatibility; `statusId` is the real catalog FK. Compatibility triggers synchronize/validate both representations. They are not independent sources of state and there is no PAUSED catalog value.
+- `mentor_participation_requests_touch_audit` and `mentor_slot_offers_touch_audit` set updated_at with clock_timestamp() on SQL updates, in addition to Prisma @updatedAt. Catalogs expose createdAt/updatedAt as shown above.
+- Additional SQL-only rules: `mentor_intake_attempts_window` indexes (user_id, occurred_at) WHERE counted; response_status is constrained to 200..499; sanctions require ends_at = started_at + 72 hours; the legacy attempt-limit counter requires attempt_count >= 0.
+- Intake operation catalog values are ACTIVATE, REQUEST and LEGACY; the operation compatibility trigger keeps operation and operationId synchronized. `mentor_intake_attempts_identity` and its legacy compatibility index enforce user/operation/idempotency-key uniqueness. Sanction and attempt legacy records have the exact time fields listed above, not invented createdAt/updatedAt fields.
+- Technical/orientation joins have their own UUID PK and unique mentor/catalog pairs; deleting a user cascades selections, but deleting a referenced catalog is restricted. Current role participation is distinct from availability and requests.
+
+Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`.
+
+## Appointments
+
+Tables used by the [appointments](../../docs/appointments/README.md) module (Epic 7): booked sessions, their status history, the delivery record of their notices and the catalogs behind them. Availability blocks belong to the [availability](../../docs/availability/README.md) module and are only referenced here.
+
+### Relationship diagram
+
+```mermaid
+erDiagram
+  users ||--o{ appointments : "mentor_id"
+  users ||--o{ appointments : "student_id"
+  users |o--o{ appointments : "cancelled_by_id"
+  availability_blocks |o--o{ appointments : "block_id"
+  orientation_types |o--o{ appointments : "orientation_type_id"
+  appointment_statuses ||--o{ appointments : "status_id"
+  appointments ||--o{ appointment_histories : "appointment_id"
+  appointments ||--o| appointment_documents : "appointment_id"
+  appointments ||--o{ appointment_notifications : "appointment_id"
+  users ||--o{ appointment_notifications : "recipient_id"
+  appointment_notification_events ||--o{ appointment_notifications : "event_id"
+  appointment_notification_channels ||--o{ appointment_notifications : "channel_id"
+  appointment_notification_statuses ||--o{ appointment_notifications : "status_id"
+
+  appointments {
+    uuid id PK
+    uuid block_id FK
+    uuid mentor_id FK
+    uuid student_id FK
+    uuid status_id FK
+    uuid orientation_type_id FK
+    timestamptz start_at
+    timestamptz end_at
+    string meeting_url
+    uuid cancelled_by_id FK
+    string cancellation_reason
+    timestamptz cancelled_at
+  }
+  appointment_notifications {
+    uuid id PK
+    uuid appointment_id FK
+    uuid recipient_id FK
+    uuid event_id FK
+    uuid channel_id FK
+    uuid status_id FK
+    int attempts
+    string last_error
+    timestamptz sent_at
+  }
+  appointment_notification_events {
+    uuid id PK
+    string title UK
+  }
+  appointment_notification_channels {
+    uuid id PK
+    string title UK
+  }
+  appointment_notification_statuses {
+    uuid id PK
+    string title UK
+  }
+```
+
+### `appointments`
+
+A mentoring session between a mentor and a student. Prisma model `Appointment`.
+
+| Column                     | Type           | Null | Notes                                                                                                     |
+| -------------------------- | -------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                                               |
+| `block_id`                 | uuid           | yes  | FK to `availability_blocks.id` (`AvailabilityBlock.id`), set null                                         |
+| `mentor_id`                | uuid           | no   | FK to `users.id` (`User.id`), restrict                                                                    |
+| `student_id`               | uuid           | no   | FK to `users.id` (`User.id`), restrict. The person who booked; a mentor can also book with another mentor |
+| `start_at`, `end_at`       | timestamptz(6) | no   | Copied from the block when booking                                                                        |
+| `status_id`                | uuid           | no   | FK to `appointment_statuses.id` (`AppointmentStatus.id`), restrict                                        |
+| `orientation_type_id`      | uuid           | yes  | FK to `orientation_types.id` (`OrientationType.id`), set null. Topic of the session                       |
+| `message`                  | varchar(300)   | yes  | Message for the mentor; required by the application when booking                                          |
+| `rejection_reason`         | varchar(300)   | yes  | Only filled by old seed rows (`RECHAZADA`); bookings are now confirmed directly                           |
+| `meeting_url`              | varchar(255)   | yes  | Private Jitsi room `https://meet.jit.si/umssy-<uuid>`, set when booking                                   |
+| `cancelled_by_id`          | uuid           | yes  | FK to `users.id` (`User.id`), set null. Participant who cancelled                                         |
+| `cancellation_reason`      | varchar(300)   | yes  | **Sprint 3.** Reason given when cancelling; required by the application with less than 24 h to the start  |
+| `cancelled_at`             | timestamptz(6) | yes  | **Sprint 3.** When it was cancelled                                                                       |
+| `requested_at`             | timestamptz(6) | no   | Default now                                                                                               |
+| `responded_at`             | timestamptz(6) | yes  |                                                                                                           |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                                                           |
+
+Relationships: belongs to a mentor, a student and a status (N:1 each), and optionally to a block, a topic and a canceller (N:0..1). Has many `appointment_histories` and `appointment_notifications` (1:N) and at most one `appointment_documents` row (1:0..1). Indexes: `(mentor_id, start_at)`, `(student_id, start_at)`, `status_id`, `block_id`, `cancelled_by_id`, `orientation_type_id`.
+
+`cancelled_by_id`, `cancellation_reason` and `cancelled_at` are filled together only when the status changes to `CANCELLED`. The `COMPLETED` status is computed by the application from `end_at`; confirmed rows are not updated when they end.
+
+### `appointment_notifications`
+
+**Sprint 3.** Delivery record of an appointment notice: one row per appointment, recipient, event and channel. Prisma model `AppointmentNotification`.
+
+| Column                     | Type           | Null | Notes                                                                                        |
+| -------------------------- | -------------- | ---- | -------------------------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                                  |
+| `appointment_id`           | uuid           | no   | FK to `appointments.id` (`Appointment.id`), cascade                                          |
+| `recipient_id`             | uuid           | no   | FK to `users.id` (`User.id`), cascade                                                        |
+| `event_id`                 | uuid           | no   | FK to `appointment_notification_events.id` (`AppointmentNotificationEvent.id`), restrict     |
+| `channel_id`               | uuid           | no   | FK to `appointment_notification_channels.id` (`AppointmentNotificationChannel.id`), restrict |
+| `status_id`                | uuid           | no   | FK to `appointment_notification_statuses.id` (`AppointmentNotificationStatus.id`), restrict  |
+| `attempts`                 | integer        | no   | Default 0. Failed attempts; the application stops at 3                                       |
+| `last_error`               | text           | yes  | Error of the last failed attempt                                                             |
+| `sent_at`                  | timestamptz(6) | yes  | When the channel delivered it                                                                |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                                              |
+
+Relationships: belongs to one appointment, one recipient, one event, one channel and one status (N:1 each). Constraints: unique `(appointment_id, recipient_id, event_id, channel_id)`, so a notice is recorded once per channel. Indexes: `recipient_id`, `event_id`, `channel_id`, `status_id`.
+
+Life of a row: created `PENDING`; `SENT` with `sent_at` when the channel delivers; each failure increments `attempts` and saves `last_error`, and the third one sets `FAILED`. A row for a channel the recipient does not use is deleted.
+
+### Other appointment tables
+
+| Table                   | Prisma model          | Content                                                                                                                                                                                                                                           | Deletion                                                                                                   |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `appointment_histories` | `AppointmentHistory`  | Status changes: `appointment_id`, `previous_status_id` (null when booking), `new_status_id`, `changed_by_id`, `changed_at`, `note` (varchar(300)). Indexes `(appointment_id, changed_at)`, `previous_status_id`, `new_status_id`, `changed_by_id` | Cascade with the appointment; set null from the previous status and the user; restrict from the new status |
+| `appointment_documents` | `AppointmentDocument` | Document attached by the student: `appointment_id` (unique), `file_name`, `mime_type`, `size_bytes`, `data` (bytea), `uploaded_at`                                                                                                                | Cascade with the appointment                                                                               |
+
+### Catalog tables
+
+All of them have `id`, a unique `title` (varchar(100)), an optional `description`, `created_at` and `updated_at`, and no `deleted_at`. Rows are inserted by the catalog seeds (`catalog-stages.ts`) with `skipDuplicates`; the code refers to them through enums of the appointments module.
+
+| Table                               | Used by                                | Values                                                                                                                       |
+| ----------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `appointment_statuses`              | `appointments.status_id`, histories    | `CONFIRMED`, `CANCELLED`, `COMPLETED`; older seed rows use `CONFIRMADA`, `CANCELADA`, `COMPLETADA`, `PENDIENTE`, `RECHAZADA` |
+| `appointment_notification_events`   | `appointment_notifications.event_id`   | **Sprint 3.** `BOOKED` (cita confirmada), `CANCELLED` (cita cancelada)                                                       |
+| `appointment_notification_channels` | `appointment_notifications.channel_id` | **Sprint 3.** `IN_APP`, `EMAIL`, `PUSH`                                                                                      |
+| `appointment_notification_statuses` | `appointment_notifications.status_id`  | **Sprint 3.** `PENDING`, `SENT`, `FAILED`                                                                                    |
+
+### Rules enforced by the database and by the application
+
+| Rule                                                                                                                   | Where                                                          |
+| ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| A person or a status cannot be deleted while an appointment uses them                                                  | Restrict                                                       |
+| Deleting a block or a topic keeps the appointment with that field null                                                 | Set null                                                       |
+| Deleting an appointment removes its history, document and notice records                                               | Cascade from `appointments`                                    |
+| Deleting a user removes the notice records addressed to them                                                           | Cascade from `users`                                           |
+| One notice record per appointment, recipient, event and channel                                                        | Unique constraint                                              |
+| One document per appointment                                                                                           | Unique `appointment_documents.appointment_id`                  |
+| Reason of up to 300 characters, required with less than 24 h; only a confirmed, unstarted appointment can be cancelled | Application, inside a transaction that locks both participants |
+| No overlapping confirmed appointments per person and at most one booking per person and day (Bolivia time)             | Application, with advisory locks per participant               |
+
+### Migrations
+
+| Migration                                            | What it does                                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `20261104221145_add_appointment_documents`           | `appointment_documents`                                                                                      |
+| `20261112020151_add_appointment_cancellation_fields` | **Sprint 3.** Optional `appointments.cancellation_reason` (varchar(300)) and `cancelled_at`                  |
+| `20261112030833_add_appointment_notifications`       | **Sprint 3.** The three notice catalogs and `appointment_notifications` with its unique key, indexes and FKs |
+
+Both Sprint 3 migrations only add nullable columns and new tables; they do not change existing rows.
+
+## Workshop sessions and attendance
+
+```mermaid
+erDiagram
+  events ||--o{ event_sessions : "event_id"
+  events ||--o{ event_registrations : "event_id"
+  event_registrations ||--o{ event_attendances : "registration_id"
+  event_sessions |o--o{ event_attendances : "session_id"
+  users |o--o{ event_attendances : "checked_in_by_id"
+
+  events {
+    uuid id PK
+    date event_date
+    time start_time
+    time end_time
+  }
+  event_sessions {
+    uuid id PK
+    uuid event_id FK
+    timestamptz starts_at
+    timestamptz ends_at
+    string location
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  event_registrations {
+    uuid id PK
+    uuid event_id FK
+    uuid user_id FK
+  }
+  event_attendances {
+    uuid id PK
+    uuid registration_id FK
+    uuid session_id FK
+    timestamptz checked_in_at
+    uuid checked_in_by_id FK
+    boolean checked_in_offline
+    timestamptz synced_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+```
+
+`event_sessions` has one row per workshop session, with UTC instants in `starts_at` and `ends_at`, nullable `location`, and audit timestamps. `event_id` references `events.id` with cascade deletion. The table has separate indexes on `event_id`, `starts_at` and `ends_at`, with no uniqueness constraint beyond its primary key. The original `events.event_date`, `start_time` and `end_time` retain the first session for compatibility; registrations and attendance use all session rows when present. The migration backfills one session for every existing event.
+
+`event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
+
 ## Sprint History
 
 ### Sprint 3
 
+- Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.
 - Unique `(job_offer_id, user_id)` on applications, which supports withdrawing and applying again on the same row.
@@ -708,4 +1251,11 @@ Configuración opcional de las alertas de variación de una encuesta. Cuando la 
 - Migración `20261115120000_add_survey_alert_configs_and_notification_flags`:
   - Nueva tabla `survey_alert_configs` (`SurveyAlertConfig`) con relación 1:0..1 con `surveys`, índice único sobre `survey_id` y borrado en cascada.
   - Nuevas columnas nullable en `surveys`: `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, que permiten un único aviso de cierre próximo y de cierre por encuesta y registran el último recordatorio manual.
+- Migración `20261119120000_add_survey_published_notified_period`:
+  - Nueva columna nullable `published_notified_period` (`VARCHAR(7)`) en `surveys`. Guarda el semestre en que se notificó la publicación de la encuesta, así se envía un solo aviso `SURVEY_PUBLISHED` por encuesta y semestre. No modifica filas existentes.
+- Migración `20261122180000_add_job_offer_notification_preferences` (HU-15):
+  - Nueva tabla catálogo `job_alert_modes` con los modos `ALL`, `MATCHING` y `HIGH_AFFINITY`, insertados por la migración.
+  - Nueva tabla `job_offer_notification_preferences` (una fila por usuario, clave primaria `user_id` con borrado en cascada desde `users`, `mode_id` con restricción de borrado sobre el catálogo). Solo agrega tablas; no modifica filas existentes.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
+- Mentor network (Sprint 3): documented participation models, requests, FIFO offers, capacity, technical selections, catalogs, idempotency, sanctions, indexes, SQL constraints, relationships, and deletion behavior.
+- Documented the Appointments tables: `appointments` with the new `cancellation_reason` and `cancelled_at`, `appointment_notifications` and its three catalogs (`appointment_notification_events`, `appointment_notification_channels`, `appointment_notification_statuses`), with keys, relationships, indexes and deletion behavior.

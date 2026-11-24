@@ -192,6 +192,26 @@ export type TimeProposal = Prisma.TimeProposalModel
  */
 export type AppointmentHistory = Prisma.AppointmentHistoryModel
 /**
+ * Model AppointmentNotificationEvent
+ * 
+ */
+export type AppointmentNotificationEvent = Prisma.AppointmentNotificationEventModel
+/**
+ * Model AppointmentNotificationChannel
+ * 
+ */
+export type AppointmentNotificationChannel = Prisma.AppointmentNotificationChannelModel
+/**
+ * Model AppointmentNotificationStatus
+ * 
+ */
+export type AppointmentNotificationStatus = Prisma.AppointmentNotificationStatusModel
+/**
+ * Model AppointmentNotification
+ * 
+ */
+export type AppointmentNotification = Prisma.AppointmentNotificationModel
+/**
  * Model EventCategory
  * 
  */
@@ -201,6 +221,11 @@ export type EventCategory = Prisma.EventCategoryModel
  * 
  */
 export type Event = Prisma.EventModel
+/**
+ * Model EventSession
+ * 
+ */
+export type EventSession = Prisma.EventSessionModel
 /**
  * Model EventRegistration
  * 
@@ -271,6 +296,11 @@ export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
  * 
  */
 export type MentorSlotOffer = Prisma.MentorSlotOfferModel
+/**
+ * Model MentorCapacitySetting
+ * 
+ */
+export type MentorCapacitySetting = Prisma.MentorCapacitySettingModel
 /**
  * Model ActivationOtp
  * 
@@ -501,6 +531,16 @@ export type PushSubscription = Prisma.PushSubscriptionModel
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model JobAlertMode
+ * 
+ */
+export type JobAlertMode = Prisma.JobAlertModeModel
+/**
+ * Model JobOfferNotificationPreference
+ * 
+ */
+export type JobOfferNotificationPreference = Prisma.JobOfferNotificationPreferenceModel
 /**
  * Model RadarDocumentStatus
  * 

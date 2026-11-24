@@ -7,6 +7,7 @@ import { apiResponse, SURVEY_SUMMARIES } from "../testing/survey-fixtures";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
 
 vi.mock("@/shared/utils/download-file", () => ({ downloadFile: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 describe("Pantallas de encuestas", () => {
   beforeEach(() => {

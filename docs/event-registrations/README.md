@@ -11,7 +11,8 @@ The backend manages workshop registrations, cancellation, proposal support, priv
 - The default `GET /event-registrations/me` scope lists current confirmed registrations. `scope=finished` returns finished registrations as a paginated history. Finished workshops leave the current-pass view at closing time; history does not claim the participant attended.
 - A pass can be viewed offline only after it was loaded and saved online. Registration, cancellation and attendance check-in require a network connection.
 - The authenticated `titulado` who created a published workshop may check in participants. The backend validates role, ownership, workshop, confirmed registration, cancellation state and server-side time window. It accepts a `v1:` QR token, the 64-character token or a registration UUID as a manual reference. A short manual code is not implemented.
-- The current server window starts at the workshop's start time inclusive and closes at its end time exclusive, using Bolivia time (UTC−4). The server stores `checkedInById` and `checkedInAt`. Repeated check-in returns `duplicate` without adding an attendance row.
+- Each session opens at its start time inclusive and closes at its end time exclusive, using Bolivia time (UTC−4). The scanner selects a session for multi-session workshops; if omitted, the server resolves the session in progress. Legacy workshops without session rows use their event date and time. The server stores `sessionId`, `checkedInById` and `checkedInAt`. Repeated check-in for the same registration and session returns `duplicate` without adding an attendance row.
+- Registration conflict checks compare every session of both workshops. Workshops without session rows use their original date and time columns.
 
 ```mermaid
 sequenceDiagram
@@ -19,12 +20,12 @@ sequenceDiagram
     participant Scanner as Mobile scanner
     participant API as Attendance API
     participant DB as PostgreSQL
-    Organizer->>Scanner: Scan QR or enter reference
-    Scanner->>API: POST /api/events/:eventId/attendances/check-ins
-    API->>DB: Check owner, registration and time window
-    API->>DB: Lock registration and insert attendance if absent
-    DB-->>API: Existing or new attendance
-    API-->>Scanner: registered or duplicate
+    Organizer->>Scanner: Select session, scan QR or enter reference
+    Scanner->>API: POST /api/events/:eventId/attendances/check-ins (reference, sessionId)
+    API->>DB: Check owner, registration and selected session window
+    API->>DB: Lock registration and insert attendance for session if absent
+    DB-->>API: Existing or new attendance for this session
+    API-->>Scanner: registered or duplicate with sessionId
     Scanner-->>Organizer: Show validation result
 ```
 
@@ -44,7 +45,7 @@ sequenceDiagram
 | GET | `/api/event-registrations/me` | Current passes or paginated finished history with `scope=finished`. |
 | GET | `/api/event-registrations/:id/pass` | Retrieve the user's private pass for an active published workshop. |
 | POST | `/api/events/:eventId/supports` | Support a proposal as an authenticated `titulado`. |
-| POST | `/api/events/:eventId/attendances/check-ins` | Online check-in for the published workshop's creator; returns `registered` or `duplicate`. |
+| POST | `/api/events/:eventId/attendances/check-ins` | Online check-in for the published workshop's creator; returns `registered` (201) or `duplicate` (200), both with nullable `sessionId`. |
 
 Check-in errors distinguish malformed input (400), missing session (401), forbidden role or ownership (403), closed window (409), and invalid or cancelled pass (422). Responses do not list participants or expose the submitted reference.
 
@@ -68,3 +69,4 @@ Local acceptance checks covered exact current and history IDs, ordering and pagi
 - Current passes leave the active view when their workshops finish; finished registrations are available in a separate paginated history.
 - The pass screen supports offline viewing of a previously saved QR. Check-in remains online.
 - The attendance endpoint validates ownership, pass status and the workshop window, and stores an idempotent attendance record. The frontend supplies camera scanning, manual entry and result states.
+- Current and finished passes expose session schedules. The scanner selects the session and check-in is idempotent per registration and session; legacy workshops still have a single workshop window.

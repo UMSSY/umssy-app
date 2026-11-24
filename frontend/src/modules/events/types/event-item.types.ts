@@ -1,4 +1,5 @@
 import type { EventCategoryItem } from '@/modules/event-categories';
+import type { EventSession } from './event-session.types';
 
 export interface EventItem {
   coverUrl?: string | null;
@@ -24,4 +25,5 @@ export interface EventItem {
   registrationCount: number;
   statusId: string;
   modalityId: string;
+  sessions?: EventSession[];
 }

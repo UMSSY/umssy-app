@@ -31,3 +31,15 @@ describe('Proposal creation contract', () => {
     await expect(proposalsService.create(EMPTY_PROPOSAL, image, 'operation-1')).rejects.toThrow();
   });
 });
+
+describe('Proposal creation with additional sessions', () => {
+  it('sends additional sessions as JSON text only when there are sessions', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { data: response } });
+    const sessions = [{ eventDate: '2026-11-19', startTime: '09:00', endTime: '12:00' }];
+    await proposalsService.create(EMPTY_PROPOSAL, image, 'operation-1', 'session-a', sessions);
+    await proposalsService.create(EMPTY_PROPOSAL, image, 'operation-2', 'session-a', []);
+    const [first, second] = vi.mocked(apiClient.post).mock.calls.map(([, data]) => data as FormData);
+    expect(JSON.parse(String(first.get('additionalSessions')))).toEqual(sessions);
+    expect(second.has('additionalSessions')).toBe(false);
+  });
+});
