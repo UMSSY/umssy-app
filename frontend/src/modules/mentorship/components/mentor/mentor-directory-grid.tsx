@@ -8,6 +8,7 @@ export function MentorDirectoryGrid({
   returnTo = "/mentorship/mentors",
   showAffinityBadge = false,
   selectedArea,
+  radarAreas,
   highlightAvailability = false,
 }: MentorDirectoryGridProps) {
   return (
@@ -23,7 +24,7 @@ export function MentorDirectoryGrid({
             isOwnProfile={currentUserId === mentor.id}
             returnTo={returnTo}
             showAffinityBadge={showAffinityBadge}
-            selectedArea={selectedArea}
+            selectedArea={radarAreas?.find(area => mentor.technicalAreas.includes(area)) ?? selectedArea}
             highlightAvailability={highlightAvailability}
           />
         ))}

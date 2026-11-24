@@ -3,9 +3,9 @@ import { Prisma } from '../../../prisma/client.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 
-type DirectoryFilters = Pick<
+export type DirectoryFilters = Pick<
   MentorDirectoryQuery,
-  'search' | 'area' | 'orientation' | 'available'
+  'search' | 'area' | 'areaIds' | 'orientation' | 'available'
 >;
 
 function normalized(value: Prisma.Sql): Prisma.Sql {
@@ -25,7 +25,13 @@ export function directoryPredicate(
   ];
   if (filters.available)
     conditions.push(Prisma.sql`u.is_available_for_mentoring = true`);
-  if (filters.area)
+  if (filters.areaIds?.length) {
+    const ids = filters.areaIds.map((id) => Prisma.sql`${id}::uuid`);
+    conditions.push(Prisma.sql`EXISTS (
+    SELECT 1 FROM mentor_technical_areas mta
+    WHERE mta.mentor_id = u.id AND mta.technical_area_id IN (${Prisma.join(ids)})
+  )`);
+  } else if (filters.area)
     conditions.push(Prisma.sql`EXISTS (
     SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
     WHERE mta.mentor_id = u.id AND (ta.id::text = ${filters.area} OR ta.name IN (${Prisma.join(resolveMentorAreas(filters.area))}))

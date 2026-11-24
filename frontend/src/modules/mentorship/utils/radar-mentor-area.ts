@@ -11,6 +11,6 @@ const CATALOG_NAMES: Record<AreaId, readonly string[]> = {
   "gobernanza-ti": ["Gobernanza TI", "Gobernanza de TI"],
 };
 
-export function resolveRadarMentorArea(id: AreaId, catalog: readonly TechnicalAreaResponse[]) {
-  return CATALOG_NAMES[id]?.flatMap(name => catalog.filter(area => area.name === name))[0];
+export function resolveRadarMentorAreas(id: AreaId, catalog: readonly TechnicalAreaResponse[]) {
+  return CATALOG_NAMES[id].flatMap(name => catalog.filter(area => area.name === name));
 }

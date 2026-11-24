@@ -1,5 +1,7 @@
 'use client';
 import type { MentorProfileViewProps } from '../types/mentor-profile-view-props.types';
+import { RADAR_AXIS_NAMES } from '@/modules/radar-chart/constants/radar-axis-names.constants';
+import { resolveRadarMentorAreas } from '../utils/radar-mentor-area';
 
 import { MentorProfileHeader } from '../components/mentor/mentor-profile-header';
 import { MentorAbout } from '../components/mentor/mentor-about';
@@ -86,9 +88,10 @@ export function MentorProfileView({
   const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
   const directoryParams = new URL(returnTo, "http://localhost").searchParams;
   const areaId = directoryParams.get("areaId");
+  const radarAxis = RADAR_AXIS_NAMES.find(axis => axis.id === directoryParams.get('radarArea'));
   const selectedArea = mentor.technicalAreas.find(area =>
     areaId ? area.id === areaId : area.name === directoryParams.get("area"),
-  );
+  ) ?? (radarAxis ? resolveRadarMentorAreas(radarAxis.id, mentor.technicalAreas)[0] : undefined);
   const similarProps: SimilarMentorsSectionProps =
     similar.isPending || (similar.isError && similar.isFetching)
       ? { status: 'loading' }
@@ -123,7 +126,7 @@ export function MentorProfileView({
         <MentorProfileHeader
           mentor={mentor}
           selectedArea={selectedArea?.name}
-          selectedAreaId={areaId ? selectedArea?.id : undefined}
+          selectedAreaId={areaId || radarAxis ? selectedArea?.id : undefined}
           returnTo={returnTo}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />

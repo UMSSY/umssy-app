@@ -1,7 +1,7 @@
 "use client";
 import type { MentorDirectoryViewProps } from "../types/mentor-directory-view-props.types";
 import Link from "next/link";
-import { resolveRadarMentorArea } from "../utils/radar-mentor-area";
+import { resolveRadarMentorAreas } from "../utils/radar-mentor-area";
 import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
 
 import { useEffect, useMemo } from 'react';
@@ -59,7 +59,8 @@ export function MentorDirectoryView({
     ? RADAR_AXIS_NAMES.find(axis => axis.name === rawArea)
     : undefined);
   const isAvailableOnly = isHu2Flow || requestedAvailable;
-  const resolvedArea = radarAxis ? resolveRadarMentorArea(radarAxis.id, technicalAreas) : undefined;
+  const radarAreas = radarAxis ? resolveRadarMentorAreas(radarAxis.id, technicalAreas) : [];
+  const [resolvedArea] = radarAreas;
   const area = radarAxis ? resolvedArea?.name ?? radarAxis.name : rawArea;
   const missingRadarArea = Boolean(radarAxis && !resolvedArea);
 
@@ -88,7 +89,10 @@ export function MentorDirectoryView({
   } = useMentorDirectory({
     page,
     search,
-    area: technicalAreas.find(item => item.id === searchParams.get("areaId") && item.name === area)?.id ?? resolvedArea?.id ?? area,
+    area: radarAreas.length > 1
+      ? ""
+      : technicalAreas.find(item => item.id === searchParams.get("areaId") && item.name === area)?.id ?? resolvedArea?.id ?? area,
+    areaIds: radarAreas.length > 1 ? radarAreas.map(item => item.id) : undefined,
     orientation,
     available: isAvailableOnly,
     sort: sortBy,
@@ -164,7 +168,7 @@ export function MentorDirectoryView({
   }) {
     const nextAxis = isHu2Flow && RADAR_AXIS_NAMES.find(axis => axis.name === updates.area);
     const selected = nextAxis
-      ? resolveRadarMentorArea(nextAxis.id, technicalAreas)
+      ? resolveRadarMentorAreas(nextAxis.id, technicalAreas)[0]
       : technicalAreas.find(item => item.name === updates.area);
     const next = updateMentorDirectoryParams(
       new URLSearchParams(queryString),
@@ -339,7 +343,7 @@ export function MentorDirectoryView({
             <div className="-mt-2 flex justify-end text-xs">
             <MentorFiltersSummary
               search={search}
-              area={area}
+              area={radarAreas.length > 1 ? radarAxis?.name ?? area : area}
               orientation={orientation}
               available={isAvailableOnly}
               totalItems={totalItems}
@@ -352,6 +356,7 @@ export function MentorDirectoryView({
               returnTo={returnTo}
               showAffinityBadge={effectiveSort === 'affinity'}
               selectedArea={area}
+              radarAreas={radarAreas.map(item => item.name)}
               highlightAvailability={isAvailableOnly}
             />
 
