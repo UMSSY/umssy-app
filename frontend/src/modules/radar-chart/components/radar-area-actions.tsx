@@ -26,7 +26,7 @@ export function RadarAreaActions({
         </p>
         <AreaLevelBadge level={getAreaLevel(area.score)} />
       </div>
-      <h3 className="[font-family:Georgia,serif] text-[27px] leading-tight font-semibold text-accent">
+      <h3 className="font-tight text-[27px] leading-tight font-semibold text-accent">
         {area.name}
       </h3>
       <p className="text-4xl leading-tight font-bold text-accent tabular-nums">

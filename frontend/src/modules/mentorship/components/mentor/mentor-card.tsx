@@ -42,13 +42,13 @@ export function MentorCard({
                   className="object-cover"
                 />
               ) : null}
-              <AvatarFallback className="bg-[#d5e6ef] text-sm font-semibold text-accent">{getInitials(mentor.fullName)}</AvatarFallback>
+              <AvatarFallback className="bg-accent/10 text-sm font-semibold text-accent">{getInitials(mentor.fullName)}</AvatarFallback>
             </Avatar>
 
             <div className="min-w-0 flex-1">
               <h2
                 id={`mentor-${mentor.id}`}
-                className="[font-family:Georgia,serif] text-[20px] leading-6 font-semibold [overflow-wrap:anywhere] text-accent"
+                className="font-tight text-[20px] leading-6 font-semibold [overflow-wrap:anywhere] text-accent"
               >
                 {mentor.fullName}
               </h2>
@@ -73,13 +73,13 @@ export function MentorCard({
                 variant="outline"
                 aria-current={highlightAvailability ? 'true' : undefined}
                 className={cn(
-                  "absolute top-[22px] right-[22px] border-transparent bg-transparent px-0 text-[10px] whitespace-nowrap text-[#246448]",
+                  "absolute top-[22px] right-[22px] border-transparent bg-transparent px-0 text-[10px] whitespace-nowrap text-success",
                   highlightAvailability && "font-semibold",
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className="size-1.5 rounded-full bg-[#3b9e70]"
+                  className="size-1.5 rounded-full bg-success"
                 />
                 Disponible para mentoría
               </Badge>

@@ -15,7 +15,7 @@ export function MentorAbout({ description }: MentorAboutProps) {
           <CardTitle
             role="heading"
             aria-level={2}
-            className="[font-family:Georgia,serif] text-[22px] font-semibold text-accent"
+            className="font-tight text-[22px] font-semibold text-accent"
           >
             Sobre mí
           </CardTitle>
