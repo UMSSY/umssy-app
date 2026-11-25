@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,16 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { DELETE_JOB_OFFER_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
+import { CLOSE_JOB_OFFER_TEXT, DELETE_JOB_OFFER_TEXT, NO_COMPANY_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
 import { useDeleteJobOffer } from "../hooks/use-delete-job-offer";
 import { useReopenJobOffer } from "../hooks/use-reopen-job-offer";
+import { useCloseJobOffer } from "../hooks/use-close-job-offer";
 import type { JobOffer } from "../types/job-offer.types";
 import type { JobOfferFilters } from "../types/job-offer-filters.types";
 import type { VacancyListProps } from "../types/vacancy-list-props.types";
 import { DEFAULT_JOB_OFFER_FILTERS } from "../utils/filter-job-offers";
+import { getCloseErrorStatus } from "../utils/to-close-error-message";
 import { ConfirmDialog } from "./confirm-dialog";
 import { JobOfferDetailsDialog } from "./job-offer-details-dialog";
 import { JobOffersPagination } from "./job-offers-pagination";
@@ -32,10 +34,12 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [offerToDelete, setOfferToDelete] = useState<JobOffer | null>(null);
   const [offerToReopen, setOfferToReopen] = useState<JobOffer | null>(null);
+  const [offerToClose, setOfferToClose] = useState<JobOffer | null>(null);
 
   const { companyId, offers, status, reload } = useCompanyJobOffers(filters, scope);
   const deletion = useDeleteJobOffer();
   const reopening = useReopenJobOffer();
+  const closing = useCloseJobOffer();
 
   const hasSearch = filters.search.trim() !== "";
   const hasOtherFilters =
@@ -65,7 +69,10 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
   };
 
   const isAnyDialogOpen =
-    selectedOfferId !== null || offerToDelete !== null || offerToReopen !== null;
+  selectedOfferId !== null ||
+  offerToDelete !== null ||
+  offerToReopen !== null ||
+  offerToClose !== null;
 
   const openDetails = (jobOfferId: string) => {
     if (!isAnyDialogOpen) setSelectedOfferId(jobOfferId);
@@ -104,6 +111,35 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
     );
   };
 
+  const openCloseDialog = (offer: JobOffer) => {
+    if (!isAnyDialogOpen) setOfferToClose(offer);
+  };
+
+  const cancelCloseDialog = () => {
+    if (!closing.isPending) setOfferToClose(null);
+  };
+
+  const confirmClose = () => {
+    if (!offerToClose || closing.isPending) return;
+
+    closing.mutate(
+      {
+        companyId: offerToClose.company.id,
+        jobOfferId: offerToClose.id,
+      },
+      {
+        onSuccess: () => {
+          setOfferToClose(null);
+        },
+        onError: (error) => {
+          if (getCloseErrorStatus(error) === 409) {
+            setOfferToClose(null);
+          }
+        },
+      },
+    );
+  };
+
   if (status === "loading") {
     return (
       <div role="status" aria-label={text.loading} className="space-y-4">
@@ -114,6 +150,15 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
             <Skeleton className="h-4 w-1/2" />
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (status === "no-company") {
+    return (
+      <div role="alert" className="rounded-lg border border-border bg-surface p-5 text-sm">
+        <p className="font-semibold text-ink">{NO_COMPANY_TEXT.title}</p>
+        <p className="mt-1 text-text-secondary">{NO_COMPANY_TEXT.description}</p>
       </div>
     );
   }
@@ -138,30 +183,44 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
 
   return (
     <section aria-label={text.ariaLabel} className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <Input
-          type="search"
-          placeholder="Buscar por título de vacante..."
-          aria-label="Buscar por título de vacante"
-          value={filters.search}
-          onChange={(event) => update("search", event.target.value)}
-          className="w-full max-md:h-11 sm:max-w-sm"
-        />
-        <VacancyFiltersDialog
-          filters={filters}
-          onChange={update}
-          onReset={reset}
-          showStatusFilter={isHistory}
-        />
-        {isEmptyWithoutFilters ? null : (
-          <Link
-            href={"/recruiters/job-offers/new"}
-            className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
-          >
-            <Plus aria-hidden="true" />
-            Crear nueva vacante
-          </Link>
-        )}
+      {isHistory ? null : (
+        <header>
+          <h2 className="text-lg font-semibold">{VACANCY_LIST_TEXT.published.title}</h2>
+          <p className="mt-1 text-sm text-text-secondary">{VACANCY_LIST_TEXT.published.subtitle}</p>
+        </header>
+      )}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative w-full sm:max-w-sm sm:flex-1">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-secondary"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            placeholder="Buscar por título de vacante..."
+            aria-label="Buscar por título de vacante"
+            value={filters.search}
+            onChange={(event) => update("search", event.target.value)}
+            className="w-full pl-9 max-md:h-11"
+          />
+        </div>
+        <div className="flex flex-wrap gap-3 sm:ml-auto">
+          <VacancyFiltersDialog
+            filters={filters}
+            onChange={update}
+            onReset={reset}
+            showStatusFilter={isHistory}
+          />
+          {isEmptyWithoutFilters ? null : (
+            <Link
+              href={"/recruiters/job-offers/new"}
+              className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
+            >
+              <Plus aria-hidden="true" />
+              Crear nueva vacante
+            </Link>
+          )}
+        </div>
       </div>
 
       {offers.length === 0 ? (
@@ -190,6 +249,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
                 onDetails={openDetails}
                 showStatus={isHistory}
                 onReopen={isHistory ? openReopenDialog : undefined}
+                onClose={openCloseDialog}
                 onDelete={openDeleteDialog}
               />
             ))}
@@ -209,6 +269,24 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
           onClose={() => setSelectedOfferId(null)}
         />
       ) : null}
+
+      <ConfirmDialog
+        isOpen={offerToClose !== null}
+        title={CLOSE_JOB_OFFER_TEXT.title}
+        description={
+          <>
+            <span className="font-semibold text-ink">{offerToClose?.title}</span>{" "}
+            {CLOSE_JOB_OFFER_TEXT.description}
+          </>
+        }
+        cancelLabel={CLOSE_JOB_OFFER_TEXT.cancel}
+        confirmLabel={CLOSE_JOB_OFFER_TEXT.confirm}
+        busyLabel={CLOSE_JOB_OFFER_TEXT.busy}
+        isBusy={closing.isPending}
+        closeOnOverlayClick
+        onConfirm={confirmClose}
+        onCancel={cancelCloseDialog}
+      />
 
       <ConfirmDialog
         isOpen={offerToDelete !== null}

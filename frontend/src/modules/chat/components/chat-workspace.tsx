@@ -241,11 +241,15 @@ export function ChatWorkspace({
   );
 
   const showConnectionDialog =
-    isError && !dismissedError;
+    isError && !dismissedError && !selectedConversation && !selectedRequest;
 
   const { status: connectionStatus, refreshMessages } = useChatConnection(selectedRequestId ? null : selectedId);
 
   const handleBackToList = () => {
+    if (isCompact && ui?.launcherId) {
+      ui?.setIsPanelOpen(false);
+      return;
+    }
     setSelectedRequestId(null);
     setResponseError(null);
     clearSelectedConversation();

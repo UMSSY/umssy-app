@@ -6,6 +6,8 @@ The `access-requests` module manages graduates' access requests: registration an
 
 This document describes the read services the module exposes to other domains in Sprint 3.
 
+Account activation uses institutional buttons with the shared button shape.
+
 ## Read services for other domains
 
 `ApprovedGraduateCareersService` (exported by `AccessRequestsModule`) provides cohort data without exposing the `access_requests` table:
