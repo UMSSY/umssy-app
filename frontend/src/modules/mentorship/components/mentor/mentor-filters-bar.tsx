@@ -1,19 +1,21 @@
-"use client";
-import type { MentorFiltersBarProps } from "../../types/mentor-filters-bar-props.types";
+'use client';
+import type { MentorFiltersBarProps } from '../../types/mentor-filters-bar-props.types';
 
-import { Label } from "@/components/ui/label";
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
-const ALL_VALUE = "__all__";
+const ALL_VALUE = '__all__';
 
 export function MentorFiltersBar({
   area,
+  areaAsChips = false,
   orientation,
   technicalAreas,
   orientationTypes,
@@ -21,7 +23,7 @@ export function MentorFiltersBar({
   onOrientationChange,
 }: MentorFiltersBarProps) {
   const areaItems = [
-    { value: ALL_VALUE, label: "Todas" },
+    { value: ALL_VALUE, label: 'Todas' },
     ...technicalAreas.map((name) => ({
       value: name,
       label: name,
@@ -29,7 +31,7 @@ export function MentorFiltersBar({
   ];
 
   const orientationItems = [
-    { value: ALL_VALUE, label: "Todas" },
+    { value: ALL_VALUE, label: 'Todas' },
     ...orientationTypes.map((name) => ({
       value: name,
       label: name,
@@ -38,13 +40,42 @@ export function MentorFiltersBar({
 
   return (
     <>
-      <div className="flex flex-col gap-1.5">
+      {areaAsChips ? (
+        <div
+          className="hidden w-full flex-wrap items-center gap-2 min-[1700px]:w-auto sm:flex"
+          role="group"
+          aria-label="Especialidades"
+        >
+          <p className="w-full text-[11px] font-semibold tracking-widest text-ink-soft uppercase">Especialidad</p>
+          {areaItems.map((item) => (
+            <Button
+              key={item.value}
+              type="button"
+              variant="outline"
+              aria-pressed={(area || ALL_VALUE) === item.value}
+              onClick={() =>
+                onAreaChange(item.value === ALL_VALUE ? '' : item.value)
+              }
+              className="h-[35px] rounded-sm border-border bg-surface px-3 text-[11px] font-normal text-ink-soft aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-foreground"
+            >
+              {item.value === ALL_VALUE ? 'Todas las áreas' : item.label}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+      <div
+        className={
+          areaAsChips
+            ? 'flex flex-col gap-1.5 sm:hidden'
+            : 'flex flex-col gap-1.5'
+        }
+      >
         <Label htmlFor="mentor-area">Área técnica</Label>
         <Select
           items={areaItems}
           value={area || ALL_VALUE}
           onValueChange={(value) =>
-            onAreaChange(value === ALL_VALUE ? "" : (value ?? ""))
+            onAreaChange(value === ALL_VALUE ? '' : (value ?? ''))
           }
         >
           <SelectTrigger
@@ -71,13 +102,13 @@ export function MentorFiltersBar({
           items={orientationItems}
           value={orientation || ALL_VALUE}
           onValueChange={(value) =>
-            onOrientationChange(value === ALL_VALUE ? "" : (value ?? ""))
+            onOrientationChange(value === ALL_VALUE ? '' : (value ?? ''))
           }
         >
           <SelectTrigger
             id="mentor-orientation"
             aria-label="Orientación"
-            className="max-w-72 min-w-56"
+            className="max-w-56 min-w-36"
           >
             <SelectValue />
           </SelectTrigger>

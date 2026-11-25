@@ -9,14 +9,14 @@ export const skillSelect = { id: true, name: true, isCustom: true } as const;
 export class SkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findCatalog(search?: string): Promise<SkillRecord[]> {
+  findCatalog(search?: string): Promise<(SkillRecord & { areaId: string | null })[]> {
     return this.prisma.skill.findMany({
       where: {
         isCustom: false,
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
       },
       orderBy: { name: 'asc' },
-      select: skillSelect,
+      select: { ...skillSelect, areaId: true },
     });
   }
 
