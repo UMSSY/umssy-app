@@ -306,7 +306,28 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
 
     const viewButton = screen.getByTestId('chat-room-view-postulation-button');
     expect(viewButton).toBeInTheDocument();
-    expect(viewButton).toHaveAttribute('href', '/vacancies/my-applications');
+    expect(viewButton).toHaveAttribute('href', '/vacancies/my-applications?applicationId=app-uuid-1234');
+  });
+
+  it('muestra el nombre de la vacante en el banner cuando contextTitle esta presente', () => {
+    const postulationConversation: Conversation = {
+      ...mockConversation,
+      contextType: 'POSTULACION',
+      contextId: 'app-uuid-1234',
+      contextTitle: 'Control de calidad',
+    };
+
+    render(
+      <ChatRoom
+        conversation={postulationConversation}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('chat-room-postulation-vacancy')).toHaveTextContent('Control de calidad');
   });
 
   it('debe dirigir el enlace de ver postulacion a /recruiters cuando el usuario tiene rol empresa', () => {

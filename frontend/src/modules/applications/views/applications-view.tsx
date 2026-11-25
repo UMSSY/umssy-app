@@ -32,6 +32,15 @@ export function ApplicationsView() {
   const [pendingWithdrawal, setPendingWithdrawal] = useState<Application | null>(null);
   const [pendingReactivation, setPendingReactivation] = useState<Application | null>(null);
   const [showWithdrawn, setShowWithdrawn] = useState(false);
+  const [highlightedId, setHighlightedId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("applicationId");
+  });
+
+  const highlightedApplication = useMemo(() => {
+    if (!highlightedId || !data) return null;
+    return data.find((application) => application.id === highlightedId) ?? null;
+  }, [data, highlightedId]);
 
   const withdrawnCount = useMemo(
     () => (data ?? []).filter((application) => application.status === WITHDRAWN_STATUS).length,
@@ -69,6 +78,37 @@ export function ApplicationsView() {
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <h1 className="font-tight text-3xl font-bold text-ink">{APPLICATION_MESSAGES.pageTitle}</h1>
+
+      {highlightedApplication && (
+        <div
+          data-testid="linked-application-detail"
+          className="flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-sm text-ink"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-blue-800 uppercase">
+                Postulación vinculada al chat
+              </p>
+              <h2 className="text-lg font-bold text-ink">{highlightedApplication.vacancyTitle}</h2>
+              <p className="text-sm text-text-secondary">{highlightedApplication.companyName}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setHighlightedId(null)}>
+              Cerrar detalle
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-4 text-xs text-text-secondary">
+            <span>
+              Estado: <strong className="text-ink">{highlightedApplication.status}</strong>
+            </span>
+            <span>
+              Afinidad: <strong className="text-ink">{highlightedApplication.affinityPercentage}%</strong>
+            </span>
+            <span>
+              Fecha: <strong className="text-ink">{highlightedApplication.appliedDate}</strong>
+            </span>
+          </div>
+        </div>
+      )}
 
       {isPending && <Skeleton aria-busy="true" className="h-40 rounded-xl" />}
 
