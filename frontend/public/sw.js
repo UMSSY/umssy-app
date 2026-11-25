@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_PREFIX = 'umssy-';
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
@@ -61,6 +61,7 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/icons/icon-umssy.svg',
   '/icons/icon-192x192.png',
+  '/icons/notification-badge-96x96.png',
   '/icons/icon-512x512.png',
   '/icons/icon-maskable-512x512.png',
   '/icons/umssy-simbolo-web.svg',
@@ -314,6 +315,9 @@ self.addEventListener('message', (event) => {
   const PUSH_DEFAULT_TITLE = 'UMSSY';
   const PUSH_DEFAULT_BODY = 'Tienes una nueva notificación';
   const PUSH_DEFAULT_ICON = '/icons/icon-192x192.png';
+  // Android pinta el badge solo con el canal alfa: debe ser una silueta
+  // blanca sobre fondo transparente, no el ícono a color (ROSEMARY-492).
+  const PUSH_BADGE_ICON = '/icons/notification-badge-96x96.png';
   const PUSH_DEFAULT_URL = '/dashboard';
   const NOTIFICATION_OPEN_PATH = '/notifications/open';
 
@@ -338,7 +342,7 @@ self.addEventListener('message', (event) => {
     const options = {
       body: String(payload.body || PUSH_DEFAULT_BODY).slice(0, PUSH_TEXT_MAX_LENGTH),
       icon: payload.icon || PUSH_DEFAULT_ICON,
-      badge: PUSH_DEFAULT_ICON,
+      badge: PUSH_BADGE_ICON,
       data: {
         actionUrl: payload.actionUrl || payload.url || PUSH_DEFAULT_URL,
         notificationId: payload.notificationId || null,

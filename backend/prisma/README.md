@@ -180,7 +180,7 @@ A vacancy published by a company. Prisma model `JobOffer`.
 | `published_at`             | timestamptz(6) | no   | Default now; reset when a vacancy is reopened       |
 | `created_at`, `updated_at` | timestamptz(6) | no   |                                                     |
 
-Relationships: belongs to one company, one modality, one contract type and one status (N:1 each); has many `job_offer_skills` and many `job_applications` (1:N). Indexes: `company_id`, `modality_id`, `contract_type_id`, `status_id`. A vacancy is visible to applicants when its status is `Publicada` and `expires_at` is null or in the future.
+Relationships: belongs to one company, one modality, one contract type and one status (N:1 each); has many `job_offer_skills` and many `job_applications` (1:N). Indexes: `company_id`, `modality_id`, `contract_type_id`, `status_id`, and the composite `(status_id, expires_at)` used by the automatic close to find published vacancies whose closing date has passed. A vacancy is visible to applicants when its status is `Publicada` and `expires_at` is null or in the future.
 
 ### `job_offer_skills`
 
@@ -296,6 +296,7 @@ All of them have `id`, a unique `title` (varchar(100), except in `job_alert_mode
 | `20261029120000_add_withdrawn_application_status`      | `Retirada` status                                                             |
 | `20261103120000_add_job_offer_published_at`            | `published_at` of vacancies                                                   |
 | `20261106000000_add_radar_application_consents`        | Consents of an application                                                    |
+| `20261112120000_add_job_offer_status_expires_at_index` | Composite index `(status_id, expires_at)` of `job_offers`                     |
 | `20261122180000_add_job_offer_notification_preferences` | Vacancy alert modes catalog and the preference of each person (HU-15)        |
 
 ## Radar and document verification

@@ -133,7 +133,9 @@ describe('PortfolioController', () => {
     service.getAccounts.mockResolvedValue(sampleAccounts);
     service.getRepositories.mockResolvedValue([sampleRepo]);
     socialOAuthService.getAuthorizationUrl.mockReturnValue(sampleOAuthUrl);
-    socialOAuthService.connectWithCode.mockResolvedValue(sampleConnectedAccount);
+    socialOAuthService.connectWithCode.mockResolvedValue(
+      sampleConnectedAccount,
+    );
     session.getAuthenticatedUser.mockResolvedValue({
       id: userId,
       email: 'user@example.test',
@@ -243,14 +245,17 @@ describe('PortfolioController', () => {
     expect(socialOAuthService.getAuthorizationUrl).toHaveBeenCalledWith(
       'github',
       'mystate',
+      userId,
+      undefined,
     );
   });
 
   it('POST /api/profile/portfolio/oauth/:provider/callback connects account and returns account dto without tokens', async () => {
+    const verifier = 'a'.repeat(43);
     const response = await request(app.getHttpServer())
       .post('/api/profile/portfolio/oauth/github/callback')
       .auth(token, { type: 'bearer' })
-      .send({ code: 'valid-auth-code' })
+      .send({ code: 'valid-auth-code', state: 'valid-state', verifier })
       .expect(200);
 
     expect(response.body).toEqual({
@@ -263,6 +268,8 @@ describe('PortfolioController', () => {
       userId,
       'github',
       'valid-auth-code',
+      'valid-state',
+      verifier,
     );
   });
 
@@ -499,6 +506,12 @@ describe('PortfolioController', () => {
     const oauthCallbackPath =
       document.paths['/api/profile/portfolio/oauth/{provider}/callback'];
     expect(oauthCallbackPath?.post?.security).toContainEqual({ bearer: [] });
+    expect(oauthUrlPath?.get?.responses['400']).toMatchObject({
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } },
+    });
+    expect(oauthCallbackPath?.post?.responses['400']).toMatchObject({
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiErrorResponse' } } },
+    });
 
     const reposPath = document.paths['/api/profile/portfolio/repositories'];
     expect(reposPath?.get?.security).toContainEqual({ bearer: [] });

@@ -81,7 +81,11 @@ export function AreaBreakdownPanel({
     );
 
   return (
-    <RadarCard as="aside" aria-labelledby={titleId} className={cn("flex flex-col rounded-2xl p-5", className)}>
+    <RadarCard
+      as="aside"
+      aria-labelledby={titleId}
+      className={cn('flex flex-col rounded-2xl p-4 sm:p-5', className)}
+    >
       <h2 id={titleId} className="text-sm font-medium text-accent">
         Desglose por área
       </h2>
@@ -91,8 +95,18 @@ export function AreaBreakdownPanel({
 
           return (
             <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
-              <Button type="button" variant="ghost" onClick={() => onAreaClick?.(area.id)} aria-pressed={selectedArea === area.id} aria-label={`Seleccionar ${area.name}`} className={cn("flex min-h-12 w-full items-center gap-2 rounded-none px-2 text-left focus-visible:outline-2 focus-visible:outline-accent", selectedArea === area.id && "bg-interaction text-accent")}>
-                <span className="min-w-0 flex-1 truncate text-xs text-ink-soft">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onAreaClick?.(area.id)}
+                aria-pressed={selectedArea === area.id}
+                aria-label={`Seleccionar ${area.name}`}
+                className={cn(
+                  'flex h-auto min-h-12 w-full items-center gap-2 rounded-none px-2 text-left focus-visible:outline-2 focus-visible:outline-accent',
+                  selectedArea === area.id && 'bg-interaction text-accent',
+                )}
+              >
+                <span className="min-w-0 flex-1 text-xs break-words whitespace-normal text-ink-soft">
                   {area.name}
                 </span>
                 <AreaLevelBadge level={level} />

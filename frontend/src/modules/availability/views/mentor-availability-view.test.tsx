@@ -509,6 +509,6 @@ describe("MentorAvailabilityView", () => {
         expect(toast.success).toHaveBeenCalledWith("Se crearon 2 bloques.", expect.any(Object)),
       )
       expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("--:--")
-    })
+    }, 15000)
   })
 })

@@ -9,6 +9,7 @@ import {
   NOTIFICATION_INBOX_FILTER_LABELS,
   NOTIFICATION_INBOX_FILTERS,
 } from "../constants/notification-inbox-filters.constants";
+import { NOTIFICATION_INBOX_EMPTY_MESSAGES } from "../constants/notification-inbox-empty-messages.constants";
 import {
   useNotificationsInbox,
   useUnreadNotificationsCount,
@@ -190,8 +191,8 @@ export function NotificationsView({ filterSections }: NotificationsViewProps = {
       ) : groupedNotifications.length === 0 ? (
         <NotificationsInboxEmpty
           icon={Bell}
-          title="No tienes notificaciones"
-          description="Cuando recibas nuevos avisos sobre encuestas, recordatorios o actividad de tu cuenta, aparecerán aquí."
+          title={NOTIFICATION_INBOX_EMPTY_MESSAGES[activeFilter].title}
+          description={NOTIFICATION_INBOX_EMPTY_MESSAGES[activeFilter].description}
         />
       ) : (
         <div className="flex flex-col gap-6">
