@@ -18,7 +18,7 @@ export function VacancyDetailDialog({ vacancy, onClose }: VacancyDetailDialogPro
   return <Dialog open onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
     <DialogContent showCloseButton={false} className="max-h-editor-dialog overflow-y-auto p-7 sm:max-w-3xl">
       <DialogClose render={<Button variant="ghost" size="icon-sm" className="absolute top-4 right-4" aria-label="Cerrar detalle de vacante" />}><X aria-hidden="true" /></DialogClose>
-      <DialogHeader className="border-b border-border pr-8 pb-5"><DialogTitle className="text-2xl font-bold text-accent">{vacancy?.title ?? "Vacante no encontrada"}</DialogTitle><DialogDescription>{vacancy?.companyName ?? "La oferta solicitada no está disponible. Puedes explorar otras vacantes."}</DialogDescription></DialogHeader>
+      <DialogHeader className="border-b border-border pr-8 pb-5"><DialogTitle className="text-2xl font-bold text-accent">{vacancy?.title ?? "Esta vacante ya no está disponible"}</DialogTitle><DialogDescription>{vacancy?.companyName ?? "Pudo haber vencido, haberse cerrado o haber sido retirada por la empresa. Puedes explorar otras vacantes."}</DialogDescription></DialogHeader>
       {vacancy ? <>
         <dl aria-label="Condiciones de la vacante" className="grid grid-cols-2 gap-5 rounded-lg bg-interaction p-5 text-sm">
           <div><dt className="text-xs text-availability-foreground">Salario</dt><dd className="mt-1 font-semibold text-accent">{vacancy.salary}</dd></div>

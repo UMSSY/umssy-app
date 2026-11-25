@@ -61,7 +61,7 @@ sequenceDiagram
 
 - Only vacancies with status `Publicada` that have not expired are returned by the API, ordered by publication date (newest first). The frontend does not filter dates again.
 - The search is case-insensitive and looks into title, company, description, modality, contract type and the required skills.
-- A normal click on a card opens the detail as a dialog over the list without leaving the page. Each card keeps a real link to `/vacancies/<id>`: opening it directly (or in a new tab, or with a modifier key) shows the same dialog, and closing it returns to `/vacancies`. An id that is not in the list shows "Vacante no encontrada" and lets the person go back.
+- A normal click on a card opens the detail as a dialog over the list without leaving the page. Each card keeps a real link to `/vacancies/<id>`: opening it directly (or in a new tab, or with a modifier key) shows the same dialog, and closing it returns to `/vacancies`. An id that is not in the list (the vacancy expired, was closed or was withdrawn) shows "Esta vacante ya no está disponible" and lets the person go back. If the list itself cannot be loaded, only the load error with its retry button is shown, never that notice.
 - The apply button appears only for sessions whose role is `titulado` or `estudiante`. Other roles can read the catalog but cannot apply.
 - A vacancy without expiry date shows "Sin fecha de expiración". All dates are shown in Bolivia time.
 - Required skills are shown as light blue chips (availability tokens) in the card and as a list in the detail.
