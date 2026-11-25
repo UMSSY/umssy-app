@@ -303,7 +303,8 @@ describe("WeekGrid", () => {
 
     const button = screen.getByRole("button", { name: "confirmada, 10:00 a 10:30" });
     expect(button).toHaveTextContent("10:00");
-    expect(button).toHaveClass("py-0", "text-[11px]", "leading-none", "justify-center");
+    expect(button).toHaveClass("py-0", "text-xs", "leading-none", "justify-center");
+    expect(button).not.toHaveClass("text-[11px]");
     expect(button).not.toHaveClass("py-0.5", "leading-[15px]");
     expect(COMPACT_HOUR_HEIGHT_PX / 2).toBeGreaterThanOrEqual(15);
   });
