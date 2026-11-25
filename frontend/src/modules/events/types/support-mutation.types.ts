@@ -1,5 +1,5 @@
 
 export interface SupportMutation {
   eventId: string;
-  accessToken: string;
+  accessToken: string | null;
 }

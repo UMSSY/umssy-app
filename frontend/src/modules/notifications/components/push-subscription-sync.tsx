@@ -7,33 +7,44 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from "@/shared/services/storage/access-token-storage";
+import {
+  hasCookieSession,
+  subscribeCookieSession,
+} from "@/shared/services/storage/cookie-session-state";
 import { notificationPreferencesQuery } from "../utils/notification-preferences-query";
 
 const getServerToken = () => null;
+const getServerFalse = () => false;
 
 export function PushSubscriptionSync() {
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    getServerFalse,
+  );
+  const sessionKey = token ?? (cookieSession ? "cookie" : null);
   const { environment, sync } = usePushNotifications();
-  const syncedToken = useRef<string | null>(null);
+  const syncedSession = useRef<string | null>(null);
 
   const { data: preferences } = useQuery({
     ...notificationPreferencesQuery,
-    enabled: !!token && environment === "supported",
+    enabled: Boolean(sessionKey) && environment === "supported",
   });
 
   useEffect(() => {
-    if (!token || environment !== "supported") return;
-    if (!preferences?.pushEnabled || syncedToken.current === token) return;
+    if (!sessionKey || environment !== "supported") return;
+    if (!preferences?.pushEnabled || syncedSession.current === sessionKey) return;
 
     const controller = new AbortController();
     void sync({ token, signal: controller.signal }).then((isRegistered) => {
       if (isRegistered && !controller.signal.aborted) {
-        syncedToken.current = token;
+        syncedSession.current = sessionKey;
       }
     });
 
     return () => controller.abort();
-  }, [token, environment, preferences?.pushEnabled, sync]);
+  }, [sessionKey, token, environment, preferences?.pushEnabled, sync]);
 
   return null;
 }

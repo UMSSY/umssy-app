@@ -3,6 +3,7 @@ import type { PassData } from '../types/pass-data.types';
 export type { PassData } from '../types/pass-data.types';
 import { registrationsService as registrationApi, parseRegistrationSessions } from '@/modules/event-registrations';
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { hasCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { readRecord, readString, readNullableString } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { apiClient } from '@/shared/services/api-client';
@@ -42,7 +43,7 @@ export const registrationsService = {
 
   async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken(), saveCopy = true): Promise<PassData> {
     const token = accessToken;
-    if (!token)
+    if (!token && !hasCookieSession())
       throw new Error('Debes iniciar sesión para consultar el pase.');
     if (!apiClient.defaults.baseURL)
       throw new Error('La URL del backend no está configurada.');
@@ -50,7 +51,7 @@ export const registrationsService = {
     const response = await apiClient.get(
       `/event-registrations/${registrationId}/pass`,
       {
-        headers: { Authorization: `${BEARER_PREFIX}${token}` },
+        ...(token ? { headers: { Authorization: `${BEARER_PREFIX}${token}` } } : {}),
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       },
@@ -79,7 +80,7 @@ export const registrationsService = {
       }),
     };
     // A blocked browser store should not prevent showing a valid online pass.
-    if (saveCopy) await saveOfflinePass(pass, token, signal).catch(() => {});
+    if (saveCopy && token) await saveOfflinePass(pass, token, signal).catch(() => {});
     return pass;
   },
 };

@@ -49,6 +49,7 @@ export class NotificationsService {
   async notify(request: NotifyRequest): Promise<NotifyResult> {
     const {
       recipientIds,
+      recipientEmails,
       actorId,
       type,
       payload,
@@ -62,7 +63,14 @@ export class NotificationsService {
     const includeEmail = !channels || channels.includes('EMAIL');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
-    if (finalRecipients.length === 0) {
+    const targetEmails = Array.from(
+      new Set(
+        (recipientEmails ?? [])
+          .map((email) => email.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    );
+    if (finalRecipients.length === 0 && targetEmails.length === 0) {
       return {
         inAppCount: 0,
         pushStatus: 'skipped',
@@ -82,7 +90,7 @@ export class NotificationsService {
       validRecipients.push(recipientId);
     }
 
-    if (validRecipients.length === 0) {
+    if (validRecipients.length === 0 && targetEmails.length === 0) {
       return {
         inAppCount: 0,
         pushStatus: 'skipped',
@@ -118,7 +126,9 @@ export class NotificationsService {
       typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
 
     const preferences =
-      await this.preferencesRepository.findManyByUserIds(validRecipients);
+      validRecipients.length > 0
+        ? await this.preferencesRepository.findManyByUserIds(validRecipients)
+        : [];
     const preferenceByUserId = new Map(preferences.map((p) => [p.userId, p]));
 
     const pushTargets: string[] = [];
@@ -137,19 +147,20 @@ export class NotificationsService {
       }
     }
 
-    const createdNotifications = includeInApp
-      ? await this.notificationsRepository.createMany(
-          validRecipients.map((id) => ({
-            recipientId: id,
-            actorId: actorId,
-            typeId: typeRecord.id,
-            title,
-            body,
-            link: actionUrl,
-            groupKey,
-          })),
-        )
-      : [];
+    const createdNotifications =
+      includeInApp && validRecipients.length > 0
+        ? await this.notificationsRepository.createMany(
+            validRecipients.map((id) => ({
+              recipientId: id,
+              actorId: actorId,
+              typeId: typeRecord.id,
+              title,
+              body,
+              link: actionUrl,
+              groupKey,
+            })),
+          )
+        : [];
     const inAppCount = createdNotifications.length;
     const notificationIdsByRecipient = new Map(
       createdNotifications.map((notification) => [
@@ -213,6 +224,27 @@ export class NotificationsService {
         deliveries.push(...email.deliveries);
       } catch (e) {
         this.logger.error('Fallo crítico en MailDispatcher', e);
+        emailStatus = 'failed';
+      }
+    }
+
+    if (includeEmail && typeSendsEmail && targetEmails.length > 0) {
+      try {
+        const email = await this.mailDispatcher.dispatchToEmails(
+          targetEmails,
+          title,
+          body,
+          actionUrl,
+          renderMail,
+        );
+        if (emailStatus === 'skipped') {
+          emailStatus = email.status;
+        } else if (email.status === 'failed') {
+          emailStatus = 'failed';
+        }
+        deliveries.push(...email.deliveries);
+      } catch (e) {
+        this.logger.error('Fallo crítico en MailDispatcher para correos directos', e);
         emailStatus = 'failed';
       }
     }
