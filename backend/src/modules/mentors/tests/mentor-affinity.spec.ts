@@ -1,3 +1,4 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
 import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -6,7 +7,6 @@ import type { UserSkillService } from '../../skills/services/user-skill.service.
 import { SEED_TECHNICAL_AREAS } from '../../technical-areas/constants/seed-technical-areas.constants.js';
 import { SKILL_TO_TECHNICAL_AREA } from '../constants/skill-to-technical-area.catalog.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorAffinityService } from '../services/mentor-affinity.service.js';
 import { MentorsService } from '../services/mentors.service.js';
 
@@ -80,7 +80,7 @@ function makeContext(
   });
   const userCount = vi.fn();
   const queryRaw = vi.fn().mockResolvedValue(candidates);
-  const repository = new MentorsRepository({
+  const repository = makeMentorsRepository({
     $queryRaw: queryRaw,
     technicalArea: { findMany: areaFindMany },
     user: { findMany: userFindMany, count: userCount },

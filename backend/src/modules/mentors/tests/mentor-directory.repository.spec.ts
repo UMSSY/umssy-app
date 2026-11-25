@@ -1,7 +1,10 @@
+import { makeMentorsRepository, mentorDirectorySearch } from './fixtures/mentor-directory-search.fixture.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { directoryPredicate } from '../repositories/mentor-directory.queries.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
+import { directoryPredicate as buildDirectoryPredicate, type DirectoryFilters } from '../repositories/mentor-directory.queries.js';
+
+const directoryPredicate = (filters: DirectoryFilters, now: Date) =>
+  buildDirectoryPredicate(filters, now, mentorDirectorySearch);
 
 describe('MentorsRepository directory page', () => {
   it('incluye el cargo del perfil aunque no exista experiencia laboral', () => {
@@ -34,7 +37,7 @@ describe('MentorsRepository directory page', () => {
     ];
     const filters = { search: '', areaIds, available: true };
     const findMany = vi.fn().mockResolvedValue([]);
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
     await repository.findDirectoryPage(filters, now, 1, 6);
@@ -69,7 +72,7 @@ describe('MentorsRepository directory page', () => {
       .fn()
       .mockResolvedValueOnce([{ id: 'a' }, { id: 'b' }])
       .mockResolvedValue([]);
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       $queryRaw: raw,
       user: { findMany },
     } as unknown as PrismaService);
@@ -104,7 +107,7 @@ describe('MentorsRepository directory page', () => {
   it('no hidrata una página sin coincidencias', async () => {
     const raw = vi.fn().mockResolvedValue([]);
     const findMany = vi.fn();
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       $queryRaw: raw,
       user: { findMany },
     } as unknown as PrismaService);
@@ -114,7 +117,7 @@ describe('MentorsRepository directory page', () => {
 
   it('construye consultas independientes bajo concurrencia', async () => {
     const raw = vi.fn().mockResolvedValue([{ total: 0n }]);
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       $queryRaw: raw,
     } as unknown as PrismaService);
     expect(
@@ -140,7 +143,7 @@ describe('MentorsRepository directory page', () => {
   it('ordena Z-A antes de paginar y desempata por ID ascendente', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
 
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -164,7 +167,7 @@ describe('MentorsRepository directory page', () => {
   it('ordena A-Z antes de paginar y conserva el desempate por ID', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
 
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -188,7 +191,7 @@ describe('MentorsRepository directory page', () => {
   it('ordena los candidatos de afinidad por el orden general estable', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
 
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -208,7 +211,7 @@ describe('MentorsRepository directory page', () => {
   it('usa el ID ascendente para desempatar nombres y apellidos repetidos en Z-A', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
 
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -232,7 +235,7 @@ describe('MentorsRepository directory page', () => {
   it('omite filtros opcionales y no consulta fotos para página vacía', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
 
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -258,7 +261,7 @@ describe('MentorsRepository directory page', () => {
 
 it('filtra el área del radar por cualquiera de sus especialidades existentes', async () => {
   const findMany = vi.fn().mockResolvedValue([]);
-  const repository = new MentorsRepository({ user: { findMany } } as unknown as PrismaService);
+  const repository = makeMentorsRepository({ user: { findMany } } as unknown as PrismaService);
   await repository.findDirectoryPage({ search: '', area: 'Desarrollo', available: true }, new Date(), 1, 6);
   expect(findMany.mock.calls[0][0].where).toMatchObject({
     isActive: true, isAvailableForMentoring: true,

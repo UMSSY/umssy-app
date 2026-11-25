@@ -1,5 +1,5 @@
+import { makeMentorsRepository, mentorDirectorySearch } from './fixtures/mentor-directory-search.fixture.js';
 import { describe, expect, it, vi } from 'vitest';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { directoryPredicate } from '../repositories/mentor-directory.queries.js';
 
@@ -12,7 +12,7 @@ describe('minimal mentor profile snapshot query', () => {
       hasWorkExperience: true,
     };
     const queryRaw = vi.fn().mockResolvedValue([snapshot]);
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       $queryRaw: queryRaw,
     } as unknown as PrismaService);
     const userId = "id' OR true --";
@@ -26,7 +26,7 @@ describe('minimal mentor profile snapshot query', () => {
     expect(query.sql).not.toContain(userId);
     expect(query.sql).toContain('octet_length(u.photo_url)');
     expect(query.sql).toContain(
-      directoryPredicate({ search: '', available: false }, now).sql,
+      directoryPredicate({ search: '', available: false }, now, mentorDirectorySearch).sql,
     );
     expect(query.sql.match(/EXISTS/g)).toHaveLength(3);
     const selected = query.sql.slice(0, query.sql.indexOf('FROM users u'));
@@ -46,7 +46,7 @@ describe('minimal mentor profile snapshot query', () => {
   });
 
   it('returns null when no active mentor matches', async () => {
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       $queryRaw: vi.fn().mockResolvedValue([]),
     } as unknown as PrismaService);
     expect(
@@ -56,7 +56,7 @@ describe('minimal mentor profile snapshot query', () => {
 
   it('propagates database errors without pretending the profile is complete', async () => {
     const error = new Error('database unavailable');
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       $queryRaw: vi.fn().mockRejectedValue(error),
     } as unknown as PrismaService);
     await expect(
