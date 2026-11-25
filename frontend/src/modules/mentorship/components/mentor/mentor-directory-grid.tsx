@@ -8,6 +8,7 @@ export function MentorDirectoryGrid({
   returnTo = "/mentorship/mentors",
   showAffinityBadge = false,
   selectedArea,
+  radarAreas,
   highlightAvailability = false,
 }: MentorDirectoryGridProps) {
   return (
@@ -15,7 +16,7 @@ export function MentorDirectoryGrid({
       aria-label="Listado de mentores"
       className="@container w-full min-w-0"
     >
-      <div className="grid grid-cols-1 gap-5 @min-[50rem]:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 @min-[50rem]:grid-cols-2 @min-[66rem]:grid-cols-3">
         {mentors.map((mentor) => (
           <MentorCard
             key={mentor.id}
@@ -23,7 +24,7 @@ export function MentorDirectoryGrid({
             isOwnProfile={currentUserId === mentor.id}
             returnTo={returnTo}
             showAffinityBadge={showAffinityBadge}
-            selectedArea={selectedArea}
+            selectedArea={radarAreas?.find(area => mentor.technicalAreas.includes(area)) ?? selectedArea}
             highlightAvailability={highlightAvailability}
           />
         ))}

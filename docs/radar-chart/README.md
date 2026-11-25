@@ -66,30 +66,31 @@ The comparison uses the latest two available publications in the current view. I
 
 Selecting an area exposes **Ver mentores de esta area** and **Simular habilidad**. The directory link passes the area name and `from=radar`; [mentorship](../mentorship/README.md) normalizes the filter and requires available mentors for this entry point.
 
-Opening the simulation queries `GET /mentors/directory` through `useMentorDirectory`, with the selected area, `available=true`, page 1 and default ordering. The result's `totalItems` determines whether a projection can be shown.
+Opening the simulation loads the shared Skills catalog and calls `GET /profile/me/radar/simulation-eligibility` for the authenticated owner. The dialog groups catalog skills by axis and excludes skills already approved. The eligibility response returns approved skills and the IDs of pending skills that qualify for the relevance bonus when the current analysis is ready.
 
-- With available mentors, the selected axis is projected as `min(10, currentScore + 1)`. The displayed gain can therefore be less than one near the cap.
+- Selecting a skill applies its catalog weight to the skill's own axis, capped at 10. The shared rubric gives 1 point per skill and adds 0.5 for high relevance.
 - The projected global average uses the projected selected axis and the unchanged scores of the other five axes.
-- With no mentors, the current score is preserved. While loading or after a query failure, no projection is applied; failures offer retry.
+- The optional mentor availability lookup is independent of the projection. The catalog and eligibility must load before a skill can project a gain. Query failures offer retry.
 - Closing or unmounting the simulation clears the projection. Simulation does not approve a skill, reserve a mentor or write a score; the estimate does not guarantee a future improvement.
 
-For example, an axis at 6 becomes 7 when mentors are available, increasing the six-axis average by approximately 0.17. An axis at 9.5 becomes 10, not 10.5.
+An axis at 6 becomes 7 with the base weight or 7.5 with the relevance bonus. An axis at 9.5 is capped at 10 in both cases.
 
 ```mermaid
 sequenceDiagram
   actor Owner
   participant View as Radar area panel
-  participant Projection as MentorshipProjection
-  participant Directory as Mentors directory API
+  participant Projection as SkillSimulationDialog
+  participant Skills as Skills catalog
+  participant Radar as Radar API
   Owner->>View: Select an area and open simulation
-  View->>Projection: Current area and six scores
-  Projection->>Directory: GET /mentors/directory with area and available=true
-  alt Available mentors found
-    Directory-->>Projection: totalItems greater than zero
+  View->>Skills: Load shared skill catalog and rubric weights
+  View->>Radar: GET /profile/me/radar/simulation-eligibility
+  alt Catalog and eligibility available
+    View->>Projection: Scores, eligible skills and relevance bonuses
+    Owner->>Projection: Select an unapproved skill
     Projection-->>View: Capped projected axis and global average
-  else Empty result or request error
-    Directory-->>Projection: No available mentors or failure
-    Projection-->>View: Keep published scores; show empty state or retry
+  else Query error
+    View-->>Projection: Show retry
   end
   Owner->>Projection: Close dialog
   Projection->>View: Clear projection
