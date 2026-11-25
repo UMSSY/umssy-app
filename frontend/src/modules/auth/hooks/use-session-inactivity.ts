@@ -6,7 +6,7 @@ import {
   DEFAULT_WARNING_SECONDS,
   DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS,
 } from "../constants/session-timing.constants";
-import { executeSharedRefresh } from "../utils/session-refresh-lock";
+import { executeSharedRefresh, type SharedRefreshOptions } from "../utils/session-refresh-lock";
 import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
 import {
   readSharedLastActivity,
@@ -23,7 +23,7 @@ export interface UseSessionInactivityOptions {
   absoluteExpiresAt?: string;
   enabled?: boolean;
   onTimeout: () => void;
-  onRefresh?: () => Promise<void>;
+  onRefresh?: (options?: SharedRefreshOptions) => Promise<unknown>;
   checkIntervalMs?: number;
 }
 
@@ -203,7 +203,7 @@ export function useSessionInactivity({
         onRefreshRef.current
       ) {
         lastRefreshRef.current = now;
-        void executeSharedRefresh(onRefreshRef.current);
+        void Promise.resolve(onRefreshRef.current({ wait: false })).catch(() => {});
       }
     }, checkIntervalMs);
 
@@ -221,7 +221,15 @@ export function useSessionInactivity({
     setIsRefreshing(true);
     try {
       if (onRefreshRef.current) {
-        await executeSharedRefresh(onRefreshRef.current);
+        const refreshed = await onRefreshRef.current({ wait: true });
+        if (refreshed === false) {
+          return;
+        }
+      } else {
+        const refreshed = await executeSharedRefresh(undefined, { wait: true });
+        if (!refreshed) {
+          return;
+        }
       }
       const now = Date.now();
       lastActivityRef.current = now;
@@ -229,6 +237,8 @@ export function useSessionInactivity({
       syncSharedActivity(now, true);
       setIsWarningOpen(false);
       setSecondsLeft(warningSeconds);
+    } catch {
+      return;
     } finally {
       setIsRefreshing(false);
     }

@@ -1,6 +1,24 @@
 export const SESSION_MARKER_COOKIE_NAME = "umssy_session";
 export const SESSION_MARKER_COOKIE_VALUE = "1";
 
+function cookieAttributes(): string {
+  const secure =
+    typeof window !== "undefined" && window.location.protocol === "https:"
+      ? "; Secure"
+      : "";
+  return `; Path=/; SameSite=Lax${secure}`;
+}
+
+export function setSessionMarker(): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${SESSION_MARKER_COOKIE_NAME}=${SESSION_MARKER_COOKIE_VALUE}${cookieAttributes()}`;
+}
+
+export function clearSessionMarker(): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${SESSION_MARKER_COOKIE_NAME}=; Max-Age=0${cookieAttributes()}`;
+}
+
 export function hasSessionMarker(): boolean {
   if (typeof document === "undefined") return false;
   return document.cookie

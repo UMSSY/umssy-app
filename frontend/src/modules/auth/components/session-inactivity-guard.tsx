@@ -61,9 +61,7 @@ export function SessionInactivityGuard({
       const currentPath = `${window.location.pathname}${window.location.search}`;
       try {
         sessionStorage.setItem("umssy_post_login_redirect", currentPath);
-      } catch {
-        // Ignore private browsing quota errors
-      }
+      } catch {}
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
       navigateTo(`${loginUrl}${separator}reason=${redirectReason}`);
@@ -79,9 +77,7 @@ export function SessionInactivityGuard({
       absoluteExpiresAt: absoluteExpiresAt ?? auth?.absoluteExpiresAt,
       enabled: true,
       onTimeout: () => closeAndRedirect("SESSION_EXPIRED", "SESSION_EXPIRED"),
-      onRefresh: async () => {
-        await authService.refreshSession();
-      },
+      onRefresh: (options) => authService.refreshSession(options),
     });
 
   return (

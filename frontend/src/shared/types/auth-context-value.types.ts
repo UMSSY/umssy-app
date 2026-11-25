@@ -10,4 +10,5 @@ export interface AuthContextValue {
   warningSeconds?: number;
   absoluteExpiresAt?: string;
   refreshRoles: () => Promise<void>;
+  hydrateSession?: () => Promise<boolean>;
 }

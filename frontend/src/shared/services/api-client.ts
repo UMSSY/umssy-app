@@ -146,9 +146,18 @@ apiClient.interceptors.response.use(
           if (!success) {
             throw new Error("No se pudo renovar la sesión");
           }
+          const previousToken =
+            typeof previousAuthorization === "string"
+              ? previousAuthorization.replace(BEARER_PREFIX, "")
+              : null;
           deleteAuthorizationHeader(originalRequest.headers);
           const newToken = getAccessToken();
-          if (newToken && originalRequest.headers) {
+          if (
+            newToken &&
+            !isJwtExpired(newToken) &&
+            newToken !== previousToken &&
+            originalRequest.headers
+          ) {
             setAuthorizationHeader(originalRequest.headers, `${BEARER_PREFIX}${newToken}`);
           }
           return apiClient(originalRequest);

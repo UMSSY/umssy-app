@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
 import {
   authService,
@@ -21,7 +21,7 @@ import {
 } from "@/shared/services/storage/cookie-session-state";
 import { setCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
 import { readAccessTokenSubject } from "@/shared/utils/read-access-token-subject";
-import { hasSessionMarker } from "@/shared/utils/session-marker";
+import { hasSessionMarker, setSessionMarker } from "@/shared/utils/session-marker";
 import type { AuthContextValue } from "@/shared/types/auth-context-value.types";
 import type { AuthProviderProps } from "@/shared/types/auth-provider-props.types";
 
@@ -30,6 +30,7 @@ const getServerToken = () => null;
 const getServerFalse = () => false;
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const queryClient = useQueryClient();
   const accessToken = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -88,6 +89,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await session.refetch();
   }
 
+  async function hydrateSession(): Promise<boolean> {
+    if (session.data?.id || accessToken || cookieSession) return true;
+    try {
+      const hydrated = await authService.getSession(null);
+      if (hydrated?.id) {
+        queryClient.setQueryData(["auth-session", "cookie"], hydrated);
+        setCurrentSessionUserId(hydrated.id);
+        markCookieSessionActive();
+        setSessionMarker();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   const isAuthenticated = Boolean(
     session.data?.id || accessToken || cookieSession,
   );
@@ -106,6 +124,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         warningSeconds: session.data?.warningSeconds,
         absoluteExpiresAt: session.data?.absoluteExpiresAt,
         refreshRoles,
+        hydrateSession,
       }}
     >
       {children}

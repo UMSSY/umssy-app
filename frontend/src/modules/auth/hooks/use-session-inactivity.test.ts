@@ -297,4 +297,32 @@ describe("useSessionInactivity", () => {
     });
     expect(onTimeout).not.toHaveBeenCalled();
   });
+
+  it("mantiene abierto el modal de advertencia si stayConnected falla al renovar", async () => {
+    const onTimeout = vi.fn();
+    const onRefresh = vi.fn().mockRejectedValue(new Error("Refresh failed"));
+
+    const { result } = renderHook(() =>
+      useSessionInactivity({
+        idleTimeoutSeconds: 15 * 60,
+        warningSeconds: 3 * 60,
+        checkIntervalMs: 1000,
+        onTimeout,
+        onRefresh,
+      }),
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(12 * 60 * 1000);
+    });
+    expect(result.current.isWarningOpen).toBe(true);
+
+    await act(async () => {
+      await result.current.stayConnected();
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(result.current.isWarningOpen).toBe(true);
+    expect(result.current.isRefreshing).toBe(false);
+  });
 });
