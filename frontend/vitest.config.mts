@@ -42,7 +42,6 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      // Shards write coverage into blob reports. The merge enforces the suite-wide thresholds.
       reporter: isCoverageShard ? [] : ['text', 'json', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
         exclude: ['src/app/layout.tsx', '**/*.test.{ts,tsx}', 'src/lib/utils.ts', 'src/components/ui/card/index.ts', 'src/components/ui/select.tsx'],
