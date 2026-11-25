@@ -1,3 +1,5 @@
+import { PasswordHistoryRepository } from '../repositories/password-history.repository.js';
+import { PasswordHistoryService } from '../services/password-history.service.js';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthModule } from '../auth.module.js';
@@ -20,7 +22,7 @@ describe('AuthModule', () => {
       .compile();
   });
 
-  it.each([AuthController, AuthService, AuthRepository, JwtAuthGuard])(
+  it.each([AuthController, AuthService, PasswordHistoryRepository, PasswordHistoryService, AuthRepository, JwtAuthGuard])(
     'resuelve %o',
     (provider) => {
       expect(moduleRef.get(provider)).toBeInstanceOf(provider);
