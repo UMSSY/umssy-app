@@ -29,4 +29,5 @@ export const CV_APPLY_TEXTS = {
   failedLabel: "No se aplicó:",
   retryHint: "Revisa los datos que no se aplicaron y vuelve a intentarlo.",
   profileUnavailable: "No se pudo cargar tu perfil para aplicar los datos de contacto.",
+  existingRecordsUnavailable: "No se pudo revisar lo que ya tienes en tu perfil.",
 } as const;

@@ -178,9 +178,9 @@ export function RadarProfileView() {
       ) : null}
       {data ? (
         <>
-          <details className="group rounded-lg border border-border bg-surface p-5">
-            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
-              <div>
+          <details className="group rounded-lg border border-border bg-surface p-4 sm:p-5">
+            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:gap-4 [&::-webkit-details-marker]:hidden">
+              <div className="min-w-0">
                 <h2 className="text-lg font-semibold text-ink">
                   Mi perfil profesional
                 </h2>
@@ -188,7 +188,7 @@ export function RadarProfileView() {
                   Competencias y evidencias de tu perfil
                 </p>
               </div>
-              <div className="ml-auto text-right text-xs text-text-secondary">
+              <div className="text-left text-xs text-text-secondary max-sm:order-last max-sm:w-full sm:ml-auto sm:text-right">
                 <p role="status" className="font-semibold text-ink">
                   {data.status === 'ready'
                     ? data.approved.length
@@ -219,9 +219,9 @@ export function RadarProfileView() {
           </details>
           <div
             aria-label="Resumen del perfil"
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4"
           >
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">
                 {data.average.toLocaleString('es-BO', {
                   maximumFractionDigits: 2,
@@ -235,20 +235,20 @@ export function RadarProfileView() {
                   : `${variation >= 0 ? '+' : ''}${variation.toFixed(2)} vs. anterior`}
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">
                 {areas.filter((a) => a.score > 0).length} / 6
               </b>
               <p className="text-xs">Áreas con puntuación</p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">{data.keywordCount}</b>
               <p className="text-xs">Habilidades aprobadas</p>
               <p className="text-xs text-text-secondary">
                 {data.highRelevanceCount} de alta relevancia
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">{data.pendingCount}</b>
               <p className="text-xs">Habilidades pendientes</p>
             </div>
