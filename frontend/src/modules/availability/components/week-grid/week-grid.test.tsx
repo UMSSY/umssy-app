@@ -292,6 +292,30 @@ describe("WeekGrid", () => {
     expect(dayColumn).toHaveStyle({ height: `${15 * COMPACT_HOUR_HEIGHT_PX}px` });
   });
 
+  it("en densidad compacta, un bloque de 30 minutos con cita deja lugar a su hora en una línea", () => {
+    const shortBlock = makeBlock({
+      id: "6",
+      startAt: "2026-10-09T14:00:00.000Z",
+      endAt: "2026-10-09T14:30:00.000Z",
+      state: "confirmed",
+    });
+    render(<WeekGrid blocks={[shortBlock]} weekRange={WEEK_RANGE} variant="owner" density="compact" />);
+
+    const button = screen.getByRole("button", { name: "confirmada, 10:00 a 10:30" });
+    expect(button).toHaveTextContent("10:00");
+    expect(button).toHaveClass("py-0", "text-[11px]", "leading-none", "justify-center");
+    expect(button).not.toHaveClass("py-0.5", "leading-[15px]");
+    expect(COMPACT_HOUR_HEIGHT_PX / 2).toBeGreaterThanOrEqual(15);
+  });
+
+  it("en densidad normal, conserva el relleno y el alto de línea de los bloques", () => {
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+
+    const button = screen.getByRole("button", { name: /^confirmada, 17:00/ });
+    expect(button).toHaveClass("py-0.5", "text-xs", "leading-[15px]");
+    expect(button).not.toHaveClass("py-0", "leading-none");
+  });
+
   it("en densidad compacta, muestra solo la hora en el bloque, sin el estado", () => {
     render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" density="compact" />);
 
