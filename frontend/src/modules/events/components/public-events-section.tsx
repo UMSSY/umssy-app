@@ -7,5 +7,5 @@ export function PublicEventsSection() {
   if (query.isPending) return <p role="status" className="py-8 text-text-secondary">Cargando talleres…</p>;
   if (query.isError) return <div className="rounded-lg border border-border p-6"><p className="mb-4 text-text-secondary">No pudimos cargar los talleres.</p><Button variant="outline" onClick={() => void query.refetch()}>Volver a intentar</Button></div>;
   if (!query.data.data.length) return <p className="py-8 text-text-secondary">Aún no hay talleres publicados. Vuelve pronto.</p>;
-  return <div className="grid gap-5 md:grid-cols-3">{query.data.data.map((event) => <PublicEventCard key={event.id} event={event} />)}</div>;
+  return <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">{query.data.data.map((event) => <PublicEventCard key={event.id} event={event} />)}</div>;
 }
