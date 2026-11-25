@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,10 +11,12 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+import { useVisualViewportBox } from "../hooks/use-visual-viewport-box";
 import type { ChatPanelProps } from "../types/chat-panel-props.types";
 
 const TRIGGER_ID = "quick-messages-trigger";
 const DOCK_ID = "quick-messages-dock";
+const MOBILE_QUERY = "(width < 48rem)";
 const ChatWorkspace = dynamic(() => import("./chat-workspace").then((module) => module.ChatWorkspace), { loading: () => <p role="status" className="p-6 text-sm text-text-secondary">Cargando mensajes…</p> });
 
 export function ChatPanel({ roles }: ChatPanelProps) {
@@ -33,22 +35,74 @@ export function ChatDock() {
   const canChat = roles.some((role) => getRouteRoles("/chat").includes(role));
   const isOpen = Boolean(ui?.isPanelOpen && canChat && pathname !== "/chat");
   const setIsPanelOpen = ui?.setIsPanelOpen;
+  const launcherId = ui?.launcherId ?? null;
+  const setLauncherId = ui?.setLauncherId;
+  const launcherRef = useRef<string | null>(null);
+  const viewportBox = useVisualViewportBox();
+  const dockRef = useRef<HTMLDivElement>(null);
+  const viewportHeight = viewportBox?.height;
+  const viewportTop = viewportBox?.offsetTop;
+  useEffect(() => { launcherRef.current = launcherId; }, [launcherId]);
   useEffect(() => { if (pathname === "/chat" || !canChat) setIsPanelOpen?.(false); }, [pathname, canChat, setIsPanelOpen]);
   useEffect(() => {
     if (isOpen) closeRef.current?.focus();
-    else if (wasOpen.current) document.getElementById(TRIGGER_ID)?.focus();
+    else if (wasOpen.current) {
+      const launcher = launcherRef.current ? document.getElementById(launcherRef.current) : null;
+      (launcher ?? document.getElementById(TRIGGER_ID))?.focus();
+      setLauncherId?.(null);
+    }
     wasOpen.current = isOpen;
+  }, [isOpen, setLauncherId]);
+  useEffect(() => {
+    if (!isOpen) return;
+    const mobileQuery = window.matchMedia?.(MOBILE_QUERY);
+    if (!mobileQuery) return;
+    const root = document.documentElement;
+    let previousOverflow: string | undefined;
+
+    function unlockScroll() {
+      if (previousOverflow === undefined) return;
+      root.style.overflow = previousOverflow;
+      previousOverflow = undefined;
+    }
+
+    const syncScrollLock = () => {
+      if (!mobileQuery.matches) {
+        unlockScroll();
+      } else if (previousOverflow === undefined) {
+        previousOverflow = root.style.overflow;
+        root.style.overflow = "hidden";
+      }
+    };
+
+    mobileQuery.addEventListener("change", syncScrollLock);
+    syncScrollLock();
+    return () => {
+      mobileQuery.removeEventListener("change", syncScrollLock);
+      unlockScroll();
+    };
   }, [isOpen]);
+  useEffect(() => {
+    if (!isOpen || viewportHeight === undefined) return;
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement) || !dockRef.current?.contains(active)) return;
+    const frame = requestAnimationFrame(() => active.scrollIntoView({ block: "nearest" }));
+    return () => cancelAnimationFrame(frame);
+  }, [isOpen, viewportHeight, viewportTop]);
   if (!ui || !canChat || pathname === "/chat") return null;
+  const viewportStyle = {
+    "--chat-dock-height": isOpen && viewportBox ? `${viewportBox.height}px` : "100dvh",
+    "--chat-dock-top": isOpen && viewportBox ? `${viewportBox.offsetTop}px` : "0px",
+  } as CSSProperties;
   return (
-    <div className={cn("sticky top-app-header h-app-sidebar min-w-0 shrink-0 self-start overflow-hidden transition-[width] duration-300 ease-out", isOpen ? "w-chat-dock" : "w-0")}>
-      <div className="min-w-0 overflow-hidden" inert={!isOpen} aria-hidden={!isOpen || undefined}>
-        <aside id={DOCK_ID} aria-label="Mensajes rápidos" className="flex h-app-sidebar w-chat-dock flex-col border-l border-sidebar-border bg-surface" onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.stopPropagation(); ui.setIsPanelOpen(false); } }}>
+    <div ref={dockRef} style={viewportStyle} data-testid="chat-dock" className={cn("fixed inset-x-0 top-(--chat-dock-top) z-50 h-(--chat-dock-height) w-full overflow-hidden bg-surface md:sticky md:inset-auto md:top-app-header md:h-app-sidebar md:w-auto md:self-start md:border-l md:border-sidebar-border md:transition-[width] md:duration-300 md:ease-out", isOpen ? "block md:w-chat-dock" : "hidden md:block md:w-0")}>
+      <div className="size-full min-w-0 overflow-hidden" inert={!isOpen} aria-hidden={!isOpen || undefined}>
+        <aside id={DOCK_ID} aria-label="Mensajes rápidos" className="flex size-full flex-col border-l-0 border-sidebar-border bg-surface md:h-app-sidebar md:w-chat-dock md:border-l" onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.stopPropagation(); ui.setIsPanelOpen(false); } }}>
           <header className="flex items-center justify-between gap-3 border-b border-border bg-sidebar p-4">
             <h2 className="font-bold text-ink">Mensajes</h2>
             <div className="flex items-center gap-1">
-              <Link href="/chat" onClick={() => ui.setIsPanelOpen(false)} aria-label="Abrir mensajes en pantalla completa" className={buttonVariants({ variant: "ghost", size: "icon-sm" })}><Maximize2 aria-hidden="true" /></Link>
-              <Button ref={closeRef} variant="ghost" size="icon-sm" aria-label="Cerrar mensajes rápidos" onClick={() => ui.setIsPanelOpen(false)}><X aria-hidden="true" /></Button>
+              <Link href="/chat" onClick={() => ui.setIsPanelOpen(false)} aria-label="Abrir mensajes en pantalla completa" className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }), "size-11 md:size-8")}><Maximize2 aria-hidden="true" /></Link>
+              <Button ref={closeRef} variant="ghost" size="icon-sm" aria-label="Cerrar mensajes rápidos" onClick={() => ui.setIsPanelOpen(false)} className="size-11 md:size-8"><X aria-hidden="true" /></Button>
             </div>
           </header>
           <div className="flex min-h-0 flex-1 flex-col">{isOpen ? <ChatWorkspace isCompact /> : null}</div>

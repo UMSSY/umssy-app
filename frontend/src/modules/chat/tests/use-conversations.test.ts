@@ -227,5 +227,34 @@ const spy = vi
     updatedAt: '',
   });
 });
-});
 
+it('abre la conversacion de un contexto y la reutiliza en la siguiente apertura', async () => {
+  vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
+  vi.spyOn(chatApi, 'markConversationAsRead').mockResolvedValue(undefined);
+  const contextual = {
+    id: 'c-app',
+    contact: { id: 'u-app', fullName: 'Postulante', avatarUrl: null, isOnline: false },
+    lastMessage: null,
+    unreadCount: 0,
+    updatedAt: '2026-11-20T10:00:00Z',
+    contextType: 'POSTULACION',
+    contextId: 'app-1',
+  };
+  const create = vi.spyOn(chatApi, 'getOrCreateConversation').mockResolvedValue(contextual);
+  const context = { contextType: 'POSTULACION', contextId: 'app-1' };
+
+  const { result } = renderHook(() => useConversations());
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+  await act(async () => {
+    await result.current.openContextualConversation('u-app', context);
+  });
+  await act(async () => {
+    await result.current.openContextualConversation('u-app', context);
+  });
+
+  expect(create).toHaveBeenCalledTimes(1);
+  expect(result.current.selectedId).toBe('c-app');
+  expect(result.current.conversations.filter((c) => c.id === 'c-app')).toHaveLength(1);
+});
+});
