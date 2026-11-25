@@ -1957,7 +1957,11 @@ Physical table `notification_preferences`.
   - Nueva tabla catálogo `job_alert_modes` con los modos `ALL`, `MATCHING` y `HIGH_AFFINITY`, insertados por la migración.
   - Nueva tabla `job_offer_notification_preferences` (una fila por usuario, clave primaria `user_id` con borrado en cascada desde `users`, `mode_id` con restricción de borrado sobre el catálogo). Solo agrega tablas; no modifica filas existentes.
 - Migración `20261124230000_normalize_survey_notification_links`:
-  - Migración solo de datos, sin cambios en `schema.prisma`. En `notifications.link` elimina el esquema y el host (`^https?://[^/]+`) de los avisos cuyo `type_id` pertenece a `SURVEY_PUBLISHED`, `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` o `SURVEY_VARIATION_ALERT`, conservando ruta, query y hash, y actualiza `updated_at`. Es idempotente: solo afecta enlaces absolutos con ruta, y no modifica otros tipos de notificación.
+  - Migración solo de datos, sin cambios en `schema.prisma`. En `notifications.link` elimina el esquema y el host solo cuando el enlace coincide con la ruta histórica de su tipo de aviso, conservando query y hash, y actualiza `updated_at`:
+    - `SURVEY_PUBLISHED`: `/notifications?filter=SURVEYS` o `/surveys/:id`.
+    - `SURVEY_REMINDER`: `/surveys/:id`.
+    - `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT`: `/backoffice/surveys/statistics/:id`.
+  - `:id` es el UUID de la encuesta. Los enlaces absolutos con otra ruta no se modifican, así ninguna ruta ajena a encuestas queda como destino interno. Es idempotente y no modifica otros tipos de notificación.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
 - Mentor network (Sprint 3): documented participation models, requests, FIFO offers, capacity, technical selections, catalogs, idempotency, sanctions, indexes, SQL constraints, relationships, and deletion behavior.
 - Documented the Appointments tables: `appointments` with the new `cancellation_reason` and `cancelled_at`, `appointment_notifications` and its three catalogs (`appointment_notification_events`, `appointment_notification_channels`, `appointment_notification_statuses`), with keys, relationships, indexes and deletion behavior.
