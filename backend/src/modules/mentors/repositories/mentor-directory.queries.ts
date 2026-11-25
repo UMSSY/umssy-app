@@ -3,8 +3,7 @@ import { Prisma } from '../../../prisma/client.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import { containsNormalizedText } from '../../../common/prisma/contains-normalized-text.js';
-import { matchesUserSkill } from '../../skills/user-skills-search.js';
-import { matchesWorkExperience } from '../../work-experience/work-experience-search.js';
+import type { MentorDirectorySearchService } from '../services/mentor-directory-search.service.js';
 
 export type DirectoryFilters = Pick<
   MentorDirectoryQuery,
@@ -14,6 +13,7 @@ export type DirectoryFilters = Pick<
 export function directoryPredicate(
   filters: DirectoryFilters,
   now: Date,
+  search: Pick<MentorDirectorySearchService, 'matchingUsers'>,
 ): Prisma.Sql {
   const conditions = [
     Prisma.sql`u.is_active = true AND EXISTS (
@@ -46,10 +46,9 @@ export function directoryPredicate(
       OR ${containsNormalizedText(Prisma.sql`u.last_name`, term)}
       OR ${containsNormalizedText(Prisma.sql`coalesce(u.headline, '')`, term)}
       OR ${containsNormalizedText(Prisma.sql`coalesce(u.about_me, '')`, term)}
-      OR ${matchesWorkExperience(Prisma.sql`u.id`, term)}
       OR EXISTS (SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
         WHERE mta.mentor_id = u.id AND ${containsNormalizedText(Prisma.sql`ta.name`, term)})
-      OR ${matchesUserSkill(Prisma.sql`u.id`, term)}
+      OR ${search.matchingUsers(Prisma.sql`u.id`, term)}
     )`);
   }
   return Prisma.join(conditions, ' AND ');

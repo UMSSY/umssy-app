@@ -739,7 +739,7 @@ Configuración opcional de las alertas de variación de una encuesta. Cuando la 
 
 `NotificationType` (`notification_types`): PK `id`, `code` `VARCHAR(50)` único, `name` `VARCHAR(100)`, `sends_push` y `sends_email` `BOOLEAN` (por defecto `false`). Lo referencia `Notification.typeId`. La semilla del catálogo hace upsert por `code`.
 
-La migración `20261120220000_register_radar_published_notification` registra `RADAR_PUBLISHED` en el catálogo central si falta, con push habilitado y correo deshabilitado. Si el código ya existe, conserva su configuración.
+Migration `20261120220000_register_radar_published_notification` adds `RADAR_PUBLISHED` to the central notification catalog if it is missing, with push enabled and email disabled. Existing entries keep their channel settings.
 
 ## Mentor network
 
