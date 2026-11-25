@@ -29,4 +29,4 @@ sequenceDiagram
 
 ### Sprint 3
 
-Mentors manage weekly time blocks and blocked dates. Appointment booking consumes free blocks from the selected mentor.
+The weekly calendar shows seven equal day columns when its container is at least 44rem wide. Below that width, availability and blocked dates appear in a day-by-day list with the same slot actions.
