@@ -208,7 +208,3 @@
     @apply font-heading text-balance;
   }
 }
-
-@utility institutional-button {
-  clip-path: polygon(0.75rem 0, 100% 0, calc(100% - 0.75rem) 100%, 0 100%);
-}
