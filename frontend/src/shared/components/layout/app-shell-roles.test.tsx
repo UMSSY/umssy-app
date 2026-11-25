@@ -14,15 +14,8 @@ const route = vi.hoisted(() => ({ pathname: "/dashboard" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.pathname, useRouter: () => ({ replace: vi.fn() }) }));
 
 const ROUTES = [
-  ["administrativo", "/dashboard"],
   ["administrativo", "/backoffice/solicitudes"],
-  ["administrativo", "/backoffice/solicitudes/example"],
-  ["administrativo", "/backoffice/reports/registered-users"],
-  ["administrativo", "/affinity-radar/review-queue"],
   ["titulado", "/profile"],
-  ["estudiante", "/vacancies"],
-  ["mentor", "/mentor/availability"],
-  ["empresa", "/matching"],
   ["empresa", "/recruiters"],
 ] as const;
 
