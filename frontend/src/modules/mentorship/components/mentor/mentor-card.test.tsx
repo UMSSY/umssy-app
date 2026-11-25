@@ -84,7 +84,7 @@ describe("MentorCard", () => {
     expect(screen.getByText("Ingeniería · UMSS")).toBeVisible();
     const availability = screen.getByText("Disponible para mentoría");
     expect(availability).toBeVisible();
-    expect(availability).toHaveClass("absolute", "border-transparent");
+    expect(availability).toHaveClass("sm:absolute", "border-transparent");
     const indicators = availability.parentElement;
     expect(indicators).toHaveClass("flex-wrap", "items-center");
     const header = indicators?.parentElement;

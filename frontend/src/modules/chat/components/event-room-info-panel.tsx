@@ -32,7 +32,7 @@ export function EventRoomInfoPanel({
         >
           <Users className="size-10" />
         </div>
-        <p className="text-sm font-bold text-ink">{groupName}</p>
+        <p className="text-center text-sm font-bold wrap-anywhere text-ink">{groupName}</p>
         <p className="text-xs text-text-secondary">
           Creado el {formatEventRoomCreatedAt(createdAt)}
         </p>
