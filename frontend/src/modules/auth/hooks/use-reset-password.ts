@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { authService } from "../services/auth.service";
+import { getCredentialLimit } from "../utils/auth-request-error";
 import type { PasswordResetResult, ResetPasswordPayload } from "../types/forgot-password.types";
 
 const DEFAULT_ERROR_MESSAGE = "No se pudo actualizar la contraseña.";
@@ -16,7 +17,7 @@ export function useResetPassword() {
       await mutation.mutateAsync(payload);
       return { ok: true };
     } catch (cause: unknown) {
-      return { ok: false, error: cause instanceof Error ? cause.message : DEFAULT_ERROR_MESSAGE };
+      return { ok: false, error: cause instanceof Error ? cause.message : DEFAULT_ERROR_MESSAGE, restriction: getCredentialLimit(cause) };
     }
   }
 

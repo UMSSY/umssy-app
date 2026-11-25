@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
 import { parseApiError } from '@/shared/utils/parse-api-error';
 import { getRegistrationErrorMessage } from '../utils/registration-error';
 import { REGISTRATION_QUERY_KEYS } from '../constants/registration-query-keys.constants';
@@ -29,7 +30,7 @@ export function useCancelRegistration() {
     mutationFn: ({ registrationId, accessToken: token }: CancelPassVariables) =>
       registrationsService.cancel(registrationId, token),
     onSuccess: async (cancelledRegistration, variables) => {
-      if (getAccessToken() !== variables.accessToken) return;
+      if (getAccessToken() !== variables.accessToken || (!variables.accessToken && !hasCookieSession())) return;
 
       queryClient.setQueryData(
         REGISTRATION_QUERY_KEYS.own(cancelledRegistration.eventId, variables.accessToken),
