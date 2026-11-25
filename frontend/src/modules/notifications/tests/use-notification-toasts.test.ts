@@ -95,8 +95,9 @@ describe('useNotificationToasts', () => {
     expect(toast).toHaveBeenCalledWith('Mensaje nuevo de: Juan Pérez', {
       description: 'Hola, ¿cómo estás?',
       duration: 7000,
+      icon: expect.anything(),
       action: {
-        label: 'Ir al chat',
+        label: 'Ver mensaje',
         onClick: expect.any(Function),
       },
     });
@@ -129,8 +130,10 @@ describe('useNotificationToasts', () => {
 
     const options = vi.mocked(toast).mock.calls[0][1] as {
       action?: { label: string };
+      icon?: unknown;
     };
     expect(options.action?.label).toBe('Ir a la sala de chat');
+    expect(options.icon).toBeDefined();
   });
 
   it('usa la etiqueta por defecto si el evento no trae un tipo conocido', () => {

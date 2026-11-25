@@ -5,6 +5,6 @@ type OptionalRequirementFields =
 
 export type UpdateJobOfferData = Omit<
   CreateJobOfferData,
-  'companyId' | 'statusId' | OptionalRequirementFields
+  'companyId' | 'statusId' | 'expiresAt' | OptionalRequirementFields
 > &
   Partial<Pick<CreateJobOfferData, OptionalRequirementFields>>;

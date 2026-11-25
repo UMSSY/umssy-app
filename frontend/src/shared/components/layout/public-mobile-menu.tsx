@@ -6,7 +6,7 @@ import { cn } from "cn";
 import { MenuIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { PUBLIC_NAV_LABELS, PUBLIC_NAV_LINKS, PUBLIC_SLANT_BUTTON_CLASS } from "@/shared/constants/public-navigation.constants";
+import { PUBLIC_NAV_LABELS, PUBLIC_NAV_LINKS, PUBLIC_CTA_CLASS } from "@/shared/constants/public-navigation.constants";
 
 export function PublicMobileMenu() {
   const [open, setOpen] = useState(false);
@@ -23,8 +23,8 @@ export function PublicMobileMenu() {
           {PUBLIC_NAV_LINKS.map((link) => <Link key={link.href} href={link.href} onClick={close} className="border-b border-surface/15 px-2 py-4 font-tight text-lg font-extrabold uppercase hover:text-surface/75">{link.label}</Link>)}
         </nav>
         <SheetFooter className="shrink-0 gap-3">
-          <Link href="/login" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-surface text-ink hover:bg-surface/85")}>{PUBLIC_NAV_LABELS.login}</Link>
-          <Link href="/request-access" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-surface text-ink hover:bg-surface-soft")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
+          <Link href="/login" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_CTA_CLASS, "bg-surface text-ink hover:bg-surface/85")}>{PUBLIC_NAV_LABELS.login}</Link>
+          <Link href="/request-access" onClick={close} className={cn(buttonVariants({ size: "lg" }), PUBLIC_CTA_CLASS, "bg-surface text-ink hover:bg-surface-soft")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
         </SheetFooter>
       </SheetContent>
     </Sheet>
