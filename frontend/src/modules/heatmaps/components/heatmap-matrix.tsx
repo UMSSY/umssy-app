@@ -44,7 +44,12 @@ export function HeatmapMatrix({
   }
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-3">
+    <div
+      role="region"
+      aria-label={caption}
+      tabIndex={0}
+      className="min-w-0 overflow-x-auto rounded-lg border border-border bg-surface p-3 [&>[data-slot=table-container]]:overflow-visible"
+    >
       <Table className="border-separate border-spacing-1.5" aria-label={caption}>
         <TableHeader className="[&_tr]:border-0">
           <TableRow className="border-0 hover:bg-transparent">

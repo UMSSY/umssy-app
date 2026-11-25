@@ -66,7 +66,7 @@ export function BlockUserDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant="outline"
             disabled={isPending}
             onClick={() => void handleConfirm()}
           >

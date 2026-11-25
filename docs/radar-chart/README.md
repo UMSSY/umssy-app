@@ -152,6 +152,10 @@ JSON responses follow `{ statusCode, data, detail, ok }`; supporting files are b
 
 Existing tests cover current/previous version preservation, empty/error states, area comparisons, historical navigation and return, mentor availability and score caps, document and skill panels, and review operation recovery. Relevant tests live beside the components, hooks, services and views under `frontend/src/modules/radar-chart`; directory integration tests also live in `frontend/src/modules/mentorship`. Coverage must be measured by Vitest; documentation does not establish a coverage result.
 
+## Action styling
+
+Review approval and rejection are decision actions and use non-destructive button styles.
+
 ## Sprint History
 
 ### Sprint 3
