@@ -84,6 +84,16 @@ describe("PersonalInfoForm", () => {
     expect(await screen.findByRole("option", { name: "Cochabamba" })).toBeInTheDocument();
   }, 15000);
 
+  it("keeps the email and both connection buttons in the contact section without submitting the profile form", () => {
+    renderForm(SAVED_VALUES);
+    const contact = within(screen.getByRole("region", { name: "Contacto" }));
+    const connections = within(contact.getByRole("group", { name: "Cuentas de desarrollo" }));
+
+    expect(contact.getByLabelText(/Correo personal/)).toHaveValue("valeria@correo.com");
+    expect(connections.getByRole("button", { name: "Conectar con GitHub" })).toHaveAttribute("type", "button");
+    expect(connections.getByRole("button", { name: "Conectar con GitLab" })).toHaveAttribute("type", "button");
+  });
+
   it("shows the initial values", () => {
     renderForm(SAVED_VALUES);
 

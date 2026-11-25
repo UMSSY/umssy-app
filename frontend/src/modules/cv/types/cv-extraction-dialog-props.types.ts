@@ -1,4 +1,5 @@
 import type { CvApplyReport } from "./cv-apply-report.types";
+import type { CvContactErrors } from "./cv-contact-errors.types";
 import type { CvExtractedContact } from "./cv-extracted-contact.types";
 import type { CvExtractedEducation } from "./cv-extracted-education.types";
 import type { CvExtractedPresentation } from "./cv-extracted-presentation.types";
@@ -13,6 +14,7 @@ export interface CvExtractionDialogProps {
   extraction: CvExtraction | null;
   available: CvExtractionSelection;
   selection: CvExtractionSelection;
+  contactErrors?: CvContactErrors;
   errorMessage?: string | null;
   canRetry?: boolean;
   isApplying?: boolean;

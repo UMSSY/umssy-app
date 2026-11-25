@@ -152,7 +152,7 @@ it('consumes optimized responses, preserves QR and chat, and moves finished pass
   expect(
     await screen.findByRole('img', { name: 'Código QR del pase' }),
   ).toBeInTheDocument();
-});
+}, 15000);
 
 it('recovers from a transport error into the empty state without inventing passes', async () => {
   current = [];

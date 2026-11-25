@@ -179,4 +179,13 @@ describe("SavedCvCard", () => {
 
     expect(screen.getByRole("button", { name: "Autollenar perfil" })).toBeDisabled();
   });
+
+  it("applies min-w-0 to prevent layout overflow on smaller screens", () => {
+    renderCard();
+
+    const card = screen.getByText("CVs guardados").closest('[data-slot="card"]');
+    expect(card).toHaveClass("min-w-0");
+  });
 });
+
+
