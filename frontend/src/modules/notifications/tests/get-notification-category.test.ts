@@ -4,6 +4,7 @@ import { getNotificationCategory } from "../utils/get-notification-category";
 describe("getNotificationCategory", () => {
   it("devuelve la categoría asignada al tipo", () => {
     expect(getNotificationCategory("SURVEY_PUBLISHED")).toBe("SURVEYS");
+    expect(getNotificationCategory("SURVEY_REMINDER")).toBe("REMINDERS");
     expect(getNotificationCategory("APPOINTMENT_BOOKED")).toBe("REMINDERS");
     expect(getNotificationCategory("EVENT_STARTING_SOON")).toBe("REMINDERS");
     expect(getNotificationCategory("NEW_JOB_APPLICANT")).toBe("SYSTEM");

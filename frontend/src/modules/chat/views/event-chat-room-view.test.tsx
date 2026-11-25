@@ -11,6 +11,7 @@ import { EventChatRoomView } from './event-chat-room-view';
 const mocks = vi.hoisted(() => ({
   useEventRoom: vi.fn(),
   useChatConnection: vi.fn(),
+  useConversationVisibility: vi.fn(),
   useMessages: vi.fn(),
   useSendEventRoomMessage: vi.fn(),
 }));
@@ -20,6 +21,9 @@ vi.mock('../hooks/use-event-room', () => ({
 }));
 vi.mock('../hooks/use-chat-connection', () => ({
   useChatConnection: mocks.useChatConnection,
+}));
+vi.mock('../hooks/use-conversation-visibility', () => ({
+  useConversationVisibility: mocks.useConversationVisibility,
 }));
 vi.mock('../hooks/use-messages', () => ({
   useMessages: mocks.useMessages,
@@ -215,5 +219,11 @@ describe('EventChatRoomView', () => {
     render(<EventChatRoomView registrationId="registration-1" />);
 
     expect(screen.getByText('Fallo de envío')).toBeInTheDocument();
+  });
+
+  it('should report the room visibility so open rooms do not trigger notifications', () => {
+    render(<EventChatRoomView registrationId="registration-1" />);
+
+    expect(mocks.useConversationVisibility).toHaveBeenCalledWith('conv-1');
   });
 });
