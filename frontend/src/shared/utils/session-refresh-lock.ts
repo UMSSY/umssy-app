@@ -109,9 +109,7 @@ export async function executeSharedRefresh(
                 resolve(true);
                 return;
               }
-            } catch {
-              // Proceed with network refresh if shared timestamp cannot be read
-            }
+            } catch {}
           }
 
           const success = await runRefresh();

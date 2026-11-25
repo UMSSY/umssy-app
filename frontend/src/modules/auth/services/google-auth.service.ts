@@ -59,10 +59,6 @@ export interface GoogleLoginResult {
 }
 
 export const googleAuthService = {
-  /**
-   * Triggers the official native Google Identity Services ID Token flow (google.accounts.id)
-   * or falls back to Google OAuth redirect / popup flow (/oauth/google/callback).
-   */
   promptSelectAccount: (options: GoogleOAuthRequestOptions = {}): Promise<GoogleProfile> => {
     return new Promise((resolve, reject) => {
       if (typeof window === "undefined") {
@@ -78,7 +74,6 @@ export const googleAuthService = {
         );
       }
 
-      // Check if official Google Identity Services (GIS) ID Token SDK is available
       const google = (window as unknown as {
         google?: {
           accounts?: {
@@ -141,10 +136,6 @@ export const googleAuthService = {
     });
   },
 
-  /**
-   * Compares the selected Google email with the activated account's email
-   * and links the Google account.
-   */
   linkGoogleAccount: async (
     accountEmail: string,
     googleEmail: string,
@@ -153,7 +144,6 @@ export const googleAuthService = {
     const cleanAccount = accountEmail.trim().toLowerCase();
     const cleanGoogle = googleEmail.trim().toLowerCase();
 
-    // Verification: emails must match
     if (cleanAccount !== cleanGoogle) {
       return {
         success: false,
