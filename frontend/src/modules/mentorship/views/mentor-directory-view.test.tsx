@@ -443,7 +443,8 @@ describe("MentorDirectoryView", () => {
       name: "Filtros de mentores",
     });
 
-    expect(filters).toHaveClass("flex", "flex-wrap");
+    const orientation = within(filters).getByRole("combobox", { name: "Orientación" });
+    expect(orientation.closest(".grid")).toHaveClass("grid-cols-2", "lg:flex");
 
     expect(
       within(filters).getByRole("searchbox", {
@@ -457,11 +458,7 @@ describe("MentorDirectoryView", () => {
       }),
     ).toBeVisible();
 
-    expect(
-      within(filters).getByRole("combobox", {
-        name: "Orientación",
-      }),
-    ).toBeVisible();
+    expect(orientation).toBeVisible();
 
     const checkbox = within(filters).getByRole("checkbox", {
       name: "Solo disponibles",

@@ -108,8 +108,8 @@ export function DashboardView() {
         </section>
       )}
       {canExploreMentors ? (
-        <aside className="flex items-center justify-between gap-6 rounded-lg bg-interaction px-6 py-5">
-          <div className="flex items-center gap-4">
+        <aside className="flex min-w-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-lg bg-interaction p-4 sm:px-6 sm:py-5">
+          <div className="flex min-w-0 grow basis-52 items-center gap-3 sm:gap-4">
             <Compass
               className="size-8 shrink-0 text-accent"
               strokeWidth={1.5}
@@ -121,10 +121,10 @@ export function DashboardView() {
           </div>
           <Link
             href="/mentorship/mentors"
-            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-accent underline-offset-4 hover:underline"
+            className="inline-flex max-w-full min-w-0 items-center gap-2 text-sm font-semibold wrap-anywhere text-accent underline-offset-4 hover:underline"
           >
             Explorar mentores
-            <ArrowRight className="size-4" aria-hidden="true" />
+            <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
           </Link>
         </aside>
       ) : null}

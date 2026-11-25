@@ -141,6 +141,7 @@ Cancelling orientation configuration uses the shared outlined style. The confirm
 
 ### Sprint 3
 
+- The mentor directory uses equal-width filters and a dedicated action row on phones and tablets. Compact result cards place the mentor name beside the avatar and keep the availability status in the normal reading order.
 - Radar directory integration: navigate from a radar area to the available mentor directory.
 - Mentor availability for radar areas resolved through the directory.
 - Standards alignment: consume areas through the radar module's public API.
