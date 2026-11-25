@@ -22,6 +22,9 @@ export class EventsCatalogService {
     payload: GetEventsPayload,
     userId?: string,
   ): Promise<EventsListResponse> {
+    // Los talleres finalizados se listan por fecha, del más reciente al más antiguo, sin ranking.
+    if (payload.scope === 'finished')
+      return this.eventsService.findAll(payload, userId);
     if (payload.sort === 'popular')
       return this.paginate(
         rankEventsByPopularity(await this.findCatalog(payload, userId)),
@@ -72,6 +75,7 @@ export class EventsCatalogService {
       ...(payload.includeProposals && { includeProposals: true }),
       search,
       userId,
+      visibility: this.eventsService.getCatalogVisibilityFilter(payload),
     });
     return items;
   }

@@ -26,6 +26,20 @@ export const SEED_USERS: ReadonlyArray<
     roles: ['titulado'],
   },
   {
+    key: 'workshopOrganizer',
+    firstName: 'Carla',
+    lastName: 'Montaño Ríos',
+    email: 'carla.montano@umss.edu.bo',
+    roles: ['titulado'],
+  },
+  {
+    key: 'workshopParticipant',
+    firstName: 'Diego',
+    lastName: 'Fernández Aguilar',
+    email: 'diego.fernandez@umss.edu.bo',
+    roles: ['titulado'],
+  },
+  {
     key: 'mentorA',
     firstName: 'Mentor',
     lastName: 'Alfa',
