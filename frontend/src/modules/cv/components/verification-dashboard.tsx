@@ -44,15 +44,15 @@ export function VerificationDashboard({
       {unread.length > 0 && (
         <div
           role="status"
-          className="flex items-center justify-between gap-3 rounded-lg bg-surface-soft p-3"
+          className="flex flex-col items-start justify-between gap-3 rounded-lg bg-surface-soft p-3 sm:flex-row sm:items-center"
         >
-          <span>
+          <span className="min-w-0 break-words">
             {unread[0].filename} · {verificationLabels[unread[0].status]}
             {unread.length > 1
               ? ' · ' + unread.length + ' resultados nuevos'
               : ''}
           </span>
-          <Button variant="outline" onClick={() => void acknowledge(unread[0])}>
+          <Button variant="outline" className="w-full shrink-0 sm:w-auto" onClick={() => void acknowledge(unread[0])}>
             Entendido
           </Button>
         </div>
@@ -125,7 +125,7 @@ export function VerificationDashboard({
         <section className="space-y-4 rounded-xl border bg-surface p-4">
           <VerificationFlow doc={chosen} />
           <div className="flex justify-center">
-            <Button onClick={() => setHistoryOpen(true)}>
+            <Button className="w-full sm:w-auto" onClick={() => setHistoryOpen(true)}>
               <Bell size={18} /> Ver historial de verificaciones
             </Button>
           </div>
@@ -154,7 +154,7 @@ export function VerificationDashboard({
                     </small>
                   </span>
                   <VerificationBadge doc={d} />
-                  <small className="col-span-full text-right sm:col-span-1">
+                  <small className="col-span-full text-left sm:col-span-1 sm:text-right">
                     {formatUploadDate(new Date(d.decidedAt ?? d.createdAt))}
                   </small>
                 </Button>

@@ -24,10 +24,16 @@ export function assertAttendanceWindow(
   now: Date,
 ): void {
   const startsAt = localScheduleInstant(schedule.eventDate, schedule.startTime);
-  const opensAt = startsAt - ATTENDANCE_OPEN_EARLY_MS;
   const endsAt = localScheduleInstant(schedule.eventDate, schedule.endTime);
-  const checkedAt = now.getTime();
-  if (checkedAt < opensAt || checkedAt >= endsAt) {
+  if (!isAttendanceWindowOpen(startsAt, endsAt, now.getTime())) {
     throw new AttendanceOutsideWindowException();
   }
+}
+
+export function isAttendanceWindowOpen(
+  startsAt: number,
+  endsAt: number,
+  checkedAt: number,
+): boolean {
+  return checkedAt >= startsAt - ATTENDANCE_OPEN_EARLY_MS && checkedAt < endsAt;
 }

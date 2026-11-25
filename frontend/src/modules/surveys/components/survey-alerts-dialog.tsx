@@ -16,7 +16,7 @@ export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLo
   const router = useRouter();
   const [isDirty, setIsDirty] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
-  const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(open && isDirty);
+  const { pendingHref, pendingAction, clearPendingHref, clearPendingAction } = useUnsavedChangesGuard(open && isDirty);
 
   const closeDialog = () => {
     setIsDirty(false);
@@ -36,13 +36,19 @@ export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLo
     if (nextOpen) return;
     setIsDiscardDialogOpen(false);
     clearPendingHref();
+    clearPendingAction();
   };
 
   const handleConfirmDiscard = () => {
     const target = pendingHref;
     setIsDiscardDialogOpen(false);
     clearPendingHref();
+    clearPendingAction();
     closeDialog();
+    if (pendingAction) {
+      pendingAction();
+      return;
+    }
     if (!target) return;
     if (navigator.onLine === false) void openOfflineRoute(target);
     else router.push(target);
@@ -81,7 +87,7 @@ export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLo
         )}
 
         <DiscardChangesDialog
-          open={isDiscardDialogOpen || pendingHref !== null}
+          open={isDiscardDialogOpen || pendingHref !== null || pendingAction !== null}
           onOpenChange={handleDiscardOpenChange}
           onConfirm={handleConfirmDiscard}
           description={SURVEY_ALERTS_TEXT.discardDescription}

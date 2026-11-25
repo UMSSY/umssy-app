@@ -10,6 +10,7 @@ import { seedHistoryScenarioEvents } from '../../modules/events/seeds/history-sc
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
 import { seedHistoryScenarioRegistrations } from '../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js';
 import { seedAttendanceQaFixtures } from '../../modules/event-registrations/seeds/attendance-qa-fixtures.seed.js';
+import { seedMultisessionScenarios } from '../../modules/events/seeds/multisession-scenarios.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedRadar } from '../../modules/radar-integration/seeds/radar.seed.js';
@@ -42,6 +43,9 @@ vi.mock(
     seedAttendanceQaFixtures: vi.fn(),
   }),
 );
+vi.mock('../../modules/events/seeds/multisession-scenarios.seed.js', () => ({
+  seedMultisessionScenarios: vi.fn(),
+}));
 vi.mock('../../modules/availability/seeds/availability.seed.js', () => ({
   seedAvailability: vi.fn(),
 }));
@@ -80,6 +84,8 @@ const users = {
   eventGraduate: { id: 'event-graduate' },
   emptyGraduate: { id: 'without-passes' },
   historyGraduate: { id: 'history-graduate' },
+  workshopOrganizer: { id: 'workshop-organizer' },
+  workshopParticipant: { id: 'workshop-participant' },
 };
 
 beforeEach(() => {
@@ -168,6 +174,10 @@ describe('combined events and availability seed', () => {
       expect.any(Date),
     );
     expect(seedAttendanceQaFixtures).toHaveBeenCalledWith(tx, expect.any(Date));
+    expect(seedMultisessionScenarios).toHaveBeenCalledWith(tx, {
+      organizerId: 'workshop-organizer',
+      participantId: 'workshop-participant',
+    });
     expect(seedEvents).toHaveBeenCalledBefore(
       vi.mocked(seedEventRegistrations),
     );
@@ -186,7 +196,7 @@ describe('combined events and availability seed', () => {
       maxWait: 5000,
       timeout: 120000,
     });
-    expect(client.$transaction).toHaveBeenCalledTimes(13);
+    expect(client.$transaction).toHaveBeenCalledTimes(14);
     expect(client.$disconnect).not.toHaveBeenCalled();
   });
 

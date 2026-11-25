@@ -13,7 +13,8 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
   const categoryId = filters.categoryId;
   const sort = filters.sort;
   const statusId = filters.statusId;
-  const queryKey = ["events", "list", accessToken, search, categoryId, sort, statusId];
+  const scope = filters.scope;
+  const queryKey = ["events", "list", accessToken, search, categoryId, sort, statusId, scope];
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: 1,
@@ -24,6 +25,7 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
       ...(categoryId && { categoryId }), 
       ...(sort && { sort }), 
       ...(statusId && { statusId }),
+      ...(scope && { scope }),
     }, signal, accessToken),
     getNextPageParam: (lastPage, pages) => lastPage.data.length === 50 ? pages.length + 1 : undefined,
   });

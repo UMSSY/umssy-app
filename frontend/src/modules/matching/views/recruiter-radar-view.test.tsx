@@ -358,7 +358,7 @@ describe("RecruiterRadarView (HU4)", () => {
     expect(screen.queryByText("carlos@example.com")).not.toBeInTheDocument();
   });
 
-  it("registra la decisión del reclutador sobre una postulación", async () => {
+  it("muestra el botón Contactar sin botones de aceptar o rechazar postulación", async () => {
     renderWithQuery(<RecruiterRadarView />);
     await screen.findByText(/2 candidatos/i);
 
@@ -366,18 +366,15 @@ describe("RecruiterRadarView (HU4)", () => {
       screen.getByRole("searchbox", { name: "Buscar candidato" }),
       { target: { value: "Lucía" } },
     );
-    await screen.findByRole("button", { name: "Rechazar postulación" });
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "Rechazar postulación" }),
-    );
-
-    await waitFor(() => {
-      expect(radarRecruiterApi.decide).toHaveBeenCalledWith(
-        "app-lucia",
-        "rejected",
-      );
-    });
+    expect(
+      await screen.findByRole("button", { name: "Contactar" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Aceptar postulación" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Rechazar postulación" }),
+    ).not.toBeInTheDocument();
   });
 
   it("muestra un error de vacantes y permite reintentar", async () => {
