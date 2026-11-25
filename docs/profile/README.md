@@ -123,6 +123,7 @@ The profile client reads `GET /profile/me`, updates personal information and pre
 
 ### Sprint 3
 
+- The profile guide welcome screen stacks the illustration and text on small screens. The mascot scales with the available width, and the dialog scrolls to reveal its actions.
 - Selecting push opens the UMSSY prompt first and the native permission only after "Continuar".
 - Guides for blocked permission, iPhone below iOS 16.4 and app not installed on iPhone.
 - "Activar en este dispositivo" registers push on a new device without changing the saved preference.
