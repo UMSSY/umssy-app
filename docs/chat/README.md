@@ -140,6 +140,7 @@ Blocking is a moderation action with a confirmation dialog. Its controls use neu
 
 ### Sprint 3
 
+- Compact chat headers show up to two lines of the contact or group name. The contact profile and group information show the full name. The subtitle truncates within its column.
 - Conversation selection from links is driven by the navigation state (`useSearchParams`); the `app:navigate` event and the `popstate` listener were removed.
 - The open conversation is exposed through the typed `getActiveConversationId()` contract instead of a global `window` property.
 - Handled `conversationId` and `tab` parameters are removed from the URL, so repeated links to the same conversation work.
