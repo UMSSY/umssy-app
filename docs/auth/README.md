@@ -4,6 +4,8 @@
 
 The `auth` module starts and ends the user's session in the frontend (`frontend/src/modules/auth`) and keeps the access token shared by every module (`frontend/src/shared/services/storage/access-token-storage.ts`). This document describes how the session keeps working without a connection.
 
+Sign-in and password recovery use institutional buttons with the shared button shape.
+
 ## Offline session
 
 The offline session lets a user who prepared offline access read the data they downloaded when the browser has no connection. Every copy belongs to a user (`userId`, the `sub` of the access token), never to the token itself:
