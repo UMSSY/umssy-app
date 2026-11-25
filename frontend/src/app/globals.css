@@ -213,7 +213,6 @@
   clip-path: polygon(0.75rem 0, 100% 0, calc(100% - 0.75rem) 100%, 0 100%);
 }
 
-/* Toast institucional HU-20 (Sonner) */
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) {
   padding: 2.25rem 1rem 1rem 1rem !important;
   position: relative !important;
@@ -222,7 +221,9 @@
   column-gap: 0.75rem !important;
   row-gap: 0.625rem !important;
   align-items: start !important;
-  min-width: 20rem !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: min(20rem, 100%) !important; 
 }
 
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"])::before {
