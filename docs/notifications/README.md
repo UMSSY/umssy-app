@@ -149,6 +149,49 @@ The module exposes in `index.ts` the visual pieces of the inbox and the route of
 | `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications?filter=SURVEYS`...), used by the sidebar, the filter tabs and surveys |
 | `NOTIFICATION_INBOX_FILTER_LABELS` | Filter labels; surveys keys its sidebar badge with `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`, so renaming the menu entry does not disconnect the counter |
 
+### Inbox categories and filters
+
+Every notification type is declared in `NOTIFICATION_CATALOG` (`frontend/src/modules/notifications/constants/notification-catalog.constants.ts`) with a category, an icon and a fallback path used when the notification has no `actionUrl`. Types missing from the catalog use `DEFAULT_NOTIFICATION_CATALOG_DEFINITION`: category `SYSTEM`, the `Bell` icon and the `/dashboard` path.
+
+| Category | Notification types | Fallback path |
+| --- | --- | --- |
+| `CHAT` | `CHAT_MESSAGE`, `CHAT_GROUP_MESSAGE` | `/chat` |
+| `SYSTEM` | `CONNECTION_REQUEST_RECEIVED`, `CONNECTION_REQUEST_ACCEPTED` | `/chat` |
+| `SYSTEM` | `MENTOR_SLOT_OFFERED` | `/mentors/participation` |
+| `SYSTEM` | `RADAR_PUBLISHED` | `/profile/radar` |
+| `SYSTEM` | `JOB_OFFER_PUBLISHED` | `/vacancies` |
+| `SYSTEM` | `NEW_JOB_APPLICANT` | `/matching` |
+| `SYSTEM` | `ACCESS_REQUEST_APPROVED` | `/profile` |
+| `SYSTEM` | `APPLICATION_STATUS_CHANGED` | `/vacancies/my-applications` |
+| `REMINDERS` | `APPOINTMENT_CANCELLED`, `APPOINTMENT_BOOKED` | `/appointments` |
+| `REMINDERS` | `SURVEY_REMINDER` | `/surveys` |
+| `REMINDERS` | `EVENT_STARTING_SOON` | `/events` |
+| `SURVEYS` | `SURVEY_PUBLISHED`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED`, `SURVEY_VARIATION_ALERT` | `/backoffice/surveys` |
+
+The inbox filters are defined in `notification-inbox-filters.constants.ts`. `NOTIFICATION_INBOX_FILTERS` lists them in tab order and `NOTIFICATION_INBOX_FILTER_LABELS` holds the visible label of each one:
+
+| Filter | Label | Route |
+| --- | --- | --- |
+| `ALL` | Todas | `/notifications` |
+| `SURVEYS` | Notificaciones de Encuestas | `/notifications?filter=SURVEYS` |
+| `REMINDERS` | Recordatorios | `/notifications?filter=REMINDERS` |
+| `SYSTEM` | Sistema | `/notifications?filter=SYSTEM` |
+
+The `CHAT` category has no filter of its own. `SURVEY_REMINDER` belongs to `REMINDERS`, so it is listed under the Recordatorios filter and not under the surveys one.
+
+### Empty inbox messages
+
+When the active filter has no notifications, the inbox shows `NotificationsInboxEmpty` with a message specific to that filter, defined in `NOTIFICATION_INBOX_EMPTY_MESSAGES` (`notification-inbox-empty-messages.constants.ts`). The title is the same for every filter; only the description changes:
+
+| Filter | Title | Description |
+| --- | --- | --- |
+| `ALL` | `No tienes notificaciones` | `Cuando recibas nuevos avisos sobre encuestas, recordatorios o actividad de tu cuenta, aparecerán aquí.` |
+| `SURVEYS` | `No tienes notificaciones` | `Cuando recibas nuevos avisos sobre encuestas, aparecerán aquí.` |
+| `REMINDERS` | `No tienes notificaciones` | `Cuando recibas nuevos avisos sobre recordatorios, aparecerán aquí.` |
+| `SYSTEM` | `No tienes notificaciones` | `Cuando recibas nuevos avisos del sistema, aparecerán aquí.` |
+
+The general description that mentions surveys, reminders and account activity is only used by the `ALL` filter.
+
 ## Sprint History
 
 ### Sprint 3
