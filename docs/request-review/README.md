@@ -20,6 +20,7 @@ flowchart TD
 ## Key Responsibilities
 - **Session Verification**: `useBackofficeSession` and `useBackofficeUser` work seamlessly with both `HttpOnly` cookie sessions (`AuthProvider`) and Bearer headers, enforcing the `administrativo` role before rendering review views.
 - **Review Workspaces**: Dedicated queues for graduate verification (`access-requests`), company verification (`company-access-requests`), OCR inspection, approval/rejection verdicts, and audit traceability (`audit-events`).
+- **Responsive Inbox Cards**: Below `65rem`, both graduate and company inboxes switch from tables to compact labeled request cards preserving all fields and review links.
 
 ## Sprint History
 

@@ -6,6 +6,7 @@ import { skillsService } from "@/modules/skills/services/skills.service";
 import { workExperienceService } from "@/modules/work-experience/services/work-experience.service";
 import type { CvApplyTask } from "../types/cv-apply-task.types";
 import type { CvExtraction } from "../types/cv-extraction.types";
+import type { CvExtractionMatches } from "../types/cv-extraction-matches.types";
 import type { CvExtractionSelection } from "../types/cv-extraction-selection.types";
 import { buildCvApplyReport } from "./build-cv-apply-report";
 import { buildCvApplyTasks } from "./build-cv-apply-tasks";
@@ -17,10 +18,10 @@ vi.mock("@/modules/profile/services/profile.service", () => ({
   profileService: { updatePersonalInfo: vi.fn(), updatePresentation: vi.fn() },
 }));
 vi.mock("@/modules/educations/services/educations.service", () => ({
-  educationsService: { createEducation: vi.fn() },
+  educationsService: { createEducation: vi.fn(), updateEducation: vi.fn() },
 }));
 vi.mock("@/modules/work-experience/services/work-experience.service", () => ({
-  workExperienceService: { createWorkExperience: vi.fn() },
+  workExperienceService: { createWorkExperience: vi.fn(), updateWorkExperience: vi.fn() },
 }));
 vi.mock("@/modules/skills/services/skills.service", () => ({
   skillsService: { getMySkills: vi.fn(), saveMySkills: vi.fn(), addSkills: vi.fn() },
@@ -97,6 +98,11 @@ const SELECTION: CvExtractionSelection = {
   skills: [1],
 };
 
+const NEW_MATCHES: CvExtractionMatches = {
+  education: [{ status: "new" }, { status: "new" }],
+  experience: [{ status: "new" }],
+};
+
 const task = (label: string, run: () => Promise<unknown>, items: number[] = [0]): CvApplyTask => ({
   section: "education",
   items,
@@ -132,7 +138,7 @@ describe("buildCvApplyTasks", () => {
   });
 
   it("saves only the selected data with the existing profile services", async () => {
-    const tasks = buildCvApplyTasks(EXTRACTION, SELECTION, PROFILE);
+    const tasks = buildCvApplyTasks(EXTRACTION, SELECTION, PROFILE, NEW_MATCHES);
 
     await runCvApplyTasks(tasks);
 
@@ -169,16 +175,83 @@ describe("buildCvApplyTasks", () => {
       EXTRACTION,
       { contact: [], presentation: [], education: [], experience: [], skills: [] },
       PROFILE,
+      NEW_MATCHES,
     );
 
     expect(tasks).toEqual([]);
   });
 
   it("fails the contact task when the profile is not loaded", async () => {
-    const [contactTask] = buildCvApplyTasks(EXTRACTION, { ...SELECTION, presentation: [] }, null);
+    const [contactTask] = buildCvApplyTasks(EXTRACTION, { ...SELECTION, presentation: [] }, null, NEW_MATCHES);
 
     await expect(contactTask.run()).rejects.toThrow("No se pudo cargar tu perfil");
     expect(profileService.updatePersonalInfo).not.toHaveBeenCalled();
+  });
+
+  it("skips identical records and updates the changed ones instead of creating them again", async () => {
+    const educationRecord = { id: "edu-1", ...EDUCATION_ITEM, description: "Tesis" };
+    const experienceRecord = { id: "exp-1", ...WORK_ITEM, startDate: "2021-01-01" };
+    vi.mocked(workExperienceService.updateWorkExperience).mockResolvedValue(experienceRecord);
+    const tasks = buildCvApplyTasks(
+      EXTRACTION,
+      { ...SELECTION, contact: [], presentation: [], skills: [] },
+      PROFILE,
+      {
+        education: [{ status: "new" }, { status: "same", record: educationRecord }],
+        experience: [{ status: "changed", record: experienceRecord }],
+      },
+    );
+
+    const results = await runCvApplyTasks(tasks);
+
+    expect(results.every(({ isApplied }) => isApplied)).toBe(true);
+    expect(educationsService.createEducation).not.toHaveBeenCalled();
+    expect(educationsService.updateEducation).not.toHaveBeenCalled();
+    expect(workExperienceService.createWorkExperience).not.toHaveBeenCalled();
+    expect(workExperienceService.updateWorkExperience).toHaveBeenCalledWith("exp-1", {
+      companyName: "Empresa SRL",
+      position: "Desarrolladora",
+      startDate: "2021-03-01",
+      endDate: null,
+      isCurrent: true,
+      description: "APIs",
+    });
+  });
+
+  it("updates a changed education with the saved names", async () => {
+    const educationRecord = { id: "edu-1", ...EDUCATION_ITEM, startDate: "2020-01-15" };
+    vi.mocked(educationsService.updateEducation).mockResolvedValue(educationRecord);
+    const [educationTask] = buildCvApplyTasks(
+      EXTRACTION,
+      { ...SELECTION, contact: [], presentation: [], experience: [], skills: [] },
+      PROFILE,
+      { education: [{ status: "new" }, { status: "changed", record: educationRecord }], experience: [] },
+    );
+
+    await educationTask.run();
+
+    expect(educationsService.updateEducation).toHaveBeenCalledWith("edu-1", {
+      institution: "UCB",
+      degree: "Maestría",
+      startDate: "2020-01-01",
+      endDate: "2021-01-01",
+      description: null,
+    });
+  });
+
+  it("fails education and experience tasks without creating records when the profile records are unknown", async () => {
+    const tasks = buildCvApplyTasks(
+      EXTRACTION,
+      { ...SELECTION, contact: [], presentation: [], skills: [] },
+      PROFILE,
+      null,
+    );
+
+    const results = await runCvApplyTasks(tasks);
+
+    expect(results.map(({ isApplied }) => isApplied)).toEqual([false, false]);
+    expect(educationsService.createEducation).not.toHaveBeenCalled();
+    expect(workExperienceService.createWorkExperience).not.toHaveBeenCalled();
   });
 });
 

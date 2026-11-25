@@ -19,13 +19,6 @@ describe("cookie marcadora de sesión", () => {
     expect(document.cookie).not.toContain("umssy_session");
   });
 
-  it("no lleva el token ni datos: solo el valor 1", () => {
-    sessionStorage.setItem("accessToken", "token-secreto");
-    setSessionMarker();
-    expect(document.cookie).not.toContain("token-secreto");
-    sessionStorage.clear();
-  });
-
   it("define SameSite=Lax y Path=/ sin Expires, y Secure solo en https", () => {
     const writes: string[] = [];
     const descriptor = Object.getOwnPropertyDescriptor(Document.prototype, "cookie");

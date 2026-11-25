@@ -8,8 +8,6 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
-  GoogleEmailMismatchException,
-  GoogleAccountAlreadyLinkedException,
 } from '../exceptions/index.js';
 
 describe('AuthService', () => {

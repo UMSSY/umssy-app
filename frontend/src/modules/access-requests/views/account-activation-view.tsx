@@ -220,9 +220,9 @@ export function AccountActivationView({ initialEmail = "" }: { initialEmail?: st
   const [email, setEmail] = useState(initialEmail.trim().toLowerCase());
 
   return (
-    <main data-app-shell="true" className="min-h-screen bg-background">
+    <main data-app-shell="true" className="min-h-dvh bg-background">
       <AccessRequestProvider>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-dvh flex-col">
           <PublicHeader />
           <div className="flex flex-1">
             <div className="hidden lg:flex">

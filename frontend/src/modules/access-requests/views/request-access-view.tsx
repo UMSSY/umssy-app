@@ -70,7 +70,7 @@ export function RequestAccessView() {
 
   return (
     <AccessRequestProvider>
-      <main data-app-shell="true" className="min-h-screen bg-background">
+      <main data-app-shell="true" className="min-h-dvh bg-background">
         {accountType === "company" ? (
           <CompanyAccessRequestFlow
             onSwitchToGraduate={() => setAccountType("graduate")}

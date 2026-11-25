@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useOptionalAuth } from "@/shared/contexts/auth-context";
 import {
@@ -27,7 +27,8 @@ export function SessionGate({ children }: SessionGateProps) {
   const auth = useOptionalAuth();
   const hydrateSession = auth?.hydrateSession;
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
-  const [backendProbe, setBackendProbe] = useState<"idle" | "probing" | "done">("idle");
+  const [backendProbeDone, setBackendProbeDone] = useState(false);
+  const hydrateSessionRef = useRef(hydrateSession);
 
   const localState = useSyncExternalStore<SessionGateState>(
     subscribeAccessToken,
@@ -62,24 +63,34 @@ export function SessionGate({ children }: SessionGateProps) {
     rawState === "login" &&
     Boolean(hydrateSession) &&
     !hasOpenedOnce &&
-    backendProbe !== "done";
+    !backendProbeDone;
 
   const state: SessionGateState = needsBackendProbe ? "checking" : rawState;
 
   useEffect(() => {
-    if (!needsBackendProbe || !hydrateSession || backendProbe === "probing") return;
+    hydrateSessionRef.current = hydrateSession;
+  }, [hydrateSession]);
+
+  useEffect(() => {
+    if (!needsBackendProbe) return;
+    const hydrate = hydrateSessionRef.current;
+    if (!hydrate) return;
+
     let active = true;
-    queueMicrotask(() => {
+    queueMicrotask(async () => {
       if (!active) return;
-      setBackendProbe("probing");
-      void hydrateSession().finally(() => {
-        if (active) setBackendProbe("done");
-      });
+      try {
+        await hydrate();
+      } catch {
+        return;
+      } finally {
+        if (active) setBackendProbeDone(true);
+      }
     });
     return () => {
       active = false;
     };
-  }, [needsBackendProbe, hydrateSession, backendProbe]);
+  }, [needsBackendProbe]);
 
   useEffect(() => {
     if (state === "login") {

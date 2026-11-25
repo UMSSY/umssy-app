@@ -36,6 +36,7 @@ export function RadarEvidencePanel({
   radar,
   selected,
   onClose,
+  actions,
 }: RadarEvidencePanelProps) {
   const work = useWorkExperiences();
   const education = useEducations();
@@ -156,6 +157,7 @@ export function RadarEvidencePanel({
       subtitle="Información aprobada asociada a la puntuación publicada"
       footer={
         <div className="flex flex-col gap-2">
+          {actions}
           {cvRefs.map((id) => (
             <Button
               key={id}

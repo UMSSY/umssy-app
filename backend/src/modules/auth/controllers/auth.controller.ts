@@ -10,8 +10,32 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import {
+  AUTH_GOOGLE_BODY,
+  AUTH_GOOGLE_LINK_OK_RESPONSE,
+  AUTH_LOGIN_BODY,
+  AUTH_PASSWORD_RESET_BODY,
+  AUTH_PASSWORD_RESET_REQUEST_BODY,
+  AUTH_PASSWORD_RESET_VERIFY_BODY,
+  AUTH_REFRESH_OK_RESPONSE,
+  AUTH_SESSION_OK_RESPONSE,
+  AUTH_TOKEN_CREATED_RESPONSE,
+} from '../constants/auth-openapi.constants.js';
 import { CREDENTIAL_LIMIT_RESPONSE } from '../constants/credential-limit-response.constants.js';
 import { CredentialLimitsService } from '../services/credential-limits.service.js';
 import { AuthService } from '../services/auth.service.js';
@@ -44,6 +68,7 @@ function readRefreshCookie(request?: Request): string | undefined {
   return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
+@ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -56,6 +81,16 @@ export class AuthController {
   @Get('session')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    operationId: 'auth_getSession',
+    summary: 'Obtener sesión activa',
+    description:
+      'Devuelve la identidad autenticada, roles activos y límites de inactividad calculados desde la familia de refresh.',
+  })
+  @ApiOkResponse(AUTH_SESSION_OK_RESPONSE)
+  @ApiUnauthorizedResponse({
+    description: 'Sesión no autenticada o credencial expirada.',
+  })
   async getSession(
     @CurrentUser() user: AuthenticatedUser,
     @Req() request?: Request,
@@ -67,6 +102,16 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({
+    operationId: 'auth_login',
+    summary: 'Iniciar sesión con correo y contraseña',
+    description:
+      'Autentica credenciales, emite cookies HttpOnly de sesión y aplica control de intentos fallidos.',
+  })
+  @ApiBody(AUTH_LOGIN_BODY)
+  @ApiCreatedResponse(AUTH_TOKEN_CREATED_RESPONSE)
+  @ApiBadRequestResponse({ description: 'Cuerpo de solicitud inválido.' })
+  @ApiUnauthorizedResponse({ description: 'Credenciales incorrectas.' })
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   async login(
     @Body() body: LoginDto,
@@ -92,6 +137,19 @@ export class AuthController {
   }
 
   @Post('google/login')
+  @ApiOperation({
+    operationId: 'auth_googleLogin',
+    summary: 'Iniciar sesión con Google OAuth',
+    description:
+      'Verifica el token de Google Identity Services y establece cookies HttpOnly de sesión.',
+  })
+  @ApiBody(AUTH_GOOGLE_BODY)
+  @ApiCreatedResponse(AUTH_TOKEN_CREATED_RESPONSE)
+  @ApiBadRequestResponse({ description: 'Credencial de Google ausente o inválida.' })
+  @ApiUnauthorizedResponse({ description: 'Token de Google no autorizado.' })
+  @ApiForbiddenResponse({
+    description: 'El rol del usuario no permite acceso con Google.',
+  })
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   async googleLogin(
     @Body() body: GoogleLoginDto,
@@ -132,6 +190,19 @@ export class AuthController {
   @Post('google/link')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    operationId: 'auth_googleLink',
+    summary: 'Vincular cuenta de Google',
+    description:
+      'Asocia una cuenta de Google verificada al usuario autenticado actual.',
+  })
+  @ApiBody(AUTH_GOOGLE_BODY)
+  @ApiCreatedResponse(AUTH_GOOGLE_LINK_OK_RESPONSE)
+  @ApiBadRequestResponse({ description: 'Credencial de Google faltante o inválida.' })
+  @ApiUnauthorizedResponse({ description: 'Sesión no autenticada.' })
+  @ApiConflictResponse({
+    description: 'La cuenta de Google ya está vinculada o el correo no coincide.',
+  })
   async googleLink(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: GoogleLinkDto,
@@ -148,6 +219,16 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    operationId: 'auth_refresh',
+    summary: 'Rotar tokens de sesión',
+    description:
+      'Valida la cookie HttpOnly de refresh, detecta reuso, rota el par de tokens y actualiza cookies de sesión.',
+  })
+  @ApiOkResponse(AUTH_REFRESH_OK_RESPONSE)
+  @ApiUnauthorizedResponse({
+    description: 'Refresh token inválido, expirado o reutilizado.',
+  })
   async refresh(
     @Res({ passthrough: true }) response: Response,
     @Req() request?: Request,
@@ -174,6 +255,15 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    operationId: 'auth_logout',
+    summary: 'Cerrar sesión',
+    description:
+      'Revoca la familia activa del token de refresh y limpia las cookies de sesión.',
+  })
+  @ApiNoContentResponse({
+    description: 'Sesión cerrada y cookies limpiadas correctamente.',
+  })
   async logout(
     @Res({ passthrough: true }) response: Response,
     @Req() request?: Request,
@@ -183,6 +273,17 @@ export class AuthController {
   }
 
   @Post('forgot-password/request')
+  @ApiOperation({
+    operationId: 'auth_requestPasswordReset',
+    summary: 'Solicitar código OTP de recuperación',
+    description:
+      'Genera y envía un código OTP temporal para restablecer contraseña sujeto a límites por cuenta.',
+  })
+  @ApiBody(AUTH_PASSWORD_RESET_REQUEST_BODY)
+  @ApiCreatedResponse({
+    description: 'Solicitud procesada correctamente.',
+  })
+  @ApiBadRequestResponse({ description: 'Correo inválido.' })
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   requestPasswordReset(@Body() body: RequestPasswordResetDto) {
     return this.credentialLimits.run('request', body.email, () =>
@@ -191,6 +292,15 @@ export class AuthController {
   }
 
   @Post('forgot-password/verify')
+  @ApiOperation({
+    operationId: 'auth_verifyPasswordReset',
+    summary: 'Verificar código OTP de recuperación',
+    description:
+      'Valida el código OTP ingresado antes de permitir el cambio de contraseña.',
+  })
+  @ApiBody(AUTH_PASSWORD_RESET_VERIFY_BODY)
+  @ApiCreatedResponse({ description: 'Código OTP válido.' })
+  @ApiBadRequestResponse({ description: 'Código OTP inválido o expirado.' })
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   verifyPasswordReset(@Body() body: VerifyPasswordResetDto) {
     return this.credentialLimits.run('verify', body.email, () =>
@@ -199,6 +309,14 @@ export class AuthController {
   }
 
   @Post('forgot-password/reset')
+  @ApiOperation({
+    operationId: 'auth_resetPassword',
+    summary: 'Restablecer contraseña con OTP',
+    description:
+      'Actualiza la contraseña validando historial reciente y revoca cadenas de refresh activas.',
+  })
+  @ApiBody(AUTH_PASSWORD_RESET_BODY)
+  @ApiCreatedResponse({ description: 'Contraseña restablecida correctamente.' })
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   @ApiResponse({
     status: 400,

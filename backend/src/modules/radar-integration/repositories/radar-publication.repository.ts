@@ -87,9 +87,11 @@ export class RadarPublicationRepository {
       store: RadarPublicationTransaction,
       context: TransactionContext,
     ) => Promise<T>,
+    isolationLevel?: PrismaTypes.TransactionIsolationLevel,
   ): Promise<T> {
     return this.prisma.$transaction(async (tx) =>
       operation(new RadarPublicationTransaction(tx), { client: tx }),
+      isolationLevel ? { isolationLevel } : undefined,
     );
   }
 

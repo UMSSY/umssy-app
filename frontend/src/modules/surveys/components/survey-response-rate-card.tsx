@@ -1,8 +1,13 @@
+import { cn } from "cn";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { SURVEY_PARTICIPATION_TEXT, SURVEY_RESPONSE_RATE_LEVEL_LABELS } from "../constants/survey-participation.constants";
+import {
+  SURVEY_PARTICIPATION_TEXT,
+  SURVEY_RESPONSE_RATE_LEVEL_LABELS,
+  SURVEY_RESPONSE_RATE_LEVEL_METER_CLASSES,
+} from "../constants/survey-participation.constants";
 import type { SurveyResponseRateCardProps } from "../types/survey-response-rate-card-props.types";
 import { getResponseRateLevel } from "../utils/get-response-rate-level";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
@@ -10,7 +15,8 @@ import { formatIsoDisplayDate } from "../utils/survey-dates";
 export function SurveyResponseRateCard({ participation, isSendingReminder, onSendReminder }: SurveyResponseRateCardProps) {
   const { responseRate, respondedCount, eligibleCount, pendingCount, audienceLabel, lastReminderSentAt, canSendReminder } =
     participation;
-  const levelLabel = SURVEY_RESPONSE_RATE_LEVEL_LABELS[getResponseRateLevel(responseRate)];
+  const level = getResponseRateLevel(responseRate);
+  const levelLabel = SURVEY_RESPONSE_RATE_LEVEL_LABELS[level];
   const hasPending = pendingCount > 0;
 
   return (
@@ -28,9 +34,10 @@ export function SurveyResponseRateCard({ participation, isSendingReminder, onSen
 
           <Progress
             value={responseRate}
+            data-level={level}
             aria-label={SURVEY_PARTICIPATION_TEXT.responseRateLabel}
             aria-valuetext={`${responseRate}% · ${levelLabel}`}
-            className="**:data-[slot=progress-track]:h-2.5"
+            className={cn("**:data-[slot=progress-track]:h-2.5", SURVEY_RESPONSE_RATE_LEVEL_METER_CLASSES[level])}
           />
 
           <p className="text-xs text-text-secondary">{SURVEY_PARTICIPATION_TEXT.audience(audienceLabel)}</p>

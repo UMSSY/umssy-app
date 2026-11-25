@@ -20,7 +20,7 @@ export function CvUploadCard({
 }: CvUploadCardProps) {
   if (isLoading) {
     return (
-      <SectionCard title="Subir currículum">
+      <SectionCard title="Subir currículum" className="min-w-0">
         <div aria-busy="true" className="flex flex-col items-center gap-3 px-6 py-10">
           <Skeleton className="h-5 w-2/3" />
           <Skeleton className="h-12 w-40" />
@@ -31,7 +31,7 @@ export function CvUploadCard({
 
   if (hasSavedCv) {
     return (
-      <SectionCard title="Subir currículum">
+      <SectionCard title="Subir currículum" className="min-w-0">
         <CvDropzone
           selectId={selectId}
           title="Ya tienes un CV vigente"
@@ -50,7 +50,7 @@ export function CvUploadCard({
   }
 
   return (
-    <SectionCard title="Subir currículum">
+    <SectionCard title="Subir currículum" className="min-w-0">
       <CvDropzone
         selectId={selectId}
         title="Selecciona tu CV en formato PDF"
@@ -70,7 +70,7 @@ export function CvUploadCard({
       <div className="mt-6 flex justify-end">
         <Button
           type="button"
-          className="h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
+          className="h-10 w-full bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover sm:w-auto"
           disabled={!selectedFile || isBusy}
           onClick={selectedFile ? () => onConfirmUpload(selectedFile) : undefined}
         >

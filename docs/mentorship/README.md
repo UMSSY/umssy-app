@@ -52,9 +52,9 @@ Activation sends `Idempotency-Key` through the shared service to prevent duplica
 
 From a selected radar area, **Ver mentores de esta area** opens `/mentorship/mentors?area=<encodedAreaName>&from=radar`. The directory normalizes the area against the radar area names and forces the availability filter for this entry point. The URL retains search, area, orientation, ordering and pagination so filtering and returning to the directory preserve context.
 
-`GET /mentors/directory` receives the selected area and `available=true`; results include `items`, `totalItems`, pagination and effective ordering. The directory handles loading, empty results and errors with retry. It does not substitute demonstration mentors for unavailable data.
+`GET /mentors/directory` accepts `area` for a single specialty or `areaIds` for a comma-separated list of specialty UUIDs. The two filters are mutually exclusive. With `areaIds`, a mentor matches any listed specialty. The radar entry point resolves the IDs against the technical-area catalog and sends `available=true`. Results include `items`, `totalItems`, pagination and effective ordering. The directory handles loading, empty results and errors with retry.
 
-The same public `useMentorDirectory` hook is consumed by the Radar simulation dialog with page 1, an empty search and default sort. Its total result count determines whether a projected gain is available; the number of cards in the first page is not treated as the full mentor count.
+The Radar dialog can use the public `useMentorDirectory` hook to display availability for the selected area. The result's `totalItems` is the full count for the applied filters. Score projection uses the selected skill and the radar rubric independently of mentor availability.
 
 | Responsibility                                                                | Owning module                                                                |
 | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -133,12 +133,16 @@ Services extract `data` from the common response contract and use the centralize
 
 Tests cover HTTP services, navigation and normalization, radar filters, query states, catalogs, profiles, and the wizard. Directory integration changes must preserve the mandatory availability filter and area mapping.
 
+## Action styling
+
+Cancelling orientation configuration uses the shared outlined style. The confirmation dialog keeps the editor open if the user dismisses it.
+
 ## Sprint History
 
 ### Sprint 3
 
 - Radar directory integration: navigate from a radar area to the available mentor directory.
-- Radar simulation based on actual mentor queries.
+- Mentor availability for radar areas resolved through the directory.
 - Standards alignment: consume areas through the radar module's public API.
 
 - Similar mentor cards with loading, empty and error states.

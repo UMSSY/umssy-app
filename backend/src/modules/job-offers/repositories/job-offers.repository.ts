@@ -6,7 +6,7 @@ import {
   JOB_OFFER_CREATED_SELECT,
   JOB_OFFER_SELECT,
 } from '../constants/job-offer.constants.js';
-import { JobOfferNotFoundException } from '../exceptions/index.js';
+import { JobOfferNotClosableException, JobOfferNotFoundException} from '../exceptions/index.js';
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CreateJobOfferData } from '../types/create-job-offer-data.type.js';
 import type { JobOfferCatalogIds } from '../types/job-offer-catalog-ids.type.js';
@@ -179,18 +179,52 @@ export class JobOffersRepository {
     });
   }
 
-  reopen(
+    reopen(
     jobOfferId: string,
     statusId: string,
     publishedAt: Date,
+    clearExpiresAt = false,
   ): Promise<JobOfferRecord> {
-    return this.updateExisting(jobOfferId, { statusId, publishedAt });
+    return this.updateExisting(jobOfferId, {
+      statusId,
+      publishedAt,
+      ...(clearExpiresAt && { expiresAt: null }),
+    });
+  }
+
+  async closeExpired(
+    publishedStatusId: string,
+    closedStatusId: string,
+    now: Date,
+  ): Promise<number> {
+    const { count } = await this.prisma.jobOffer.updateMany({
+      where: { statusId: publishedStatusId, expiresAt: { lte: now } },
+      data: { statusId: closedStatusId },
+    });
+    return count;
   }
 
   updateStatus(jobOfferId: string, statusId: string): Promise<JobOfferRecord> {
     return this.updateExisting(jobOfferId, { statusId });
   }
-
+  closePublished(companyId: string, jobOfferId: string, closedStatusId: string,): Promise<JobOfferRecord> {
+    return mapRecordNotFound(
+      this.prisma.jobOffer.update({
+        where: {
+          id: jobOfferId,
+          companyId,
+          status: {
+            title: JobOfferStatus.PUBLISHED,
+          },
+        },
+        data: {
+          statusId: closedStatusId,
+        },
+          select: JOB_OFFER_SELECT,
+        }),
+      () => new JobOfferNotClosableException(),
+    );
+  }
   private updateExisting(
     jobOfferId: string,
     data: Prisma.JobOfferUncheckedUpdateInput,

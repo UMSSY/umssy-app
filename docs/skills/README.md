@@ -8,6 +8,8 @@ Owner: group 5. The detection pipeline (`nlp`) and the radar chart that consumes
 
 ## Functionality
 
+Profile completeness and the NLP radar share the visibility rule for detected skills: a valid skill name and at least one valid evidence reference are required. A saved manual skill still counts independently of detected evidence. Historical detected rows without evidence do not complete the section.
+
 | Feature                                                                               | Where                               |
 | ------------------------------------------------------------------------------------- | ----------------------------------- |
 | Search the skill catalog                                                              | `GET /skills?search=`               |
@@ -93,6 +95,7 @@ sequenceDiagram
 ## Business rules
 
 - **Catalog.** `GET /skills` returns only non-custom skills ordered by name; `search` is a case-insensitive "contains" of up to 100 characters. Detection and vacancy publishing use this catalog.
+- **Simulation weights.** Each catalog entry includes `radarPoints` (the base weight, 1 point) and `radarHighRelevancePoints` (the total with the relevance bonus, 1.5 points). Both come from the shared Radar rubric. Use the higher weight only when Radar's simulation eligibility endpoint lists the skill in `highRelevanceSkillIds`.
 - **Custom skills.** The name is normalized (formatted, up to 50 characters, only letters, digits and ` + # . - _ / & ( )`, at least one letter, no character repeated more than 3 times in a row). Creating a name that already exists returns the existing skill instead of an error.
 - **Own skills.** At most 50 ids per request. Duplicated ids in the same request answer 409 `DuplicateSkillException`; an unknown id answers 404 `SkillNotFoundException`. `PUT` replaces the whole list, `POST` adds to it. Both ask the detection pipeline to refresh afterwards.
 - **Origin of a skill** is derived, not stored: `manual` when its source is manual, `experience` when its evidence points to a work experience, `cv` when it points to the CV. A skill can have several origins.

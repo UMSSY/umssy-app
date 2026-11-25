@@ -601,7 +601,10 @@ export function ParticipationView({
             </div>
 
             <div
+              role="region"
+              aria-label="Historial de solicitudes de cupo como mentor"
               aria-busy={history.isFetching}
+              tabIndex={0}
               className={`overflow-x-auto rounded-lg border transition-opacity ${
                 isChangingHistoryPage ? 'opacity-60' : 'opacity-100'
               }`}

@@ -463,7 +463,7 @@ export class CompanyAccessRequestsService {
     );
   }
 
-  async getActivationStatus(email: string, code?: string, otp?: string) {
+  async getActivationStatus(email: string, code?: string, _otp?: string) {
     if (!email || !email.trim()) {
       return {
         state: 'INVALID',

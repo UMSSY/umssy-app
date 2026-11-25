@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Audit Events Module** captures, filters, exports, inspects, and traces immutable administrative and identity actions across the platform. It equips backoffice administrators with paginated audit logs, CSV exports, per-event detail inspection, correlated entity timelines, and authenticated access to supporting verification evidence.
+The **Audit Events Module** captures, filters, exports, inspects, and traces immutable administrative and identity actions across the platform. It equips backoffice administrators with paginated audit logs, CSV exports, per-event detail inspection, correlated entity timelines, and authenticated access to supporting verification evidence (read-only operations).
 
 ## API Endpoints
 

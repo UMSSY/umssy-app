@@ -7,7 +7,7 @@ export function WorkflowSteps({ steps, currentStep, label }: WorkflowStepsProps)
     <nav aria-label={label}>
       <ol className="flex flex-wrap gap-3 rounded-lg border border-border bg-surface p-4">
         {steps.map((step) => (
-          <li key={step.id} aria-current={step.id === currentStep ? "step" : undefined} className={cn("flex min-w-0 flex-1 items-center gap-3 rounded-md px-3 py-2 text-sm", step.id === currentStep ? "bg-interaction font-semibold text-accent" : "text-text-secondary")}>
+          <li key={step.id} aria-current={step.id === currentStep ? "step" : undefined} className={cn("flex min-w-0 flex-1 basis-full items-center gap-3 rounded-md px-3 py-2 text-sm sm:basis-40", step.id === currentStep ? "bg-interaction font-semibold text-accent" : "text-text-secondary")}>
             <span aria-hidden="true" className={cn("flex size-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold", step.id <= currentStep ? "bg-accent text-surface" : "bg-surface-soft text-text-secondary")}>
               {step.id < currentStep ? <Check className="size-4" aria-hidden="true" /> : step.id}
             </span>

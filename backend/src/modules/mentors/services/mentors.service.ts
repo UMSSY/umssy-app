@@ -69,6 +69,7 @@ export class MentorsService {
     const filters = {
       search: query.search,
       area: query.area,
+      ...(query.areaIds ? { areaIds: query.areaIds } : {}),
       orientation: query.orientation,
       available: query.available,
     };

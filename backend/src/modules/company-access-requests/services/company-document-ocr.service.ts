@@ -327,7 +327,7 @@ export class CompanyDocumentOcrService {
 
   private extractUrls(text: string): string[] {
     const urlRegex =
-      /(?:https?:\/\/|www\.)[^\s\)\],;]+|[a-zA-Z0-9-]+\.(?:bo|com|org|net|io|tech)(?:\/[^\s\)\],;]*)?/gi;
+      /(?:https?:\/\/|www\.)[^\s)\],;]+|[a-zA-Z0-9-]+\.(?:bo|com|org|net|io|tech)(?:\/[^\s)\],;]*)?/gi;
     return Array.from(new Set(text.match(urlRegex) ?? [])).filter(
       (u) =>
         !u.includes('@') && u.length > 5 && !u.startsWith('http://www.w3.org'),
