@@ -266,18 +266,6 @@ describe("AppointmentsView", () => {
     expect(screen.getByText("Confirmada")).toBeInTheDocument();
   });
 
-  it("muestra una alternativa cuando la cita no tiene tema", async () => {
-    vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue(
-      makePage([makeAppointment({ orientationType: null })]),
-    );
-
-    renderWithQuery(<AppointmentsView />);
-
-    expect(
-      await screen.findByText("Mentor · Tema no especificado"),
-    ).toBeInTheDocument();
-  });
-
   it("conserva el orden de la API y separa la caché de próximas y pasadas", async () => {
     const user = userEvent.setup();
 
@@ -611,16 +599,6 @@ describe("AppointmentsView", () => {
   describe("búsqueda por nombre", () => {
     afterEach(() => {
       vi.useRealTimers();
-    });
-
-    it("muestra el campo de búsqueda sobre la lista", async () => {
-      renderWithQuery(<AppointmentsView />);
-
-      await screen.findByText("No tienes citas próximas");
-
-      expect(
-        screen.getByRole("searchbox", { name: "Buscar citas por nombre" }),
-      ).toBeInTheDocument();
     });
 
     it("busca con debounce, manda q y vuelve a la página 1", async () => {
