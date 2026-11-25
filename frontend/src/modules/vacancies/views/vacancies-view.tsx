@@ -116,7 +116,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
         </div>
       )}
 
-      {selectedId !== null && !isLoading ? <VacancyDetailDialog vacancy={vacancies.find((item) => item.id === selectedId) ?? null} onClose={closeVacancy} /> : null}
+      {selectedId !== null && !isLoading && !isError ? <VacancyDetailDialog vacancy={vacancies.find((item) => item.id === selectedId) ?? null} onClose={closeVacancy} /> : null}
     </main>
   );
 }
