@@ -33,7 +33,7 @@ export function useCompanyJobOffers(
   }, [query.isError, query.errorUpdatedAt, scope]);
 
   const status: CompanyJobOffersStatus =
-    companyId === null || query.isError ? "error" : query.isPending ? "loading" : "ready";
+    companyId === null ? "no-company" : query.isError ? "error" : query.isPending ? "loading" : "ready";
 
   return {
     companyId,
