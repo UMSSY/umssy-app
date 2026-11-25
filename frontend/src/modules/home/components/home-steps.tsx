@@ -25,7 +25,7 @@ export function HomeSteps() {
           ))}
         </ol>
         <div className="mt-16 flex justify-center">
-          <Link href={HOME_STEPS.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "h-14 bg-danger px-12 text-surface hover:bg-danger/85")}>{HOME_STEPS.action.label}<ArrowRight aria-hidden="true" /></Link>
+          <Link href={HOME_STEPS.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "h-14 bg-primary px-12 text-primary-foreground hover:bg-brand-hover")}>{HOME_STEPS.action.label}<ArrowRight aria-hidden="true" /></Link>
         </div>
       </div>
     </section>

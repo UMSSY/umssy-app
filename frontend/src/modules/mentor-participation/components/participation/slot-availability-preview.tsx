@@ -154,7 +154,8 @@ export function SlotUnavailableDialog({
 
             <footer className="flex flex-col-reverse gap-3 rounded-b-xl bg-surface-soft px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
               <Button
-                variant="outline"
+                variant="cancel"
+                size="lg"
                 disabled={isSubmitting}
                 onClick={() => onOpenChange(false)}
                 className="min-h-10 sm:px-6"

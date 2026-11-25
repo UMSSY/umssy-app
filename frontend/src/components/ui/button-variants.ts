@@ -8,12 +8,12 @@ const buttonVariants = cva(
         default: "bg-primary text-primary-foreground hover:bg-brand-hover",
         outline:
           "border-border-strong bg-transparent hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        cancel: "border-border-strong bg-transparent text-ink hover:bg-surface-soft aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
-        brand: "bg-brand-red text-brand-red-foreground hover:bg-danger focus-visible:ring-brand-red/30",
-        institutional: "rounded-none bg-brand-red font-tight font-extrabold tracking-wide text-brand-red-foreground uppercase institutional-button hover:bg-danger focus-visible:border-brand-red-foreground focus-visible:ring-2 focus-visible:ring-brand-red-foreground focus-visible:ring-inset",
+        institutional: "rounded-none bg-primary font-tight font-extrabold tracking-wide text-primary-foreground uppercase institutional-button hover:bg-brand-hover focus-visible:border-primary-foreground focus-visible:ring-2 focus-visible:ring-primary-foreground focus-visible:ring-inset",
         success: "bg-success text-surface hover:bg-success-hover focus-visible:ring-success/30",
         destructive:
           "bg-critical-action text-critical-action-foreground hover:bg-critical-action-hover focus-visible:border-ring focus-visible:ring-ring/20",

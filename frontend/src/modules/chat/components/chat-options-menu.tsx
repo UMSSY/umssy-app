@@ -47,7 +47,6 @@ export function ChatOptionsMenu({
         ) : (
           <DropdownMenuItem
             data-testid="chat-option-block"
-            variant="destructive"
             onClick={onBlockSelect}
           >
             Bloquear usuario

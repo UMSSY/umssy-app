@@ -120,6 +120,10 @@ JSON responses use `{ statusCode, data, detail, ok }`; files are binary response
 
 Tests verify mutations, cancellation and refresh, previews, extraction, export, history, and synchronization. TypeScript checks contracts, while ESLint checks naming and UI rules. CI validates builds and coverage.
 
+## Action styling
+
+The export dialog uses the shared outlined Cancel button. Cancelling closes the export dialog without generating a file.
+
 ## Sprint History
 
 ### Sprint 3

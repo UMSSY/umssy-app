@@ -77,7 +77,7 @@ export function RequestInboxView() {
                 {list.hasActiveFilters ? "No hay solicitudes que coincidan con los filtros." : "No hay solicitudes en este estado."}
               </p>
               {list.hasActiveFilters ? (
-                <Button type="button" variant="brand" onClick={list.clearFilters} className="h-[34px] rounded-lg px-4 text-sm font-semibold">
+                <Button type="button" onClick={list.clearFilters} className="h-[34px] rounded-lg px-4 text-sm font-semibold">
                   Limpiar filtros
                 </Button>
               ) : null}

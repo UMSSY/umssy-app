@@ -241,7 +241,7 @@ export function ReviewProfileDetail({
 
               <Button
                 type="button"
-                variant="destructive"
+                variant="outline"
                 className="flex-1"
                 onClick={() => onAction('rejected')}
               >

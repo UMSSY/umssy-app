@@ -1,4 +1,4 @@
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -37,48 +37,40 @@ describe("RequestInboxView: filtros", () => {
     listRequests.mockResolvedValue(page([row(1)]));
     getAutomationSummary.mockResolvedValue({ ok: true, data: { manualReviewCount: 0, autoApprovedTodayCount: 0, autoRejectedTodayCount: 0, receivedTodayCount: 0 } });
   });
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
 
   it("al inicio pide la pestaña Pendientes sin filtros y con el período Todo el período", async () => {
     renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
 
     expect(lastCall()).toEqual(["pending", 1, EMPTY_FILTERS]);
+    expect(screen.getByLabelText("Buscar por nombre, C.I. o código SIS")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Período" })).toHaveTextContent("Todo el período");
     expect(screen.getByRole("combobox", { name: "Carrera" })).toHaveTextContent("Todas las carreras");
   });
 
-  it("los controles tienen etiqueta accesible", async () => {
-    renderWithQuery(<RequestInboxView />);
-    await screen.findByText("Persona 1");
-
-    expect(screen.getByLabelText("Buscar por nombre, C.I. o código SIS")).toHaveAttribute("placeholder", "Nombre, CI o código SIS");
-    expect(screen.getByRole("combobox", { name: "Carrera" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Período" })).toBeInTheDocument();
-  });
-
-  it("la búsqueda espera 300 ms de pausa antes de pedir y envía el texto recortado", async () => {
-    const user = userEvent.setup();
+  it("ignora un carácter y envía el texto recortado tras 300 ms", async () => {
     renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
     const callsBefore = listCalls().length;
+    const search = screen.getByLabelText("Buscar por nombre, C.I. o código SIS");
 
-    await user.type(screen.getByLabelText("Buscar por nombre, C.I. o código SIS"), "  ana ");
-    expect(listCalls().length).toBe(callsBefore);
+    vi.useFakeTimers();
+    fireEvent.change(search, { target: { value: "a" } });
+    await act(async () => { await vi.advanceTimersByTimeAsync(300); });
+    expect(listCalls()).toHaveLength(callsBefore);
 
+    fireEvent.change(search, { target: { value: "  ana " } });
+    await act(async () => { await vi.advanceTimersByTimeAsync(299); });
+    expect(listCalls()).toHaveLength(callsBefore);
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    vi.useRealTimers();
     await waitFor(() => expect(lastCall()).toEqual(["pending", 1, { ...EMPTY_FILTERS, search: "ana" }]));
-    expect(listCalls().length).toBe(callsBefore + 1);
-  });
-
-  it("con un solo carácter no filtra por texto", async () => {
-    const user = userEvent.setup();
-    renderWithQuery(<RequestInboxView />);
-    await screen.findByText("Persona 1");
-
-    await user.type(screen.getByLabelText("Buscar por nombre, C.I. o código SIS"), "a");
-    await new Promise((resolve) => setTimeout(resolve, 450));
-
-    expect(lastCall()).toEqual(["pending", 1, EMPTY_FILTERS]);
+    expect(listCalls()).toHaveLength(callsBefore + 1);
   });
 
   it("el filtro de carrera envía el nombre exacto de la carrera", async () => {
