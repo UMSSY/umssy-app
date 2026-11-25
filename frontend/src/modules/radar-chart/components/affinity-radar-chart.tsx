@@ -186,7 +186,7 @@ export function AffinityRadarChart({
                       area={areas[index]}
                       className={
                         areas[index].id === highlightedArea
-                          ? 'stroke-accent'
+                          ? 'stroke-gold'
                           : undefined
                       }
                       cx={cx}
