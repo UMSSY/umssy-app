@@ -42,7 +42,7 @@ export function MentorFiltersBar({
     <>
       {areaAsChips ? (
         <div
-          className="hidden w-full flex-wrap items-center gap-2 min-[1700px]:w-auto sm:flex"
+          className="hidden w-full flex-wrap items-center gap-2 min-[1700px]:w-auto lg:flex"
           role="group"
           aria-label="Especialidades"
         >
@@ -66,8 +66,8 @@ export function MentorFiltersBar({
       <div
         className={
           areaAsChips
-            ? 'flex flex-col gap-1.5 sm:hidden'
-            : 'flex flex-col gap-1.5'
+            ? 'flex min-w-0 flex-col gap-1.5 lg:hidden'
+            : 'flex min-w-0 flex-col gap-1.5'
         }
       >
         <Label htmlFor="mentor-area">Área técnica</Label>
@@ -81,7 +81,7 @@ export function MentorFiltersBar({
           <SelectTrigger
             id="mentor-area"
             aria-label="Área técnica"
-            className="max-w-64 min-w-48"
+            className="w-full min-w-0 data-[size=default]:h-11 lg:w-auto lg:max-w-64 lg:min-w-48 lg:data-[size=default]:h-10"
           >
             <SelectValue />
           </SelectTrigger>
@@ -96,7 +96,7 @@ export function MentorFiltersBar({
         </Select>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-w-0 flex-col gap-1.5">
         <Label htmlFor="mentor-orientation">Orientación</Label>
         <Select
           items={orientationItems}
@@ -108,7 +108,7 @@ export function MentorFiltersBar({
           <SelectTrigger
             id="mentor-orientation"
             aria-label="Orientación"
-            className="max-w-56 min-w-36"
+            className="w-full min-w-0 data-[size=default]:h-11 lg:w-auto lg:max-w-56 lg:min-w-36 lg:data-[size=default]:h-10"
           >
             <SelectValue />
           </SelectTrigger>

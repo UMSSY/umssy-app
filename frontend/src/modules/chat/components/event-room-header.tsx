@@ -14,17 +14,19 @@ export function EventRoomHeader({
     participantCount === 1 ? "1 participante" : `${participantCount} participantes`;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3">
       <div
         className={cn(
-          "flex size-9 items-center justify-center rounded-full border border-accent bg-accent text-accent-foreground",
+          "flex size-9 shrink-0 items-center justify-center rounded-full border border-accent bg-accent text-accent-foreground",
         )}
         aria-hidden="true"
       >
         <Users className="size-5" />
       </div>
-      <div className="text-left">
-        <h3 className="text-sm font-bold text-ink">{groupName}</h3>
+      <div className="min-w-0 text-left">
+        <h3 className="text-sm leading-tight font-bold wrap-anywhere text-ink max-lg:line-clamp-2">
+          {groupName}
+        </h3>
         <p className="mt-0.5 text-xs text-text-secondary">
           {participantLabel}
         </p>
