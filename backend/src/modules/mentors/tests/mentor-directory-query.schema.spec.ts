@@ -17,6 +17,18 @@ describe('mentorDirectoryQuerySchema', () => {
     );
   });
 
+  it('acepta UUID separados por comas y conserva el filtro individual', () => {
+    const ids = [
+      '06d773ee-90d1-40c0-9744-c7c3601b84ef',
+      'ee0d0fe2-bc99-4a6a-8939-2bd663c3cae1',
+    ];
+    const areaIds = ids.join(',');
+    expect(mentorDirectoryQuerySchema.parse({ areaIds }).areaIds).toEqual(ids);
+    expect(mentorDirectoryQuerySchema.parse({ area: ids[0] }).area).toBe(ids[0]);
+    expect(mentorDirectoryQuerySchema.safeParse({ area: 'Backend', areaIds }).success).toBe(false);
+    expect(mentorDirectoryQuerySchema.safeParse({ areaIds: `${ids[0]},QA` }).success).toBe(false);
+  });
+
   it.each(['0', '-1', 'abc', '1.5', '9007199254740992'])(
     'rechaza página inválida %s',
     (page) => {

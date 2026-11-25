@@ -27,7 +27,7 @@ describe('SkillRepository', () => {
     expect(skill.findMany).toHaveBeenCalledWith({
       where: { isCustom: false },
       orderBy: { name: 'asc' },
-      select,
+      select: { ...select, areaId: true },
     });
   });
 
@@ -39,7 +39,7 @@ describe('SkillRepository', () => {
     expect(skill.findMany).toHaveBeenCalledWith({
       where: { isCustom: false, name: { contains: 'py', mode: 'insensitive' } },
       orderBy: { name: 'asc' },
-      select,
+      select: { ...select, areaId: true },
     });
   });
 

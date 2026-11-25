@@ -1,7 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
 import { useEffect, useState } from "react";
 import { useLeaveGuard } from "@/modules/job-offers";
 import { useMentorProfile } from "@/modules/mentorship";
@@ -17,6 +15,8 @@ import { RequestAppointmentForm } from "./request-appointment-form";
 
 export function BlockSelection({
   mentorId,
+  selectedAreaId,
+  area,
   blocks,
   weekRange,
   fetchFreeBlocks,
@@ -34,9 +34,10 @@ export function BlockSelection({
     markUnavailable,
     clearSelection,
   } = useBlockSelection(fetchFreeBlocks);
-  const requestedArea = useSearchParams().get("area");
-  const selectedArea = RADAR_AXIS_NAMES.find(item => item.name === requestedArea)?.name;
   const mentorProfile = useMentorProfile(mentorId);
+  const selectedArea = mentorProfile.data?.technicalAreas?.find((specialty) =>
+    selectedAreaId ? specialty.id === selectedAreaId : specialty.name === area,
+  );
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
   const [reservationError, setReservationError] = useState<string | null>(null);
@@ -90,9 +91,10 @@ export function BlockSelection({
           isChecking={isChecking}
           error={availabilityError ?? reservationError ?? error}
         >
+          {selectedArea ? <p className="mb-3 text-sm font-semibold text-ink">Área de mentoría: {selectedArea.name}. Se incluirá en tu solicitud.</p> : null}
           <RequestAppointmentForm
-            key={`${formVersion}:${selectedArea ?? ""}`}
-            selectedArea={selectedArea}
+            key={formVersion}
+            selectedAreaName={selectedArea?.name}
             orientationTypes={mentorProfile.data?.orientationTypes ?? []}
             isLoadingTopics={mentorProfile.isPending}
             isSubmitting={isSubmitting}

@@ -16,6 +16,7 @@ import type { SkillsProfileResponse } from '../types/skills-profile-response.typ
 import type { UseSkillsResult } from '../types/use-skills-result.types';
 import { getSkillsErrorMessage } from '../utils/get-skills-error-message';
 import { isManualSkill } from '../utils/is-manual-skill';
+import { skillCatalogOptions } from './use-skill-catalog';
 
 export function useSkills({
   forGuide = false,
@@ -32,6 +33,7 @@ export function useSkills({
     const request = skillsService
       .createCustomSkill(skill.name)
       .then((created) => {
+        void queryClient.invalidateQueries({ queryKey: skillCatalogOptions.queryKey });
         queryClient.setQueryData<SkillsProfileResponse>(
           MY_SKILLS_QUERY_KEY,
           (current) =>
@@ -59,7 +61,7 @@ export function useSkills({
     staleTime: forGuide ? 30_000 : undefined,
     queryFn: async () => {
       const [catalog, selected] = await Promise.all([
-        skillsService.getCatalog(),
+        queryClient.fetchQuery(skillCatalogOptions),
         skillsService.getMySkills(),
       ]);
       return { catalog, selected };

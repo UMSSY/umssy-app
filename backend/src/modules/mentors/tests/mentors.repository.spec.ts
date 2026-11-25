@@ -1,7 +1,7 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 vi.mock('../repositories/mentor-offers.queries.js', () => ({
   reconcileMentorOffers: vi.fn(),
@@ -21,7 +21,7 @@ describe('MentorsRepository', () => {
       .mockResolvedValue([
         { orientationType: { id: 'orientation', name: 'Empleo' } },
       ]);
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       userRole: { findMany: roles },
       mentorTechnicalArea: { findMany: areas },
       mentorOrientationType: { findMany: orientations },
@@ -45,7 +45,7 @@ describe('MentorsRepository', () => {
   });
   it('no consulta metadatos de fotos si el directorio está vacío', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -67,7 +67,7 @@ describe('MentorsRepository', () => {
         { id: 'mentor-19', updatedAt },
       ]);
 
-    const repository = new MentorsRepository({
+    const repository = makeMentorsRepository({
       user: { findMany },
     } as unknown as PrismaService);
 
@@ -93,7 +93,7 @@ describe('MentorsRepository', () => {
     const role = { id: 'mentor-role-id' };
     const findUnique = vi.fn().mockResolvedValue(role);
     const prisma = { role: { findUnique } } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findMentorRole();
 
@@ -108,7 +108,7 @@ describe('MentorsRepository', () => {
     const userRole = { id: 'user-role-id' };
     const findFirst = vi.fn().mockResolvedValue(userRole);
     const prisma = { userRole: { findFirst } } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findActiveUserRole('user-1', 'role-1');
 
@@ -129,7 +129,7 @@ describe('MentorsRepository', () => {
     const mentor = { id: 'user-1' };
     const findFirst = vi.fn().mockResolvedValue(mentor);
     const prisma = { user: { findFirst } } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findActiveMentorParticipation(
       mentor.id,
@@ -159,7 +159,7 @@ describe('MentorsRepository', () => {
     const prisma = {
       mentorTechnicalArea: { findMany },
     } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findMentorTechnicalAreas('user-1');
 
@@ -181,7 +181,7 @@ describe('MentorsRepository', () => {
     const prisma = {
       mentorOrientationType: { findMany },
     } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findMentorOrientationTypes('user-1');
 
@@ -206,7 +206,7 @@ describe('MentorsRepository', () => {
     const prisma = {
       technicalArea: { findMany },
     } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findTechnicalAreas(['area-1']);
 
@@ -223,7 +223,7 @@ describe('MentorsRepository', () => {
     const prisma = {
       orientationType: { findMany },
     } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findActiveOrientationTypes([
       'orientation-1',
@@ -263,7 +263,7 @@ describe('MentorsRepository', () => {
       .mockResolvedValueOnce([]);
 
     const prisma = { user: { findMany } } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findActiveMentors(now);
 
@@ -325,7 +325,7 @@ describe('MentorsRepository', () => {
     const mentor = { id: 'user-1' };
     const findFirst = vi.fn().mockResolvedValue(mentor);
     const prisma = { user: { findFirst } } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.findActiveMentorById('user-1', now);
 
@@ -413,7 +413,7 @@ describe('MentorsRepository', () => {
 
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.activate(
       'user-1',
@@ -478,7 +478,7 @@ describe('MentorsRepository', () => {
 
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     await expect(
       repository.activate('user-1', 'role-1', ['area-1'], ['orientation-1']),
@@ -497,7 +497,7 @@ describe('MentorsRepository', () => {
     });
 
     const prisma = { user: { update } } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     const result = await repository.updateAvailability('user-1', false);
 
@@ -525,7 +525,7 @@ describe('MentorsRepository', () => {
 
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     await repository.replaceMentorTechnicalAreas('user-1', [
       'area-1',
@@ -553,7 +553,7 @@ describe('MentorsRepository', () => {
 
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
 
     await repository.replaceMentorOrientationTypes('user-1', [
       'orientation-1',

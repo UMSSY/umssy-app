@@ -29,22 +29,26 @@ describe('SkillCatalogService', () => {
     );
   });
 
+  const radarWeights = { radarPoints: 1, radarHighRelevancePoints: 1.5 };
+  const catalogPython = { ...python, areaId: 'data-ai' };
+  const catalogSql = { ...sql, areaId: null };
+
   describe('listCatalog', () => {
     it('returns the catalog filtered by the search term', async () => {
-      skillRepository.findCatalog.mockResolvedValue([python]);
+      skillRepository.findCatalog.mockResolvedValue([catalogPython]);
 
       await expect(service.listCatalog({ search: 'py' })).resolves.toEqual([
-        python,
+        { ...catalogPython, ...radarWeights },
       ]);
       expect(skillRepository.findCatalog).toHaveBeenCalledWith('py');
     });
 
     it('returns the whole catalog when the search term is empty', async () => {
-      skillRepository.findCatalog.mockResolvedValue([python, sql]);
+      skillRepository.findCatalog.mockResolvedValue([catalogPython, catalogSql]);
 
       await expect(service.listCatalog({ search: '' })).resolves.toEqual([
-        python,
-        sql,
+        { ...catalogPython, ...radarWeights },
+        { ...catalogSql, ...radarWeights },
       ]);
       expect(skillRepository.findCatalog).toHaveBeenCalledWith(undefined);
     });

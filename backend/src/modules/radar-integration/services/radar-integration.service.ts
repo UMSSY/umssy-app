@@ -66,6 +66,9 @@ export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
   myRadar(userId: string) {
     return this.publication.myRadar(userId);
   }
+  simulationEligibility(userId: string) {
+    return this.publication.simulationEligibility(userId);
+  }
   historicalRadar(userId: string, snapshotId: string) {
     return this.notifications.historical(userId, snapshotId);
   }
