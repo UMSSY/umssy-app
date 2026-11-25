@@ -228,12 +228,11 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
               {error ?? downloadError}
             </p>
           ) : null}
-          <DialogFooter className="mx-0 mb-0 flex-row justify-end gap-3 rounded-b-lg border-t border-border bg-transparent px-6 py-4">
+          <DialogFooter className="mx-0 mb-0 flex-col gap-3 rounded-b-lg border-t border-border bg-transparent px-6 py-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="cancel"
               size="lg"
-              className="h-11 border-border-strong px-5 text-sm text-ink hover:bg-surface-soft"
               disabled={isBusy}
               onClick={onClose}
             >
@@ -241,7 +240,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
             </Button>
             <Button
               type="button"
-              className="h-11 bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
+              size="lg"
               disabled={isBusy}
               onClick={() => void handleDownload()}
             >
@@ -265,10 +264,9 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
               {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.dialogDescription(percentage ?? 0)}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mx-0 mt-6 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+          <AlertDialogFooter className="mx-0 mt-6 mb-0 flex-col gap-3 border-t-0 bg-transparent p-0 sm:flex-row sm:justify-end">
             <AlertDialogCancel
               type="button"
-              className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
               onClick={handleCompleteProfile}
             >
               {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.completeProfile}
