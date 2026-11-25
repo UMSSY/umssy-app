@@ -13,7 +13,7 @@ export function WithdrawApplicationButton({
 
   return (
     <Button
-      variant="destructive"
+      variant="outline"
       size="sm"
       className={className}
       disabled={!canWithdraw || isWithdrawing}

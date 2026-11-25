@@ -88,6 +88,22 @@ sequenceDiagram
   S->>DB: transaction: remove owner + offline-passes:<userId> (only that user)
 ```
 
+## Online sign-in and recovery
+
+The login form sends credentials to `POST /auth/login`, and the authenticated client checks its session with `GET /auth/session`. The recovery flow requests a code, verifies the code and resets the password through `POST /auth/forgot-password/request`, `POST /auth/forgot-password/verify` and `POST /auth/forgot-password/reset`. Login and password recovery use institutional primary buttons. Signing out uses a standard confirmation.
+
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Auth API"]
+  API --> Service["Auth service"]
+  Service --> Data[("Users")]
+  Service --> Related[("Password reset codes")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
 ## Sprint History
 
 ### Sprint 3

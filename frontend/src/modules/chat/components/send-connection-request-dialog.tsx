@@ -63,7 +63,8 @@ export function SendConnectionRequestDialog({
         <DialogFooter>
           <Button
             type="button"
-            variant="outline"
+            variant="cancel"
+            size="lg"
             onClick={onClose}
             disabled={isSending}
           >

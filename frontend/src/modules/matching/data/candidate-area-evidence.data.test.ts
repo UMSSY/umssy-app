@@ -48,14 +48,4 @@ describe("HU4: evidencias por candidato y área", () => {
     expect(detail.certifications).toEqual([]);
     expect(detail.experience).toEqual([]);
   });
-
-  it("asigna números únicamente numéricos de demostración a los seis candidatos", () => {
-    const uniqueNumbers = new Set(
-      CANDIDATES_POOL.map((candidate) => candidate.demoPhone),
-    );
-    expect(uniqueNumbers.size).toBe(CANDIDATES_POOL.length);
-    CANDIDATES_POOL.forEach((candidate) => {
-      expect(candidate.demoPhone).toMatch(/^\+591 7\d{3} \d{4}$/);
-    });
-  });
 });

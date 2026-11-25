@@ -62,6 +62,18 @@ The current-list query now filters published, unfinished workshops in the databa
 
 Local acceptance checks covered exact current and history IDs, ordering and pagination, a workshop reaching its closing instant, QR stability, cancellation, another user's data, and frontend loading, empty and error states. The recorded run passed 594 frontend tests, 318 backend tests and 3 PostgreSQL-backed tests. No staging deployment or staging measurement was performed for that run.
 
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Registration API"]
+  API --> Service["Registration service"]
+  Service --> Data[("Event registrations")]
+  Service --> Related[("Events and users")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
 ## Sprint History
 
 ### Sprint 3
