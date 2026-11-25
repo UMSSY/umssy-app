@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { CompanyAccessRequestsService } from '../services/company-access-requests.service.js';
 import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -40,8 +41,8 @@ describe('CompanyAccessRequestsService', () => {
     evaluateDocumentText: vi.fn(),
   };
 
-  const mailService = {
-    send: vi.fn(),
+  const notificationsService = {
+    notify: vi.fn(),
   };
 
   beforeEach(() => {
@@ -50,7 +51,7 @@ describe('CompanyAccessRequestsService', () => {
       repository as any,
       filesService as any,
       companyOcr as any,
-      mailService as any,
+      notificationsService as any,
     );
   });
 
@@ -242,13 +243,25 @@ describe('CompanyAccessRequestsService', () => {
         id: 'req-1',
         requestCode: 'EMP-2026-0001',
         approvedCompanyId: 'comp-1',
+        approvedUserId: 'usr-1',
       });
-      mailService.send.mockResolvedValue(undefined);
+      notificationsService.notify.mockResolvedValue({
+        inAppCount: 1,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+        deliveries: [],
+      });
 
       const res = await service.approve('req-1', 'admin-1');
       expect(res.status).toBe('APPROVED');
       expect(res.activationCodeSent).toBe(true);
-      expect(mailService.send).toHaveBeenCalled();
+      expect(notificationsService.notify).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientIds: ['usr-1'],
+          actorId: 'admin-1',
+          type: NotificationType.COMPANY_ACCESS_REQUEST_APPROVED,
+        }),
+      );
     });
   });
 
@@ -266,7 +279,12 @@ describe('CompanyAccessRequestsService', () => {
         status: { title: 'REJECTED' },
         rejectionReason: 'Firma no válida',
       });
-      mailService.send.mockResolvedValue(undefined);
+      notificationsService.notify.mockResolvedValue({
+        inAppCount: 0,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+        deliveries: [],
+      });
 
       const res = await service.reject('req-1', 'admin-1', {
         reasonCategory: 'Firma',
@@ -274,6 +292,12 @@ describe('CompanyAccessRequestsService', () => {
       });
       expect(res.status).toBe('REJECTED');
       expect(res.rejectionReason).toContain('Firma no válida');
+      expect(notificationsService.notify).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientEmails: ['acme@test.com'],
+          type: NotificationType.COMPANY_ACCESS_REQUEST_REJECTED,
+        }),
+      );
     });
 
     it('solicita corrección con categoría y detalle', async () => {
@@ -288,14 +312,24 @@ describe('CompanyAccessRequestsService', () => {
         id: 'req-1',
         status: { title: 'OBSERVED' },
       });
-      mailService.send.mockResolvedValue(undefined);
+      notificationsService.notify.mockResolvedValue({
+        inAppCount: 0,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+        deliveries: [],
+      });
 
       const res = await service.requestCorrection('req-1', 'admin-1', {
         reasonCategory: 'Documento',
         customDetails: 'Subir carta nítida con sello legible',
       });
       expect(res.status.title).toBe('OBSERVED');
-      expect(mailService.send).toHaveBeenCalled();
+      expect(notificationsService.notify).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientEmails: ['acme@test.com'],
+          type: NotificationType.COMPANY_ACCESS_REQUEST_OBSERVED,
+        }),
+      );
     });
   });
 

@@ -19,4 +19,23 @@ export type NotificationPayloadMap = {
   [NotificationType.NEW_JOB_APPLICANT]: { jobTitle: string; applicantName: string; applicantCount: number };
   [NotificationType.EVENT_STARTING_SOON]: { eventName: string; time: string };
   [NotificationType.ACCESS_REQUEST_APPROVED]: { studentName: string };
+  [NotificationType.COMPANY_ACCESS_REQUEST_APPROVED]: {
+    companyName: string;
+    requestCode: string;
+    activationCode: string;
+    expiresInMinutes: string;
+    activationUrl: string;
+  };
+  [NotificationType.COMPANY_ACCESS_REQUEST_OBSERVED]: {
+    companyName: string;
+    requestCode: string;
+    reason: string;
+    requestStatusUrl: string;
+  };
+  [NotificationType.COMPANY_ACCESS_REQUEST_REJECTED]: {
+    companyName: string;
+    requestCode: string;
+    reason: string;
+    requestStatusUrl: string;
+  };
 };

@@ -1,4 +1,5 @@
 import type { UploadedDocumentFile } from '../../access-requests/types/uploaded-file.types.js';
+import type { NotifyRequest } from '../../notifications/types/notify-request.type.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { createHash, randomInt } from 'node:crypto';
 import {
@@ -10,9 +11,13 @@ import {
 import * as bcrypt from 'bcrypt';
 import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
 import { FilesService } from '../../files/services/files.service.js';
-import { MailService } from '../../mail/services/mail.service.js';
-import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { buildFrontendUrl } from '../../mail/helpers/frontend-url.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import {
+  companyRequestApprovedNotification,
+  companyRequestObservedNotification,
+  companyRequestRejectedNotification,
+} from '../notification/company-request-notifications.js';
 import { CompanyAccessRequestsRepository } from '../repositories/company-access-requests.repository.js';
 import { CompanyDocumentOcrService } from './company-document-ocr.service.js';
 import type {
@@ -40,7 +45,7 @@ export class CompanyAccessRequestsService {
     private readonly repository: CompanyAccessRequestsRepository,
     private readonly filesService: FilesService,
     private readonly companyOcr: CompanyDocumentOcrService,
-    private readonly mailService: MailService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   listCities() {
@@ -266,33 +271,28 @@ export class CompanyAccessRequestsService {
       `[OTP EMPRESA] Código de activación para ${current.email} (${updated.requestCode}): ${rawCode}`,
     );
 
-    try {
-      const activationUrl = buildFrontendUrl(
-        '/request-access/activacion-empresa',
-        {
-          email: current.email,
-          otp: rawCode,
-        },
-      );
-      const expiresInMinutes = '2880';
-      await this.mailService.send({
-        to: current.email,
-        subject: 'Tu código de activación de UMSSY para empresa',
-        text: `Tu solicitud de acceso para ${current.companyName} (${updated.requestCode}) fue aprobada.\n\nCódigo de activación: ${rawCode}\nCódigo de seguimiento: ${updated.requestCode}\nVence en 48 horas.\n\nPara activar tu cuenta y configurar tus credenciales de acceso, ingresa al siguiente enlace oficial:\n${activationUrl}\n\nEn la pantalla se te solicitará ingresar obligatoriamente tu código de seguimiento institucional (${updated.requestCode}) para validar tu identidad.`,
-        mjml: await loadMailTemplate('activation-code'),
-        values: {
-          code: rawCode,
-          expiresInMinutes,
-          activationUrl,
-        },
-      });
-    } catch (mailError) {
-      this.logger.warn(
-        `No se pudo enviar el correo de activación a ${current.email}: ${
-          mailError instanceof Error ? mailError.message : String(mailError)
-        }`,
-      );
-    }
+    const expiresInMinutes = '2880';
+    const activationUrl = buildFrontendUrl(
+      '/request-access/activacion-empresa',
+      {
+        email: current.email,
+        otp: rawCode,
+      },
+    );
+    await this.dispatchDecisionNotification('activación', current.email, {
+      recipientIds: updated.approvedUserId ? [updated.approvedUserId] : [],
+      recipientEmails: updated.approvedUserId ? undefined : [current.email],
+      actorId: reviewerId,
+      ...companyRequestApprovedNotification({
+        companyName: current.companyName,
+        requestCode: updated.requestCode ?? '',
+        activationCode: rawCode,
+        expiresInMinutes,
+        activationUrl,
+      }),
+      actionUrl: `/request-access/activacion-empresa?email=${encodeURIComponent(current.email)}&otp=${encodeURIComponent(rawCode)}`,
+      channels: updated.approvedUserId ? ['IN_APP', 'EMAIL'] : ['EMAIL'],
+    });
 
     return {
       id: updated.id,
@@ -340,29 +340,23 @@ export class CompanyAccessRequestsService {
       composedReason,
     );
 
-    try {
-      const requestStatusUrl = buildFrontendUrl('/request-access/status', {
-        code: current.requestCode ?? '',
-        email: current.email,
-      });
-      await this.mailService.send({
-        to: current.email,
-        subject: 'Observaciones a tu solicitud de registro de empresa en UMSSY',
-        text: `Tu solicitud de acceso para ${current.companyName} (${current.requestCode}) requiere subsanación.\n\nMotivo:\n${composedReason}\n\nConsulta el estado y realiza las correcciones en: ${requestStatusUrl}`,
-        mjml: await loadMailTemplate('access-request-rejection'),
-        values: {
-          reason: composedReason,
-          requestCode: current.requestCode ?? '',
-          requestStatusUrl,
-        },
-      });
-    } catch (mailError) {
-      this.logger.warn(
-        `No se pudo enviar el correo de subsanación a ${current.email}: ${
-          mailError instanceof Error ? mailError.message : String(mailError)
-        }`,
-      );
-    }
+    const requestStatusUrl = buildFrontendUrl('/request-access/status', {
+      code: current.requestCode ?? '',
+      email: current.email,
+    });
+    await this.dispatchDecisionNotification('subsanación', current.email, {
+      recipientIds: [],
+      recipientEmails: [current.email],
+      actorId: reviewerId,
+      ...companyRequestObservedNotification({
+        companyName: current.companyName,
+        requestCode: current.requestCode ?? '',
+        reason: composedReason,
+        requestStatusUrl,
+      }),
+      actionUrl: `/request-access/status?code=${encodeURIComponent(current.requestCode ?? '')}&email=${encodeURIComponent(current.email)}`,
+      channels: ['EMAIL'],
+    });
 
     return updated;
   }
@@ -400,29 +394,23 @@ export class CompanyAccessRequestsService {
 
     await this.repository.rejectCompanyRequest(id, reviewerId, finalReason);
 
-    try {
-      const requestStatusUrl = buildFrontendUrl('/request-access/status', {
-        code: current.requestCode ?? '',
-        email: current.email,
-      });
-      await this.mailService.send({
-        to: current.email,
-        subject: 'Dictamen de tu solicitud de registro de empresa en UMSSY',
-        text: `Tu solicitud de acceso para ${current.companyName} (${current.requestCode}) fue rechazada.\n\nMotivo del rechazo:\n${finalReason}\n\nConsulta el estado en: ${requestStatusUrl}`,
-        mjml: await loadMailTemplate('access-request-rejection'),
-        values: {
-          reason: finalReason,
-          requestCode: current.requestCode ?? '',
-          requestStatusUrl,
-        },
-      });
-    } catch (mailError) {
-      this.logger.warn(
-        `No se pudo enviar el correo de rechazo a ${current.email}: ${
-          mailError instanceof Error ? mailError.message : String(mailError)
-        }`,
-      );
-    }
+    const requestStatusUrl = buildFrontendUrl('/request-access/status', {
+      code: current.requestCode ?? '',
+      email: current.email,
+    });
+    await this.dispatchDecisionNotification('rechazo', current.email, {
+      recipientIds: [],
+      recipientEmails: [current.email],
+      actorId: reviewerId,
+      ...companyRequestRejectedNotification({
+        companyName: current.companyName,
+        requestCode: current.requestCode ?? '',
+        reason: finalReason,
+        requestStatusUrl,
+      }),
+      actionUrl: `/request-access/status?code=${encodeURIComponent(current.requestCode ?? '')}&email=${encodeURIComponent(current.email)}`,
+      channels: ['EMAIL'],
+    });
 
     return { id, status: 'REJECTED', rejectionReason: finalReason };
   }
@@ -641,6 +629,24 @@ export class CompanyAccessRequestsService {
       );
     }
     return current;
+  }
+
+  private async dispatchDecisionNotification(
+    label: string,
+    email: string,
+    request: NotifyRequest,
+  ) {
+    try {
+      await this.notificationsService.notify(request);
+    } catch (notificationError) {
+      this.logger.warn(
+        `No se pudo enviar la notificación de ${label} a ${email}: ${
+          notificationError instanceof Error
+            ? notificationError.message
+            : String(notificationError)
+        }`,
+      );
+    }
   }
 
   private async safeDeleteFile(fileId: string) {
