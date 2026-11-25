@@ -144,3 +144,4 @@ Blocking is a moderation action with a confirmation dialog. Its controls use neu
 - The open conversation is exposed through the typed `getActiveConversationId()` contract instead of a global `window` property.
 - Handled `conversationId` and `tab` parameters are removed from the URL, so repeated links to the same conversation work.
 - `visibility:changed` reports the open conversation so the backend does not notify a recipient who is reading it.
+- On narrow screens, the event chat header opens group information and participants through the **Información del grupo** button. From the large breakpoint, this information appears beside the conversation.
