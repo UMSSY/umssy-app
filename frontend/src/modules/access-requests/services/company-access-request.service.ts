@@ -91,6 +91,19 @@ async function request<T>(
   }
 }
 
+async function fetchAttachmentBlob(
+  url: string,
+  errorMessage: string,
+): Promise<Blob | null> {
+  const res = await apiClient.get(url, {
+    responseType: 'blob',
+    validateStatus: () => true,
+  });
+  if (res.status === 200) return res.data as Blob;
+  if (res.status === 404) return null;
+  throw new Error(errorMessage);
+}
+
 export const companyAccessRequestService = {
   getCities: () => request<CityItem[]>('get', '/cities'),
 
@@ -176,21 +189,17 @@ export const companyAccessRequestService = {
       ocrFieldResults: CompanyAccessRequestItem['ocrFieldResults'];
     }>('post', `/company-access-requests/${id}/re-evaluate-ocr`),
 
-  getDocumentBlob: async (id: string): Promise<Blob | null> => {
-    const res = await apiClient.get(`/company-access-requests/${id}/document`, {
-      responseType: 'blob',
-      validateStatus: () => true,
-    });
-    return res.status === 200 ? (res.data as Blob) : null;
-  },
+  getDocumentBlob: (id: string): Promise<Blob | null> =>
+    fetchAttachmentBlob(
+      `/company-access-requests/${id}/document`,
+      'No se pudo descargar la carta membretada adjunta.',
+    ),
 
-  getLogoBlob: async (id: string): Promise<Blob | null> => {
-    const res = await apiClient.get(`/company-access-requests/${id}/logo`, {
-      responseType: 'blob',
-      validateStatus: () => true,
-    });
-    return res.status === 200 ? (res.data as Blob) : null;
-  },
+  getLogoBlob: (id: string): Promise<Blob | null> =>
+    fetchAttachmentBlob(
+      `/company-access-requests/${id}/logo`,
+      'No se pudo descargar el logotipo adjunto.',
+    ),
 
   getActivationStatus: (params: {
     email?: string;

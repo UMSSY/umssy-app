@@ -437,7 +437,6 @@ export function LoginView() {
                 {!isLoading ? <ArrowRight aria-hidden="true" /> : null}
               </Button>
 
-              {/* Divisor "o continúa con" */}
               <div className="relative my-6 text-center text-xs text-text-secondary">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-border" />
@@ -445,7 +444,6 @@ export function LoginView() {
                 <span className="relative bg-surface px-3">o continúa con</span>
               </div>
 
-              {/* Botón "Continuar con Google" */}
               <Button
                 type="button"
                 variant="outline"

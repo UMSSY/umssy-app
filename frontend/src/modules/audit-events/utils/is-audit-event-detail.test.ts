@@ -66,4 +66,21 @@ describe("isAuditEventDetail", () => {
       }),
     ).toBe(false);
   });
+
+  it("rechaza acciones y roles de responsable fuera del contrato", () => {
+    expect(isAuditEventDetail({ ...VALID_DETAIL, action: "unknown_action" })).toBe(false);
+    expect(isAuditEventDetail({ ...VALID_DETAIL, action: "toString" })).toBe(false);
+    expect(
+      isAuditEventDetail({
+        ...VALID_DETAIL,
+        responsible: { ...VALID_DETAIL.responsible, role: "admin" },
+      }),
+    ).toBe(false);
+    expect(
+      isAuditEventDetail({
+        ...VALID_DETAIL,
+        responsible: { ...VALID_DETAIL.responsible, role: "constructor" },
+      }),
+    ).toBe(false);
+  });
 });

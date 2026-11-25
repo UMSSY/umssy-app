@@ -110,7 +110,6 @@ function ActivationFlow({ email }: { email: string }) {
           "El servicio de vinculación con Google no está disponible en este momento."
         );
       }
-      // User closed Google prompt or cancelled
     } finally {
       setIsLinking(false);
     }
@@ -121,7 +120,6 @@ function ActivationFlow({ email }: { email: string }) {
     router.push("/login");
   }
 
-  // Post-activation / Active account screens
   if (postActivationStep === "google_linked") {
     return (
       <GoogleLinkedSuccessStep

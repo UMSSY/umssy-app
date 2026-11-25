@@ -1,12 +1,17 @@
-import { AUDIT_ACTION_STYLES, AUDIT_ROLE_LABELS } from "../constants/audit-actions.constants";
+import {
+  AUDIT_ACTION_STYLES,
+  AUDIT_ROLE_LABELS,
+} from "../constants/audit-actions.constants";
+import type { AuditAction } from "../types/audit-action.types";
+import type { AuditActorRole } from "../types/audit-actor-role.types";
 import type { AuditEventDetail } from "../types/audit-event-detail.types";
 import { isRecord } from "./to-audit-failure";
 
-function isAuditAction(value: unknown): boolean {
+function isAuditAction(value: unknown): value is AuditAction {
   return typeof value === "string" && Object.hasOwn(AUDIT_ACTION_STYLES, value);
 }
 
-function isAuditActorRole(value: unknown): boolean {
+function isAuditActorRole(value: unknown): value is AuditActorRole {
   return typeof value === "string" && Object.hasOwn(AUDIT_ROLE_LABELS, value);
 }
 

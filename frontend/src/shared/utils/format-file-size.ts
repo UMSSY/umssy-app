@@ -1,26 +1,41 @@
+import type { FormatFileSizeOptions } from "@/shared/types/format-file-size-options.types";
+
 export const BYTES_PER_KB = 1024;
 export const BYTES_PER_MB = BYTES_PER_KB * 1024;
 
-export type FileSizeUnit = "B" | "KB" | "MB";
-
-export interface FileSizeParts {
-  value: number;
-  unit: FileSizeUnit;
+function formatDecimal(
+  value: number,
+  decimals: 0 | 1 | 2,
+  decimalSeparator: "," | ".",
+): string {
+  const rounded =
+    decimals === 0 ? String(Math.round(value)) : value.toFixed(decimals);
+  const trimmed = decimals > 0 ? rounded.replace(/\.0+$/, "") : rounded;
+  return decimalSeparator === "," ? trimmed.replace(".", ",") : trimmed;
 }
 
-export function toFileSizeParts(bytes: number, smallestUnit: FileSizeUnit = "B"): FileSizeParts {
-  const safeBytes = Number.isFinite(bytes) && bytes > 0 ? bytes : 0;
-  if (safeBytes >= BYTES_PER_MB) return { value: safeBytes / BYTES_PER_MB, unit: "MB" };
-  if (safeBytes >= BYTES_PER_KB || smallestUnit === "KB") {
-    return { value: safeBytes / BYTES_PER_KB, unit: "KB" };
+export function formatFileSize(
+  bytes: number,
+  options: FormatFileSizeOptions = {},
+): string {
+  const {
+    decimalSeparator = ",",
+    kbDecimals = 0,
+    mbDecimals = 1,
+    allowBytesUnit = true,
+  } = options;
+
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return allowBytesUnit ? "0 B" : "0 KB";
   }
-  return { value: safeBytes, unit: "B" };
-}
 
-// Tamaño legible en español: coma decimal y sin ",0" sobrante (por ejemplo "340 KB", "2,3 MB")
-export function formatFileSize(bytes: number): string {
-  const { value, unit } = toFileSizeParts(bytes);
-  if (unit === "B") return `${value} B`;
-  if (unit === "KB") return `${Math.round(value)} KB`;
-  return `${String(Math.round(value * 10) / 10).replace(".", ",")} MB`;
+  if (allowBytesUnit && bytes < BYTES_PER_KB) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < BYTES_PER_MB) {
+    return `${formatDecimal(bytes / BYTES_PER_KB, kbDecimals, decimalSeparator)} KB`;
+  }
+
+  return `${formatDecimal(bytes / BYTES_PER_MB, mbDecimals, decimalSeparator)} MB`;
 }

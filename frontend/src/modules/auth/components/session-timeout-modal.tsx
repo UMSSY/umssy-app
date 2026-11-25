@@ -29,7 +29,7 @@ export function SessionTimeoutModal({
   return (
     <AlertDialog open={open}>
       <AlertDialogContent
-        className="max-w-md p-6 sm:p-7"
+        className="max-h-editor-dialog max-w-md overflow-y-auto p-6 sm:p-7"
         aria-describedby="session-timeout-description"
       >
         <AlertDialogHeader className="flex flex-col items-center text-center">

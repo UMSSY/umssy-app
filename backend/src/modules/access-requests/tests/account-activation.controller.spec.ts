@@ -47,6 +47,36 @@ describe('AccountActivationController', () => {
     );
   });
 
+  it('emite las cookies HttpOnly de sesión al activar la cuenta cuando recibe response', async () => {
+    const service = {
+      activate: vi.fn().mockResolvedValue({ accessToken: 'jwt' }),
+    };
+    const sessionCookies = {
+      issueLoginCookies: vi.fn().mockResolvedValue(undefined),
+    };
+    const controller = new AccountActivationController(
+      service as any,
+      sessionCookies as any,
+    );
+    const response = { cookie: vi.fn() };
+
+    await controller.activate(
+      {
+        email: 'ana@umss.test',
+        code: '482719',
+        password: 'Jackson2026',
+      },
+      response as any,
+      'Mozilla/5.0',
+    );
+
+    expect(sessionCookies.issueLoginCookies).toHaveBeenCalledWith(
+      response,
+      'jwt',
+      'Mozilla/5.0',
+    );
+  });
+
   it('reenvía el código al correo recibido', async () => {
     const { controller, service } = build();
     await controller.resend({ email: 'ana@umss.test' });

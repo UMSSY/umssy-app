@@ -164,7 +164,6 @@ export class GoogleAuthService {
       throw new InvalidCredentialsException('La credencial de Google ha expirado');
     }
 
-    // GOOGLE_CLIENT_ID es obligatorio: sin él no se puede comprobar a quién se emitió la credencial
     const expectedAudience = process.env.GOOGLE_CLIENT_ID?.trim();
     if (!expectedAudience) {
       throw new InvalidCredentialsException(

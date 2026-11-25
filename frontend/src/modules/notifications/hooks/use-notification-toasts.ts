@@ -8,12 +8,17 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import {
+  hasCookieSession,
+  subscribeCookieSession,
+} from '@/shared/services/storage/cookie-session-state';
 import { NOTIFICATION_NEW_EVENT } from '../constants/notification-socket-events.constants';
 import { getNotificationsSocket } from '../services/notifications-socket';
 import type { NotificationNewSocketPayload } from '../types/notification-new-socket-payload.types';
 import { getNotificationActionLabel } from '../utils/get-notification-action-label';
 
 const getServerToken = () => null;
+const getServerFalse = () => false;
 
 function conversationIdOf(actionUrl: string): string | null {
   try {
@@ -38,9 +43,15 @@ export function useNotificationToasts(): void {
     getAccessToken,
     getServerToken,
   );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    getServerFalse,
+  );
+  const hasSession = Boolean(token) || cookieSession;
 
   useEffect(() => {
-    if (!token) return;
+    if (!hasSession) return;
 
     let socket;
     try {
@@ -89,5 +100,5 @@ export function useNotificationToasts(): void {
     return () => {
       socket.off(NOTIFICATION_NEW_EVENT, handleNewNotification);
     };
-  }, [token, router]);
+  }, [hasSession, router]);
 }

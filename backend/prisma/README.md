@@ -1239,134 +1239,141 @@ erDiagram
 
 `event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
 
-## Identity, sessions and audit
-
-### RefreshToken
-Table: `refresh_tokens`.
-
-| Field | Prisma type | Column or relation | Definition and constraints |
-| --- | --- | --- | --- |
-| id | `String` | id | `@id @default(uuid()) @db.Uuid` |
-| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
-| familyId | `String` | family_id | `@map("family_id") @db.Uuid` |
-| roleTag | `String` | role_tag | `@map("role_tag") @db.VarChar(30)` |
-| tokenHash | `String` | token_hash | `@unique @map("token_hash") @db.VarChar(64)` |
-| expiresAt | `DateTime` | expires_at | `@map("expires_at") @db.Timestamptz(6)` |
-| absoluteExpiresAt | `DateTime` | absolute_expires_at | `@map("absolute_expires_at") @db.Timestamptz(6)` |
-| usedAt | `DateTime?` | used_at | `@map("used_at") @db.Timestamptz(6)` |
-| revokedAt | `DateTime?` | revoked_at | `@map("revoked_at") @db.Timestamptz(6)` |
-| revokedReason | `String?` | revoked_reason | `@map("revoked_reason") @db.VarChar(30)` |
-| userAgent | `String?` | user_agent | `@map("user_agent") @db.VarChar(255)` |
-| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
-| updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-
-Model constraints:
-
-- `@@index([userId])`, `@@index([familyId])`, `@@index([expiresAt])`
-- `@@map("refresh_tokens")`
-
-The raw token never reaches the table: only its hash is stored, and the hash is unique. A session is a family: rotating marks `used_at` on the presented token and inserts the next one with the same `family_id` and the same `absolute_expires_at`. Presenting a token that already has `used_at` revokes the whole family through `revoked_at` and `revoked_reason`.
-
-### PasswordHistory
-Table: `password_histories`.
-
-| Field | Prisma type | Column or relation | Definition and constraints |
-| --- | --- | --- | --- |
-| id | `String` | id | `@id @default(uuid()) @db.Uuid` |
-| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
-| passwordHash | `String` | password_hash | `@map("password_hash") @db.VarChar(255)` |
-| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
-| updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-
-Model constraints:
-
-- `@@index([userId, createdAt(sort: Desc), id(sort: Desc)])`
-- `@@map("password_histories")`
-
-### AuditAction
-Table: `audit_actions`.
-
-| Field | Prisma type | Column or relation | Definition and constraints |
-| --- | --- | --- | --- |
-| id | `String` | id | `@id @default(uuid()) @db.Uuid` |
-| title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `No explicit attributes` |
-| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
-| updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-
-Catalog of the actions the audit log can record. `title` is the stable key read by the application.
-
-### AuditEvent
-Table: `audit_events`.
-
-| Field | Prisma type | Column or relation | Definition and constraints |
-| --- | --- | --- | --- |
-| id | `String` | id | `@id @default(uuid()) @db.Uuid` |
-| number | `Int` | number | `@unique @default(autoincrement())` |
-| accessRequestId | `String` | access_request_id | `@map("access_request_id") @db.Uuid` |
-| requestCode | `String` | request_code | `@map("request_code") @db.VarChar(20)` |
-| applicantName | `String` | applicant_name | `@map("applicant_name") @db.VarChar(201)` |
-| applicantCareer | `String` | applicant_career | `@map("applicant_career") @db.VarChar(100)` |
-| actionId | `String` | action_id | `@map("action_id") @db.Uuid` |
-| actorId | `String?` | actor_id | `@map("actor_id") @db.Uuid` |
-| actorName | `String` | actor_name | `@map("actor_name") @db.VarChar(201)` |
-| actorRole | `String` | actor_role | `@map("actor_role") @db.VarChar(50)` |
-| detail | `String?` | detail | `@db.VarChar(500)` |
-| evidenceFileId | `String?` | evidence_file_id | `@map("evidence_file_id") @db.Uuid` |
-| occurredAt | `DateTime` | occurred_at | `@default(now()) @map("occurred_at") @db.Timestamptz(6)` |
-| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
-| updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequest | `AccessRequest` | Relation: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Restrict)` |
-| action | `AuditAction` | Relation: AuditAction | `@relation(fields: [actionId], references: [id], onDelete: Restrict)` |
-| actor | `User?` | Relation: User? | `@relation("AuditEventActor", fields: [actorId], references: [id], onDelete: SetNull)` |
-| evidenceFile | `File?` | Relation: File? | `@relation("AuditEventEvidence", fields: [evidenceFileId], references: [id], onDelete: Restrict)` |
-
-Model constraints:
-
-- `@@index([occurredAt(sort: Desc), number(sort: Desc)])`
-- `@@index([accessRequestId, occurredAt])`
-- `@@index([actionId])`, `@@index([actorId])`, `@@index([evidenceFileId])`
-- `@@map("audit_events")`
-
-The row keeps the request code, the applicant and the responsible as text at the moment of the event, so the trail still reads correctly after those records change. The request, the action and the evidence are restricted on delete: nothing that an event points at can disappear while the event exists. The actor is set to null instead, because a person may be removed without erasing what they did. `access_request_id` and `request_code` are mandatory, which is what lets the timeline resolve the request behind any event.
+## Identity, Refresh Rotation, and Company Onboarding
 
 ```mermaid
 erDiagram
-  ACCESS_REQUESTS ||--o{ AUDIT_EVENTS : "access_request_id"
-  AUDIT_ACTIONS ||--o{ AUDIT_EVENTS : "action_id"
-  USERS ||--o{ AUDIT_EVENTS : "actor_id (set null)"
-  FILES ||--o{ AUDIT_EVENTS : "evidence_file_id"
-  USERS ||--o{ REFRESH_TOKENS : "user_id (cascade)"
-  USERS ||--o{ PASSWORD_HISTORIES : "user_id (cascade)"
+  users ||--o{ refresh_tokens : "user_id"
+  users ||--o{ password_histories : "user_id"
+  companies |o--o| company_profiles : "company_id"
+  companies |o--o| company_logos : "company_id"
+  cities ||--o{ company_profiles : "city_id"
+  cities ||--o{ company_access_requests : "city_id"
+  access_request_statuses ||--o{ company_access_requests : "status_id"
+  access_request_document_types |o--o{ company_access_requests : "access_request_document_type_id"
+  users |o--o{ company_access_requests : "opened_by_id"
+  users |o--o{ company_access_requests : "reviewed_by_id"
+  company_access_requests ||--o{ company_activation_otps : "company_access_request_id"
+
+  refresh_tokens {
+    uuid id PK
+    uuid user_id FK
+    uuid family_id
+    varchar role_tag
+    varchar token_hash UK
+    timestamptz expires_at
+    timestamptz absolute_expires_at
+    timestamptz used_at
+    timestamptz revoked_at
+    varchar revoked_reason
+    varchar user_agent
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  password_histories {
+    uuid id PK
+    uuid user_id FK
+    varchar password_hash
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_profiles {
+    uuid id PK
+    uuid company_id UK,FK
+    varchar sector
+    varchar email UK
+    varchar phone
+    varchar website_url
+    uuid city_id FK
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_logos {
+    uuid id PK
+    uuid company_id UK,FK
+    varchar file_name
+    varchar mime_type
+    int size_bytes
+    bytes data
+    timestamptz uploaded_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_access_requests {
+    uuid id PK
+    varchar request_code UK
+    varchar company_name
+    text description
+    varchar sector
+    varchar email
+    varchar phone
+    varchar website_url
+    uuid city_id FK
+    varchar username
+    uuid status_id FK
+    uuid document_file_id UK,FK
+    uuid logo_file_id UK,FK
+    smallint ocr_match_score
+    jsonb ocr_field_results
+    timestamptz submitted_at
+    uuid opened_by_id FK
+    timestamptz opened_at
+    uuid reviewed_by_id FK
+    timestamptz reviewed_at
+    varchar rejection_reason
+    uuid approved_company_id UK,FK
+    uuid approved_user_id UK,FK
+    uuid access_request_document_type_id FK
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_activation_otps {
+    uuid id PK
+    uuid company_access_request_id FK
+    varchar code_hash
+    timestamptz expires_at
+    int attempts
+    timestamptz used_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
 ```
 
-### CompanyAccessRequest
-Table: `company_access_requests`.
+### `refresh_tokens`
 
-Keeps the company registration request from the draft to its resolution. `request_code` is unique and nullable, because it is assigned when the request is submitted. `document_file_id`, `logo_file_id`, `approved_company_id` and `approved_user_id` are unique and nullable: one request produces at most one company and one recruiter. `city_id` and `status_id` are restricted on delete; the files and the approved records are set to null. `ocr_match_score` and `ocr_field_results` keep what the OCR read from the legal document. `opened_by_id` and `reviewed_by_id` record who opened and who resolved the request, both set to null if the user is removed. `access_request_document_type_id` maps the document type of the request.
+Stores hashed rotating refresh tokens grouped by session `family_id`. Prisma model `RefreshToken`.
 
-Model constraints:
+- `token_hash` is unique (`varchar(64)`).
+- `family_id` groups all rotated tokens belonging to a single login session so replay of a previously `used_at` token revokes the entire family.
+- Indexes: `user_id`, `family_id`, `expires_at`. Foreign key `user_id` deletes on `Cascade`.
 
-- `@@index([statusId])`, `@@index([cityId])`, `@@index([email])`
-- `@@index([accessRequestDocumentTypeId])`, `@@index([openedById])`, `@@index([reviewedById])`
-- `@@map("company_access_requests")`
+### `password_histories`
 
-### CompanyActivationOtp
-Table: `company_activation_otps`.
+Stores previous password hashes per user to prevent recent password reuse during resets. Prisma model `PasswordHistory`.
 
-One activation code per attempt for an approved request. Stores only `code_hash`, with `expires_at`, `attempts` and `used_at`. `company_access_request_id` cascades on delete and has its own index.
+- Columns: `id`, `user_id` (FK to `users.id`, `Cascade`), `password_hash`, `created_at`, `updated_at`.
+- Index: `(user_id, created_at DESC, id DESC)`.
+
+### `company_profiles` & `company_logos`
+
+Stores active company contact details (`CompanyProfile`, 1:1 unique `company_id`, unique `email`, `city_id` indexed with `Restrict`) and persisted binary logo files (`CompanyLogo`, 1:1 unique `company_id`, `Cascade`).
+
+### `company_access_requests` & `company_activation_otps`
+
+Stores external company onboarding drafts, OCR scoring metadata (`ocr_match_score`, `ocr_field_results`), review assignments (`opened_by_id`, `reviewed_by_id`, both `SetNull`), document classification (`access_request_document_type_id`, `SetNull`), and one-time activation codes (`CompanyActivationOtp`, `Cascade`).
+
+- Unique constraints on `company_access_requests`: `request_code`, `document_file_id`, `logo_file_id`, `approved_company_id`, `approved_user_id`.
+- Indexes on `company_access_requests`: `status_id`, `city_id`, `email`, `access_request_document_type_id`, `opened_by_id`, `reviewed_by_id`.
 
 ## Sprint History
 
 ### Sprint 3
 
-- Documented the identity, session and audit tables: `refresh_tokens` with rotation by family, `password_histories`, `audit_actions`, `audit_events` with its deletion behavior, and the company registration tables.
 - Migration `20261124210000_align_company_request_and_password_history`:
-  - `password_histories.updated_at` added and backfilled from `created_at`, following the audit timestamp rule.
-  - `company_access_requests.accessRequestDocumentTypeId` renamed to `access_request_document_type_id`, with its foreign key renamed accordingly.
-  - Indexes added on `company_access_requests` for `access_request_document_type_id`, `opened_by_id` and `reviewed_by_id`.
+  - Added `updated_at` (`TIMESTAMPTZ(6)`, backfilled from `created_at`) to `password_histories`.
+  - Renamed `company_access_requests."accessRequestDocumentTypeId"` to snake_case `access_request_document_type_id`, updated its foreign key constraint name to `company_access_requests_access_request_document_type_id_fkey`, and created indexes on `access_request_document_type_id`, `opened_by_id`, and `reviewed_by_id`.
+- Documented `refresh_tokens`, `password_histories`, `company_profiles`, `company_logos`, `company_access_requests`, and `company_activation_otps` with relationships, deletion rules, and indexes.
+
 - Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.

@@ -1,62 +1,50 @@
+import "@/shared/testing/indexed-db.mock";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-
-const records = vi.hoisted(() => new Map<string, unknown>());
-vi.mock("./browser-indexed-db", () => ({
-  readIndexedDb: vi.fn(async (key: string) => records.get(key) ?? null),
-  writeIndexedDb: vi.fn(async (key: string, value: unknown) => {
-    records.set(key, value);
-  }),
-  removeIndexedDb: vi.fn(async (key: string) => {
-    records.delete(key);
-  }),
-}));
-
+import { readIndexedDb, writeIndexedDb } from "./browser-indexed-db";
 import {
-  clearCurrentSessionUserId,
   getCurrentSessionUserId,
-  initializeSessionUserId,
   setCurrentSessionUserId,
+  clearCurrentSessionUserId,
+  waitForSessionUserIdWrites,
 } from "./session-user-id-storage";
 
 describe("session-user-id-storage", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     clearCurrentSessionUserId();
-    records.clear();
-    vi.resetModules();
+    await waitForSessionUserIdWrites();
+    sessionStorage.clear();
   });
 
-  it("almacena el userId en memoria y en la capa compartida de IndexedDB", async () => {
+  it("almacena el userId en memoria y en IndexedDB sin usar sessionStorage", async () => {
     expect(getCurrentSessionUserId()).toBeNull();
 
     setCurrentSessionUserId("user-123");
+    await waitForSessionUserIdWrites();
 
     expect(getCurrentSessionUserId()).toBe("user-123");
-    expect(records.get("umssy_current_user_id")).toBe("user-123");
+    expect(await readIndexedDb("umssy:session:current-user-id")).toBe("user-123");
+    expect(Object.values(sessionStorage)).not.toContain("user-123");
   });
 
-  it("no deja copia del identificador en sessionStorage", () => {
-    setCurrentSessionUserId("user-123");
-
-    expect(sessionStorage.getItem("umssy_current_user_id")).toBeNull();
-  });
-
-  it("recupera el userId de IndexedDB cuando la memoria se reinició", async () => {
-    records.set("umssy_current_user_id", "persisted-user-456");
+  it("recupera el userId desde IndexedDB tras recargar la memoria", async () => {
+    await writeIndexedDb("umssy:session:current-user-id", "persisted-user-456");
+    vi.resetModules();
     const reloaded = await import("./session-user-id-storage");
 
-    await reloaded.initializeSessionUserId();
-
+    expect(reloaded.getCurrentSessionUserId()).toBeNull();
+    expect(await reloaded.readCurrentSessionUserId()).toBe("persisted-user-456");
     expect(reloaded.getCurrentSessionUserId()).toBe("persisted-user-456");
   });
 
-  it("elimina el userId al llamar clearCurrentSessionUserId", async () => {
+  it("elimina el userId en memoria e IndexedDB al llamar clearCurrentSessionUserId", async () => {
     setCurrentSessionUserId("temp-user");
+    await waitForSessionUserIdWrites();
     expect(getCurrentSessionUserId()).toBe("temp-user");
 
     clearCurrentSessionUserId();
-    await initializeSessionUserId();
+    await waitForSessionUserIdWrites();
 
     expect(getCurrentSessionUserId()).toBeNull();
-    expect(records.has("umssy_current_user_id")).toBe(false);
+    expect(await readIndexedDb("umssy:session:current-user-id")).toBeNull();
   });
 });

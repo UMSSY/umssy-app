@@ -1,12 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useOptionalAuth } from "@/shared/contexts/auth-context";
 import { authService } from "../services/auth.service";
 import { endSession } from "../utils/session";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { useSessionInactivity } from "../hooks/use-session-inactivity";
+import {
+  broadcastAuthEvent,
+  type AuthCloseReason,
+  useAuthBroadcastSync,
+} from "../utils/auth-broadcast";
 import type { SessionInactivityGuardProps } from "../types/session-inactivity-guard-props.types";
-import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
 function useOptionalRouter() {
@@ -17,8 +22,13 @@ function useOptionalRouter() {
   }
 }
 
-export function SessionInactivityGuard({ session }: SessionInactivityGuardProps = {}) {
+export function SessionInactivityGuard({
+  idleTimeoutSeconds,
+  warningSeconds,
+  absoluteExpiresAt,
+}: SessionInactivityGuardProps = {}) {
   const router = useOptionalRouter();
+  const auth = useOptionalAuth();
 
   const navigateTo = (path: string) => {
     if (router) {
@@ -40,54 +50,34 @@ export function SessionInactivityGuard({ session }: SessionInactivityGuardProps 
     }
   });
 
-  const handleTimeout = () => {
-    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_EXPIRED" });
+  const closeAndRedirect = (
+    broadcastReason: AuthCloseReason,
+    redirectReason: AuthCloseReason,
+  ) => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: broadcastReason });
     endSession();
     void authService.logout();
     if (typeof window !== "undefined") {
       const currentPath = `${window.location.pathname}${window.location.search}`;
       try {
         sessionStorage.setItem("umssy_post_login_redirect", currentPath);
-      } catch {
-        // ignore storage error
-      }
+      } catch {}
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
-      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+      navigateTo(`${loginUrl}${separator}reason=${redirectReason}`);
     } else {
-      navigateTo("/login?reason=SESSION_EXPIRED");
-    }
-  };
-
-  const handleCloseSession = () => {
-    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
-    endSession();
-    void authService.logout();
-    if (typeof window !== "undefined") {
-      const currentPath = `${window.location.pathname}${window.location.search}`;
-      try {
-        sessionStorage.setItem("umssy_post_login_redirect", currentPath);
-      } catch {
-        // ignore storage error
-      }
-      const loginUrl = buildLoginUrl(currentPath);
-      const separator = loginUrl.includes("?") ? "&" : "?";
-      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
-    } else {
-      navigateTo("/login?reason=SESSION_EXPIRED");
+      navigateTo(`/login?reason=${redirectReason}`);
     }
   };
 
   const { isWarningOpen, secondsLeft, isRefreshing, stayConnected } =
     useSessionInactivity({
-      idleTimeoutSeconds: session?.idleTimeoutSeconds,
-      warningSeconds: session?.warningSeconds,
-      absoluteExpiresAt: session?.absoluteExpiresAt,
+      idleTimeoutSeconds: idleTimeoutSeconds ?? auth?.idleTimeoutSeconds,
+      warningSeconds: warningSeconds ?? auth?.warningSeconds,
+      absoluteExpiresAt: absoluteExpiresAt ?? auth?.absoluteExpiresAt,
       enabled: true,
-      onTimeout: handleTimeout,
-      onRefresh: async () => {
-        await authService.refreshSession();
-      },
+      onTimeout: () => closeAndRedirect("SESSION_EXPIRED", "SESSION_EXPIRED"),
+      onRefresh: (options) => authService.refreshSession(options),
     });
 
   return (
@@ -96,7 +86,7 @@ export function SessionInactivityGuard({ session }: SessionInactivityGuardProps 
       secondsLeft={secondsLeft}
       isRefreshing={isRefreshing}
       onStayConnected={stayConnected}
-      onCloseSession={handleCloseSession}
+      onCloseSession={() => closeAndRedirect("SESSION_REVOKED", "SESSION_EXPIRED")}
     />
   );
 }

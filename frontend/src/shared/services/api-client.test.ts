@@ -8,6 +8,7 @@ import {
   getAccessToken,
   saveAccessToken,
 } from "./storage/access-token-storage";
+import { hasCookieSession } from "./storage/cookie-session-state";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -107,7 +108,7 @@ describe("apiClient session errors", () => {
     },
   );
 
-  it("broadcasts SESSION_CLOSED when 401 response includes a session closure code (CA7, CA10)", async () => {
+  it("broadcasts SESSION_CLOSED when 401 response includes a session closure code", async () => {
     const broadcastSpy = vi.spyOn(authBroadcast, "broadcastAuthEvent").mockImplementation(() => {});
     await saveAccessToken("expired-token");
 
@@ -167,5 +168,50 @@ describe("apiClient session errors", () => {
     expect(response.data).toEqual({ success: true });
     expect(postSpy).toHaveBeenCalled();
     postSpy.mockRestore();
+  });
+
+  it("drops stale Authorization header and retries with cookie when /auth/refresh rotates cookies without accessToken in body", async () => {
+    await saveAccessToken("expired-in-memory-jwt");
+    const seenAuthHeaders: Array<string | undefined> = [];
+    const postSpy = vi.spyOn(axios, "post").mockResolvedValueOnce({
+      data: { ok: true, data: { roleTag: "titulado", roles: ["titulado"] } },
+    });
+
+    const response = await apiClient.get("/protected-cookie", {
+      adapter: async (config) => {
+        seenAuthHeaders.push(config.headers?.get?.("Authorization") as string | undefined);
+        if (seenAuthHeaders.length === 1) {
+          throw Object.assign(new Error("Token expired"), {
+            isAxiosError: true,
+            config,
+            response: { status: 401, data: {} },
+          });
+        }
+        return {
+          data: { ok: true },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      },
+    });
+
+    expect(response.data).toEqual({ ok: true });
+    expect(seenAuthHeaders).toEqual(["Bearer expired-in-memory-jwt", undefined]);
+    expect(getAccessToken()).toBeNull();
+    expect(hasCookieSession()).toBe(true);
+    postSpy.mockRestore();
+  });
+
+  it("does not attach an already-expired JWT from memory and switches to cookie mode", async () => {
+    const expiredJwt = `h.${btoa(JSON.stringify({ sub: "u1", exp: Math.floor(Date.now() / 1000) - 60 }))}.s`;
+    await saveAccessToken(expiredJwt);
+
+    const headers = await captureRequestHeaders();
+
+    expect(headers?.has("Authorization")).toBe(false);
+    expect(getAccessToken()).toBeNull();
+    expect(hasCookieSession()).toBe(true);
   });
 });

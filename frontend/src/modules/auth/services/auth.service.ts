@@ -3,6 +3,11 @@ import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
 import { broadcastAuthEvent } from "../utils/auth-broadcast";
+import {
+  applyRefreshedSessionCredential,
+  executeSharedRefresh,
+  type SharedRefreshOptions,
+} from "../utils/session-refresh-lock";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { SessionResponse } from "../types/session-response.types";
 import type { LoginPayload, LoginResponse } from "../types/auth-types";
@@ -45,17 +50,21 @@ export const authService = {
       return response.data.data;
     }, { signal, requireStorage });
   },
-  refreshSession: async (): Promise<{ ok: boolean }> => {
-    try {
-      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/refresh");
-      const res = response.data;
-      if (res && typeof res === "object" && "data" in res && res.data) {
-        return res.data;
-      }
-      return (res as { ok: boolean }) ?? { ok: true };
-    } catch (err: unknown) {
-      extractApiError(err, "No se pudo renovar la sesión");
+  refreshSession: async (options?: SharedRefreshOptions): Promise<{ ok: boolean }> => {
+    const refreshed = await executeSharedRefresh(
+      async () => {
+        const response = await apiClient.post<
+          ApiResponse<{ ok?: boolean; accessToken?: string }> | { ok?: boolean; accessToken?: string }
+        >("/auth/refresh");
+        await applyRefreshedSessionCredential(response.data);
+        return response.data;
+      },
+      { wait: options?.wait ?? true },
+    );
+    if (!refreshed) {
+      throw new Error("No se pudo renovar la sesión");
     }
+    return { ok: true };
   },
   logout: async (): Promise<{ ok: boolean }> => {
     broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });

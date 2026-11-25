@@ -9,7 +9,6 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockGetSession = vi.fn();
-const mockRefreshSession = vi.fn();
 const mockLogout = vi.fn();
 const mockEndSession = vi.fn();
 let mockBroadcastHandler: ((msg: { type: string; reason?: string }) => void) | null = null;
@@ -25,13 +24,18 @@ vi.mock("../utils/auth-broadcast", () => ({
 vi.mock("../services/auth.service", () => ({
   authService: {
     getSession: () => mockGetSession(),
-    refreshSession: () => mockRefreshSession(),
+    refreshSession: () => Promise.resolve(),
     logout: () => mockLogout(),
   },
 }));
 
 vi.mock("../utils/session", () => ({
   endSession: () => mockEndSession(),
+}));
+
+const mockUseOptionalAuth = vi.fn();
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useOptionalAuth: () => mockUseOptionalAuth(),
 }));
 
 let mockUseSessionInactivityResult = {
@@ -42,9 +46,11 @@ let mockUseSessionInactivityResult = {
   resetActivity: vi.fn(),
   recordActivity: vi.fn(),
 };
+let capturedInactivityOptions: Record<string, unknown> | null = null;
 
 vi.mock("../hooks/use-session-inactivity", () => ({
-  useSessionInactivity: (options: { onTimeout: () => void }) => {
+  useSessionInactivity: (options: Record<string, unknown> & { onTimeout: () => void }) => {
+    capturedInactivityOptions = options;
     (
       mockUseSessionInactivityResult as typeof mockUseSessionInactivityResult & {
         triggerTimeout: () => void;
@@ -54,18 +60,15 @@ vi.mock("../hooks/use-session-inactivity", () => ({
   },
 }));
 
-vi.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({
-    data: {
-      idleTimeoutSeconds: 900,
-      warningSeconds: 180,
-    },
-  }),
-}));
-
 describe("SessionInactivityGuard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedInactivityOptions = null;
+    mockUseOptionalAuth.mockReturnValue({
+      idleTimeoutSeconds: 900,
+      warningSeconds: 180,
+      absoluteExpiresAt: "2026-11-24T23:59:59.000Z",
+    });
     mockUseSessionInactivityResult = {
       isWarningOpen: false,
       secondsLeft: 180,
@@ -74,6 +77,29 @@ describe("SessionInactivityGuard", () => {
       resetActivity: vi.fn(),
       recordActivity: vi.fn(),
     };
+  });
+
+  it("reuses session timings from AuthContext without polling getSession", () => {
+    render(<SessionInactivityGuard />);
+
+    expect(mockGetSession).not.toHaveBeenCalled();
+    expect(capturedInactivityOptions?.idleTimeoutSeconds).toBe(900);
+    expect(capturedInactivityOptions?.warningSeconds).toBe(180);
+    expect(capturedInactivityOptions?.absoluteExpiresAt).toBe("2026-11-24T23:59:59.000Z");
+  });
+
+  it("prefers explicit timing props over context defaults", () => {
+    render(
+      <SessionInactivityGuard
+        idleTimeoutSeconds={600}
+        warningSeconds={120}
+        absoluteExpiresAt="2026-11-25T01:00:00.000Z"
+      />,
+    );
+
+    expect(capturedInactivityOptions?.idleTimeoutSeconds).toBe(600);
+    expect(capturedInactivityOptions?.warningSeconds).toBe(120);
+    expect(capturedInactivityOptions?.absoluteExpiresAt).toBe("2026-11-25T01:00:00.000Z");
   });
 
   it("does not render modal when warning is not open", () => {
@@ -101,9 +127,7 @@ describe("SessionInactivityGuard", () => {
     render(<SessionInactivityGuard />);
     await user.click(screen.getByRole("button", { name: /seguir conectado/i }));
 
-    expect(mockUseSessionInactivityResult.stayConnected).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(mockUseSessionInactivityResult.stayConnected).toHaveBeenCalledTimes(1);
   });
 
   it("closes session and redirects to /login on Cerrar sesión click", async () => {
@@ -140,7 +164,7 @@ describe("SessionInactivityGuard", () => {
     );
   });
 
-  it("cierra la sesión y redirige a /session-closed al recibir evento de otra pestaña (CA10)", () => {
+  it("cierra la sesión y redirige a /session-closed al recibir evento de otra pestaña", () => {
     render(<SessionInactivityGuard />);
 
     mockBroadcastHandler?.({

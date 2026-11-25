@@ -1,97 +1,67 @@
-# Company Access Requests
+# Company Access Requests Module
 
-## Purpose
+## Overview
 
-The `company-access-requests` module handles the request a company makes to join UMSSY: the company fills in its data, attaches its logo and its legal document, submits the request, follows its state by code, and once the backoffice approves it, activates its recruiter account. Approving a request creates the company and the recruiter user linked to it.
+The **Company Access Requests Module** manages the end-to-end onboarding lifecycle for external companies: draft creation, catalog city lookup, corporate logo and verification document upload with automated OCR scoring, public tracking code status consultation, administrative backoffice review (edit, OCR re-evaluation, correction request, approval, rejection), and one-time OTP activation of the company profile and recruiter account.
 
-## Key flows
+## API Endpoints
 
-### Registering and submitting
+| Method  | Route                                             | Access         | Description                                                            |
+| ------- | ------------------------------------------------- | -------------- | ---------------------------------------------------------------------- |
+| `GET`   | `/cities`                                         | Public         | Lists available cities for company registration                        |
+| `POST`  | `/company-access-requests`                        | Public         | Creates or updates a draft company onboarding request                  |
+| `POST`  | `/company-access-requests/:id/logo`               | Public         | Uploads the company logo file to a draft request                       |
+| `POST`  | `/company-access-requests/:id/document`           | Public         | Uploads supporting legal/verification PDF or image document            |
+| `POST`  | `/company-access-requests/:id/submit`             | Public         | Submits draft, triggers OCR evaluation, generates tracking code        |
+| `GET`   | `/company-access-requests/status/:code`           | Public         | Checks request review status using its public tracking code            |
+| `GET`   | `/company-access-requests/activation-status`      | Public         | Verifies whether an approved company request is eligible for activation|
+| `POST`  | `/company-access-requests/report-inconsistency`   | Public         | Reports data inconsistency discovered during activation verification   |
+| `POST`  | `/company-access-requests/activate`               | Public         | Validates activation OTP and creates the active company & recruiter    |
+| `GET`   | `/companies/:companyId/logo`                      | Authenticated  | Streams active persisted `CompanyLogo` binary for an approved company  |
+| `GET`   | `/company-access-requests`                        | Administrative | Paginated backoffice list of company access requests                   |
+| `GET`   | `/company-access-requests/summary`                | Administrative | Status counts and review queue summary metrics                         |
+| `GET`   | `/company-access-requests/:id`                    | Administrative | Full inspection payload including OCR results and reviewer timestamps  |
+| `GET`   | `/company-access-requests/:id/document`           | Administrative | Streams uploaded legal verification document                           |
+| `GET`   | `/company-access-requests/:id/logo`               | Administrative | Streams uploaded candidate logo prior to activation                    |
+| `PATCH` | `/company-access-requests/:id`                    | Administrative | Edits company metadata during backoffice review                        |
+| `POST`  | `/company-access-requests/:id/re-evaluate-ocr`    | Administrative | Re-runs automated OCR matching against the uploaded document           |
+| `POST`  | `/company-access-requests/:id/request-correction` | Administrative | Sends correction instructions to the applicant                         |
+| `PATCH` | `/company-access-requests/:id/approve`            | Administrative | Approves request and issues company activation OTP                     |
+| `PATCH` | `/company-access-requests/:id/reject`             | Administrative | Rejects request with administrative reason                             |
 
-The request is built in two moments. First a draft is created with the company data, which returns the identifier used to attach the logo and the document. The document is read by OCR when it is attached, and the match between what was read and what was typed is stored with the request. Only once the files are in place is the request submitted, which assigns it a request code and leaves it waiting for review.
+## Onboarding & Activation Sequence
 
 ```mermaid
 sequenceDiagram
-  participant C as Company
+  autonumber
+  participant Company as External Company
   participant API as CompanyAccessRequestsController
-  participant S as CompanyAccessRequestsService
-  participant O as CompanyDocumentOcrService
-  C->>API: POST /company-access-requests
-  API->>S: createDraft(data)
-  S-->>C: request id
-  C->>API: POST /company-access-requests/:id/logo
-  C->>API: POST /company-access-requests/:id/document
-  API->>O: read the document and compare it with the typed data
-  O-->>S: match score and field results
-  C->>API: POST /company-access-requests/:id/submit
-  S-->>C: request code
+  participant OCR as Document OCR Service
+  participant Admin as Administrative Reviewer
+  participant DB as PostgreSQL
+
+  Company->>API: POST /company-access-requests (draft)
+  Company->>API: POST /:id/logo & POST /:id/document
+  Company->>API: POST /:id/submit
+  API->>OCR: Extract & score corporate document fields
+  API->>DB: Store status, ocr_match_score, ocr_field_results, request_code
+  Admin->>API: GET /company-access-requests/:id
+  Admin->>API: PATCH /:id/approve
+  API->>DB: Record reviewed_by_id & create CompanyActivationOtp
+  Company->>API: POST /company-access-requests/activate (OTP + password)
+  API->>DB: Provision Company, CompanyProfile, CompanyLogo & Recruiter User
+  API-->>Company: Account activated
 ```
 
-### Reviewing in the backoffice
+## Notifications & OpenAPI Contracts
 
-Administrative staff list the requests, open one, read its document and its logo, and resolve it. Opening a request records who opened it and when; resolving it records who reviewed it, when, and the reason when it is a rejection. The OCR reading can be run again on demand when the first attempt was poor.
-
-### Following the request and activating
-
-The company follows its request by code without signing in. When the request is approved, the company receives an activation code, and activating creates the recruiter session. A company that finds wrong data in its own request can report the inconsistency instead of creating a second request.
-
-```mermaid
-flowchart LR
-  D[Draft] --> SUB[Submitted]
-  SUB --> OP[Opened for review]
-  OP --> AP[Approved]
-  OP --> RJ[Rejected]
-  AP --> ACT[Recruiter account activated]
-```
-
-## Business rules
-
-- The request code is assigned when the request is submitted, not when the draft is created.
-- The logo and the document belong to the request: each one is stored once and replacing it replaces the stored file.
-- Reviewing requires an authenticated session with the backoffice role; registering, following by code and activating do not.
-- An approved request keeps the company and the recruiter it created (`approved_company_id` and `approved_user_id`), each of them unique, so one request cannot create two companies.
-- A rejection always carries its reason.
-- The city and the status come from catalogs and are restricted on delete, so a status in use cannot disappear.
-
-## Endpoints
-
-| Method | Route | Who |
-| --- | --- | --- |
-| `GET` | `/cities` | Public, cities for the form |
-| `POST` | `/company-access-requests` | Public, creates the draft |
-| `POST` | `/company-access-requests/:id/logo` | Public, attaches the logo |
-| `POST` | `/company-access-requests/:id/document` | Public, attaches the document and runs the OCR |
-| `POST` | `/company-access-requests/:id/submit` | Public, submits the request |
-| `GET` | `/company-access-requests/status/:code` | Public, state by code |
-| `GET` | `/company-access-requests/activation-status` | Public, state of the activation |
-| `POST` | `/company-access-requests/report-inconsistency` | Public, reports wrong data |
-| `POST` | `/company-access-requests/activate` | Public, activates the recruiter account |
-| `GET` | `/companies/:companyId/logo` | Public, logo of an approved company |
-| `GET` | `/company-access-requests` | Backoffice, paginated list |
-| `GET` | `/company-access-requests/summary` | Backoffice, counters |
-| `GET` | `/company-access-requests/:id` | Backoffice, detail |
-| `GET` | `/company-access-requests/:id/document` | Backoffice, attached document |
-| `GET` | `/company-access-requests/:id/logo` | Backoffice, attached logo |
-| `PATCH` | `/company-access-requests/:id` | Backoffice, opens or resolves the request |
-| `POST` | `/company-access-requests/:id/re-evaluate-ocr` | Backoffice, reads the document again |
-
-## Dependencies
-
-| Direction | Module | Usage |
-| --- | --- | --- |
-| Uses | [files](../files/README.md) | Logo and legal document of the request |
-| Uses | [mail](../mail/README.md) | Activation code and resolution notices |
-| Uses | [companies](../companies/README.md) | Company created when the request is approved |
-
-## Data
-
-Tables `company_access_requests` and `company_activation_otps` (see [backend/prisma/README.md](../../backend/prisma/README.md)).
+- **Notification Pipeline**: Administrative resolution emails (`COMPANY_ACCESS_REQUEST_APPROVED`, `COMPANY_ACCESS_REQUEST_OBSERVED`, `COMPANY_ACCESS_REQUEST_REJECTED`) are validated via Zod schemas and rendered from MJML templates under `backend/src/modules/company-access-requests/notification/`, then dispatched exclusively through `NotificationsService.notify()`.
+- **OpenAPI Specifications**: All 20 controller endpoints declare unique `operationId`s (`companyAccessRequests_*`), parameter/query/body schemas, security requirements for backoffice routes, and multipart upload limits (`2 MB` for logos; `10 MB` for supporting documents).
 
 ## Sprint History
 
 ### Sprint 3
-
-- Company registration in two moments: draft with its data, then logo and document, then submission with its request code.
-- OCR reading of the legal document when it is attached, with its match score kept on the request and the option to run it again from the backoffice.
-- Review in the backoffice: opening, approval and rejection with reason, recording who did it and when.
-- Following the request by code, reporting an inconsistency and activating the recruiter account.
+- Implemented full company onboarding request lifecycle (draft creation, logo and document upload, OCR verification, public tracking, administrative review, and OTP account activation).
+- Migrated approval, correction, and rejection notifications to typed `NotificationsService.notify()` workflows with Zod payload validation and MJML templates, and added complete OpenAPI decorators across all 20 endpoints.
+- Aligned `company_access_requests` schema mapping (`access_request_document_type_id`), `SetNull` foreign key rules, and indexes on `opened_by_id`, `reviewed_by_id`, and `access_request_document_type_id`.
+- Replaced duplicated frontend file size formatting helper in the company onboarding flow with the shared `formatFileSize` utility.

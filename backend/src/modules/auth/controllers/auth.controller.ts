@@ -17,7 +17,6 @@ import { CredentialLimitsService } from '../services/credential-limits.service.j
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
 import {
-  ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
 } from '../../../common/constants/auth.constants.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
@@ -25,13 +24,9 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
-  buildAccessTokenCookieOptions,
-  buildClearAccessTokenCookieOptions,
-} from '../../../common/utils/access-token-cookie.js';
-import {
-  buildClearRefreshTokenCookieOptions,
-  buildRefreshTokenCookieOptions,
-} from '../utils/refresh-token-cookie.util.js';
+  clearSessionCookies,
+  writeSessionCookies,
+} from '../utils/session-cookies.util.js';
 import { LoginDto } from '../requests/login.schema.js';
 import { GoogleLoginDto } from '../requests/google-login.schema.js';
 import { GoogleLinkDto } from '../requests/google-link.schema.js';
@@ -80,22 +75,18 @@ export class AuthController {
   ) {
     return this.credentialLimits.run('login', body.email, async () => {
       const result = await this.authService.login(body);
-      response.cookie(
-        ACCESS_TOKEN_COOKIE,
-        result.accessToken,
-        buildAccessTokenCookieOptions(
-          this.authService.getAccessTokenMaxAgeMs(result.accessToken),
-        ),
-      );
       const refresh = await this.refreshTokens.startFromLogin(
         result.accessToken,
         userAgent,
       );
-      response.cookie(
-        REFRESH_TOKEN_COOKIE,
-        refresh.refreshToken,
-        buildRefreshTokenCookieOptions(refresh.refreshMaxAgeMs),
-      );
+      writeSessionCookies(response, {
+        accessToken: result.accessToken,
+        accessMaxAgeMs: this.authService.getAccessTokenMaxAgeMs(
+          result.accessToken,
+        ),
+        refreshToken: refresh.refreshToken,
+        refreshMaxAgeMs: refresh.refreshMaxAgeMs,
+      });
       return result;
     });
   }
@@ -121,25 +112,18 @@ export class AuthController {
         verifiedUser,
         body.roleTag,
       );
-
-      response.cookie(
-        ACCESS_TOKEN_COOKIE,
-        result.accessToken,
-        buildAccessTokenCookieOptions(
-          this.authService.getAccessTokenMaxAgeMs(result.accessToken),
-        ),
-      );
-
       const refresh = await this.refreshTokens.startFromLogin(
         result.accessToken,
         userAgent,
       );
-
-      response.cookie(
-        REFRESH_TOKEN_COOKIE,
-        refresh.refreshToken,
-        buildRefreshTokenCookieOptions(refresh.refreshMaxAgeMs),
-      );
+      writeSessionCookies(response, {
+        accessToken: result.accessToken,
+        accessMaxAgeMs: this.authService.getAccessTokenMaxAgeMs(
+          result.accessToken,
+        ),
+        refreshToken: refresh.refreshToken,
+        refreshMaxAgeMs: refresh.refreshMaxAgeMs,
+      });
 
       return result;
     });
@@ -174,16 +158,7 @@ export class AuthController {
         readRefreshCookie(request),
         userAgent,
       );
-      response.cookie(
-        ACCESS_TOKEN_COOKIE,
-        session.accessToken,
-        buildAccessTokenCookieOptions(session.accessMaxAgeMs),
-      );
-      response.cookie(
-        REFRESH_TOKEN_COOKIE,
-        session.refreshToken,
-        buildRefreshTokenCookieOptions(session.refreshMaxAgeMs),
-      );
+      writeSessionCookies(response, session);
       return {
         accessToken: session.accessToken,
         roleTag: session.roleTag,
@@ -191,14 +166,7 @@ export class AuthController {
       };
     } catch (error) {
       if (error instanceof DomainException && error.statusCode === 401) {
-        response.clearCookie(
-          ACCESS_TOKEN_COOKIE,
-          buildClearAccessTokenCookieOptions(),
-        );
-        response.clearCookie(
-          REFRESH_TOKEN_COOKIE,
-          buildClearRefreshTokenCookieOptions(),
-        );
+        clearSessionCookies(response);
       }
       throw error;
     }
@@ -211,14 +179,7 @@ export class AuthController {
     @Req() request?: Request,
   ): Promise<void> {
     await this.refreshTokens.revokeByToken(readRefreshCookie(request));
-    response.clearCookie(
-      ACCESS_TOKEN_COOKIE,
-      buildClearAccessTokenCookieOptions(),
-    );
-    response.clearCookie(
-      REFRESH_TOKEN_COOKIE,
-      buildClearRefreshTokenCookieOptions(),
-    );
+    clearSessionCookies(response);
   }
 
   @Post('forgot-password/request')

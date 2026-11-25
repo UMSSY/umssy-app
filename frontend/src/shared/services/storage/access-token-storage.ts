@@ -3,6 +3,12 @@ import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject
 import { readIndexedDb, removeIndexedDb } from './browser-indexed-db';
 import { offlinePassesKey } from '@/shared/constants/offline-passes.constants';
 import { claimOfflinePasses, endOfflinePassesSession, readOfflinePassesOwner } from './offline-passes-owner';
+import {
+  clearCookieSessionState,
+  getCookieSessionSubject,
+  registerBearerTokenClearer,
+  setCookieSessionSubject,
+} from './cookie-session-state';
 
 let token: string | null = null;
 let ready = false;
@@ -18,6 +24,14 @@ const clearOfflinePassesOfOtherUser = async (userId: string | null) => {
   const owner = await readOfflinePassesOwner();
   if (owner && owner !== userId) await endOfflinePassesSession(owner);
 };
+
+registerBearerTokenClearer(() => {
+  revision++;
+  token = null;
+  ready = true;
+  loading = null;
+  emit();
+});
 
 export function isAccessTokenReady(): boolean {
   return ready;
@@ -51,6 +65,7 @@ export async function saveAccessToken(value: string): Promise<boolean> {
   revision++;
   token = value;
   ready = true;
+  setCookieSessionSubject(nextOwner);
   emit();
   channel?.postMessage('changed');
   const operation = writes.then(async () => {
@@ -76,11 +91,12 @@ export async function waitForAccessTokenWrites(): Promise<void> {
 }
 
 export function clearAccessToken(): boolean {
-  const previousUser = readAccessTokenSubject(token);
+  const previousUser = readAccessTokenSubject(token) ?? getCookieSessionSubject();
   const logoutRevision = ++revision;
   token = null;
   ready = true;
   loading = null;
+  clearCookieSessionState();
   emit();
   const operation = writes.then(async () => {
     await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {});
@@ -105,6 +121,7 @@ export function subscribeAccessToken(onChange: () => void): () => void {
       token = null;
       ready = false;
       loading = null;
+      clearCookieSessionState();
       emit();
       void initializeAccessTokenStorage();
     };

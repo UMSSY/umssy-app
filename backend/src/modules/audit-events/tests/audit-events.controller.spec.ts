@@ -76,6 +76,24 @@ describe('AuditEventsController', () => {
     });
     expect(response.end).toHaveBeenCalledWith(content);
   });
+
+  it('documenta cada endpoint con un operationId OpenAPI único', () => {
+    const methods = Object.getOwnPropertyNames(
+      AuditEventsController.prototype,
+    ).filter((name) => name !== 'constructor');
+    const operationIds = methods.map((name) => {
+      const meta = Reflect.getMetadata(
+        'swagger/apiOperation',
+        (AuditEventsController.prototype as unknown as Record<string, object>)[
+          name
+        ],
+      ) as { operationId?: string } | undefined;
+      return meta?.operationId;
+    });
+
+    expect(operationIds.every((id) => typeof id === 'string' && id.length > 0)).toBe(true);
+    expect(new Set(operationIds).size).toBe(methods.length);
+  });
 });
 
 describe('AuditEventsModule', () => {
