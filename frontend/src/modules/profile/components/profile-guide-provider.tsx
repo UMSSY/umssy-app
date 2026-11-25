@@ -519,7 +519,7 @@ function ProfileGuideSessionProvider({
                     data-assistant-side={side}
                     aria-label="Ayuda de la guía"
                     className={cn(
-                      'order-first flex flex-col items-center gap-4 rounded-xl p-4 text-center lg:sticky lg:top-0 lg:self-start',
+                      'order-first flex flex-col items-center gap-4 rounded-xl p-4 text-center xl:sticky xl:top-0 xl:self-start',
                       side === 'right' ? 'xl:order-last' : 'xl:order-first',
                       !isTraveling && 'bg-interaction',
                     )}
