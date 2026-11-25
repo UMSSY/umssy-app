@@ -4,6 +4,9 @@ import { CompanyAccessRequestsService } from '../services/company-access-request
 import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
+const PNG_BYTES = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+const JPG_BYTES = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]);
+
 describe('CompanyAccessRequestsService', () => {
   let service: CompanyAccessRequestsService;
 
@@ -127,10 +130,56 @@ describe('CompanyAccessRequestsService', () => {
       await expect(service.attachLogo('req-1', file)).rejects.toThrow(BadRequestException);
     });
 
+    it.each(['image/webp', 'image/svg+xml', 'image/gif'])('rechaza el logo %s con el mensaje PNG o JPG', async (mimetype) => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      const file = { mimetype, buffer: PNG_BYTES, originalname: 'logo' } as any;
+      await expect(service.attachLogo('req-1', file)).rejects.toThrow('El logo debe estar en formato PNG o JPG');
+      expect(filesService.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un logo cuyo contenido no es PNG ni JPG aunque el tipo declarado lo sea', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      const pdfAsPng = { mimetype: 'image/png', buffer: Buffer.from('%PDF-1.7 contenido'), originalname: 'logo.png' } as any;
+      const webpAsJpg = { mimetype: 'image/jpeg', buffer: Buffer.from('RIFF....WEBPVP8 '), originalname: 'logo.jpg' } as any;
+      await expect(service.attachLogo('req-1', pdfAsPng)).rejects.toThrow('El logo debe estar en formato PNG o JPG');
+      await expect(service.attachLogo('req-1', webpAsJpg)).rejects.toThrow('El logo debe estar en formato PNG o JPG');
+      expect(filesService.create).not.toHaveBeenCalled();
+    });
+
+    it('elimina el logo anterior al reemplazarlo por uno nuevo', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      filesService.create.mockResolvedValue({ id: 'file-logo-new' });
+      repository.setLogo.mockResolvedValue('file-logo-old');
+      const file = { mimetype: 'image/png', buffer: PNG_BYTES, originalname: 'logo.png' } as any;
+
+      await service.attachLogo('req-1', file);
+
+      expect(filesService.delete).toHaveBeenCalledWith('file-logo-old');
+    });
+
+    it('no elimina nada si el logo anterior es el mismo archivo', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      filesService.create.mockResolvedValue({ id: 'file-logo-1' });
+      repository.setLogo.mockResolvedValue('file-logo-1');
+      const file = { mimetype: 'image/png', buffer: PNG_BYTES, originalname: 'logo.png' } as any;
+
+      await service.attachLogo('req-1', file);
+
+      expect(filesService.delete).not.toHaveBeenCalled();
+    });
+
+    it('acepta un logo JPG con firma real', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      filesService.create.mockResolvedValue({ id: 'file-logo-2' });
+      repository.setLogo.mockResolvedValue(null);
+      const file = { mimetype: 'image/jpeg', buffer: JPG_BYTES, originalname: 'logo.jpg' } as any;
+      await expect(service.attachLogo('req-1', file)).resolves.toEqual({ id: 'req-1', logoFileId: 'file-logo-2' });
+    });
+
     it('guarda y adjunta logo exitosamente', async () => {
       const file = {
         mimetype: 'image/png',
-        buffer: Buffer.from('data'),
+        buffer: PNG_BYTES,
         originalname: 'logo.png',
         size: 100,
       } as any;

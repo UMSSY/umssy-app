@@ -58,6 +58,19 @@ sequenceDiagram
 - **Notification Pipeline**: Administrative resolution emails (`COMPANY_ACCESS_REQUEST_APPROVED`, `COMPANY_ACCESS_REQUEST_OBSERVED`, `COMPANY_ACCESS_REQUEST_REJECTED`) are validated via Zod schemas and rendered from MJML templates under `backend/src/modules/company-access-requests/notification/`, then dispatched exclusively through `NotificationsService.notify()`.
 - **OpenAPI Specifications**: All 20 controller endpoints declare unique `operationId`s (`companyAccessRequests_*`), parameter/query/body schemas, security requirements for backoffice routes, and multipart upload limits (`2 MB` for logos; `10 MB` for supporting documents).
 
+## Registration Validation Rules
+
+The create (`POST /company-access-requests`) and update (`PATCH /company-access-requests/:id`) payloads share the same field rules, defined in `requests/create-company-access-request.schema.ts` and `constants/company-registration-rules.constants.ts`. Update accepts any subset of fields, but each field sent must satisfy the same rule.
+
+| Field | Rule |
+| --- | --- |
+| `companyName` | 4 to 30 characters after trimming; letters, digits, spaces and `& . , - ' ( )`; whitespace-only values are rejected |
+| `description` | 10 to 500 characters after trimming |
+| `websiteUrl` | Required (empty or whitespace-only is rejected); must start with `http://` or `https://` and contain a domain |
+| `phone` | Bolivian mobile number of exactly 8 digits (`^[67]\d{7}$`) |
+| `username` | 4 to 20 characters, starts with a letter, only letters, digits and underscore |
+| Logo (`POST /:id/logo`) | PNG or JPG only, up to 2 MB; the file signature must match (a PDF renamed to `.png` is rejected) |
+
 ## Sprint History
 
 ### Sprint 3

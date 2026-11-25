@@ -9,7 +9,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import {
+  ALLOWED_LOGO_MIMES,
+  COMPANY_LOGO_FORMAT_MESSAGE,
+} from '../constants/company-registration-rules.constants.js';
 import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
+import { FILE_TYPES } from '../../files/constants/file-rules.constants.js';
 import { FilesService } from '../../files/services/files.service.js';
 import { buildFrontendUrl } from '../../mail/helpers/frontend-url.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
@@ -29,13 +34,6 @@ import type {
   RequestCorrectionDto,
   UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
-
-const ALLOWED_LOGO_MIMES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/svg+xml',
-]);
 
 @Injectable()
 export class CompanyAccessRequestsService {
@@ -84,10 +82,8 @@ export class CompanyAccessRequestsService {
     if (!file) {
       throw new BadRequestException('Debes adjuntar un archivo de imagen');
     }
-    if (!ALLOWED_LOGO_MIMES.has(file.mimetype)) {
-      throw new BadRequestException(
-        'El logo debe estar en formato PNG, JPG, WEBP o SVG',
-      );
+    if (!ALLOWED_LOGO_MIMES.has(file.mimetype) || !this.hasLogoSignature(file)) {
+      throw new BadRequestException(COMPANY_LOGO_FORMAT_MESSAGE);
     }
 
     const created = await this.filesService.create({
@@ -101,6 +97,13 @@ export class CompanyAccessRequestsService {
     }
 
     return { id: current.id, logoFileId: created.id };
+  }
+
+  private hasLogoSignature(file: UploadedDocumentFile): boolean {
+    const detected = FILE_TYPES.find((type) =>
+      type.signature.every((byte, index) => file.buffer[index] === byte),
+    );
+    return detected !== undefined && ALLOWED_LOGO_MIMES.has(detected.mimeType);
   }
 
   async attachDocument(id: string, file: UploadedDocumentFile | undefined) {

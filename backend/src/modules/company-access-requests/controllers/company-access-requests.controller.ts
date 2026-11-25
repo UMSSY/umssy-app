@@ -152,7 +152,7 @@ export class CompanyAccessRequestsController {
     operationId: 'companyAccessRequests_attachLogo',
     summary: 'Adjuntar logotipo al borrador de empresa',
     description:
-      'Sube un logotipo empresarial en formato PNG, JPG, WEBP o SVG con límite máximo de 2 MB para un borrador existente.',
+      'Sube un logotipo empresarial en formato PNG o JPG con límite máximo de 2 MB para un borrador existente.',
   })
   @ApiCompanyRequestUuidParam()
   @ApiConsumes('multipart/form-data')
@@ -364,7 +364,7 @@ export class CompanyAccessRequestsController {
       'Devuelve la imagen binaria del logotipo almacenado para una empresa ya aprobada en el sistema.',
   })
   @ApiParam(COMPANY_ID_PARAM)
-  @ApiProduces('image/png', 'image/jpeg', 'image/webp', 'image/svg+xml')
+  @ApiProduces('image/png', 'image/jpeg')
   @ApiOkResponse(BINARY_FILE_OK_RESPONSE)
   @ApiBadRequestResponse({ description: 'El identificador de empresa no es un UUID válido.' })
   @ApiNotFoundResponse({ description: 'Logo de empresa no encontrado.' })
@@ -480,7 +480,7 @@ export class CompanyAccessRequestsController {
       'Devuelve el archivo de imagen del logotipo vinculado a la solicitud o a la empresa aprobada. Solo disponible para el rol administrativo.',
   })
   @ApiCompanyRequestUuidParam()
-  @ApiProduces('image/png', 'image/jpeg', 'image/webp', 'image/svg+xml')
+  @ApiProduces('image/png', 'image/jpeg')
   @ApiOkResponse(BINARY_FILE_OK_RESPONSE)
   @ApiNotFoundResponse({
     description: 'La solicitud no existe o la empresa no adjuntó un logotipo.',
