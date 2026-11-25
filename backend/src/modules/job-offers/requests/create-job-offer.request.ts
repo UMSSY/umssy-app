@@ -90,6 +90,12 @@ export const createJobOfferSchema = jobOfferFieldsSchema
   .extend({
     requiredCareers: requirementListSchema.default([]),
     otherRequirements: requirementListSchema.default([]),
+    expiresAt: z.iso
+      .datetime({ offset: true, message: MESSAGES.INVALID_EXPIRES_AT })
+      .nullish()
+      .describe(
+        'Fecha y hora de cierre automático en ISO 8601 con zona horaria. Debe ser posterior al momento de publicar; si se omite o es null, la vacante no vence.',
+      ),
   })
   .refine(hasRequiredSalary, {
     path: ['salaryMin'],

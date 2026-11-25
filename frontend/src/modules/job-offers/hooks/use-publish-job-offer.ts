@@ -43,7 +43,10 @@ export function usePublishJobOffer(
     },
   });
 
-  const submit = async (conditions: VacancyConditions): Promise<void> => {
+  const submit = async (
+    conditions: VacancyConditions,
+    expiresAt: Date | null = null,
+  ): Promise<void> => {
     if (mutation.isPending) return;
 
     if (hasErrors(conditions)) {
@@ -58,7 +61,7 @@ export function usePublishJobOffer(
 
     setLocalError(null);
     try {
-      await mutation.mutateAsync({ companyId: company.id, payload: toJobOfferPayload(conditions) });
+      await mutation.mutateAsync({ companyId: company.id, payload: toJobOfferPayload(conditions, expiresAt) });
     } catch {
       return;
     }

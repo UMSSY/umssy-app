@@ -1,6 +1,7 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildLongDescription, DOCKER, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
+import { useExpirationDate } from "../hooks/use-expiration-date";
 import { PreviewStep } from "./preview-step";
 
 const COMPANY = { id: "company-id", name: "TechBolivia S.R.L.", initials: "TB" };
@@ -142,5 +143,30 @@ describe("PreviewStep", () => {
     renderStep({ conditions: { ...VALID_CONDITIONS, skills: [DOCKER] } });
 
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
+  });
+
+    it("muestra el bloque de fecha de cierre al publicar una vacante", () => {
+    const { result } = renderHook(() => useExpirationDate());
+    renderStep({ expiration: result.current });
+
+    expect(screen.getByRole("heading", { name: "Fecha de cierre" })).toBeInTheDocument();
+  });
+
+  it("oculta el bloque de fecha de cierre al editar una vacante", () => {
+    const { result } = renderHook(() => useExpirationDate());
+    renderStep({ expiration: result.current, isEditMode: true });
+
+    expect(screen.queryByRole("heading", { name: "Fecha de cierre" })).not.toBeInTheDocument();
+  });
+
+    it("muestra en la tarjeta hasta cuándo se reciben postulaciones si hay fecha confirmada", () => {
+    const { result } = renderHook(() => useExpirationDate());
+    act(() => result.current.toggleExpiration(true));
+    act(() => result.current.selectDate(new Date(2026, 11, 15)));
+    act(() => result.current.confirmDate());
+    renderStep({ expiration: result.current });
+
+    expect(screen.getByText(/Postulaciones hasta el/)).toBeInTheDocument();
+    expect(screen.getByText("15/12/2026")).toBeInTheDocument();
   });
 });
