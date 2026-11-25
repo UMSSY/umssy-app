@@ -35,7 +35,7 @@ describe("Data display primitives", () => {
         </TableHeader>
         <TableBody>
           <TableRow>
-            <TableCell>Ana</TableCell>
+            <TableCell className="mt-2">Ana</TableCell>
           </TableRow>
         </TableBody>
         <TableFooter>
@@ -47,7 +47,8 @@ describe("Data display primitives", () => {
     )
 
     expect(screen.getByRole("table", { name: "Usuarios" })).toBeInTheDocument()
-    expect(screen.getByRole("columnheader", { name: "Nombre" })).toBeInTheDocument()
+    expect(screen.getByRole("columnheader", { name: "Nombre" })).toHaveAttribute("data-slot", "table-head")
+    expect(screen.getByRole("cell", { name: "Ana" })).toHaveClass("mt-2")
     expect(screen.getByRole("cell", { name: "Total: 1" })).toBeInTheDocument()
   })
 

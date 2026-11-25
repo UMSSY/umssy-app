@@ -349,7 +349,7 @@ export function BlockForm({
         >
           <Button
             type="button"
-            variant="outline"
+            variant="cancel"
             size="lg"
             className={cn("w-full", mode !== "edit" && "sm:w-auto")}
             onClick={onCancel}

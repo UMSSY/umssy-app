@@ -177,6 +177,10 @@ Tables `job_applications` and `job_application_statuses` (see [backend/prisma/RE
 - **Contact goes through the chat module**: this module only answers who can be contacted and validates the context; messages and delivery belong to chat.
 - **Other modules are reached through their services**, never their tables (backend standard), which is why recruiters come from `UsersService`.
 
+## Action styling
+
+Withdrawing an application updates its status through the withdrawal PATCH endpoint. The withdrawal control uses the outlined action style and reactivation remains available through its own confirmation flow.
+
 ## Sprint History
 
 ### Sprint 3

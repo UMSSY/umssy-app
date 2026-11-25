@@ -32,7 +32,7 @@ function RequestAccessLayout() {
 
 export function RequestAccessView() {
   return (
-    <main data-app-shell="true" className="min-h-screen bg-background">
+    <main data-app-shell="true" className="min-h-dvh bg-background">
       <AccessRequestProvider>
         <RequestAccessLayout />
       </AccessRequestProvider>
