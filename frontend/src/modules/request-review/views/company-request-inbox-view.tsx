@@ -1,32 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Building2, Clock, FileText, Loader2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { companyAccessRequestService } from "@/modules/access-requests/services/company-access-request.service";
-import type {
-  CompanyAccessRequestItem,
-  CompanyRequestsSummary,
-} from "@/modules/access-requests/types/company-access-request.types";
-
-const TABS = [
-  { value: "PENDING", label: "Pendientes" },
-  { value: "IN_REVIEW", label: "En revisión" },
-  { value: "APPROVED", label: "Aprobadas" },
-  { value: "REJECTED", label: "Rechazadas" },
-] as const;
-
-const STATUS_BADGE: Record<string, string> = {
-  PENDING: "Pendiente",
-  IN_REVIEW: "En revisión",
-  APPROVED: "Aprobada",
-  REJECTED: "Rechazada",
-};
+import {
+  companyAccessRequestService,
+  type CompanyAccessRequestItem,
+  type CompanyRequestsSummary,
+} from "@/modules/access-requests";
+import { CompanyRequestTable } from "../components/company/company-request-table";
+import { COMPANY_STATUS_TABS } from "../constants/company-request.constants";
 
 export function CompanyRequestInboxView() {
-  const router = useRouter();
   const [rows, setRows] = useState<CompanyAccessRequestItem[]>([]);
   const [summary, setSummary] = useState<CompanyRequestsSummary | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("PENDING");
@@ -41,12 +27,15 @@ export function CompanyRequestInboxView() {
         search: search || undefined,
       }),
       companyAccessRequestService.getSummary(),
-    ]).then(([listRes, summaryRes]) => {
-      if (!active) return;
-      if (listRes.ok) setRows(listRes.data.rows);
-      if (summaryRes.ok) setSummary(summaryRes.data);
-      setLoading(false);
-    });
+    ])
+      .then(([listRes, summaryRes]) => {
+        if (!active) return;
+        if (listRes.ok) setRows(listRes.data.rows);
+        if (summaryRes.ok) setSummary(summaryRes.data);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => {
       active = false;
     };
@@ -130,7 +119,7 @@ export function CompanyRequestInboxView() {
         <div className="overflow-hidden rounded-lg border border-border bg-surface">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-4 pt-2">
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {TABS.map((tab) => {
+              {COMPANY_STATUS_TABS.map((tab) => {
                 const active = statusFilter === tab.value;
                 return (
                   <Button
@@ -154,7 +143,10 @@ export function CompanyRequestInboxView() {
             </div>
 
             <div className="relative mb-2 w-full sm:w-72">
-              <Search className="absolute top-2.5 left-3 size-4 text-text-secondary" />
+              <Search
+                aria-hidden="true"
+                className="absolute top-2.5 left-3 size-4 text-text-secondary"
+              />
               <Input
                 placeholder="Empresa, código o correo..."
                 value={search}
@@ -167,93 +159,12 @@ export function CompanyRequestInboxView() {
             </div>
           </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center p-12 text-sm text-text-secondary">
-              <Loader2 className="mr-2 size-5 animate-spin" />
-              Cargando solicitudes de empresas...
-            </div>
-          ) : rows.length === 0 ? (
+          {!loading && rows.length === 0 ? (
             <div className="p-10 text-center text-sm text-text-secondary">
               No hay solicitudes de empresas en este estado.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-border bg-surface-soft/50 text-xs font-semibold text-text-secondary uppercase">
-                  <tr>
-                    <th className="px-4 py-3">Empresa</th>
-                    <th className="px-4 py-3">Código</th>
-                    <th className="px-4 py-3">Rubro</th>
-                    <th className="px-4 py-3">Documento</th>
-                    <th className="px-4 py-3">Estado</th>
-                    <th className="px-4 py-3">Coincidencia</th>
-                    <th className="px-4 py-3 text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {rows.map((item) => {
-                    const score = item.ocrMatchScore;
-                    return (
-                      <tr key={item.id} className="hover:bg-surface-soft/40">
-                        <td className="px-4 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-soft font-bold text-primary">
-                              <Building2 className="size-4" />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-ink">
-                                {item.companyName}
-                              </p>
-                              <p className="text-xs text-text-secondary">
-                                {item.email}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3.5 font-mono text-xs text-ink">
-                          {item.requestCode ?? "—"}
-                        </td>
-                        <td className="px-4 py-3.5 text-ink">
-                          <p>{item.sector}</p>
-                          <p className="text-xs text-text-secondary">
-                            {item.city.name}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span className="inline-flex items-center gap-1.5 text-xs text-ink">
-                            <FileText className="size-4 text-text-secondary" />
-                            Carta membretada
-                          </span>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-text-secondary">
-                            <Clock className="size-3.5" />
-                            {STATUS_BADGE[item.status.title] ?? "Pendiente"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3.5 text-xs font-medium text-text-secondary">
-                          {typeof score === "number"
-                            ? `${score}% coincidencia`
-                            : "Sin validar"}
-                        </td>
-                        <td className="px-4 py-3.5 text-right">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              router.push(`/backoffice/empresas/${item.id}`)
-                            }
-                          >
-                            Revisar
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <CompanyRequestTable items={rows} isLoading={loading} />
           )}
         </div>
       </section>
