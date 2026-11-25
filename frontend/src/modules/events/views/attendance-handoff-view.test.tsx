@@ -22,7 +22,8 @@ describe('continuar en celular', () => {
     const rendered = new Resvg(svg.outerHTML, { fitTo: { mode: 'width', value: 660 } }).render();
     const decoded = jsQR(new Uint8ClampedArray(rendered.pixels), rendered.width, rendered.height);
     expect(decoded?.data).toBe(url);
-    expect(screen.getByRole('link', { name: url })).toHaveAttribute('href', url);
+    expect(screen.queryByRole('link', { name: url })).not.toBeInTheDocument();
+    expect(document.querySelector('img')?.getAttribute('src')).toContain('icon-qr-register.webp');
     expect(screen.getAllByText('Taller de QR')).toHaveLength(2);
   });
 
