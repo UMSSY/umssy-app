@@ -487,6 +487,29 @@ describe('NotificationsService', () => {
     expect(notificationIds.get('user-2')).toBe('notification-9');
   });
 
+  it('guarda un aviso central con la fecha local de publicación del radar', async () => {
+    const link = '/profile/radar?snapshot=snapshot-2';
+    await expect(
+      service.notify({
+        recipientIds: ['user-2'],
+        type: NotificationType.RADAR_PUBLISHED,
+        payload: { radarVersion: '2', publishedAt: '2026-11-17T02:30:00Z' },
+        actionUrl: link,
+        groupKey: 'radar:snapshot-2',
+      }),
+    ).resolves.toMatchObject({ inAppCount: 1 });
+
+    expect(mockNotificationsRepo.createMany).toHaveBeenCalledWith([
+      expect.objectContaining({
+        recipientId: 'user-2',
+        title: 'Nueva versión del Radar publicada',
+        body: 'La versión 2 de tu radar se publicó el 16/11/2026 22:30 (hora de Bolivia).',
+        link,
+        groupKey: 'radar:snapshot-2',
+      }),
+    ]);
+  });
+
   it('no vuelve a enviar por canales externos un aviso de radar ya creado', async () => {
     mockNotificationsRepo.createMany.mockResolvedValue([]);
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
