@@ -12,6 +12,8 @@ describe("useSessionInactivity", () => {
   }>;
 
   beforeEach(() => {
+    // La actividad se comparte entre pestañas: cada caso parte sin marcas previas
+    localStorage.clear();
     vi.useFakeTimers();
     localStorage.clear();
     broadcastChannels = [];

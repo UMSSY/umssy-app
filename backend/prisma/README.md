@@ -1369,9 +1369,9 @@ Stores external company onboarding drafts, OCR scoring metadata (`ocr_match_scor
 
 ### Sprint 3
 
-- Migration `20261124180000_align_company_requests_and_password_history`:
+- Migration `20261124210000_align_company_request_and_password_history`:
   - Added `updated_at` (`TIMESTAMPTZ(6)`, backfilled from `created_at`) to `password_histories`.
-  - Renamed `company_access_requests."accessRequestDocumentTypeId"` to snake_case `access_request_document_type_id`, updated its foreign key constraint to `ON DELETE SET NULL`, and created indexes on `access_request_document_type_id`, `opened_by_id`, and `reviewed_by_id`.
+  - Renamed `company_access_requests."accessRequestDocumentTypeId"` to snake_case `access_request_document_type_id`, updated its foreign key constraint name to `company_access_requests_access_request_document_type_id_fkey`, and created indexes on `access_request_document_type_id`, `opened_by_id`, and `reviewed_by_id`.
 - Documented `refresh_tokens`, `password_histories`, `company_profiles`, `company_logos`, `company_access_requests`, and `company_activation_otps` with relationships, deletion rules, and indexes.
 
 - Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.

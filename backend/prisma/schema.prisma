@@ -1945,7 +1945,7 @@ model CompanyAccessRequest {
   approvedUser    User?               @relation("ApprovedCompanyRecruiter", fields: [approvedUserId], references: [id], onDelete: SetNull)
 
   activationOtps              CompanyActivationOtp[]
-  accessRequestDocumentType   AccessRequestDocumentType? @relation(fields: [accessRequestDocumentTypeId], references: [id], onDelete: SetNull)
+  accessRequestDocumentType   AccessRequestDocumentType? @relation(fields: [accessRequestDocumentTypeId], references: [id])
   accessRequestDocumentTypeId String?                    @map("access_request_document_type_id") @db.Uuid
 
   @@index([statusId])
