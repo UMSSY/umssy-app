@@ -10,6 +10,7 @@ import {
 } from '@/shared/services/storage/access-token-storage';
 
 import * as service from '../services/mentor-profile.service';
+import * as availability from '@/modules/availability';
 import { MENTOR_PROFILE_FIXTURE } from '../testing/mentor-profile.fixture';
 import { MentorProfileView } from './mentor-profile-view';
 import * as similarService from '../services/similar-mentors.service';
@@ -43,6 +44,19 @@ function mockCurrentUser(id: string) {
 }
 
 describe('MentorProfileView', () => {
+  it('usa el UUID de Backend al solicitar mentoría desde Desarrollo', async () => {
+    const backendId = '06d773ee-90d1-40c0-9744-c7c3601b84ef';
+    const returnTo = '/mentorship/mentors?radarArea=desarrollo&area=Desarrollo+Web&areaId=ee0d0fe2-bc99-4a6a-8939-2bd663c3cae1';
+    const request = vi.spyOn(availability, 'useRequestMentorship');
+    vi.spyOn(service, 'getMentorProfile').mockResolvedValue({
+      ...MENTOR_PROFILE_FIXTURE,
+      technicalAreas: [{ id: backendId, name: 'Backend', description: null }],
+    });
+    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} returnTo={returnTo} />);
+
+    await screen.findByRole('heading', { name: MENTOR_PROFILE_FIXTURE.fullName, level: 1 });
+    expect(request).toHaveBeenLastCalledWith(MENTOR_PROFILE_FIXTURE.id, 'Backend', returnTo, backendId);
+  });
   it.each([false, true])(
     'recupera recomendaciones con refetch real, vacío=%s',
     async (empty) => {
@@ -175,8 +189,8 @@ describe('MentorProfileView', () => {
 
     expect((await screen.findAllByText('Ana Rojas')).length).toBeGreaterThan(0);
     expect(screen.getByText('Arquitecta de Software')).toBeInTheDocument();
-    expect(screen.getByText('Backend')).toBeInTheDocument();
-    expect(screen.getByText('Arquitectura')).toBeInTheDocument();
+    expect(screen.getAllByText('Backend')).toHaveLength(2);
+    expect(screen.getAllByText('Arquitectura')).toHaveLength(2);
     expect(screen.getByText('Orientación técnica')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Sobre mí' }),
@@ -185,9 +199,9 @@ describe('MentorProfileView', () => {
       screen.getByRole('heading', { name: 'Trayectoria actual' }),
     ).toBeInTheDocument();
     const grid = container.querySelector('main > div > div.grid');
-    expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-12');
-    expect(grid?.firstElementChild).toHaveClass('md:col-span-8');
-    expect(grid?.lastElementChild).toHaveClass('md:col-span-4');
+    expect(grid).toHaveClass(
+      'lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)]',
+    );
     const recommendations = screen.getByRole('region', {
       name: 'También podría interesarte',
     });

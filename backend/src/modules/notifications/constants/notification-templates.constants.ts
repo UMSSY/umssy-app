@@ -5,6 +5,7 @@ import {
   COMPANY_REQUEST_OBSERVED_TEMPLATE,
   COMPANY_REQUEST_REJECTED_TEMPLATE,
 } from '../../company-access-requests/notification/company-request-notifications.js';
+import { RADAR_PUBLISHED_TEMPLATE } from '../../radar-integration/notification/radar-published.template.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import { truncateNotificationText } from '../utils/truncate-notification-text.js';
 
@@ -48,13 +49,7 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
       ),
   },
 
-  [NotificationType.RADAR_PUBLISHED]: {
-    renderTitle: () => 'Nueva versión del Radar publicada',
-    renderBody: (p) =>
-      truncateNotificationText(
-        `Tu radar ha sido actualizado (Versión: ${p.radarVersion}).`,
-      ),
-  },
+  [NotificationType.RADAR_PUBLISHED]: RADAR_PUBLISHED_TEMPLATE,
 
   [NotificationType.APPOINTMENT_CANCELLED]: APPOINTMENT_CANCELLED_TEMPLATE,
   [NotificationType.APPOINTMENT_BOOKED]: APPOINTMENT_BOOKED_TEMPLATE,
