@@ -9,12 +9,14 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AppLayout from '@/app/(app)/layout';
 import { stubMatchMedia } from '@/shared/testing/stub-match-media';
 import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import { useLiveRadar } from '../hooks/use-live-radar';
+import { RADAR_AXIS_NAMES } from '../constants/radar-axis-names.constants';
 import { RadarProfileView } from './radar-profile-view';
 
 function renderWithQuery(ui: ReactElement) {
@@ -46,6 +48,11 @@ vi.mock('@/modules/mentorship/services/mentor-directory.service', () => ({
     effectiveSort: 'default',
   }),
 }));
+vi.mock('@/modules/skills/services/skills.service', () => ({
+  skillsService: { getCatalog: vi.fn().mockResolvedValue([
+    { id: 'jest', name: 'Jest', areaId: 'qa', radarPoints: 1, radarHighRelevancePoints: 1.5 },
+  ]) },
+}));
 vi.mock('../hooks/use-live-radar', () => ({ useLiveRadar: vi.fn() }));
 vi.mock('recharts', async (importOriginal) => {
   const originalModule = await importOriginal<typeof import('recharts')>();
@@ -67,6 +74,8 @@ const source = {
   dictionaryVersion: '1',
   skills: [],
 };
+
+const mockEligibility = vi.spyOn(radarIntegrationApi, 'simulationEligibility');
 
 const mockHook = vi.mocked(useLiveRadar);
 function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
@@ -110,6 +119,7 @@ function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
 describe('Radar personal integrado con Épica 2', () => {
   beforeEach(() => {
     stubMatchMedia();
+    mockEligibility.mockReset().mockResolvedValue({ approved: [], highRelevanceSkillIds: [] });
     setRadar();
     window.history.replaceState(null, '', '/profile/radar');
   });
@@ -230,6 +240,19 @@ describe('Radar personal integrado con Épica 2', () => {
     expect(screen.queryByTestId('radar-dot-qa')).not.toBeInTheDocument();
   });
 
+  it.each(RADAR_AXIS_NAMES)("selecciona $name desde el radar y el desglose aun con cero puntos", axis => {
+    renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole("button", { name: `Ver detalle de ${axis.name}` }));
+    const dialog = screen.getByRole("dialog", { name: axis.name });
+    expect(within(dialog).getByRole("link", { name: "Ver mentores de esta área" })).toHaveAttribute("href", `/mentorship/mentors?radarArea=${axis.id}`);
+    fireEvent.click(screen.getByRole("button", { name: /Cerrar detalle del/ }));
+    fireEvent.click(screen.getByRole("button", { name: `Seleccionar ${axis.name}` }));
+    expect(screen.getByRole("region", { name: "Competencia seleccionada" })).toHaveTextContent(axis.name);
+    fireEvent.click(screen.getByRole("button", { name: "Simular una habilidad" }));
+    expect(screen.getByRole("dialog", { name: "Proyecta una habilidad" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Puntaje proyectado")).toHaveTextContent("0");
+  });
+
   it('muestra seis ejes en cero sin inventar datos ni mezclar perfiles', () => {
     renderWithQuery(<RadarProfileView />);
     expect(screen.getByText('Mi perfil profesional')).toBeInTheDocument();
@@ -249,19 +272,19 @@ describe('Radar personal integrado con Épica 2', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
     expect(
       screen.getByRole('link', { name: 'Ver mentores de esta área' }),
-    ).toHaveAttribute('href', '/mentorship/mentors?area=QA&from=radar');
+    ).toHaveAttribute('href', '/mentorship/mentors?radarArea=qa');
     expect(
       screen.queryByRole('heading', {
         name: 'Proyecci\u00f3n con mentor\u00eda',
       }),
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Proyección con mentoría' }));
     expect(
       screen.getByRole('heading', {
-        name: 'Proyecci\u00f3n con mentor\u00eda',
+        name: 'Disponibilidad de mentor\u00eda',
       }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Puntaje proyectado")).toHaveTextContent("0");
   });
 
   it('muestra el desglose al inicio y lo restaura al pulsar fuera del panel', () => {
@@ -272,7 +295,7 @@ describe('Radar personal integrado con Épica 2', () => {
       }),
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
-    const simulate = screen.getByRole('button', { name: 'Simular habilidad' });
+    const simulate = screen.getByRole('button', { name: 'Proyección con mentoría' });
     fireEvent.pointerDown(simulate);
     expect(simulate).toBeInTheDocument();
     expect(
@@ -310,28 +333,57 @@ describe('Radar personal integrado con Épica 2', () => {
   it('abre la simulacion en un popup y conserva el area al interactuar y cerrar', async () => {
     renderWithQuery(<RadarProfileView />);
     fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Simular habilidad' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Proyección con mentoría' }));
     const dialog = await screen.findByRole('dialog', {
-      name: 'Simular habilidad: QA',
+      name: 'Proyecta una habilidad',
     });
+    await screen.findByRole('option', { name: 'Jest' });
+    fireEvent.change(within(dialog).getByRole('combobox'), { target: { value: 'jest' } });
+    await waitFor(() => expect(screen.getByText(/l\u00ednea verde discontinua/)).toBeInTheDocument());
     fireEvent.pointerDown(dialog);
     expect(dialog).toBeInTheDocument();
     fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
     await waitFor(() =>
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
     );
+    expect(screen.queryByText(/l\u00ednea verde discontinua/)).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Seleccionar QA' }),
     ).toHaveAttribute('aria-pressed', 'true');
     expect(
-      screen.getByRole('button', { name: 'Simular habilidad' }),
+      screen.getByRole('button', { name: 'Proyección con mentoría' }),
     ).toBeInTheDocument();
+  });
+
+  it('blocks the catalog until current eligibility succeeds and retries a failed read', async () => {
+    let rejectEligibility: (error: Error) => void = () => undefined;
+    mockEligibility.mockImplementationOnce(() => new Promise((_resolve, reject) => {
+      rejectEligibility = reject;
+    })).mockResolvedValueOnce({
+      approved: [{ id: 'jest', name: 'Jest' }],
+      highRelevanceSkillIds: [],
+    });
+    renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole('button', { name: 'Seleccionar QA' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Simular una habilidad' }));
+    const dialog = within(await screen.findByRole('dialog', { name: 'Proyecta una habilidad' }));
+    expect(dialog.getByText(/Consultando el estado/)).toBeInTheDocument();
+    expect(dialog.getByRole('combobox')).toBeDisabled();
+    expect(dialog.queryByRole('option', { name: 'Jest' })).not.toBeInTheDocument();
+
+    rejectEligibility(new Error('Eligibility unavailable'));
+    expect(await dialog.findByRole('alert')).toHaveTextContent(/No pudimos verificar/);
+    expect(dialog.getByRole('combobox')).toBeDisabled();
+    fireEvent.click(dialog.getByRole('button', { name: 'Reintentar' }));
+
+    await waitFor(() => expect(dialog.getByRole('combobox')).toBeEnabled());
+    expect(dialog.queryByRole('option', { name: 'Jest' })).not.toBeInTheDocument();
+    expect(mockEligibility).toHaveBeenCalledTimes(2);
   });
 
   it('abre el detalle del eje seleccionado y permite cerrarlo', () => {
     renderWithQuery(<RadarProfileView />);
     fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de QA' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Ver evidencias' }));
     expect(screen.getByRole('dialog', { name: 'QA' })).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole('button', { name: 'Cerrar detalle del área' }),
