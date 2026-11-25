@@ -157,7 +157,6 @@ export function LoginView() {
           'El servicio de inicio de sesión con Google no está disponible en este momento. Por favor, inicia sesión con tu correo y contraseña.',
         );
       }
-      // User closed Google popup or cancelled
     } finally {
       setIsGoogleLoading(false);
     }
