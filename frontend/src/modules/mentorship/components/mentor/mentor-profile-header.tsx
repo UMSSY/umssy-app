@@ -35,7 +35,7 @@ export function MentorProfileHeader({
   const { requestMentorship, isChecking, hasNoSlots } = useRequestMentorship(mentor.id, selectedArea, returnTo, selectedAreaId);
 
   return (
-    <Card className="gap-0 overflow-visible rounded-none border border-border bg-[#edf3f6] py-0 text-sm shadow-none ring-0">
+    <Card className="gap-0 overflow-visible rounded-none border border-border bg-interaction py-0 text-sm shadow-none ring-0">
       <CardContent className="flex min-w-0 flex-col gap-6 p-5 sm:p-8 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-6 sm:flex-row sm:items-center">
           <Avatar className="size-24 shrink-0 text-2xl">
@@ -46,14 +46,14 @@ export function MentorProfileHeader({
                 className="border-2 border-border object-cover"
               />
             ) : null}
-            <AvatarFallback className="bg-[#d5e6ef] text-[22px] font-semibold text-accent">
+            <AvatarFallback className="bg-accent/10 text-[22px] font-semibold text-accent">
               {getInitials(mentor.fullName)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-col flex-wrap items-start gap-2">
-              <h1 className="min-w-0 [font-family:Georgia,serif] text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] text-accent sm:text-[36px]">
+              <h1 className="min-w-0 font-tight text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] text-accent sm:text-[36px]">
                 {mentor.fullName}
               </h1>
               <Badge
@@ -61,7 +61,7 @@ export function MentorProfileHeader({
                 className={cn(
                   "-order-1 gap-1.5 border-transparent bg-transparent px-0 text-[10px]",
                   mentor.isAvailable
-                    ? "text-[#246448]"
+                    ? "text-success"
                     : "border-transparent text-text-secondary",
                 )}
               >
@@ -69,7 +69,7 @@ export function MentorProfileHeader({
                   aria-hidden="true"
                   className={cn(
                     "size-1.5 shrink-0 rounded-full",
-                    mentor.isAvailable ? "bg-[#3b9e70]" : "bg-text-secondary",
+                    mentor.isAvailable ? "bg-success" : "bg-text-secondary",
                   )}
                 />
                 {mentor.isAvailable
@@ -130,8 +130,10 @@ export function MentorProfileHeader({
                 disabled
                 className="h-auto w-full gap-2 rounded-lg border-0 bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
               >
-                <UserPlus className="size-5" />
-                {REQUEST_MENTORSHIP_TEXT.disabledHint}
+                <UserPlus className="size-5" aria-hidden="true" />
+                <span className="min-w-0 whitespace-normal">
+                  {REQUEST_MENTORSHIP_TEXT.disabledHint}
+                </span>
               </Button>
             )}
             {hasNoSlots && (

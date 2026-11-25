@@ -137,7 +137,7 @@ export function RadarProfileView() {
     <main className="mx-auto flex w-full max-w-[1344px] flex-col gap-6 font-sans">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="[font-family:Georgia,serif] text-[32px] font-semibold text-accent">Radar de afinidad</h1>
+          <h1 className="font-tight text-[32px] font-semibold text-accent">Radar de afinidad</h1>
           <p className="mt-3 text-sm text-text-secondary">Conoce tus fortalezas y encuentra orientación para seguir creciendo.</p>
         </div>
         {data && (
