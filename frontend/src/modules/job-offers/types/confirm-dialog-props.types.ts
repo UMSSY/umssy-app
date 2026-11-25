@@ -9,6 +9,7 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   busyLabel?: string;
   isBusy?: boolean;
+  closeOnOverlayClick?: boolean;
   confirmVariant?: ComponentProps<typeof Button>["variant"];
   onConfirm: () => void;
   onCancel?: () => void;

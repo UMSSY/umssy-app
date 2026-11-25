@@ -13,4 +13,6 @@ export interface CreateJobOfferPayload {
   languages: string;
   locationUrl: string;
   skillIds: string[];
+  /** Fecha y hora de cierre en ISO UTC. Si no se envía, la vacante no se cierra sola. */
+  expiresAt?: string;
 }

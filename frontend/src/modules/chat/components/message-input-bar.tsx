@@ -33,6 +33,7 @@ export interface MessageInputBarProps {
   maxLength?: number;
   placeholder?: string;
   onKeyDown?: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onFocus?: () => void;
   attachment?: File | null;
   onAttachmentChange?: (file: File | null) => void;
   isUploading?: boolean;
@@ -47,6 +48,7 @@ export function MessageInputBar({
   maxLength = MAX_MESSAGE_LENGTH,
   placeholder = "Escribe un mensaje...",
   onKeyDown,
+  onFocus,
   attachment,
   onAttachmentChange,
   isUploading = false,
@@ -220,6 +222,7 @@ export function MessageInputBar({
             disabled={disabled}
             readOnly={isBusy}
             aria-busy={isBusy}
+            onFocus={onFocus}
             placeholder={placeholder}
             rows={1}
             className="max-h-[clamp(2.5rem,25dvh,7.5rem)] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-ink placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring"
@@ -244,7 +247,7 @@ export function MessageInputBar({
               aria-label="Adjuntar archivo"
               disabled={disabled || isSending || isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="size-9 shrink-0 rounded-lg text-text-secondary hover:bg-surface-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
+              className="size-11 shrink-0 rounded-lg text-text-secondary hover:bg-surface-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-ring md:size-9"
             >
               <Paperclip className="size-4" />
             </Button>
@@ -255,7 +258,7 @@ export function MessageInputBar({
               data-testid="send-button"
               disabled={isSendDisabled}
               aria-label="Enviar mensaje"
-              className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
+              className={`inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-ring md:min-h-10 md:text-sm ${
                 isSendDisabled
                   ? "cursor-not-allowed bg-border-strong text-text-secondary opacity-60 shadow-none"
                   : "bg-primary text-primary-foreground shadow-none hover:bg-brand-hover"

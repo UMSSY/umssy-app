@@ -13,6 +13,7 @@ export interface UserSummary {
   email?: string | null;
   isEmailVisible?: boolean;
   academicTitle?: string | null;
+  headline?: string | null;
   isAcademicTitleVisible?: boolean;
   skills?: string[];
   areSkillsVisible?: boolean;

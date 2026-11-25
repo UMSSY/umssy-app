@@ -19,11 +19,11 @@ export async function seedNotificationTypes(
     { code: 'SURVEY_CLOSING_SOON', name: 'Encuesta próxima a cerrar', sendsPush: false, sendsEmail: true },
     { code: 'SURVEY_CLOSED', name: 'Encuesta cerrada', sendsPush: false, sendsEmail: true },
     { code: 'SURVEY_VARIATION_ALERT', name: 'Alerta de variación en encuesta', sendsPush: false, sendsEmail: true },
+    { code: 'APPLICATION_STATUS_CHANGED', name: 'Cambio de estado de una postulación', sendsPush: true, sendsEmail: false },
     { code: 'JOB_OFFER_PUBLISHED', name: 'Nueva vacante publicada', sendsPush: true, sendsEmail: false },
     { code: 'NEW_JOB_APPLICANT', name: 'Nuevo postulante en una vacante', sendsPush: true, sendsEmail: true },
     { code: 'EVENT_STARTING_SOON', name: 'Evento por comenzar', sendsPush: true, sendsEmail: false },
     { code: 'ACCESS_REQUEST_APPROVED', name: 'Solicitud de acceso aprobada', sendsPush: true, sendsEmail: true },
-    { code: 'APPLICATION_STATUS_CHANGED', name: 'Actualización de postulación', sendsPush: true, sendsEmail: true },
   ];
 
   for (const { code, ...channels } of notificationTypes) {
