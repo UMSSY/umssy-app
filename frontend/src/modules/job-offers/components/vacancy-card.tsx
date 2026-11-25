@@ -31,7 +31,7 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
             type="button"
             variant="link"
             className={cn(
-              "h-auto min-h-11 justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold text-ink hover:bg-transparent hover:text-ink",
+              "h-auto min-h-11 max-w-full justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold wrap-anywhere whitespace-normal text-ink hover:bg-transparent hover:text-ink",
               isDeleted && "text-text-secondary hover:text-text-secondary",
             )}
             onClick={() => onDetails(offer.id)}

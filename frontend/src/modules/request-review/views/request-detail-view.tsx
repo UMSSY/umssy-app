@@ -47,7 +47,7 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
               actions={<StatusBadge status={detail.status} />}
             />
 
-            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]">
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]">
               <div className="min-w-0">
                 {!detail.document && (
                   <p className="rounded-lg border border-border bg-surface p-4 text-sm text-text-secondary">

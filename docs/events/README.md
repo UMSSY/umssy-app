@@ -72,6 +72,22 @@ sequenceDiagram
 
 Successful JSON responses use the shared API envelope. The cover endpoint returns an image stream.
 
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Events API"]
+  API --> Service["Event service"]
+  Service --> Data[("Events")]
+  Service --> Related[("Categories and sessions")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
+## Action styling
+
+Public navigation and enrollment use non-destructive action colors. Cancelling an existing registration uses the destructive treatment because it invokes the registration DELETE endpoint.
+
 ## Sprint History
 
 ### Sprint 3

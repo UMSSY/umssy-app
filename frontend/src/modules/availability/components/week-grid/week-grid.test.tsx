@@ -96,8 +96,10 @@ describe("WeekGrid", () => {
   });
 
   it("reparte el ancho en 7 columnas iguales aunque un día tenga contenido más ancho", () => {
-    const { container } = render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
-    expect(container.querySelector(".md\\:grid-cols-\\[3\\.5rem_repeat\\(7\\,minmax\\(0\\,1fr\\)\\)\\]")).not.toBeNull();
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+
+    const grid = screen.getByRole("heading", { name: "LUN 5" }).closest("section")?.parentElement;
+    expect(grid).toHaveClass("@min-[44rem]/week:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]");
   });
 
   it("da a un bloque de 30 minutos la mitad del alto de una hora", () => {
@@ -254,13 +256,13 @@ describe("WeekGrid", () => {
     ).toBeInTheDocument();
   });
 
-  it("muestra la grilla desde md y la lista por día en pantallas chicas", () => {
+  it("muestra la grilla desde 44rem disponibles y la lista por debajo", () => {
     render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
 
     const grid = screen.getByRole("heading", { name: "LUN 5" }).closest("section")?.parentElement;
-    expect(grid).toHaveClass("hidden", "md:grid");
+    expect(grid).toHaveClass("hidden", "@min-[44rem]/week:grid");
     expect(screen.getByRole("heading", { name: "Lunes 5 de octubre" }).closest("ol")).toHaveClass(
-      "md:hidden"
+      "@min-[44rem]/week:hidden"
     );
   });
 

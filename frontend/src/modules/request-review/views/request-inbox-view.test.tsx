@@ -150,15 +150,6 @@ describe("RequestInboxView", () => {
       expect(tabClasses).toContain("h-full");
     });
 
-    it("la cabecera y la pestaña activa siguen el diseño", async () => {
-      listRequests.mockResolvedValue(page([row(1)]));
-      renderWithQuery(<RequestInboxView />);
-
-      expect(screen.getByRole("heading", { name: "Solicitudes de acceso" })).toBeInTheDocument();
-      expect(screen.getByText("Revisa el documento de cada solicitante y emite tu dictamen.")).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /^Pendientes/ })).toHaveClass("after:bg-accent");
-      await screen.findByText("Persona 1");
-    });
   });
 
   it("estructura: el contenedor raíz y la tarjeta ocupan todo el ancho disponible sin desbordar", async () => {

@@ -28,7 +28,7 @@ export function HomeHeroCarousel() {
 
   return (
     <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
-      <div className="relative h-[460px] overflow-hidden bg-ink md:h-[600px]">
+      <div className="relative h-[460px] overflow-hidden bg-ink md:h-[600px] [@media(orientation:landscape)_and_(max-height:500px)]:max-h-[62svh]">
         {HOME_HERO.slides.map((slide, index) => {
           const isCurrent = index === current;
           return (
