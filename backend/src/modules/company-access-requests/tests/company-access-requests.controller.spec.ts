@@ -174,4 +174,26 @@ describe('CompanyAccessRequestsController', () => {
     await expect(controller.reject('req-1', body, mockUser)).resolves.toEqual({ id: 'req-1', status: 'REJECTED' });
     expect(service.reject).toHaveBeenCalledWith('req-1', 'user-admin-1', body);
   });
+
+  it('documenta los 20 endpoints con operationId OpenAPI únicos', () => {
+    const methods = Object.getOwnPropertyNames(
+      CompanyAccessRequestsController.prototype,
+    ).filter((name) => name !== 'constructor');
+    const operationIds = methods.map((name) => {
+      const meta = Reflect.getMetadata(
+        'swagger/apiOperation',
+        (
+          CompanyAccessRequestsController.prototype as unknown as Record<
+            string,
+            object
+          >
+        )[name],
+      ) as { operationId?: string } | undefined;
+      return meta?.operationId;
+    });
+
+    expect(methods).toHaveLength(20);
+    expect(operationIds.every((id) => typeof id === 'string' && id.length > 0)).toBe(true);
+    expect(new Set(operationIds).size).toBe(methods.length);
+  });
 });
