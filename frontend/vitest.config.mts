@@ -9,8 +9,6 @@ const processTestFiles = [
   'modules/events/components/pass-qr.test.tsx',
 ]
 
-const isCoverageShard = process.env.VITEST_COVERAGE_SHARD === '1'
-
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -20,7 +18,6 @@ export default defineConfig({
   },
   test: {
     maxWorkers: Math.min(4, availableParallelism()),
-    vmMemoryLimit: '768MB',
     setupFiles: ['./vitest.setup.ts'],
     environment: 'jsdom',
     dir: './src',
@@ -29,6 +26,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           pool: 'vmForks',
+          vmMemoryLimit: '768MB',
           exclude: [...configDefaults.exclude, ...processTestFiles],
         },
       },
@@ -42,10 +40,10 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      reporter: isCoverageShard ? [] : ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
         exclude: ['src/app/layout.tsx', '**/*.test.{ts,tsx}', 'src/lib/utils.ts', 'src/components/ui/card/index.ts', 'src/components/ui/select.tsx'],
-      thresholds: isCoverageShard ? undefined : {
+      thresholds: {
         lines: 80,
         functions: 80,
         branches: 80,

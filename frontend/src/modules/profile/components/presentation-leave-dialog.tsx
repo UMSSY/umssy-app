@@ -72,7 +72,6 @@ export function PresentationLeaveDialog({
             Descartar cambios
           </AlertDialogAction>
           <AlertDialogAction
-            variant="brand"
             disabled={isSaving}
             onClick={saveAndLeave}
           >

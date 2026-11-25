@@ -7,41 +7,30 @@ on:
       - "frontend/**"
       - ".github/workflows/ci-frontend.yml"
 
-concurrency:
-  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
-env:
-  VITEST_SHARD_COUNT: "3"
-
 jobs:
-  lint-and-build:
+  build-and-test:
     runs-on: ubuntu-latest
-    defaults: &frontend-defaults
+    defaults:
       run:
         working-directory: ./frontend
 
     steps:
-      - &checkout
-        name: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - &setup-pnpm
-        name: Setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 12.4.2
 
-      - &setup-node
-        name: Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "pnpm"
           cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - &install
-        name: Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run linter
@@ -49,70 +38,7 @@ jobs:
 
       - name: Build application
         run: pnpm build
-
-  test:
-    name: Test shard ${{ matrix.shard }}
-    runs-on: ubuntu-latest
-    defaults: *frontend-defaults
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-
-    steps:
-      - *checkout
-      - *setup-pnpm
-      - *setup-node
-      - *install
-
-      - name: Run unit tests and collect coverage
-        env:
-          VITEST_COVERAGE_SHARD: "1"
-          SHARD_INDEX: ${{ matrix.shard }}
-        run: |
-          pnpm test:coverage --shard="$SHARD_INDEX/$VITEST_SHARD_COUNT" \
-            --reporter=dot --reporter=blob \
-            --outputFile.blob="$RUNNER_TEMP/vitest-shard-$SHARD_INDEX.json"
-
-      - name: Upload shard results
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-vitest-shard-${{ matrix.shard }}
-          path: ${{ runner.temp }}/vitest-shard-${{ matrix.shard }}.json
-          if-no-files-found: error
-          overwrite: true
-
-  build-and-test:
-    needs: [lint-and-build, test]
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
-    defaults: *frontend-defaults
-
-    steps:
-      - name: Require lint, build, and all test shards to pass
-        if: ${{ needs.lint-and-build.result != 'success' || needs.test.result != 'success' }}
-        run: exit 1
-
-      - *checkout
-      - *setup-pnpm
-      - *setup-node
-      - *install
-
-      - name: Download shard results
-        uses: actions/download-artifact@v4
-        with:
-          pattern: frontend-vitest-shard-*
-          path: ${{ runner.temp }}/frontend-vitest-results
-          merge-multiple: true
-
-      - name: Merge reports and enforce coverage thresholds
-        run: |
-          reports="$RUNNER_TEMP/frontend-vitest-results"
-          for ((shard = 1; shard <= VITEST_SHARD_COUNT; shard++)); do
-            if [[ ! -s "$reports/vitest-shard-$shard.json" ]]; then
-              echo "::error::Missing Vitest results for shard $shard"
-              exit 1
-            fi
-          done
-          pnpm test:coverage --merge-reports="$reports"
+        
+      - name: Run unit tests and coverage
+        run: pnpm test:coverage
 
