@@ -86,7 +86,7 @@ export function ContactProfileModal({
             <div className="min-w-0 flex-1">
               <h4
                 data-testid="contact-profile-name"
-                className="truncate text-base font-bold text-foreground"
+                className="text-base font-bold wrap-anywhere text-foreground"
               >
                 {contact.fullName}
               </h4>
