@@ -4,7 +4,7 @@ The public landing page presents the community, workshops and access links. The 
 
 ## Rules and dependencies
 
-The landing page delegates workshop loading to events. The dashboard uses the authenticated app shell and role navigation. Access and workshop calls to action use institutional styling.
+The landing page delegates workshop loading to events. The dashboard uses the authenticated app shell and role navigation. Access and workshop calls to action use the shared button shape and retain their public-facing colors.
 
 ## Main flow
 
