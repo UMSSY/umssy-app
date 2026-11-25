@@ -31,6 +31,7 @@ import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 import type { EventDetail } from '../types/event-detail.types';
 import { getProposalSupportErrorMessage } from '../utils/proposal-support-error';
+import { formatCatalogCount } from '../utils/format-catalog-count';
 
 export function EventsView({ initialProposalId = null }: EventsViewProps) {
   const router = useRouter();
@@ -45,6 +46,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
     setIsPopular,
     isExpired,
     setIsExpired,
+    isFinished,
+    setIsFinished,
     filters,
   } = useEventsFilters();
   const {
@@ -169,7 +172,10 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
         description={
           isLoading && !events.length
             ? "Cargando actividades de la comunidad…"
-            : `${events.length} talleres disponibles`
+            : formatCatalogCount(
+                events.length,
+                isExpired ? 'expired' : isFinished ? 'finished' : 'available',
+              )
         }
         actions={
           <Link
@@ -209,6 +215,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
                 onClick={() => {
                   setSelectedEventId(null);
                   setIsExpired(!isExpired);
+                  setIsFinished(false);
                   setCategoryId(null);
                   setIsPopular(false);
                 }}
@@ -216,22 +223,39 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               >
                 Propuestas vencidas
               </Button>
+              <Button
+                type="button"
+                variant={isFinished ? "default" : "outline"}
+                aria-pressed={isFinished}
+                onClick={() => {
+                  setSelectedEventId(null);
+                  setIsFinished(!isFinished);
+                  setIsExpired(false);
+                  setCategoryId(null);
+                  setIsPopular(false);
+                }}
+                className="rounded-full text-xs"
+              >
+                Finalizados
+              </Button>
               <PopularFilterChip
                 isSelected={isPopular}
                 onToggle={() => {
                   setSelectedEventId(null);
                   setIsPopular(!isPopular);
                   setIsExpired(false);
+                  setIsFinished(false);
                 }}
               />
               <CategoryFilterChips
                 categories={categories}
                 selectedId={categoryId}
-                isAllActive={!isExpired && !isPopular}
+                isAllActive={!isExpired && !isFinished && !isPopular}
                 onSelect={(id) => {
                   setSelectedEventId(null);
                   setCategoryId(id);
                   setIsExpired(false);
+                  setIsFinished(false);
                   setIsPopular(false);
                 }}
               />
@@ -275,6 +299,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               <p className="py-10 text-center text-text-secondary">
                 {isExpired
                   ? "No hay propuestas vencidas por el momento."
+                  : isFinished
+                  ? "No hay talleres finalizados por el momento."
                   : filters.search.trim() || filters.categoryId
                     ? "No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría."
                     : "No hay talleres disponibles."}

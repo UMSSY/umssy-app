@@ -204,4 +204,16 @@ describe("useEvents", () => {
       'token-b',
     );
   });
+
+  it('sends the finished scope to the catalog request', async () => {
+    getEventsMock.mockResolvedValue({ data: [], page: 1, offset: 0 });
+    renderHook(() => useEvents({ search: '', categoryId: null, scope: 'finished' }));
+    await waitFor(() =>
+      expect(getEventsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ scope: 'finished', includeProposals: true }),
+        expect.any(AbortSignal),
+        null,
+      ),
+    );
+  });
 });
