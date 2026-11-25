@@ -91,7 +91,7 @@ describe("matchCvRecords", () => {
   const noItems: TestItem[] | null = null;
   const noRecords: TestRecord[] | undefined = undefined;
 
-  it("prefers the record that starts in the same month and pairs every record only once", () => {
+  it("pairs records by month only for month-precision dates with a single candidate", () => {
     const records = [
       { id: "old", key: "a", startDate: "2020-05-01" },
       { id: "recent", key: "a", startDate: "2024-01-01" },
@@ -99,7 +99,7 @@ describe("matchCvRecords", () => {
 
     const matches = matchCvRecords(
       [
-        { key: "a", startDate: "2020-05-15" },
+        { key: "a", startDate: "2020-05" },
         { key: "a", startDate: "2024-01-01" },
         { key: "a", startDate: "2025-01-01" },
       ],
@@ -110,6 +110,25 @@ describe("matchCvRecords", () => {
     expect(matches).toEqual([
       { status: "changed", record: records[0] },
       { status: "same", record: records[1] },
+      { status: "new" },
+    ]);
+  });
+
+  it("does not match two complete dates of the same month when the day differs", () => {
+    const records = [{ id: "existing", key: "a", startDate: "2020-05-01" }];
+
+    expect(matchCvRecords([{ key: "a", startDate: "2020-05-15" }], records, matcher)).toEqual([
+      { status: "new" },
+    ]);
+  });
+
+  it("does not pair automatically by month when multiple candidates exist", () => {
+    const records = [
+      { id: "first", key: "a", startDate: "2020-05-01" },
+      { id: "second", key: "a", startDate: "2020-05-15" },
+    ];
+
+    expect(matchCvRecords([{ key: "a", startDate: "2020-05" }], records, matcher)).toEqual([
       { status: "new" },
     ]);
   });
@@ -209,12 +228,21 @@ describe("mergeCvEducation", () => {
 describe("matchCvExtractionRecords", () => {
   it("marks identical records as same and records with new data as changed", () => {
     const matches = matchCvExtractionRecords(
-      { ...EXTRACTION, educations: [{ ...EDUCATION, startDate: "2018-02-15" }] },
+      { ...EXTRACTION, educations: [{ ...EDUCATION, startDate: "2018-02" }] },
       { workExperiences: [EXPERIENCE_RECORD], educations: [EDUCATION_RECORD] },
     );
 
     expect(matches.experience).toEqual([{ status: "same", record: EXPERIENCE_RECORD }]);
     expect(matches.education).toEqual([{ status: "changed", record: EDUCATION_RECORD }]);
+  });
+
+  it("treats an extracted record with a different full date in the same month as new", () => {
+    const matches = matchCvExtractionRecords(
+      { ...EXTRACTION, educations: [{ ...EDUCATION, startDate: "2018-02-15" }] },
+      { workExperiences: [], educations: [EDUCATION_RECORD] },
+    );
+
+    expect(matches.education).toEqual([{ status: "new" }]);
   });
 
   it("detects changes in the end date, the current flag and the description", () => {

@@ -251,10 +251,11 @@ describe('PortfolioController', () => {
   });
 
   it('POST /api/profile/portfolio/oauth/:provider/callback connects account and returns account dto without tokens', async () => {
+    const verifier = 'a'.repeat(43);
     const response = await request(app.getHttpServer())
       .post('/api/profile/portfolio/oauth/github/callback')
       .auth(token, { type: 'bearer' })
-      .send({ code: 'valid-auth-code' })
+      .send({ code: 'valid-auth-code', state: 'valid-state', verifier })
       .expect(200);
 
     expect(response.body).toEqual({
@@ -267,8 +268,8 @@ describe('PortfolioController', () => {
       userId,
       'github',
       'valid-auth-code',
-      undefined,
-      undefined,
+      'valid-state',
+      verifier,
     );
   });
 
