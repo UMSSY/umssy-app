@@ -1242,6 +1242,132 @@ erDiagram
 
 `event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
 
+## Identity, Refresh Rotation, and Company Onboarding
+
+```mermaid
+erDiagram
+  users ||--o{ refresh_tokens : "user_id"
+  users ||--o{ password_histories : "user_id"
+  companies |o--o| company_profiles : "company_id"
+  companies |o--o| company_logos : "company_id"
+  cities ||--o{ company_profiles : "city_id"
+  cities ||--o{ company_access_requests : "city_id"
+  access_request_statuses ||--o{ company_access_requests : "status_id"
+  access_request_document_types |o--o{ company_access_requests : "access_request_document_type_id"
+  users |o--o{ company_access_requests : "opened_by_id"
+  users |o--o{ company_access_requests : "reviewed_by_id"
+  company_access_requests ||--o{ company_activation_otps : "company_access_request_id"
+
+  refresh_tokens {
+    uuid id PK
+    uuid user_id FK
+    uuid family_id
+    varchar role_tag
+    varchar token_hash UK
+    timestamptz expires_at
+    timestamptz absolute_expires_at
+    timestamptz used_at
+    timestamptz revoked_at
+    varchar revoked_reason
+    varchar user_agent
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  password_histories {
+    uuid id PK
+    uuid user_id FK
+    varchar password_hash
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_profiles {
+    uuid id PK
+    uuid company_id UK,FK
+    varchar sector
+    varchar email UK
+    varchar phone
+    varchar website_url
+    uuid city_id FK
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_logos {
+    uuid id PK
+    uuid company_id UK,FK
+    varchar file_name
+    varchar mime_type
+    int size_bytes
+    bytes data
+    timestamptz uploaded_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_access_requests {
+    uuid id PK
+    varchar request_code UK
+    varchar company_name
+    text description
+    varchar sector
+    varchar email
+    varchar phone
+    varchar website_url
+    uuid city_id FK
+    varchar username
+    uuid status_id FK
+    uuid document_file_id UK,FK
+    uuid logo_file_id UK,FK
+    smallint ocr_match_score
+    jsonb ocr_field_results
+    timestamptz submitted_at
+    uuid opened_by_id FK
+    timestamptz opened_at
+    uuid reviewed_by_id FK
+    timestamptz reviewed_at
+    varchar rejection_reason
+    uuid approved_company_id UK,FK
+    uuid approved_user_id UK,FK
+    uuid access_request_document_type_id FK
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  company_activation_otps {
+    uuid id PK
+    uuid company_access_request_id FK
+    varchar code_hash
+    timestamptz expires_at
+    int attempts
+    timestamptz used_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+```
+
+### `refresh_tokens`
+
+Stores hashed rotating refresh tokens grouped by session `family_id`. Prisma model `RefreshToken`.
+
+- `token_hash` is unique (`varchar(64)`).
+- `family_id` groups all rotated tokens belonging to a single login session so replay of a previously `used_at` token revokes the entire family.
+- Indexes: `user_id`, `family_id`, `expires_at`. Foreign key `user_id` deletes on `Cascade`.
+
+### `password_histories`
+
+Stores previous password hashes per user to prevent recent password reuse during resets. Prisma model `PasswordHistory`.
+
+- Columns: `id`, `user_id` (FK to `users.id`, `Cascade`), `password_hash`, `created_at`, `updated_at`.
+- Index: `(user_id, created_at DESC, id DESC)`.
+
+### `company_profiles` & `company_logos`
+
+Stores active company contact details (`CompanyProfile`, 1:1 unique `company_id`, unique `email`, `city_id` indexed with `Restrict`) and persisted binary logo files (`CompanyLogo`, 1:1 unique `company_id`, `Cascade`).
+
+### `company_access_requests` & `company_activation_otps`
+
+Stores external company onboarding drafts, OCR scoring metadata (`ocr_match_score`, `ocr_field_results`), review assignments (`opened_by_id`, `reviewed_by_id`, both `SetNull`), document classification (`access_request_document_type_id`, `SetNull`), and one-time activation codes (`CompanyActivationOtp`, `Cascade`).
+
+- Unique constraints on `company_access_requests`: `request_code`, `document_file_id`, `logo_file_id`, `approved_company_id`, `approved_user_id`.
+- Indexes on `company_access_requests`: `status_id`, `city_id`, `email`, `access_request_document_type_id`, `opened_by_id`, `reviewed_by_id`.
+
 ## Additional schema models
 
 Fields marked `?` are optional. List fields describe the inverse side of relations. Explicit referential actions appear in the relation declaration. Relations without an explicit action use Prisma defaults.
@@ -1941,10 +2067,14 @@ Physical table `notification_preferences`.
 | `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
 | `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-
 ## Sprint History
 
 ### Sprint 3
+
+- Migration `20261124210000_align_company_request_and_password_history`:
+  - Added `updated_at` (`TIMESTAMPTZ(6)`, backfilled from `created_at`) to `password_histories`.
+  - Renamed `company_access_requests."accessRequestDocumentTypeId"` to snake_case `access_request_document_type_id`, updated its foreign key constraint name to `company_access_requests_access_request_document_type_id_fkey`, and created indexes on `access_request_document_type_id`, `opened_by_id`, and `reviewed_by_id`.
+- Documented `refresh_tokens`, `password_histories`, `company_profiles`, `company_logos`, `company_access_requests`, and `company_activation_otps` with relationships, deletion rules, and indexes.
 
 - Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.

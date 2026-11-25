@@ -17,12 +17,14 @@ import { PageHeading } from "@/shared/components/layout";
 import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
 import { CARD_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
 import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
+import { useOptionalAuth } from "@/shared/contexts/auth-context";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { getInitials } from "@/shared/utils/get-initials";
 import { useVacancies } from "../hooks/use-vacancies";
-import { canApplyToVacancies } from "../utils/can-apply-to-vacancies";
+import { canApplyToVacancies, canApplyWithRoles } from "../utils/can-apply-to-vacancies";
 
 export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesViewProps = {}) {
+  const auth = useOptionalAuth();
   const [selectedId, setSelectedId] = useState<string | null>(initialVacancyId ?? null);
   function openVacancy(event: MouseEvent<HTMLAnchorElement>, id: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -33,7 +35,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
     setSelectedId(null);
     onInitialClose?.();
   }
-  const canApply = canApplyToVacancies(getAccessToken());
+  const canApply = auth ? canApplyWithRoles(auth.roles) : canApplyToVacancies(getAccessToken());
   const { search, setSearch, vacancies, filteredVacancies, isLoading, isError, retry } = useVacancies();
 
   return (
@@ -92,7 +94,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
                   "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5",
                   CARD_MOTION_CLASS,
                 )}
-              > 
+              >
                 <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-lg bg-accent text-base font-bold text-surface">{getInitials(vacancy.companyName)}</div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2"><h2 className="text-lg font-semibold text-ink"><Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className="underline-offset-4 hover:text-accent hover:underline">{vacancy.title}</Link></h2>{canApply ? <AppliedJobChip jobOfferId={vacancy.id} /> : null}</div>

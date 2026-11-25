@@ -183,6 +183,7 @@ export type AccessRequestStatusWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"AccessRequestStatus"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AccessRequestStatus"> | Date | string
   accessRequests?: Prisma.AccessRequestListRelationFilter
+  companyAccessRequests?: Prisma.CompanyAccessRequestListRelationFilter
 }
 
 export type AccessRequestStatusOrderByWithRelationInput = {
@@ -192,6 +193,7 @@ export type AccessRequestStatusOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   accessRequests?: Prisma.AccessRequestOrderByRelationAggregateInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
 }
 
 export type AccessRequestStatusWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type AccessRequestStatusWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"AccessRequestStatus"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AccessRequestStatus"> | Date | string
   accessRequests?: Prisma.AccessRequestListRelationFilter
+  companyAccessRequests?: Prisma.CompanyAccessRequestListRelationFilter
 }, "id" | "title">
 
 export type AccessRequestStatusOrderByWithAggregationInput = {
@@ -235,6 +238,7 @@ export type AccessRequestStatusCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequests?: Prisma.AccessRequestCreateNestedManyWithoutStatusInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutStatusInput
 }
 
 export type AccessRequestStatusUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type AccessRequestStatusUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutStatusInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutStatusInput
 }
 
 export type AccessRequestStatusUpdateInput = {
@@ -253,6 +258,7 @@ export type AccessRequestStatusUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequests?: Prisma.AccessRequestUpdateManyWithoutStatusNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutStatusNestedInput
 }
 
 export type AccessRequestStatusUncheckedUpdateInput = {
@@ -262,6 +268,7 @@ export type AccessRequestStatusUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutStatusNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutStatusNestedInput
 }
 
 export type AccessRequestStatusCreateManyInput = {
@@ -331,12 +338,27 @@ export type AccessRequestStatusUpdateOneRequiredWithoutAccessRequestsNestedInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccessRequestStatusUpdateToOneWithWhereWithoutAccessRequestsInput, Prisma.AccessRequestStatusUpdateWithoutAccessRequestsInput>, Prisma.AccessRequestStatusUncheckedUpdateWithoutAccessRequestsInput>
 }
 
+export type AccessRequestStatusCreateNestedOneWithoutCompanyAccessRequestsInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestStatusCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUncheckedCreateWithoutCompanyAccessRequestsInput>
+  connectOrCreate?: Prisma.AccessRequestStatusCreateOrConnectWithoutCompanyAccessRequestsInput
+  connect?: Prisma.AccessRequestStatusWhereUniqueInput
+}
+
+export type AccessRequestStatusUpdateOneRequiredWithoutCompanyAccessRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestStatusCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUncheckedCreateWithoutCompanyAccessRequestsInput>
+  connectOrCreate?: Prisma.AccessRequestStatusCreateOrConnectWithoutCompanyAccessRequestsInput
+  upsert?: Prisma.AccessRequestStatusUpsertWithoutCompanyAccessRequestsInput
+  connect?: Prisma.AccessRequestStatusWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccessRequestStatusUpdateToOneWithWhereWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUpdateWithoutCompanyAccessRequestsInput>, Prisma.AccessRequestStatusUncheckedUpdateWithoutCompanyAccessRequestsInput>
+}
+
 export type AccessRequestStatusCreateWithoutAccessRequestsInput = {
   id?: string
   title: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutStatusInput
 }
 
 export type AccessRequestStatusUncheckedCreateWithoutAccessRequestsInput = {
@@ -345,6 +367,7 @@ export type AccessRequestStatusUncheckedCreateWithoutAccessRequestsInput = {
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutStatusInput
 }
 
 export type AccessRequestStatusCreateOrConnectWithoutAccessRequestsInput = {
@@ -369,6 +392,7 @@ export type AccessRequestStatusUpdateWithoutAccessRequestsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutStatusNestedInput
 }
 
 export type AccessRequestStatusUncheckedUpdateWithoutAccessRequestsInput = {
@@ -377,6 +401,59 @@ export type AccessRequestStatusUncheckedUpdateWithoutAccessRequestsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutStatusNestedInput
+}
+
+export type AccessRequestStatusCreateWithoutCompanyAccessRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequests?: Prisma.AccessRequestCreateNestedManyWithoutStatusInput
+}
+
+export type AccessRequestStatusUncheckedCreateWithoutCompanyAccessRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutStatusInput
+}
+
+export type AccessRequestStatusCreateOrConnectWithoutCompanyAccessRequestsInput = {
+  where: Prisma.AccessRequestStatusWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccessRequestStatusCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUncheckedCreateWithoutCompanyAccessRequestsInput>
+}
+
+export type AccessRequestStatusUpsertWithoutCompanyAccessRequestsInput = {
+  update: Prisma.XOR<Prisma.AccessRequestStatusUpdateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUncheckedUpdateWithoutCompanyAccessRequestsInput>
+  create: Prisma.XOR<Prisma.AccessRequestStatusCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUncheckedCreateWithoutCompanyAccessRequestsInput>
+  where?: Prisma.AccessRequestStatusWhereInput
+}
+
+export type AccessRequestStatusUpdateToOneWithWhereWithoutCompanyAccessRequestsInput = {
+  where?: Prisma.AccessRequestStatusWhereInput
+  data: Prisma.XOR<Prisma.AccessRequestStatusUpdateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestStatusUncheckedUpdateWithoutCompanyAccessRequestsInput>
+}
+
+export type AccessRequestStatusUpdateWithoutCompanyAccessRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequests?: Prisma.AccessRequestUpdateManyWithoutStatusNestedInput
+}
+
+export type AccessRequestStatusUncheckedUpdateWithoutCompanyAccessRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutStatusNestedInput
 }
 
 
@@ -386,10 +463,12 @@ export type AccessRequestStatusUncheckedUpdateWithoutAccessRequestsInput = {
 
 export type AccessRequestStatusCountOutputType = {
   accessRequests: number
+  companyAccessRequests: number
 }
 
 export type AccessRequestStatusCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequests?: boolean | AccessRequestStatusCountOutputTypeCountAccessRequestsArgs
+  companyAccessRequests?: boolean | AccessRequestStatusCountOutputTypeCountCompanyAccessRequestsArgs
 }
 
 /**
@@ -409,6 +488,13 @@ export type AccessRequestStatusCountOutputTypeCountAccessRequestsArgs<ExtArgs ex
   where?: Prisma.AccessRequestWhereInput
 }
 
+/**
+ * AccessRequestStatusCountOutputType without action
+ */
+export type AccessRequestStatusCountOutputTypeCountCompanyAccessRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
 
 export type AccessRequestStatusSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -417,6 +503,7 @@ export type AccessRequestStatusSelect<ExtArgs extends runtime.Types.Extensions.I
   createdAt?: boolean
   updatedAt?: boolean
   accessRequests?: boolean | Prisma.AccessRequestStatus$accessRequestsArgs<ExtArgs>
+  companyAccessRequests?: boolean | Prisma.AccessRequestStatus$companyAccessRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.AccessRequestStatusCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["accessRequestStatus"]>
 
@@ -447,6 +534,7 @@ export type AccessRequestStatusSelectScalar = {
 export type AccessRequestStatusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["accessRequestStatus"]>
 export type AccessRequestStatusInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequests?: boolean | Prisma.AccessRequestStatus$accessRequestsArgs<ExtArgs>
+  companyAccessRequests?: boolean | Prisma.AccessRequestStatus$companyAccessRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.AccessRequestStatusCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccessRequestStatusIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -456,6 +544,7 @@ export type $AccessRequestStatusPayload<ExtArgs extends runtime.Types.Extensions
   name: "AccessRequestStatus"
   objects: {
     accessRequests: Prisma.$AccessRequestPayload<ExtArgs>[]
+    companyAccessRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -858,6 +947,7 @@ readonly fields: AccessRequestStatusFieldRefs;
 export interface Prisma__AccessRequestStatusClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accessRequests<T extends Prisma.AccessRequestStatus$accessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequestStatus$accessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAccessRequests<T extends Prisma.AccessRequestStatus$companyAccessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequestStatus$companyAccessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1306,6 +1396,30 @@ export type AccessRequestStatus$accessRequestsArgs<ExtArgs extends runtime.Types
   take?: number
   skip?: number
   distinct?: Prisma.AccessRequestScalarFieldEnum | Prisma.AccessRequestScalarFieldEnum[]
+}
+
+/**
+ * AccessRequestStatus.companyAccessRequests
+ */
+export type AccessRequestStatus$companyAccessRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
 }
 
 /**

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { buildLoginUrl } from "@/modules/auth";
 import { useRegistrationSession } from '@/modules/event-registrations';
 import { useAuth } from '@/shared/contexts/auth-context';
+import { useCookieSession } from '@/shared/hooks/use-cookie-session';
 import { parseApiError } from '@/shared/utils/parse-api-error';
 import { useEffect, useRef, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
@@ -35,7 +36,9 @@ import { getProposalSupportErrorMessage } from '../utils/proposal-support-error'
 export function EventsView({ initialProposalId = null }: EventsViewProps) {
   const router = useRouter();
   const session = useRegistrationSession();
+  const cookieSession = useCookieSession();
   const { roles, isLoading: rolesLoading } = useAuth();
+  const hasSession = Boolean(session) || cookieSession;
   const {
     searchInput,
     setSearchInput,
@@ -80,7 +83,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
     'ALREADY_SUPPORTED', 'PROPOSAL_EXPIRED', 'EVENT_NOT_SUPPORTABLE',
     'FORBIDDEN_ROLE', 'USER_INACTIVE',
   ].includes(support.errorCode ?? '');
-  const supportNotice = !session
+  const supportNotice = !hasSession
     ? 'Inicia sesión para apoyar esta propuesta.'
     : rolesLoading
       ? 'Verificando permisos para apoyar...'
@@ -91,7 +94,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
 
   async function handleSupport(event: EventDetail) {
     const returnToProposal = `/events?proposal=${encodeURIComponent(event.id)}`;
-    if (!session) {
+    if (!hasSession) {
       router.push(buildLoginUrl(returnToProposal));
       return;
     }

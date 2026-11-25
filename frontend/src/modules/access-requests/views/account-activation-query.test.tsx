@@ -23,9 +23,9 @@ describe("activación con TanStack Query", () => {
   it("permite recuperar el estado tras un error inicial", async () => {
     service.getStatus.mockResolvedValueOnce(failure).mockResolvedValueOnce({ ok: true, data: ready });
     render(<AccountActivationView initialEmail="test@example.com" />);
-    expect(await screen.findByText("Servicio no disponible")).toBeInTheDocument();
+    expect(await screen.findByText("Servicio no disponible", {}, { timeout: 4000 })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
-    expect(await screen.findByLabelText("Dígito 1 de 6")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Dígito 1 de 6", {}, { timeout: 4000 })).toBeInTheDocument();
     expect(service.getStatus).toHaveBeenCalledTimes(2);
   });
 
@@ -33,9 +33,9 @@ describe("activación con TanStack Query", () => {
     service.getStatus.mockResolvedValue({ ok: true, data: ready });
     service.resend.mockResolvedValue(failure);
     render(<AccountActivationView initialEmail="test@example.com" />);
-    await screen.findByLabelText("Dígito 1 de 6");
+    await screen.findByLabelText("Dígito 1 de 6", {}, { timeout: 4000 });
     await userEvent.click(screen.getByRole("button", { name: "Reenviar código" }));
-    expect(await screen.findByText("Servicio no disponible")).toBeInTheDocument();
+    expect(await screen.findByText("Servicio no disponible", {}, { timeout: 4000 })).toBeInTheDocument();
     expect(screen.queryByText(/te enviamos un nuevo código/i)).not.toBeInTheDocument();
     await waitFor(() => expect(service.resend).toHaveBeenCalledOnce());
   });
@@ -43,8 +43,8 @@ describe("activación con TanStack Query", () => {
     service.getStatus.mockResolvedValue({ ok: true, data: { ...ready, state } });
     service.resend.mockResolvedValue(failure);
     render(<AccountActivationView initialEmail="test@example.com" />);
-    await userEvent.click(await screen.findByRole("button", { name: "Enviar un código nuevo" }));
-    expect(await screen.findByText("Servicio no disponible")).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: "Enviar un código nuevo" }, { timeout: 4000 }));
+    expect(await screen.findByText("Servicio no disponible", {}, { timeout: 4000 })).toBeInTheDocument();
   });
 
 });

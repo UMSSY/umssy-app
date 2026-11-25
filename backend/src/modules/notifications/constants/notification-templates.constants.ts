@@ -1,5 +1,10 @@
 import { APPOINTMENT_BOOKED_TEMPLATE } from '../../appointments/notification/appointment-booked.template.js';
 import { APPOINTMENT_CANCELLED_TEMPLATE } from '../../appointments/notification/appointment-cancelled.template.js';
+import {
+  COMPANY_REQUEST_APPROVED_TEMPLATE,
+  COMPANY_REQUEST_OBSERVED_TEMPLATE,
+  COMPANY_REQUEST_REJECTED_TEMPLATE,
+} from '../../company-access-requests/notification/company-request-notifications.js';
 import { RADAR_PUBLISHED_TEMPLATE } from '../../radar-integration/notification/radar-published.template.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import { truncateNotificationText } from '../utils/truncate-notification-text.js';
@@ -112,6 +117,12 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
         `Bienvenido ${p.studentName}, tu cuenta ha sido activada.`,
       ),
   },
+  [NotificationType.COMPANY_ACCESS_REQUEST_APPROVED]:
+    COMPANY_REQUEST_APPROVED_TEMPLATE,
+  [NotificationType.COMPANY_ACCESS_REQUEST_OBSERVED]:
+    COMPANY_REQUEST_OBSERVED_TEMPLATE,
+  [NotificationType.COMPANY_ACCESS_REQUEST_REJECTED]:
+    COMPANY_REQUEST_REJECTED_TEMPLATE,
   [NotificationType.APPLICATION_STATUS_CHANGED]: {
     renderTitle: () => 'Actualización de postulación',
     renderBody: (p) =>
