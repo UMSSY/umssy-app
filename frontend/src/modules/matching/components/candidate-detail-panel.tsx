@@ -118,7 +118,7 @@ export function CandidateDetailPanel({
             <Button
               type="button"
               variant="outline"
-              className="h-auto min-h-10 w-full border-brand-red/40 whitespace-normal text-danger hover:bg-brand-red/5 hover:text-danger"
+              className="h-auto min-h-10 w-full whitespace-normal"
               onClick={() => onRequestDiscard(candidate.id)}
             >
               Descartar perfil

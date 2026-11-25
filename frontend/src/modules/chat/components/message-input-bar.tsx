@@ -218,7 +218,7 @@ export function MessageInputBar({
             disabled={disabled || isSending || isUploading}
             placeholder={placeholder}
             rows={1}
-            className="max-h-[120px] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-ink placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring"
+            className="max-h-[clamp(2.5rem,25dvh,7.5rem)] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-ink placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Campo de redacción de mensaje"
           />
           <div className="flex shrink-0 items-center gap-2 pb-1">

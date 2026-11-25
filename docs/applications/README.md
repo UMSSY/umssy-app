@@ -200,6 +200,10 @@ Tables `job_applications` and `job_application_statuses` (see [backend/prisma/RE
 - **Other modules are reached through their services**, never their tables (backend standard), which is why recruiters come from `UsersService`.
 - **Notification failures never break the main action**: errors are logged and swallowed, with a timeout.
 
+## Action styling
+
+Withdrawing an application updates its status through the withdrawal PATCH endpoint. The withdrawal control uses the outlined action style and reactivation remains available through its own confirmation flow.
+
 ## Sprint History
 
 ### Sprint 3

@@ -386,7 +386,9 @@ describe('MentorshipView', () => {
       screen.getByRole('heading', { name: 'Participación' }),
     ).toBeDefined();
 
-    expect(screen.getByText('Quiero participar como mentor')).toBeDefined();
+    expect(screen.getByText('Quiero participar como mentor')).toBeInTheDocument();
+    expect(screen.getByText('Participa como mentor')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Volver/i })).not.toBeInTheDocument();
 
     const checkbox = screen.getByRole('checkbox');
 
@@ -494,42 +496,6 @@ describe('MentorshipView', () => {
     ).toBeDefined();
   });
 
-  it('no muestra Volver en el primer paso', async () => {
-    renderWithQuery(<MentorshipView />);
-    await screen.findByRole('checkbox');
-
-    expect(
-      screen.queryByRole('button', {
-        name: /Volver/i,
-      }),
-    ).not.toBeInTheDocument();
-  });
-
-  it('permite regresar al paso anterior', async () => {
-    renderWithQuery(<MentorshipView />);
-    await screen.findByRole('checkbox');
-
-    fireEvent.click(screen.getByRole('checkbox'));
-
-    const nextButton = screen.getByRole('button', {
-      name: /Continuar/i,
-    });
-
-    fireEvent.click(nextButton);
-
-    const backButton = screen.getByRole('button', {
-      name: /Volver/i,
-    });
-
-    fireEvent.click(backButton);
-
-    expect(
-      screen.getByRole('heading', {
-        name: 'Participación',
-      }),
-    ).toBeDefined();
-  });
-
   it('conserva la participación al avanzar y regresar', async () => {
     renderWithQuery(<MentorshipView />);
     await screen.findByRole('checkbox');
@@ -550,16 +516,10 @@ describe('MentorshipView', () => {
       }),
     );
 
+    expect(screen.getByRole('heading', { name: 'Participación' })).toBeInTheDocument();
     const participationCheckbox = screen.getByRole('checkbox');
 
     expect(participationCheckbox).toBeChecked();
-  });
-
-  it('muestra el título principal del wizard', async () => {
-    renderWithQuery(<MentorshipView />);
-    await screen.findByRole('checkbox');
-
-    expect(screen.getByText('Participa como mentor')).toBeDefined();
   });
 
   it('actualiza el contador al seleccionar áreas', async () => {
