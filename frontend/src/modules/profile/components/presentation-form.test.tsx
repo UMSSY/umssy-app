@@ -7,6 +7,11 @@ import { PROFILE_VALIDATION_MESSAGES } from "../constants/profile-validation.con
 import type { PresentationValues } from "../types/presentation-values.types";
 import { PresentationForm } from "./presentation-form";
 
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 const SAVED_VALUES: PresentationValues = {
   headline: "Desarrolladora web junior",
   aboutMe: "Systems engineering graduate from UMSS.",

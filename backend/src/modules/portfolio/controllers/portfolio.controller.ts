@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBadGatewayResponse,
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
@@ -24,6 +25,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiServiceUnavailableResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -62,7 +64,10 @@ import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 
 @ApiTags('profile')
 @ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: 'A valid access token is required' })
+@ApiUnauthorizedResponse({
+  description: 'A valid access token is required',
+  schema: { $ref: '#/components/schemas/ApiErrorResponse' },
+})
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ResponseInterceptor)
 @UsePipes(
@@ -161,40 +166,110 @@ export class PortfolioController {
 
   @Get('oauth/:provider/url')
   @ApiOperation({
+    operationId: 'getPortfolioOAuthAuthorizationUrl',
     summary: 'Get OAuth authorization URL for the specified provider',
+    description:
+      'GitHub and GitLab require an S256 PKCE challenge.',
   })
   @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
   @ApiQuery({ name: 'state', required: false, type: String })
+  @ApiQuery({
+    name: 'challenge',
+    required: true,
+    type: String,
+    description:
+      'Required: 43-character base64url SHA-256 PKCE challenge.',
+  })
   @ApiOkResponse({
     description: 'OAuth authorization URL for GitHub or GitLab',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string', example: 'OK' },
+        data: {
+          type: 'object',
+          required: ['url'],
+          properties: { url: { type: 'string', format: 'uri' } },
+        },
+      },
+    },
   })
   @ApiBadRequestResponse({
-    description: 'Unsupported social provider',
+    description: 'Unsupported provider or missing or invalid challenge',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
+  })
+  @ApiServiceUnavailableResponse({
+    description:
+      'OAuth credentials or callback configuration are unavailable for the provider',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   getOAuthUrl(
+    @CurrentUserId() userId: string,
     @Param('provider', { schema: portfolioProviderParamSchema })
     provider: PortfolioProvider,
     @Query({ schema: oauthUrlQuerySchema })
     query: OAuthUrlQueryRequest,
   ): OAuthUrlResponse {
-    return this.socialOAuthService.getAuthorizationUrl(provider, query.state);
+    return this.socialOAuthService.getAuthorizationUrl(
+      provider,
+      query.state,
+      userId,
+      query.challenge,
+    );
   }
 
   @Post('oauth/:provider/callback')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
+    operationId: 'completePortfolioOAuthAuthorization',
     summary: 'Connect a social account using the OAuth authorization code',
+    description:
+      'GitHub and GitLab require code, state and verifier from the same authorization attempt.',
   })
   @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
-  @ApiBody(toApiBody(oauthCallbackSchema))
+  @ApiBody({
+    ...toApiBody(oauthCallbackSchema),
+    description:
+      'GitHub and GitLab require code, state and verifier from the same authorization attempt.',
+  })
   @ApiOkResponse({
     description: 'Connected social account details',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string', example: 'OK' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            provider: { type: 'string', enum: [...PORTFOLIO_PROVIDERS] },
+            username: { type: 'string' },
+            profileUrl: { type: 'string', nullable: true },
+            connected: { type: 'boolean' },
+          },
+        },
+      },
+    },
   })
   @ApiBadRequestResponse({
-    description: 'Invalid OAuth authorization code or provider exchange error',
+    description: 'Invalid OAuth authorization code, missing state or verifier, or provider exchange error',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   @ApiConflictResponse({
     description: 'Social account is already linked to another user',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
+  })
+  @ApiBadGatewayResponse({
+    description: 'GitHub or GitLab is unavailable',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
+  })
+  @ApiServiceUnavailableResponse({
+    description: 'OAuth credentials or callback configuration are unavailable for the provider',
+    schema: { $ref: '#/components/schemas/ApiErrorResponse' },
   })
   connectOAuthAccount(
     @CurrentUserId() userId: string,
@@ -207,6 +282,8 @@ export class PortfolioController {
       userId,
       provider,
       request.code,
+      request.state,
+      request.verifier,
     );
   }
 

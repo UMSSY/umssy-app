@@ -18,7 +18,13 @@ import { formatCvPeriod } from "../utils/format-cv-period";
 import { isCvEducationIncomplete } from "../utils/is-cv-education-incomplete";
 import { CvReviewItem } from "./cv-review-item";
 
-export function CvEducationReview({ educations = [], selected = [], onToggle, onChange }: CvEducationReviewProps) {
+export function CvEducationReview({
+  educations = [],
+  selected = [],
+  matchStatuses = [],
+  onToggle,
+  onChange,
+}: CvEducationReviewProps) {
   const { institutions } = useEducationInstitutions();
   const degreeCatalog = useEducationDegrees();
   const catalog = degreeCatalog.data ?? [];
@@ -42,6 +48,7 @@ export function CvEducationReview({ educations = [], selected = [], onToggle, on
             title={`${title} · ${formatCvPeriod(education.startDate, education.endDate)}`}
             isChecked={selected.includes(index)}
             isIncomplete={isCvEducationIncomplete(education)}
+            matchStatus={matchStatuses[index]}
             onToggle={() => onToggle(index)}
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

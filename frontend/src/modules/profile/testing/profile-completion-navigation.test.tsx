@@ -22,6 +22,11 @@ import { PresentationForm } from '../components/presentation-form';
 import { ProfileCompletenessChecklist } from '../components/profile-completeness-checklist';
 import { createProfileCompleteness } from './profile-completeness.fixture';
 
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock('@/modules/educations/services/educations.service', () => ({
   educationsService: {
     getEducations: vi.fn(),

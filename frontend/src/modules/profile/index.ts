@@ -11,6 +11,9 @@ export { ProfilePageLayout } from './components/profile-page-layout';
 export { ProfileCompletenessProgress } from './components/profile-completeness-progress';
 export { SectionCard } from './components/section-card';
 export { SocialAccountConnectButtons } from './components/social-account-connect-buttons';
+export { GithubOAuthCallback } from './components/github-oauth-callback';
+export { GitlabOAuthCallback } from './components/gitlab-oauth-callback';
+export { PortfolioOAuthCallback } from './components/portfolio-oauth-callback';
 export { PortfolioProjectCard } from './components/portfolio-project-card';
 export { PortfolioProfileSection } from './components/portfolio-profile-section';
 export { PortfolioSelectionDialog } from './components/portfolio-selection-dialog';
@@ -19,6 +22,7 @@ export type { Feedback } from './types/feedback.types';
 export type { PersonalInfoValues } from './types/personal-info-values.types';
 export type { ProfileResponse } from './types/profile-response.types';
 export { toPersonalInfoValues } from './utils/to-personal-info-values';
+export { validatePersonalInfo } from './utils/validate-personal-info';
 export type { FeedbackType } from './types/feedback-type.types';
 export { profileService } from './services/profile.service';
 
@@ -86,6 +90,7 @@ export type { PortfolioAccountDisconnectResponse } from './types/portfolio-accou
 export type { PortfolioAccountStatusResponse } from './types/portfolio-account-status-response.types';
 export type { PortfolioConnectedAccountResponse } from './types/portfolio-connected-account-response.types';
 export type { PortfolioOAuthCallbackPayload } from './types/portfolio-oauth-callback-payload.types';
+export type { PortfolioOAuthCallbackProps } from './types/portfolio-oauth-callback-props.types';
 export type { PortfolioOAuthUrlResponse } from './types/portfolio-oauth-url-response.types';
 export type { PortfolioProviderName } from './types/portfolio-provider-name.types';
 export type { SocialAccountConnectButtonsProps } from './types/social-account-connect-buttons-props.types';
