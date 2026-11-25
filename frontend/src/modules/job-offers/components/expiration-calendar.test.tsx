@@ -46,4 +46,12 @@ describe("ExpirationCalendar", () => {
     const picked: Date = onSelect.mock.calls[0][0];
     expect(picked.getDate()).toBe(20);
   });
+
+  it("en móvil ocupa el ancho disponible con celdas más chicas y en escritorio mantiene las de 44 px", () => {
+    const { container } = render(<ExpirationCalendar onSelect={vi.fn()} today={TODAY} />);
+    const root = container.querySelector('[data-slot="calendar"]');
+
+    expect(root).toHaveClass("w-full", "sm:w-fit", "p-1", "[--cell-size:--spacing(8)]");
+    expect(root).toHaveClass("sm:[--cell-size:--spacing(11)]");
+  });
 });

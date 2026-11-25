@@ -56,9 +56,8 @@ describe("VacancyCard - cerrar vacante", () => {
       deleteButton.parentElement,
     );
 
-    expect(closeButton).toHaveClass("cursor-pointer");
-    expect(closeButton).toHaveClass("bg-blue-600");
-    expect(closeButton).toHaveClass("hover:bg-blue-700");
+    expect(closeButton).toHaveClass("bg-primary");
+    expect(closeButton.className).not.toMatch(/bg-blue-|text-white/);
   });
 
   it("identifica correctamente la vacante seleccionada", () => {
