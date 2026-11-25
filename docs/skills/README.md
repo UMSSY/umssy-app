@@ -8,6 +8,8 @@ Owner: group 5. The detection pipeline (`nlp`) and the radar chart that consumes
 
 ## Functionality
 
+Profile completeness and the NLP radar share the visibility rule for detected skills: a valid skill name and at least one valid evidence reference are required. A saved manual skill still counts independently of detected evidence. Historical detected rows without evidence do not complete the section.
+
 | Feature                                                                               | Where                               |
 | ------------------------------------------------------------------------------------- | ----------------------------------- |
 | Search the skill catalog                                                              | `GET /skills?search=`               |

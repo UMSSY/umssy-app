@@ -74,7 +74,7 @@ export function AreaBreakdownPanel({
     <RadarCard
       as="aside"
       aria-labelledby={titleId}
-      className={cn('flex flex-col p-6', className)}
+      className={cn('flex flex-col p-4 sm:p-6', className)}
     >
       <h2
         id={titleId}
@@ -97,7 +97,7 @@ export function AreaBreakdownPanel({
                   variant="ghost"
                   type="button"
                   aria-label={`Seleccionar ${area.name}`}
-                  className="min-h-12 min-w-0 flex-1 text-left text-sm font-medium text-ink hover:underline"
+                  className="min-h-12 min-w-0 flex-1 text-left text-sm font-medium break-words whitespace-normal text-ink hover:underline"
                   onClick={() => onAreaClick?.(area.id)}
                 >
                   {area.name}
