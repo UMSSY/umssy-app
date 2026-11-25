@@ -58,7 +58,7 @@ export function ActivationSuccessStep({
           variant="institutional"
           onClick={onGoToLogin}
           disabled={isLinking}
-          className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+          className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase"
         >
           IR A INICIAR SESIÓN →
         </Button>
