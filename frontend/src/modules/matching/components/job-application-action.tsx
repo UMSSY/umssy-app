@@ -123,7 +123,8 @@ export function JobApplicationAction({
           )}
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="cancel"
+              size="lg"
               disabled={isApplying}
               onClick={() => setConsentJobId(null)}
             >

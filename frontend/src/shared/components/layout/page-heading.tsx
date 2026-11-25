@@ -14,7 +14,7 @@ export function PageHeading({ title, description, actions, className }: PageHead
           </p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2 max-sm:w-full max-sm:justify-start">{actions}</div> : null}
+      {actions ? <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   );
 }

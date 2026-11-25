@@ -545,7 +545,6 @@ export function PendingParticipation({
             </Button>
 
             <Button
-              variant="brand"
               disabled={cancelMutation.isPending}
               onClick={() => cancelMutation.mutate()}
             >

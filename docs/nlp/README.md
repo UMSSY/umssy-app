@@ -1,4 +1,25 @@
-# Natural Language Processing (NLP)
+# Profile skills analysis
+
+The backend exposes retrieval and execution of skills analysis for the signed-in profile.
+
+## Rules and dependencies
+
+The profile analysis relies on the profile context and the skills vocabulary. The endpoint distinguishes retrieving analysis from requesting it.
+
+## HTTP contract
+
+- `GET /profile/me/skills/analysis`
+- `POST /profile/me/skills/analysis`
+
+## Main flow
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant M as Module API
+  C->>M: Request skills analysis for the current profile
+  M-->>C: Return the analysis result
+```
 
 ## Purpose and responsibilities
 
@@ -182,6 +203,7 @@ The module includes unit, integration, and quality benchmark tests implemented w
   $$\text{Precision} \ge 85\% \quad (\text{TARGET\_PRECISION} = 0.85)$$
   measured against at least 20 profile fixtures and more than 100 verified positive relationships.
 
+>>>>>>> origin/epic/grupo-2-perfiles-y-NLP
 ## Sprint History
 
 ### Sprint 2
@@ -195,6 +217,8 @@ The module includes unit, integration, and quality benchmark tests implemented w
 - Validated quality metrics on evaluation fixtures exceeding the 85% precision target.
 
 ### Sprint 3
+
+The backend exposes retrieval and execution of skills analysis for the signed-in profile.
 
 - Integrated CV text extraction (`user_cv_file`) as an automated input source for the NLP pipeline.
 - Linked verified documents and certificates as direct evidence supporting detected skills.

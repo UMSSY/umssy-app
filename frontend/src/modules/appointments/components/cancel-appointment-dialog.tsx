@@ -84,7 +84,7 @@ export function CancelAppointmentDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={changeOpen}>
-      <AlertDialogTrigger render={<Button variant="destructive" />}>
+      <AlertDialogTrigger render={<Button variant="outline" />}>
         {TEXT.title}
       </AlertDialogTrigger>
       <AlertDialogContent
@@ -150,7 +150,7 @@ export function CancelAppointmentDialog({
             {TEXT.back}
           </Button>
           <Button
-            variant="destructive"
+            variant="outline"
             disabled={cancel.isPending}
             onClick={confirm}
           >

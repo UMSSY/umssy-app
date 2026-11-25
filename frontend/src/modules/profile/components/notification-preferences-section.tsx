@@ -307,7 +307,8 @@ export function NotificationPreferencesSection() {
           <div className="mt-5 flex flex-col gap-3 md:flex-row md:justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="cancel"
+              size="lg"
               className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft md:w-auto"
               disabled={!hasChanges || isBusy}
               onClick={handleCancel}
