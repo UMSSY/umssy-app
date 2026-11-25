@@ -206,7 +206,7 @@ sequenceDiagram
 - **Reminders** only for published surveys whose closing date has not passed (or that have no closing date), and only to pending users. Those who already answered receive nothing.
 - It is sent as `SURVEY_REMINDER` (push and email according to the catalog and the preferences). If no email was delivered and push was neither `sent` nor `partial`, it responds 502 and does not update `last_reminder_sent_at`.
 - Reminders are **only sent manually** from the backoffice; the worker does not send reminders.
-- Frontend: progress meter with the uniform institutional color and a participation level label of low (≤ 35 %), medium (≤ 65 %) or expected (> 65 %). The button is disabled if there are no pending users or `canSendReminder` is false.
+- Frontend: progress meter colored by participation level, with its label as a non-color cue: low (≤ 35 %) in `danger`, medium (≤ 65 %) in `gold` and expected (> 65 %) in `success`. The theme tokens are mapped in `SURVEY_RESPONSE_RATE_LEVEL_METER_CLASSES`, and the level comes from `getResponseRateLevel`. The button is disabled if there are no pending users or `canSendReminder` is false.
 
 ### Variation alerts (`SurveyAlertConfig`)
 
@@ -317,6 +317,7 @@ Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_o
 - `SurveyEmploymentResponsesService` and configurable sort order in `CareersService` to feed the heatmaps.
 - Publication notice `SURVEY_PUBLISHED` to the eligible audience through `NotificationsService.notify()`, with its own email template and a single notice per survey and semester (migration `20261119120000_add_survey_published_notified_period`).
 - Single criterion for an approved graduate (`findApprovedGraduateUserIds`: `approvedUserId` or, if missing, email), used both to answer and to compute the audience, so the response rate matches the recorded responses.
+- Response rate meter colored by level (`danger`, `gold`, `success`) instead of the uniform institutional color; the level label stays as the accessible text.
 - Variation alerts: unsaved changes warning, strict threshold (`>`), specific threshold messages and "Guardar" disabled without changes.
 - Survey notification links as relative routes (the inbox opens the analytics directly) and absolute URLs in the emails.
 - Legacy survey notifications with absolute links normalized to relative routes (migration `20261124230000_normalize_survey_notification_links`), so "Ver analíticas" and "Ver resultados" open the specific survey instead of the general history.
