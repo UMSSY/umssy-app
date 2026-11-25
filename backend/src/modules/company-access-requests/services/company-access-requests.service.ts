@@ -268,7 +268,7 @@ export class CompanyAccessRequestsService {
     );
 
     this.logger.log(
-      `[OTP EMPRESA] Código de activación para ${current.email} (${updated.requestCode}): ${rawCode}`,
+      `Solicitud de empresa ${updated.id} (${updated.requestCode}) aprobada; código de activación emitido`,
     );
 
     const expiresInMinutes = '2880';

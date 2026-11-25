@@ -351,6 +351,26 @@ describe('CompanyAccessRequestsService', () => {
       expect(warning).not.toContain('acme@test.com');
       expect(warning).not.toContain(activationCode);
     });
+
+    it('ningún registro del flujo de aprobación contiene el código de activación ni el correo', async () => {
+      notificationsService.notify.mockResolvedValue(delivery('sent'));
+
+      await service.approve('req-1', 'admin-1');
+      notificationsService.notify.mockRejectedValue(new Error('falló'));
+      repository.findById.mockResolvedValue(pendingRequest);
+      await service.approve('req-1', 'admin-1');
+
+      const codes = notificationsService.notify.mock.calls.map(
+        (call) => String((call[0] as { payload: { activationCode: string } }).payload.activationCode),
+      );
+      expect(codes).toHaveLength(2);
+      expect(logged.length).toBeGreaterThan(0);
+      for (const line of logged) {
+        for (const code of codes) expect(line).not.toContain(code);
+        expect(line).not.toContain('acme@test.com');
+      }
+      expect(logged.some((line) => line.includes('req-1') && line.includes('EMP-2026-0001'))).toBe(true);
+    });
   });
 
   describe('reject y requestCorrection', () => {
