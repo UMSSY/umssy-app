@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { EventItem } from '../types/event-item.types';
-import { getScheduleBounds } from '../utils/event-sessions';
+import { getScheduleBounds, getSortedSessions } from '../utils/event-sessions';
 import type { EventSession } from '../types/event-session.types';
 
 export function useEventTiming(event: {
@@ -14,6 +14,10 @@ export function useEventTiming(event: {
   const [now, setNow] = useState(Date.now);
   // Con sesiones, el taller empieza en la primera y termina al cerrar la última.
   const { startsAt, endsAt } = getScheduleBounds(event);
+  // Cada inicio y fin de sesión vuelve a pintar la vista (por ejemplo, el pase pasa a la sesión siguiente).
+  const sessionBoundaries = getSortedSessions(event)
+    .flatMap((session) => [Date.parse(session.startsAt), Date.parse(session.endsAt)])
+    .join(',');
   const hasValidStart = Number.isFinite(startsAt);
   const hasStarted = hasValidStart && now >= startsAt;
   const isPast = Number.isFinite(endsAt) && now >= endsAt;
@@ -24,7 +28,8 @@ export function useEventTiming(event: {
     now < endsAt;
 
   useEffect(() => {
-    const nextTransition = [startsAt, endsAt]
+    const boundaries = sessionBoundaries ? sessionBoundaries.split(',').map(Number) : [];
+    const nextTransition = [startsAt, endsAt, ...boundaries]
       .filter((timestamp) => Number.isFinite(timestamp) && timestamp > now)
       .sort((left, right) => left - right)[0];
     if (nextTransition === undefined) return;
@@ -34,7 +39,7 @@ export function useEventTiming(event: {
       Math.min(2_147_483_647, Math.max(0, nextTransition - Date.now())),
     );
     return () => window.clearTimeout(timer);
-  }, [endsAt, now, startsAt]);
+  }, [endsAt, now, sessionBoundaries, startsAt]);
 
   return { isPast, isInProgress, hasValidStart, hasStarted };
 }
