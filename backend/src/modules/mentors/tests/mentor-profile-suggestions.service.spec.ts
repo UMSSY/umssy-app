@@ -1,10 +1,11 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
+import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import {
   toMentorProfileSnapshot,
   buildEmptyMentorProfile,
   buildMentorProfile,
 } from './fixtures/mentor-profile.fixture.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 
@@ -154,7 +155,7 @@ describe('MentorProfileSuggestionsService', () => {
           ? [toMentorProfileSnapshot(buildMentorProfile())]
           : [];
       });
-      const repository = new MentorsRepository({
+      const repository = makeMentorsRepository({
         $queryRaw: queryRaw,
       } as unknown as PrismaService);
       expect(
