@@ -32,4 +32,4 @@ sequenceDiagram
 
 ### Sprint 3
 
-Administrators filter the access inbox, inspect submitted documents and record decisions from request detail.
+The inbox switches from a table to labeled request cards when its container is narrower than 65rem. Each card keeps the request fields and the review link accessible.
