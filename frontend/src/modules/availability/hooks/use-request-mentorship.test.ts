@@ -24,6 +24,15 @@ const freeBlock: AvailabilityBlock = {
 }
 
 describe("useRequestMentorship", () => {
+  it("vincula el mentor, el ID del área y el regreso al directorio", async () => {
+    vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([freeBlock]);
+    const { result } = renderHook(() => useRequestMentorship("m1", undefined, "/mentorship/mentors?area=Cloud", "area-real"), createQueryWrapper());
+    await act(() => result.current.requestMentorship());
+    const destination = new URL(push.mock.lastCall![0], "http://localhost");
+    expect(destination.pathname).toBe("/mentors/m1/availability");
+    expect(destination.searchParams.get("areaId")).toBe("area-real");
+    expect(destination.searchParams.get("returnTo")).toBe("/mentorship/mentors?area=Cloud");
+  });
   beforeEach(() => {
     push.mockClear()
     vi.mocked(toast.error).mockClear()

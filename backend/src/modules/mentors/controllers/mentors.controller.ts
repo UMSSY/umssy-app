@@ -107,6 +107,12 @@ export class MentorsController {
     schema: { type: 'string', minLength: 1, maxLength: 80 },
   })
   @ApiQuery({
+    name: 'areaIds',
+    required: false,
+    description: 'UUID de especialidades separados por comas. Usar en lugar de area.',
+    schema: { type: 'string' },
+  })
+  @ApiQuery({
     name: 'orientation',
     required: false,
     schema: { type: 'string', minLength: 1, maxLength: 80 },

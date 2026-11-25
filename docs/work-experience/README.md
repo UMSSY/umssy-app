@@ -104,7 +104,7 @@ sequenceDiagram
 ## Business rules
 
 - All data belongs to the signed-in user; reading, editing or deleting another person's experience answers 404.
-- Required fields: company name (max 100 characters), position (max 150), start date and description (max 5000, trimmed, not empty).
+- Required fields: company name (max 100 characters), position (max 150), start date and description (max 5000, trimmed, not empty). The backend normalizes the description with `trim()` and `toLowerCase()` before persisting it. This currently loses the original capitalization of acronyms and proper names (for example, `APIs` and `Node.js`); that behavior is implemented by `workExperienceDescriptionSchema` and is not changed by this documentation update.
 - Dates must be between 1 January 1950 and today (Bolivia time `America/La_Paz`).
 - If `isCurrent` is true the end date is cleared. If it is false, the end date is required (`WORK_EXPERIENCE_END_DATE_REQUIRED`) and cannot be earlier than the start date (`INVALID_WORK_EXPERIENCE_DATE_RANGE`). Both answer 400.
 - An update that finds the dates changed by someone else during the operation answers 409 `WORK_EXPERIENCE_UPDATE_CONFLICT`.
@@ -155,7 +155,7 @@ Table `work_experiences`, related to `users` and `companies` (see [backend/prism
 - **Preview and persisted analysis are different calls.** Typing only previews; nothing is stored until the experience is saved.
 - **Skills come from evidence, not from a flag on the experience.** When an experience is removed, the skills that came only from it disappear and manual skills remain (see [skills](../skills/README.md)).
 - **Companies are shared rows** so work history and vacancies refer to the same company record.
-- **Consistent company grouping.** Every company group, including one with a single position, can be expanded or collapsed. All groups start collapsed to keep long histories short.
+- **Consistent company grouping.** The accordion control is rendered for every company group, even if it contains only one position. All groups start collapsed (`expandedGroups[groupId] ?? false`) and can be opened independently to keep long histories short.
 - **The save does not wait for the skills refresh**, so the guide can continue immediately.
 
 ## Read services for other domains

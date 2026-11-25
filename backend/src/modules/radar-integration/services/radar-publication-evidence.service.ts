@@ -21,9 +21,24 @@ export class RadarPublicationEvidenceService {
   }
 
   async read(userId: string, context: TransactionContext) {
-    const [skills, cvs, experiences, educations, certificates, blocked] =
+    const [skills, sources] = await Promise.all([
+      this.skills.findApprovedPublicationSkills(userId, context),
+      this.readSources(userId, context),
+    ]);
+    return [skills, ...sources] as const;
+  }
+
+  async readSimulation(userId: string, context: TransactionContext) {
+    const [skills, sources] = await Promise.all([
+      this.skills.findProfileSkillRows(userId, context),
+      this.readSources(userId, context),
+    ]);
+    return [skills, ...sources] as const;
+  }
+
+  private async readSources(userId: string, context: TransactionContext) {
+    const [cvs, experiences, educations, certificates, blocked] =
       await Promise.all([
-        this.skills.findApprovedPublicationSkills(userId, context),
         this.cv.findPublicationCvStates(userId, context),
         this.workExperience.findPublicationEvidenceIds(userId, context),
         this.educations.findPublicationEvidenceIds(userId, context),
@@ -32,7 +47,6 @@ export class RadarPublicationEvidenceService {
       ]);
     const excluded = new Set(blocked.map((row) => row.sourceId));
     return [
-      skills,
       cvs,
       experiences,
       educations,

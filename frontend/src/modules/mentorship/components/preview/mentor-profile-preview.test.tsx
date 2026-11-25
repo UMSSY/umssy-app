@@ -1,6 +1,6 @@
 
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -99,12 +99,14 @@ describe('MentorProfilePreview', () => {
 
     render(<MentorProfilePreview {...defaultProps} />);
 
-    expect(
-      screen.getByRole('heading', { name: 'Áreas técnicas' }),
-    ).toBeVisible();
+    const heading = screen.getByRole('heading', { name: 'Áreas técnicas' });
+    expect(heading).toBeVisible();
+    const technicalAreasCard = heading.closest<HTMLElement>('[data-slot="card"]');
+    if (!technicalAreasCard) throw new Error('Falta la tarjeta de áreas técnicas.');
+    const technicalAreas = within(technicalAreasCard);
 
     for (const area of defaultProps.technicalAreas) {
-      expect(screen.getByText(area.name)).toBeVisible();
+      expect(technicalAreas.getByText(area.name, { exact: true })).toBeVisible();
     }
   });
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Lets a graduate or student follow the job applications they have submitted ("Mis postulaciones"): list them with their affinity percentage, sort them, withdraw an active one, apply again to a vacancy after withdrawing, and open a chat with the company's recruiter. The applicant-facing flow distinguishes active applications (`Postulada`) from withdrawn applications (`Retirada`). Internally, the backend uses `En revisión` for newly submitted and reactivated applications and retains other catalog statuses for compatibility with recruiter decisions. This module does not dispatch status-change notifications.
+Lets a graduate or student follow the job applications they have submitted ("Mis postulaciones"): list them with their affinity percentage, sort them, withdraw an active one, apply again to a vacancy after withdrawing, and open a chat with the company's recruiter. The applicant-facing flow distinguishes active applications (`Postulada`) from withdrawn applications (`Retirada`). Internally, the backend uses `En revisión` for newly submitted and reactivated applications; it also reads other catalog statuses when evaluating withdrawal and contact permissions, without managing recruiter decisions. This module does not dispatch status-change notifications.
 
 Creating an application (the "Postularme" action) belongs to the [matching](../matching/README.md) module. This module starts once the application exists.
 
@@ -124,7 +124,7 @@ sequenceDiagram
 
 ## Business rules
 
-- The status catalog `job_application_statuses` contains `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado` and `Retirada` (`ApplicationStatus` enum). Epic 5 presents the applicant-facing states as `Postulada` and `Retirada`; `Postulada` is a user-facing label, not an additional value in the status catalog. The backend retains `En revisión`, `Entrevista`, `Aceptada` and `No seleccionado` for existing application records and recruiter workflows. The withdrawal and contact operations still recognize some of these internal statuses according to the rules below.
+- The status catalog `job_application_statuses` contains `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado` and `Retirada` (`ApplicationStatus` enum). The applicant-facing view labels non-withdrawn applications as `Postulada` and withdrawn ones as `Retirada`; `Postulada` is a display label, not a catalog status. The applicant-facing module performs transitions to `Retirada` (withdrawal) and back to `En revisión` (reactivation); it does not implement recruiter decisions that assign `Entrevista`, `Aceptada` or `No seleccionado`. Nevertheless, the withdrawal and contact operations must recognize these catalog statuses according to the rules below.
 - Only the owner of an application can read, withdraw, reactivate or contact from it. Withdraw/reactivate answer 404 when it does not exist and 403 when it belongs to someone else; contact answers 404 in both cases so it does not reveal other users' applications.
 - An application can be withdrawn only from `En revisión` or `Entrevista`. The check is part of the `UPDATE ... WHERE`, so a concurrent status change is rejected instead of overwritten.
 - An application can be reactivated only from `Retirada`, only if the vacancy is `Publicada` and has not expired. Reactivating moves it to `En revisión` and resets `appliedAt` to the current time. The `(job_offer_id, user_id)` pair is unique, so the same row is reused.

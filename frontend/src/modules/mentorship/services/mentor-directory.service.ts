@@ -16,6 +16,7 @@ export async function getMentorDirectory(
         page: params.page,
         search: params.search || undefined,
         area: params.area || undefined,
+        ...(params.areaIds?.length ? { areaIds: params.areaIds.join(",") } : {}),
         orientation: params.orientation || undefined,
         available: String(params.available),
         sort: params.sort,

@@ -48,26 +48,26 @@ sequenceDiagram
     Client->>Events: sourceChanged(userId)
     Events->>Service: refreshAfterChange(userId)
     Service->>DB: registerSourceChange() [input_revision++]
-    
+
     Service->>Sources: findTextSources(userId) + findCatalog()
     Sources->>DB: Read profile, work experiences, education, certificates, CV
     Sources-->>Service: Aggregated text sources
-    
+
     Service->>Validation: validateSources(sources)
     Validation-->>Service: Accepted sources (< 20,000 characters)
-    
+
     Service->>Detection: detect(sources, catalog)
     Note over Detection: Tokenization, Stopwords, Longest Pattern,<br/>Negations, Intentions, Tech Context
     Detection-->>Service: Detected candidates with evidence references
-    
+
     Service->>Validation: validateDetected(candidates, catalog)
     Validation-->>Service: Validated skills against catalog
-    
+
     Service->>DB: Start isolated transaction ($transaction)
     Service->>Recon: reconcileDetected(userId, accepted, context)
     Recon->>DB: planSkillReconciliation() -> INSERT / UPDATE / DELETE on user_skills
     Service->>DB: Update profile_skill_processing_states (ready, processedRevision, resultVersion++)
-    
+
     Service->>Events: published(userId, inputRevision, resultVersion)
 ```
 
@@ -203,7 +203,6 @@ The module includes unit, integration, and quality benchmark tests implemented w
   $$\text{Precision} \ge 85\% \quad (\text{TARGET\_PRECISION} = 0.85)$$
   measured against at least 20 profile fixtures and more than 100 verified positive relationships.
 
->>>>>>> origin/epic/grupo-2-perfiles-y-NLP
 ## Sprint History
 
 ### Sprint 2
@@ -224,3 +223,6 @@ The backend exposes retrieval and execution of skills analysis for the signed-in
 - Linked verified documents and certificates as direct evidence supporting detected skills.
 - Streamlined in-memory event bus (`ProfileSkillsEvents`) for reactive re-analysis on profile mutations.
 - Synchronized relevance indicators and evidence persistence in structured JSON format.
+- Radar uses verified evidence for published scores. Its simulation grants the relevance bonus to eligible pending skills only when the analysis is ready and the processed revision matches the current input revision.
+
+See [Radar integration](../radar-integration/README.md) for publication and [Radar chart](../radar-chart/README.md#mentors-by-area-and-score-simulation) for the simulation.
