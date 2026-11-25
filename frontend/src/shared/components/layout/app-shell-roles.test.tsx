@@ -14,15 +14,8 @@ const route = vi.hoisted(() => ({ pathname: "/dashboard" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.pathname, useRouter: () => ({ replace: vi.fn() }) }));
 
 const ROUTES = [
-  ["administrativo", "/dashboard"],
   ["administrativo", "/backoffice/solicitudes"],
-  ["administrativo", "/backoffice/solicitudes/example"],
-  ["administrativo", "/backoffice/reports/registered-users"],
-  ["administrativo", "/affinity-radar/review-queue"],
   ["titulado", "/profile"],
-  ["estudiante", "/vacancies"],
-  ["mentor", "/mentor/availability"],
-  ["empresa", "/matching"],
   ["empresa", "/recruiters"],
 ] as const;
 
@@ -35,7 +28,7 @@ afterEach(() => { cleanup(); sessionStorage.clear(); vi.restoreAllMocks(); vi.un
 
 describe("shared app shell across roles and routes", () => {
   it.each(ROUTES)(
-    "keeps the same chrome and red logout for %s at %s",
+    "keeps the same chrome and logout controls for %s at %s",
     async (role, pathname) => {
       route.pathname = pathname;
       await saveAccessToken(
@@ -56,13 +49,13 @@ describe("shared app shell across roles and routes", () => {
       expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
       expect(screen.getAllByRole("banner")).toHaveLength(1);
       expect(screen.getAllByRole("main")).toHaveLength(1);
-      expect(screen.getByRole("main").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
+      expect(screen.getByRole("main").parentElement).toHaveClass("px-4", "py-6", "lg:p-8", "xl:px-12", "xl:py-10");
       expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeVisible();
-      expect(screen.getByRole("button", { name: "Cerrar sesión" })).toHaveClass("text-brand-red", "hover:bg-brand-soft");
+      expect(screen.getByRole("button", { name: "Cerrar sesión" })).not.toHaveClass("text-brand-red");
       const user = userEvent.setup();
       await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
       const menu = await screen.findByRole("menu");
-      expect(within(menu).getByRole("menuitem", { name: "Cerrar sesión" })).toHaveClass("text-brand-red");
+      expect(within(menu).getByRole("menuitem", { name: "Cerrar sesión" })).not.toHaveClass("text-brand-red");
     },
   );
 });

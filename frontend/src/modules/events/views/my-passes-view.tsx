@@ -185,7 +185,7 @@ export function MyPassesView({
           {selected ? (
             <aside
               aria-label="Detalle de la inscripción"
-              className="sticky top-24 min-w-0"
+              className="min-w-0 lg:sticky lg:top-24"
             >
               <PassDetail
                 registration={selected}
