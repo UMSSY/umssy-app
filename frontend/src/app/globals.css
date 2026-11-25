@@ -232,7 +232,7 @@
   left: 0.875rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--color-ink-soft, #33465a);
+  color: var(--color-ink-soft);
   letter-spacing: 0.02em;
   display: flex;
   align-items: center;
@@ -253,7 +253,7 @@
   right: 2.25rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-text-secondary, #5b6470);
+  color: var(--color-text-secondary);
   line-height: 0.875rem;
 }
 
@@ -264,7 +264,7 @@
   transform: none !important;
   background: transparent !important;
   border: none !important;
-  color: var(--color-text-secondary, #5b6470) !important;
+  color: var(--color-text-secondary) !important;
   opacity: 0.7 !important;
   display: flex !important;
   align-items: center !important;
@@ -279,7 +279,7 @@
 [data-sonner-toast].cn-toast [data-close-button]:hover {
   opacity: 1 !important;
   background: transparent !important;
-  color: var(--color-ink, #0B1F2E) !important;
+  color: var(--color-ink) !important;
 }
 
 [data-sonner-toast].cn-toast [data-close-button] svg {
@@ -309,13 +309,13 @@
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-title] {
   font-size: 0.9375rem !important;
   font-weight: 700 !important;
-  color: #08365C !important;
+  color: var(--color-primary) !important;
   line-height: 1.25 !important;
 }
 
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-description] {
   font-size: 0.8125rem !important;
-  color: var(--color-ink-soft, #33465a) !important;
+  color: var(--color-ink-soft) !important;
   opacity: 1 !important;
   line-height: 1.3 !important;
 }
@@ -325,8 +325,8 @@
   grid-row: 2 !important;
   justify-self: start !important;
   margin: 0 !important;
-  background-color: #08365C !important;
-  color: #ffffff !important;
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
   font-size: 0.8125rem !important;
   font-weight: 600 !important;
   padding: 0.375rem 0.875rem !important;
@@ -337,7 +337,5 @@
 }
 
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-button]:hover {
-  background-color: #002A56 !important;
+  background-color: var(--color-brand-hover) !important;
 }
-
-
