@@ -65,7 +65,7 @@ export function getAttendanceCheckInError(
   if (status === 409 && code === 'ATTENDANCE_OUTSIDE_WINDOW') {
     return {
       kind: 'error',
-      message: 'Fuera de la ventana horaria de validación. El escaneo solo está disponible durante el horario del taller.',
+      message: 'Fuera de la ventana horaria de validación. Puedes registrar desde 2 horas antes del inicio hasta antes de la hora de finalización de la sesión o taller.',
     };
   }
   if (!status) {
