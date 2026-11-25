@@ -160,3 +160,30 @@ it('superpone la proyeccion verde sin cambiar el poligono actual', () => {
   view.rerender(<AffinityRadarChart areas={RADAR_AREA_SCORES} />);
   expect(document.querySelectorAll('.recharts-radar')).toHaveLength(1);
 });
+
+describe('HU3 touch targets with comparison and projection', () => {
+  afterEach(cleanup);
+  it('adds one hit region per current area without making overlay points interactive', () => {
+    const onAreaClick = vi.fn();
+    render(
+      <AffinityRadarChart
+        areas={RADAR_AREA_SCORES}
+        previousScores={{ qa: 2 }}
+        comparisonEnabled
+        projectedScores={{ qa: 10 }}
+        onAreaClick={onAreaClick}
+      />,
+    );
+    expect(document.querySelectorAll('.recharts-radar')).toHaveLength(3);
+    expect(screen.getAllByTestId(/^radar-hit-/)).toHaveLength(
+      RADAR_AREA_SCORES.length,
+    );
+    for (const area of RADAR_AREA_SCORES) {
+      const hit = screen.getByTestId(`radar-hit-${area.id}`);
+      expect(hit).toHaveAttribute('width', '48');
+      expect(hit).toHaveAttribute('height', '48');
+      fireEvent.click(hit);
+      expect(onAreaClick).toHaveBeenLastCalledWith(area.id);
+    }
+  });
+});
