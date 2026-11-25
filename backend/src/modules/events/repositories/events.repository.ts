@@ -113,7 +113,9 @@ export class EventsRepository {
 
     const where: Prisma.EventWhereInput = {
       ...(categoryId !== undefined && { categoryId }),
-      ...(statusId !== undefined
+      ...(payload.visibility !== undefined
+        ? payload.visibility
+        : statusId !== undefined
         ? { statusId }
         : {
             status: {

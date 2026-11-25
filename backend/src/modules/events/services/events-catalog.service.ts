@@ -72,6 +72,7 @@ export class EventsCatalogService {
       ...(payload.includeProposals && { includeProposals: true }),
       search,
       userId,
+      visibility: this.eventsService.getCatalogVisibilityFilter(payload),
     });
     return items;
   }

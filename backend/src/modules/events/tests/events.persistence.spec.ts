@@ -295,4 +295,23 @@ describe('EventsService', () => {
     const args = prismaMock.event.findMany.mock.calls[0][0];
     expect(args.select.registrations.where.userId).toEqual({ in: [] });
   });
+
+  it('applies the catalog visibility instead of the plain status filter', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+    const visibility = { status: { title: 'Publicado' }, OR: [{ sessions: { some: {} } }] };
+    await repository.findAndCount({
+      categoryId: 'cat-abc',
+      statusId: 'ignored-status',
+      includeProposals: true,
+      visibility,
+      skip: 0,
+      take: 10,
+    });
+    const expectedWhere = { categoryId: 'cat-abc', ...visibility };
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expectedWhere }),
+    );
+    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
 });

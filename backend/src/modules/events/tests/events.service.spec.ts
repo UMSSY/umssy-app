@@ -101,6 +101,7 @@ describe('EventsService', () => {
       userId: undefined,
       skip: 10,
       take: 5,
+      visibility: { statusId: 'status-uuid' },
     });
   });
 
@@ -128,6 +129,7 @@ describe('EventsService', () => {
       userId: undefined,
       skip: 10,
       take: 10,
+      visibility: expect.objectContaining({ status: { title: 'Publicado' } }),
     });
   });
   it.each([10, 3, 0, null])(
@@ -165,5 +167,42 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'user-1' }),
     );
+  });
+
+  describe('catalog visibility', () => {
+    const now = new Date('2026-11-27T14:00:00.000Z');
+
+    it('shows only published workshops that have not finished yet', () => {
+      expect(service.getCatalogVisibilityFilter({}, now)).toEqual(
+        service.getActiveRegistrationEventFilter(now),
+      );
+    });
+
+    it('adds proposals in voting when they are requested', () => {
+      expect(
+        service.getCatalogVisibilityFilter({ includeProposals: true }, now),
+      ).toEqual({
+        OR: [
+          service.getActiveRegistrationEventFilter(now),
+          { status: { title: { in: ['Votacion', 'En votación'] } } },
+        ],
+      });
+    });
+
+    it('keeps the exact status filter, used for expired proposals', () => {
+      expect(
+        service.getCatalogVisibilityFilter(
+          { statusId: 'status-uuid', includeProposals: true },
+          now,
+        ),
+      ).toEqual({ statusId: 'status-uuid' });
+    });
+
+    it('treats a multi-session workshop as active until its last session ends', () => {
+      const filter = service.getCatalogVisibilityFilter({}, now);
+      expect(filter.OR).toContainEqual({
+        sessions: { some: { endsAt: { gt: now } } },
+      });
+    });
   });
 });

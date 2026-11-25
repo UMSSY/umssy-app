@@ -1,3 +1,5 @@
+import type { Prisma } from '../../../prisma/client.js';
+
 export interface FindEventsPayload {
   includeProposals?: boolean;
   categoryId?: string;
@@ -6,4 +8,6 @@ export interface FindEventsPayload {
   userId?: string;
   skip?: number;
   take?: number;
+  // Filtro de estado y horario armado por el servicio; reemplaza el filtro por estado.
+  visibility?: Prisma.EventWhereInput;
 }

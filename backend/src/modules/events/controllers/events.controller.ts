@@ -35,7 +35,7 @@ export class EventsController {
     operationId: 'listEvents',
     summary: 'Listar eventos',
     description:
-      'Autenticación opcional. Retorna eventos paginados con sesiones y conteo de inscritos activos. Con sort=recommended sin sesión usa el orden por fecha; con sesión y perfil incompleto usa popular. startTime y endTime representan horas locales de Bolivia.',
+      'Autenticación opcional. Retorna eventos paginados con sesiones y conteo de inscritos activos. Sin statusId solo incluye talleres que aún no terminaron (con sesiones, hasta el fin de la última). Con sort=recommended sin sesión usa el orden por fecha; con sesión y perfil incompleto usa popular. startTime y endTime representan horas locales de Bolivia.',
     security: [{}, { bearer: [] }],
   })
   @ApiQuery({
@@ -69,7 +69,7 @@ export class EventsController {
     name: 'includeProposals',
     required: false,
     type: Boolean,
-    description: 'Sin statusId, incluye talleres publicados y propuestas en votación. Las propuestas vencidas se consultan mediante statusId.',
+    description: 'Sin statusId, incluye talleres publicados que aún no terminaron y propuestas en votación. Las propuestas vencidas se consultan mediante statusId.',
     example: true,
   })
   @ApiQuery({
