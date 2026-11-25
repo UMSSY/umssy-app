@@ -22,7 +22,7 @@ export function WorkspaceSectionMenu({ pathname, roles }: WorkspaceSectionMenuPr
         {section.label}
         <ChevronDown className="size-3.5 text-text-secondary" aria-hidden="true" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" sideOffset={12} className="w-72 p-2">
+      <DropdownMenuContent align="start" sideOffset={12} className="w-72 max-w-(--available-width) p-2">
         {groups.map((group) => (
           <DropdownMenuGroup key={group}>
             <DropdownMenuLabel className="px-3 pt-3 pb-1 text-xs">{group}</DropdownMenuLabel>

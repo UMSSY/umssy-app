@@ -192,6 +192,7 @@ Reads `job_offers`, `job_offer_skills`, `skills`, `user_skills`, `educations` an
 - Routes: `/vacancies/recommended` (`RecommendedJobsView`) and `/vacancies/recommended/[id]` (`JobMatchDetailView`). `JobApplicationAction` is reused by the vacancy detail in [vacancies](../vacancies/README.md).
 - The feed has filters by modality and text and a "high affinity" option; "Limpiar" restores the list. Dates use the Bolivia time formatter.
 - The module also contains the recruiter views of the radar (candidate list, comparison and CV evidence); their backend is `radar-integration` and they are not described here.
+- In the recruiter candidate panel, the "Contactar" button opens or reuses the application conversation with the candidate in the chat side panel. The application is not accepted or rejected from this screen.
 
 ## Design decisions
 
@@ -202,6 +203,10 @@ Reads `job_offers`, `job_offer_skills`, `skills`, `user_skills`, `educations` an
 - **Skills must match the catalog.** The classifier never invents skills: free text only yields skills that exist in `skills`, and ambiguous names are discarded.
 - **Preview and analysis are separate endpoints** so the form can show live suggestions without writing anything.
 - **Other modules are called through their services**, never their tables (backend standard).
+
+## Action styling
+
+Discard and reject actions use neutral confirmation controls. The Cancel action dismisses the confirmation without submitting a decision.
 
 ## Sprint History
 
@@ -214,3 +219,4 @@ Reads `job_offers`, `job_offer_skills`, `skills`, `user_skills`, `educations` an
 - Skill detection for work experience text and for vacancy requirements, including symbols, accents and case.
 - Publication and expiry dates in the recommended vacancies.
 - Configurable score weights through environment variables.
+- "Contactar" button in the recruiter candidate panel, which opens the application chat.

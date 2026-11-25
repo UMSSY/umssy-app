@@ -5,15 +5,15 @@
 The `surveys` module lets administrative staff create, publish and analyze employability surveys aimed at graduates, students or mentors of a career and academic year, and lets those audiences answer them. Since Sprint 3 it also tracks audience participation, manual reminders, variation alerts between semesters and automatic closing notices to the survey creator.
 
 - Backend: `backend/src/modules/surveys` (controllers `SurveysController`, `SurveyNotificationsController`, `CareersController`; services for surveys, participation, audience, variation, lifecycle, PDF and employability responses; `notification/` folder with the survey notification contracts).
-- Frontend: `frontend/src/modules/surveys` (survey builder, answer view, backoffice list, analytics view with the response rate card, reminder dialog and alerts dialog).
+- Frontend: `frontend/src/modules/surveys` (survey builder, answer view, backoffice list, analytics view with the response rate card, reminder dialog and alerts dialog, and the survey notices section and pending badge shown inside the central notifications inbox).
 
 ## Functionality
 
 | Feature | Where |
 | --- | --- |
 | Create, edit draft, publish and disable surveys | `POST /surveys`, `PATCH /surveys/:id`, `PATCH /surveys/:id/unpublish`; `/backoffice/surveys`, `/backoffice/surveys/create`, `/backoffice/surveys/:id` |
-| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys`, `/surveys/:id` |
-| Notices of surveys assigned to the user | `GET /surveys/notifications` |
+| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys/:id` (`/surveys` redirects to `/notifications?filter=SURVEYS`) |
+| Notices of surveys assigned to the user | `GET /surveys/notifications`; `SurveyNotificationsSection` inside the "Notificaciones de Encuestas" filter of the central inbox, `PendingSurveysBadge` on that sidebar entry |
 | Statistics per semester and PDF report | `GET /surveys/:id/statistics`, `GET /surveys/:id/report`; `/backoffice/surveys/statistics/:id` |
 | Response rate of the target audience | `GET /surveys/:id/participation`; `SurveyResponseRateCard` |
 | Manual reminder to those who have not answered | `POST /surveys/:id/reminders`; `SendSurveyReminderDialog` |
@@ -34,8 +34,12 @@ flowchart LR
     AD --> HA[useSurveyAlertConfig]
     HP --> PS[surveyParticipationService]
     HA --> PS
+    SNS[SurveyNotificationsSection / PendingSurveysBadge] --> HSN[useSurveyNotifications]
+    HSN --> SNSV[surveyNotificationsService]
   end
+  NV[notifications: NotificationsView filterSections.SURVEYS] --> SNS
   PS -->|HTTP| SC[SurveysController]
+  SNSV -->|HTTP| SNC[SurveyNotificationsController]
   subgraph Backend["backend/src/modules/surveys"]
     SC --> SS[SurveysService]
     SC --> PSV[SurveyParticipationService]
@@ -65,14 +69,39 @@ Survey notifications belong to the `surveys` domain and live in `backend/src/mod
 
 | File | Responsibility |
 | --- | --- |
-| `survey-notifications.ts` | Builds the request for `NotificationsService.notify()` (`type`, validated `payload` and `renderMail`) for `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` |
+| `survey-notifications.ts` | Builds the request for `NotificationsService.notify()` (`type`, validated `payload` and `renderMail`) for `SURVEY_PUBLISHED`, `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` |
 | `survey-notification-payloads.schema.ts` | Zod schemas for each payload (title 1–150 characters, non-empty formatted date, integer responses ≥ 0, threshold 1–50, non-empty summary). An invalid payload throws before `notify()` is called |
-| `survey-notification-mails.ts` | Subject, plain text and values of each email; reads its template with `loadMailTemplate` from `mail` |
-| `mjml/survey-reminder.mjml`, `mjml/survey-closing-soon.mjml`, `mjml/survey-closed.mjml`, `mjml/survey-variation-alert.mjml` | MJML content of each email; `mail` wraps it with `layout.mjml` and `header.mjml`. The build copies them to `dist/modules/surveys/notification/mjml/` (`scripts/copy-mail-templates.ts` and `assets` in `nest-cli.json`) |
+| `survey-notification-mails.ts` | Subject, plain text and values of each email; reads its template with `loadMailTemplate` from `mail` and converts the relative `actionUrl` into an absolute URL (`toAbsoluteSurveyUrl`) for the email button |
+| `mjml/survey-published.mjml`, `mjml/survey-reminder.mjml`, `mjml/survey-closing-soon.mjml`, `mjml/survey-closed.mjml`, `mjml/survey-variation-alert.mjml` | MJML content of each email; `mail` wraps it with `layout.mjml` and `header.mjml`. The build copies them to `dist/modules/surveys/notification/mjml/` (`scripts/copy-mail-templates.ts` and `assets` in `nest-cli.json`) |
 
 The `notifications` module is core infrastructure: it stores the in-app notification, emits it over WebSocket and dispatches push and email according to the `notification_types` catalog and the recipient's preferences. It returns the status per channel and the detail per recipient (`deliveries`), which `surveys` uses to count delivered and failed emails.
 
 ## Key flows
+
+### Publication notice
+
+```mermaid
+sequenceDiagram
+  actor A as Administrative staff
+  participant S as SurveysService
+  participant P as SurveyParticipationService
+  participant R as SurveysRepository
+  participant E as SurveyVariationEvaluatorService
+  participant N as notifications: NotificationsService
+  A->>S: POST /surveys or PATCH /surveys/:id with status published
+  S->>S: Saves the survey
+  S->>P: notifyPublished(surveyId, actorId, now)
+  P->>R: findParticipationTarget(surveyId)
+  alt publishedNotifiedPeriod = current semester
+    P-->>S: No notice (already notified this semester)
+  else
+    P->>P: Resolves the eligible audience
+    P->>R: claimPublishedNotification(surveyId, semester) (conditional updateMany)
+    P->>E: evaluateSurvey(surveyId, { closesAt: now })
+    P->>N: notify(SURVEY_PUBLISHED, eligible, { surveyTitle, previousPeriod, currentPeriod, change }, actionUrl /notifications?filter=SURVEYS, renderMail)
+  end
+  Note over S,P: A notification error is logged and never blocks the publication
+```
 
 ### Manual reminder
 
@@ -131,7 +160,7 @@ sequenceDiagram
         W->>E: evaluateSurvey(id, { closesAt, threshold, questionIds })
         E->>R: findStatistics(current semester) and findStatistics(previous semester)
         E-->>W: hasShifts, summaryText
-        opt there are variations >= threshold
+        opt there are variations > threshold
           W->>N: notify(SURVEY_VARIATION_ALERT, [creator])
         end
       end
@@ -177,14 +206,21 @@ sequenceDiagram
 - **Reminders** only for published surveys whose closing date has not passed (or that have no closing date), and only to pending users. Those who already answered receive nothing.
 - It is sent as `SURVEY_REMINDER` (push and email according to the catalog and the preferences). If no email was delivered and push was neither `sent` nor `partial`, it responds 502 and does not update `last_reminder_sent_at`.
 - Reminders are **only sent manually** from the backoffice; the worker does not send reminders.
-- Frontend: progress meter with the uniform institutional color and a participation level label of low (≤ 35 %), medium (≤ 65 %) or expected (> 65 %). The button is disabled if there are no pending users or `canSendReminder` is false.
+- Frontend: progress meter colored by participation level, with its label as a non-color cue: low (≤ 35 %) in `danger`, medium (≤ 65 %) in `gold` and expected (> 65 %) in `success`. The theme tokens are mapped in `SURVEY_RESPONSE_RATE_LEVEL_METER_CLASSES`, and the level comes from `getResponseRateLevel`. The button is disabled if there are no pending users or `canSendReminder` is false.
 
 ### Variation alerts (`SurveyAlertConfig`)
 
 - Optional 1:1 configuration with the survey. Without a record, the default values `enabled = true`, `threshold = 10`, `questionIds = null` (all questions) are used.
 - `threshold`: integer from 1 to 50 percentage points. `questionIds`: list of ids of the questions to watch; `null` or empty watches all of them. The body accepts `enabled` or `isEnabled` (`enabled` takes precedence).
-- When the survey closes, the percentage of responses of the current semester is compared with that of the previous semester, per question and option. The current semester is derived only from `closesAt` (or from the current date if the survey has no closing date); `academicPeriod` is the cohort year (`AAAA` or `Todas`), not a semester, and plays no part in the comparison. For example, a survey that closes on 15/11/2024 compares II-2024 with I-2024. Every option with `|diferencia| >= threshold` is reported. If either of the two semesters has no responses, there is no alert.
+- When the survey closes, the percentage of responses of the current semester is compared with that of the previous semester, per question and option. The current semester is derived only from `closesAt` (or from the current date if the survey has no closing date); `academicPeriod` is the cohort year (`AAAA` or `Todas`), not a semester, and plays no part in the comparison. For example, a survey that closes on 15/11/2024 compares II-2024 with I-2024. Every option with `|diferencia| > threshold` is reported (a variation equal to the threshold does not trigger an alert). If either of the two semesters has no responses, there is no alert.
 - Frontend: with alerts enabled it requires at least one selected question; on save it sends the ids of the checked questions.
+
+### Publication notice (`SURVEY_PUBLISHED`)
+
+- It is sent when a survey is created as published or a draft is published, to the eligible audience of the survey (same criterion as the response rate).
+- Payload validated with Zod: `surveyTitle`, `previousPeriod`, `currentPeriod` (semester of the publication) and `change`, a text summary of the variations between the previous and current semester (or "Sin variaciones registradas respecto al semestre anterior.").
+- Link `/notifications?filter=SURVEYS` (the "Notificaciones de Encuestas" filter of the central notifications inbox), without `groupKey`. That filter shows the `SurveyNotificationsSection` (pending, expired and answered surveys with the "Responder encuesta" link to `/surveys/:id`) above the notification history, so there is a single inbox. The section and the pending badge only render for the roles that can answer surveys (`titulado`, `estudiante`, `mentor`).
+- A single notice per survey and semester: `published_notified_period` is claimed with a conditional `updateMany` before sending, so republishing in the same semester or concurrent publications do not duplicate it.
 
 ### Automatic lifecycle
 
@@ -193,7 +229,8 @@ sequenceDiagram
 - **Closing**: published surveys with `closes_at <= now` and no `closed_notified_at`. The creator is notified (`SURVEY_CLOSED`, email only), the date is marked and, if alerts are enabled, the variation is evaluated (`SURVEY_VARIATION_ALERT`, email only).
 - If the survey has no closing date, the notices use the text `SURVEY_WITHOUT_CLOSING_DATE_TEXT` ("Sin fecha de cierre definida.") instead of an empty date.
 - The `closing_soon_notified_at` and `closed_notified_at` marks guarantee a single notice per survey. An error in one survey is logged and does not stop the others.
-- Notice links point to `FRONTEND_URL` (or the first `CORS_ORIGIN`): `/backoffice/surveys/statistics/:id` for the creator and `/surveys/:id` for reminders.
+- Notice links are relative routes so the notifications inbox opens them inside the app: `/backoffice/surveys/statistics/:id` for the creator, `/notifications?filter=SURVEYS` for the publication notice and `/surveys/:id` for reminders. The emails turn them into absolute URLs with `FRONTEND_URL` (or the first `CORS_ORIGIN`).
+- Survey notifications stored before the switch to relative routes kept absolute links (`FRONTEND_URL` + route), which the inbox rejects as external and replaces with the general survey history. The data migration `20261124230000_normalize_survey_notification_links` strips the scheme and host only when the link matches the historical route of its notification type, keeping the query and hash: `/notifications?filter=SURVEYS` or `/surveys/:id` for `SURVEY_PUBLISHED`, `/surveys/:id` for `SURVEY_REMINDER`, and `/backoffice/surveys/statistics/:id` for `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (`:id` is the survey UUID). Absolute links with any other route are left unchanged, so no route outside surveys becomes an internal destination. It is idempotent and does not touch other notification types.
 
 ## Endpoints
 
@@ -231,7 +268,8 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 
 | Module | Service | Use |
 | --- | --- | --- |
-| notifications | `NotificationsService.notify()` | Reminders and lifecycle notices |
+| notifications | `NotificationsService.notify()` | Publication notice, reminders and lifecycle notices |
+| notifications (frontend) | `NotificationsView` (`filterSections`) | Shows `SurveyNotificationsSection` in the "Notificaciones de Encuestas" filter of the central inbox |
 | users | `UsersService.findActiveContactsByRoles` | Active users by audience role |
 | access-requests | `ApprovedGraduateCareersService.findApprovedUserIds` | Cohort by career and graduation year |
 | reports | `ReportHistoryService.registerGeneratedReport`, `getAcademicPeriod` | PDF history and semester calculation |
@@ -243,6 +281,7 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 | Direction | Module | Use |
 | --- | --- | --- |
 | Uses | [notifications](../notifications/README.md) | In-app, push and email delivery |
+| Uses (frontend) | [notifications](../notifications/README.md) | Central inbox (`/notifications?filter=SURVEYS`) that hosts the survey notices section |
 | Uses | [mail](../mail/README.md) | `loadMailTemplate` to read the domain's `.mjml` templates |
 | Uses | [users](../users/README.md) | Active contacts by role |
 | Uses | [access-requests](../access-requests/README.md) | Approved graduates by career and academic year |
@@ -252,13 +291,21 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 
 ## Data
 
-Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_options`, `survey_responses`, `survey_answers` and the catalogs `survey_statuses`, `survey_question_types`, `survey_target_audiences` (see [backend/prisma/README.md](../../backend/prisma/README.md)). In Sprint 3 `surveys` adds `closing_soon_notified_at`, `closed_notified_at` and `last_reminder_sent_at`, and `survey_alert_configs` is created (1:0..1 with `surveys`, cascade delete).
+Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_options`, `survey_responses`, `survey_answers` and the catalogs `survey_statuses`, `survey_question_types`, `survey_target_audiences` (see [backend/prisma/README.md](../../backend/prisma/README.md)). In Sprint 3 `surveys` adds `closing_soon_notified_at`, `closed_notified_at`, `last_reminder_sent_at` and `published_notified_period` (`VARCHAR(7)`, nullable), and `survey_alert_configs` is created (1:0..1 with `surveys`, cascade delete). The migration `20261124230000_normalize_survey_notification_links` only updates data: it rewrites absolute survey links in `notifications.link` as relative routes when they match the documented route of their notification type.
 
 ## Frontend
 
 - `SurveyAnalyticsView` (`/backoffice/surveys/statistics/:id`) shows `SurveyResponseRateCard`, the reminder button with its confirmation dialog and the "Alertas" button.
 - Query keys `SURVEYS_QUERY_KEYS.participation(id)` and `SURVEYS_QUERY_KEYS.alertConfig(id)`; sending a reminder or saving alerts invalidates its key.
 - `toSurveyAlertQuestions` names the questions `P1`, `P2`... by position; `formatReminderResult` builds the delivered and failed message.
+- Single inbox: the survey module no longer has its own inbox page. It delegates to the central notifications inbox of [notifications](../notifications/README.md): `/notifications` renders `SurveyNotificationsSection` (data from `GET /surveys/notifications`) through the `filterSections.SURVEYS` slot of `NotificationsView`, and `PendingSurveysBadge` is shown on the "Notificaciones de Encuestas" sidebar sub-item (`SURVEY_NOTIFICATIONS_LABEL`). `/surveys` redirects to `/notifications?filter=SURVEYS` (`SURVEY_NOTIFICATIONS_PATH`), which is also where the answer view goes back to; answering stays at `/surveys/:id` (`SURVEY_ANSWER_PATH`).
+- The section reuses the shared inbox components of [notifications](../notifications/README.md): each row is a `NotificationCard` (red dot when pending, survey icon with its status tone, title, message, date) whose action is a small "Responder encuesta" link to `/surveys/:id`, or a disabled "Encuesta caducada" / "Encuesta registrada" button. Loading uses `NotificationsInboxLoading` and the empty state `NotificationsInboxEmpty` with its own icon and texts. The group header ("ENCUESTAS" with the "N pendientes" pill) follows the "AYER" / "ANTERIORES" headers, so the rows keep their structure at any width.
+- `SURVEY_NOTIFICATIONS_PATH` and `SURVEY_NOTIFICATIONS_LABEL` are taken from the public contract of notifications (`getNotificationInboxPath("SURVEYS")` and `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`), the same values the sidebar uses, so the pending badge stays attached to the "Notificaciones de Encuestas" entry.
+- `useCanAnswerSurveys` limits the section and the badge to the roles allowed on `/surveys` (`titulado`, `estudiante`, `mentor`); administrative staff and companies only see the notifications of the central inbox.
+
+## Action styling
+
+Unpublishing a survey updates its publication state through PATCH. The confirmation uses a neutral action, and the Cancel button can dismiss it before submission.
 
 ## Sprint History
 
@@ -272,3 +319,13 @@ Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_o
 - The semester of the variation alert is derived from the closing date, not from the cohort year.
 - Complete Swagger contracts for all `SurveysController` endpoints.
 - `SurveyEmploymentResponsesService` and configurable sort order in `CareersService` to feed the heatmaps.
+- Publication notice `SURVEY_PUBLISHED` to the eligible audience through `NotificationsService.notify()`, with its own email template and a single notice per survey and semester (migration `20261119120000_add_survey_published_notified_period`).
+- Single criterion for an approved graduate (`findApprovedGraduateUserIds`: `approvedUserId` or, if missing, email), used both to answer and to compute the audience, so the response rate matches the recorded responses.
+- Response rate meter colored by level (`danger`, `gold`, `success`) instead of the uniform institutional color; the level label stays as the accessible text.
+- Variation alerts: unsaved changes warning, strict threshold (`>`), specific threshold messages and "Guardar" disabled without changes.
+- Survey notification links as relative routes (the inbox opens the analytics directly) and absolute URLs in the emails.
+- Legacy survey notifications with absolute links normalized to relative routes (migration `20261124230000_normalize_survey_notification_links`), so "Ver analíticas" and "Ver resultados" open the specific survey instead of the general history.
+- Survey notices unified into the central notifications inbox: `SURVEY_PUBLISHED` links to `/notifications?filter=SURVEYS`, where the survey list and the pending badge are shown; the separate "Notificaciones de encuestas" page and sidebar entry were removed.
+- Survey rows in the inbox aligned with the notification card style; the text no longer breaks letter by letter in narrow layouts.
+- Survey rows, loading and empty states reuse the shared inbox components of notifications, and the inbox route and label of the surveys filter come from its public contract.
+- Formal fixtures (`formal-surveys-and-students.seed.ts`): 10 graduates and 8 surveys with responses and closing scenarios, deterministic and idempotent.

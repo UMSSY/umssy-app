@@ -23,7 +23,9 @@ describe("AreaBreakdownPanel", () => {
     const bar = row.querySelector<HTMLElement>("[style]");
 
     expect(within(row).getByText(name)).toBeDefined();
-    expect(within(row).getByText(level)).toBeDefined();
+    expect(within(row).getByText(level)).toBeVisible();
+    expect(within(row).getByRole("button")).toHaveClass("min-h-12");
+    expect(bar?.parentElement).toHaveClass("h-1.5");
     expect(within(row).getByText(score)).toBeDefined();
     expect(bar?.style.width).toBe(width);
   });

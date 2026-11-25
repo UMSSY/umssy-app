@@ -63,6 +63,14 @@ describe("WorkExperienceForm", () => {
     expect(screen.queryByText(/\(opcional\)/)).not.toBeInTheDocument();
   });
 
+  it("checks the spelling of the description in Spanish", () => {
+    render(<WorkExperienceForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    const description = screen.getByLabelText(/Descripción de funciones/);
+    expect(description).toHaveAttribute("spellcheck", "true");
+    expect(description).toHaveAttribute("lang", "es");
+  });
+
   it("does not submit without a description and shows the required message", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();

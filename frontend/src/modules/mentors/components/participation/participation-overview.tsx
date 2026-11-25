@@ -20,8 +20,8 @@ function ParticipationPreferences({
 }: ParticipationPreferencesProps) {
   return (
     <section className="space-y-3 border-t border-border pt-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-bold text-ink">{title}</h2>
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="min-w-0 font-bold break-words text-ink">{title}</h2>
 
         {isEditable && (
           <Link
@@ -29,10 +29,10 @@ function ParticipationPreferences({
             className={buttonVariants({
               variant: "outline",
               className:
-                "h-auto min-h-10 gap-2 bg-interaction px-3 py-2 text-availability-foreground whitespace-normal",
+                "h-auto min-h-10 max-w-full shrink-0 gap-2 bg-interaction px-3 py-2 text-availability-foreground whitespace-normal",
             })}
           >
-            <Pencil aria-hidden="true" className="size-4" />
+            <Pencil aria-hidden="true" className="size-4 shrink-0" />
             {editLabel}
           </Link>
         )}
@@ -78,8 +78,8 @@ export function ParticipationOverview({
         />
 
         <div className="space-y-5 rounded-lg border border-border bg-surface p-5 sm:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex min-w-0 flex-1 items-start gap-3">
+          <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:justify-between">
+            <div className="flex w-full min-w-0 items-start gap-3 sm:w-auto sm:flex-1">
               <div
                 className={cn(
                   "flex size-12 shrink-0 items-center justify-center rounded-full",
@@ -91,7 +91,7 @@ export function ParticipationOverview({
                 <UsersRound aria-hidden="true" className="size-6" />
               </div>
 
-              <div className="space-y-1">
+              <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-bold text-ink">
                     Estado de participación
@@ -131,10 +131,10 @@ export function ParticipationOverview({
                 type="button"
                 variant={isActive ? "outline" : "default"}
                 onClick={onAction}
-                className="h-auto min-h-10 max-w-full gap-2 py-2 whitespace-normal"
+                className="h-auto min-h-10 max-w-full shrink-0 gap-2 py-2 whitespace-normal"
               >
                 {isActive && (
-                  <CircleX aria-hidden="true" className="size-4" />
+                  <CircleX aria-hidden="true" className="size-4 shrink-0" />
                 )}
                 {isActive
                   ? "Desactivar participación"

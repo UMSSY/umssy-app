@@ -38,24 +38,24 @@ describe('PushSubscriptionsRepository', () => {
   });
 
   describe('upsert', () => {
-    it('creates with userId in create and does NOT reassign userId in update', async () => {
+        it('assigns the endpoint to the active account on create and update', async () => {
       prisma.pushSubscription.upsert.mockResolvedValue(undefined);
 
-      await repo.upsert('user-1', payload);
+      await repo.upsert('user-2', payload);
 
       const args = prisma.pushSubscription.upsert.mock.calls[0][0];
       expect(args.where).toEqual({ endpoint: payload.endpoint });
       expect(args.create).toEqual(
         expect.objectContaining({
-          userId: 'user-1',
+          userId: 'user-2',
           endpoint: payload.endpoint,
           p256dh: payload.keys.p256dh,
           auth: payload.keys.auth,
         }),
       );
-      expect(args.update).not.toHaveProperty('userId');
       expect(args.update).toEqual(
         expect.objectContaining({
+          userId: 'user-2',
           p256dh: payload.keys.p256dh,
           auth: payload.keys.auth,
           userAgent: payload.userAgent,

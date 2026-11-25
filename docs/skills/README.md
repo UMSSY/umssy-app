@@ -8,6 +8,8 @@ Owner: group 5. The detection pipeline (`nlp`) and the radar chart that consumes
 
 ## Functionality
 
+Profile completeness and the NLP radar share the visibility rule for detected skills: a valid skill name and at least one valid evidence reference are required. A saved manual skill still counts independently of detected evidence. Historical detected rows without evidence do not complete the section.
+
 | Feature                                                                               | Where                               |
 | ------------------------------------------------------------------------------------- | ----------------------------------- |
 | Search the skill catalog                                                              | `GET /skills?search=`               |
@@ -93,6 +95,7 @@ sequenceDiagram
 ## Business rules
 
 - **Catalog.** `GET /skills` returns only non-custom skills ordered by name; `search` is a case-insensitive "contains" of up to 100 characters. Detection and vacancy publishing use this catalog.
+- **Simulation weights.** Each catalog entry includes `radarPoints` (the base weight, 1 point) and `radarHighRelevancePoints` (the total with the relevance bonus, 1.5 points). Both come from the shared Radar rubric. Use the higher weight only when Radar's simulation eligibility endpoint lists the skill in `highRelevanceSkillIds`.
 - **Custom skills.** The name is normalized (formatted, up to 50 characters, only letters, digits and ` + # . - _ / & ( )`, at least one letter, no character repeated more than 3 times in a row). Creating a name that already exists returns the existing skill instead of an error.
 - **Own skills.** At most 50 ids per request. Duplicated ids in the same request answer 409 `DuplicateSkillException`; an unknown id answers 404 `SkillNotFoundException`. `PUT` replaces the whole list, `POST` adds to it. Both ask the detection pipeline to refresh afterwards.
 - **Origin of a skill** is derived, not stored: `manual` when its source is manual, `experience` when its evidence points to a work experience, `cv` when it points to the CV. A skill can have several origins.
@@ -203,3 +206,7 @@ The frontend does not call this service; its data is shown in the backoffice hea
 - Detected skills panel with analysis state and manual re-analysis.
 - Skill chips in light blue for experiences and vacancies.
 - `SkillAnalysisService.findSkillSummariesByUserIds` and the `UserSkillSummaryResponse` contract to feed the heatmaps.
+
+Experience-linked skills appear once in the general list alongside manual skills. A manual skill keeps its manual origin when linked to work experiences; the remove action is hidden while experience evidence exists and reappears after its last experience is removed. Skills created automatically by Matching keep source `nlp` instead of being promoted to `manual`. The repository handles both structured `work-experience` references and older `work_experience:` references. Deleting one experience preserves skills referenced by others; deleting the final reference removes only skills without a manual origin. An NLP analysis refreshes the general skill list without a page reload.
+
+Profile reconciliation loads live evidence sources before planning changes, within the same publication transaction. Existing experience references survive an NLP omission while their source remains live. Matching explicitly replaces the associations for the experience it analyzes, so removed associations are not restored by a later profile analysis. Deleted experiences are pruned; other experience links and the manual origin remain independent. `parseEvidenceRefs` normalizes legacy `work_experience:` strings and structured references for origins, reconciliation and evidence matching. Updating one experience preserves unrelated raw evidence entries.

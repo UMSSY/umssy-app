@@ -45,6 +45,7 @@ export const HEATMAP_FILTER_TEXT = {
   allMonths: "Enero - Diciembre",
   dateRangeButton: "Filtrar por fecha",
   clearDateRange: "Quitar filtro de fecha",
+  clearFilters: "Limpiar filtros",
   dialogTitle: "Filtrar Reporte por Gestión Académica",
   dialogDescription: "Elige el rango de semestres que quieres incluir en el reporte.",
   startSection: "Desde el inicio",

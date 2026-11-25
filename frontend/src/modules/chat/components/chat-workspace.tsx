@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -55,6 +56,13 @@ interface SocketSendResponse {
   ok: boolean;
   message?: SocketMessage;
   error?: string;
+}
+
+function removeSearchParam(name: string): void {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(name)) return;
+  url.searchParams.delete(name);
+  window.history.replaceState(window.history.state, "", url);
 }
 
 export function ChatWorkspace({
@@ -145,64 +153,47 @@ export function ChatWorkspace({
   useConversationVisibility(selectedRequestId ? null : selectedId);
 
   const handledQueryParamRef = useRef<string | null>(null);
-  const handledConversationParamRef = useRef<string | null>(null);
-  const handledTabParamRef = useRef<string | null>(null);
+  const searchParams = useSearchParams();
+  const tabParam = searchParams?.get("tab") ?? null;
+  const conversationIdParam = searchParams?.get("conversationId") ?? null;
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (tabParam !== "requests" || receivedRequests.length === 0) {
       return;
     }
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const tabParam = searchParams.get("tab");
-
-    if (tabParam === "requests" && handledTabParamRef.current !== "requests") {
-      handledTabParamRef.current = "requests";
-      clearSelectedConversation();
-      if (receivedRequests.length > 0) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedRequestId(receivedRequests[0].id);
-      }
-    }
-  }, [receivedRequests, clearSelectedConversation]);
+    clearSelectedConversation();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedRequestId(receivedRequests[0].id);
+    removeSearchParam("tab");
+  }, [tabParam, receivedRequests, clearSelectedConversation]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || isLoading) {
-      return;
-    }
-
-    const searchParams = new URLSearchParams(window.location.search);
-    const conversationIdParam = searchParams.get("conversationId");
-
-    if (!conversationIdParam) {
-      return;
-    }
-
-    if (handledConversationParamRef.current === conversationIdParam) {
+    if (!conversationIdParam || isLoading) {
       return;
     }
 
     const targetConv = conversations.find((c) => c.id === conversationIdParam);
     if (targetConv) {
-      handledConversationParamRef.current = conversationIdParam;
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedRequestId(null);
       handleSelectConversation(targetConv);
+      removeSearchParam("conversationId");
     } else if (conversations.length > 0) {
-      handledConversationParamRef.current = conversationIdParam;
       toast.error("Conversación no encontrada o sin acceso.");
+      removeSearchParam("conversationId");
     }
-  }, [conversations, isLoading, handleSelectConversation]);
+  }, [conversationIdParam, conversations, isLoading, handleSelectConversation]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const contactIdParam = searchParams.get("contactId");
-    const contextTypeParam = searchParams.get("contextType");
-    const contextIdParam = searchParams.get("contextId");
+    const urlParams = new URLSearchParams(window.location.search);
+    const contactIdParam = urlParams.get("contactId");
+    const contextTypeParam = urlParams.get("contextType");
+    const contextIdParam = urlParams.get("contextId");
 
     if (!contactIdParam || !contextTypeParam || !contextIdParam) {
       return;
@@ -250,11 +241,15 @@ export function ChatWorkspace({
   );
 
   const showConnectionDialog =
-    isError && !dismissedError;
+    isError && !dismissedError && !selectedConversation && !selectedRequest;
 
   const { status: connectionStatus, refreshMessages } = useChatConnection(selectedRequestId ? null : selectedId);
 
   const handleBackToList = () => {
+    if (isCompact && ui?.launcherId) {
+      ui?.setIsPanelOpen(false);
+      return;
+    }
     setSelectedRequestId(null);
     setResponseError(null);
     clearSelectedConversation();

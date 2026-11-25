@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { Socket } from 'socket.io-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { toast } from 'sonner';
+import { getActiveConversationId } from '@/modules/chat';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { useNotificationToasts } from '../hooks/use-notification-toasts';
 import { getNotificationsSocket } from '../services/notifications-socket';
@@ -12,6 +13,10 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+}));
+
+vi.mock('@/modules/chat', () => ({
+  getActiveConversationId: vi.fn(() => null),
 }));
 
 vi.mock('sonner', () => ({
@@ -90,8 +95,9 @@ describe('useNotificationToasts', () => {
     expect(toast).toHaveBeenCalledWith('Mensaje nuevo de: Juan Pérez', {
       description: 'Hola, ¿cómo estás?',
       duration: 7000,
+      icon: expect.anything(),
       action: {
-        label: 'Ir al chat',
+        label: 'Ver mensaje',
         onClick: expect.any(Function),
       },
     });
@@ -124,8 +130,10 @@ describe('useNotificationToasts', () => {
 
     const options = vi.mocked(toast).mock.calls[0][1] as {
       action?: { label: string };
+      icon?: unknown;
     };
     expect(options.action?.label).toBe('Ir a la sala de chat');
+    expect(options.icon).toBeDefined();
   });
 
   it('usa la etiqueta por defecto si el evento no trae un tipo conocido', () => {
@@ -166,5 +174,30 @@ describe('useNotificationToasts', () => {
       'notification:new',
       expect.any(Function),
     );
+  });
+  it('no muestra el toast de la conversación que el usuario tiene abierta', () => {
+    const socket = createSocket();
+    vi.mocked(getAccessToken).mockReturnValue('fake-token');
+    vi.mocked(getNotificationsSocket).mockReturnValue(
+      socket as unknown as Socket,
+    );
+    vi.mocked(getActiveConversationId).mockReturnValue('conv-123');
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'visible',
+    });
+
+    renderHook(() => useNotificationToasts());
+
+    act(() => {
+      socket.emitEvent('notification:new', {
+        typeCode: 'CHAT_MESSAGE',
+        title: 'Mensaje nuevo de: Juan Pérez',
+        body: 'Hola',
+        actionUrl: '/chat?conversationId=conv-123',
+      });
+    });
+
+    expect(toast).not.toHaveBeenCalled();
   });
 });

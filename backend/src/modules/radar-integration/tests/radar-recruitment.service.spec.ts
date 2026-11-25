@@ -86,7 +86,6 @@ function setup() {
   };
   const applicationActions = {
     withdrawApplication: vi.fn(),
-    notifyStateChanged: vi.fn(),
   };
   const applications = makeApplications();
   const jobApplications = makeJobApplications();
@@ -648,31 +647,39 @@ describe('RadarRecruitmentService', () => {
     ).rejects.toBeInstanceOf(RadarApplicationNotFoundException);
   });
 
-  it('HU-15: notifica al postulante el cambio de estado tras la decisión', async () => {
-    const { applications, applicationActions, service, sources } = setup();
+  it('registra las decisiones de contratacion y rechazo sin emitir notificaciones de estado', async () => {
+    const { applications, service, sources } = setup();
     sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([{ id: 'app' }]);
 
-    await service.decideApplication('recruiter', 'app', 'hired');
-    await service.decideApplication('recruiter', 'app', 'rejected');
-
-    expect(applicationActions.notifyStateChanged).toHaveBeenNthCalledWith(1, {
-      recipientId: 'user',
-      applicationId: 'app',
-      previousStatus: 'En revisión',
-      newStatus: 'Aceptada',
-      jobTitle: 'Dev Backend',
-      companyName: 'Empresa A',
+    await expect(
+      service.decideApplication('recruiter', 'app', 'hired'),
+    ).resolves.toEqual({
+      id: 'app',
+      state: 'hired',
     });
-    expect(applicationActions.notifyStateChanged).toHaveBeenNthCalledWith(
+    await expect(
+      service.decideApplication('recruiter', 'app', 'rejected'),
+    ).resolves.toEqual({
+      id: 'app',
+      state: 'rejected',
+    });
+
+    expect(applications.recordRecruiterDecision).toHaveBeenNthCalledWith(
+      1,
+      'app',
+      'Aceptada',
+    );
+    expect(applications.recordRecruiterDecision).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ newStatus: 'No seleccionado' }),
+      'app',
+      'No seleccionado',
     );
   });
 
-  it('HU-15: no notifica si la decisión no se pudo registrar', async () => {
-    const { applications, applicationActions, service, sources } = setup();
+  it('no registra auditoria cuando la decision no se pudo guardar', async () => {
+    const { access, applications, service, sources } = setup();
     sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([]);
@@ -680,7 +687,8 @@ describe('RadarRecruitmentService', () => {
     await expect(
       service.decideApplication('recruiter', 'app', 'hired'),
     ).rejects.toBeInstanceOf(RadarApplicationConflictException);
-    expect(applicationActions.notifyStateChanged).not.toHaveBeenCalled();
+
+    expect(access.recordAudit).not.toHaveBeenCalled();
   });
 
   it('lista vacantes activas para el egresado', async () => {

@@ -1,4 +1,4 @@
-import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
+import { buildFrontendUrl } from '../../mail/helpers/frontend-url.js';
 import type { NotificationMailContent } from '../../notifications/types/notification-mail-content.type.js';
 import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';

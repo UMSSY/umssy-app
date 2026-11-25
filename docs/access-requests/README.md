@@ -6,6 +6,8 @@ The `access-requests` module manages graduates' access requests: registration an
 
 This document describes the read services the module exposes to other domains in Sprint 3.
 
+Account activation uses institutional buttons with the shared button shape.
+
 ## Read services for other domains
 
 `ApprovedGraduateCareersService` (exported by `AccessRequestsModule`) provides cohort data without exposing the `access_requests` table:
@@ -42,7 +44,7 @@ sequenceDiagram
 
 ## Frontend integration
 
-These services are not consumed directly by the frontend. Request registration lives in `frontend/src/modules/access-request` and review in `frontend/src/modules/request-review`. The cohort they expose is reflected in the survey response rate (`SurveyResponseRateCard`) and in the heatmaps (`frontend/src/modules/heatmaps`).
+These services are not consumed directly by the frontend. Request registration lives in `frontend/src/modules/access-requests` and review in `frontend/src/modules/request-review`. The cohort they expose is reflected in the survey response rate (`SurveyResponseRateCard`) and in the heatmaps (`frontend/src/modules/heatmaps`).
 
 ## Dependencies
 
@@ -55,6 +57,10 @@ These services are not consumed directly by the frontend. Request registration l
 ## Data
 
 Table `access_requests` (see [backend/prisma/README.md](../../backend/prisma/README.md)).
+
+## Applicant and reviewer flow
+
+The applicant creates a request with `POST /access-requests`, attaches a document through `POST /access-requests/:id/document` and submits it through `POST /access-requests/:id/submit`. They can check status through `GET /access-requests/status/:code` and send corrections through `POST /access-requests/:code/resubmit`. Reviewers open the inbox and use the approve or reject endpoint. Approved applicants use the activation status, verification, resend and completion endpoints under `/account-activation`.
 
 ## Sprint History
 

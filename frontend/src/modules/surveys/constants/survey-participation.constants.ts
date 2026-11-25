@@ -2,6 +2,7 @@ import type { SurveyResponseRateLevel } from "../types/survey-response-rate-leve
 
 export const SURVEY_ALERT_THRESHOLD_MIN = 1;
 export const SURVEY_ALERT_THRESHOLD_MAX = 50;
+export const SURVEY_ALERT_THRESHOLD_MAX_LENGTH = String(SURVEY_ALERT_THRESHOLD_MAX).length;
 
 export const SURVEY_RESPONSE_RATE_LEVEL_THRESHOLDS = {
   lowMax: 35,
@@ -12,6 +13,12 @@ export const SURVEY_RESPONSE_RATE_LEVEL_LABELS = {
   low: "Participación baja",
   medium: "Participación media",
   expected: "Participación esperada",
+} as const satisfies Record<SurveyResponseRateLevel, string>;
+
+export const SURVEY_RESPONSE_RATE_LEVEL_METER_CLASSES = {
+  low: "**:data-[slot=progress-indicator]:bg-danger",
+  medium: "**:data-[slot=progress-indicator]:bg-gold",
+  expected: "**:data-[slot=progress-indicator]:bg-success",
 } as const satisfies Record<SurveyResponseRateLevel, string>;
 
 const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural);
@@ -54,11 +61,15 @@ export const SURVEY_ALERTS_TEXT = {
   exampleTitle: "Ejemplo.",
   example: "Si en P1 Buscando empleo pasa de 18% a 30%, subió 12 puntos y se enviará un aviso.",
   cancel: "Cancelar",
+  discardDescription: "Los cambios en la configuración de alertas no se guardarán.",
   save: "Guardar",
   saving: "Guardando...",
   saved: "Configuración de alertas guardada.",
   saveError: "No se pudo guardar la configuración de alertas. Inténtalo de nuevo.",
   loadError: "No se pudo cargar la configuración de alertas. Inténtalo de nuevo más tarde.",
   thresholdError: `El umbral debe estar entre ${SURVEY_ALERT_THRESHOLD_MIN} y ${SURVEY_ALERT_THRESHOLD_MAX} puntos porcentuales.`,
+  thresholdRequired: "El umbral de cambio es obligatorio.",
+  thresholdMin: `El umbral mínimo es ${SURVEY_ALERT_THRESHOLD_MIN} punto porcentual.`,
+  thresholdMax: `El umbral máximo es ${SURVEY_ALERT_THRESHOLD_MAX} puntos porcentuales.`,
   questionsError: "Selecciona al menos una pregunta para vigilar.",
 } as const;

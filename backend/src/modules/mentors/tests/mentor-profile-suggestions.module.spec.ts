@@ -14,6 +14,9 @@ import { MentorOffersController } from '../controllers/mentor-offers.controller.
 import { MentorExitController } from '../controllers/mentor-exit.controller.js';
 import { MentorParticipationController } from '../controllers/mentor-participation.controller.js';
 import { MentorCapacityAdminController } from '../controllers/mentor-capacity-admin.controller.js';
+import { NotificationsModule } from '../../notifications/notifications.module.js';
+import { WorkExperienceSourcesModule } from '../../work-experience/work-experience-sources.module.js';
+import { MentorDirectorySearchService } from '../services/mentor-directory-search.service.js';
 
 describe('MentorsModule profile suggestions configuration', () => {
   it('registers the suggestions service once alongside its existing repository', () => {
@@ -28,6 +31,7 @@ describe('MentorsModule profile suggestions configuration', () => {
     ).toHaveLength(1);
     expect(providers).toContain(MentorsRepository);
     expect(providers).toContain(MentorsService);
+    expect(providers).toContain(MentorDirectorySearchService);
   });
 
   it('exports the suggestions service for a subsequent consumer', () => {
@@ -36,9 +40,15 @@ describe('MentorsModule profile suggestions configuration', () => {
     );
   });
 
-  it('preserves the existing module imports without adding dependencies', () => {
+  it('imports the modules that provide its public service dependencies', () => {
     expect(Reflect.getMetadata(MODULE_METADATA.IMPORTS, MentorsModule)).toEqual(
-      [AuthModule, ProfileModule, SkillsModule],
+      [
+        AuthModule,
+        ProfileModule,
+        SkillsModule,
+        NotificationsModule,
+        WorkExperienceSourcesModule,
+      ],
     );
   });
 

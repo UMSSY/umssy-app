@@ -57,11 +57,11 @@ export function WeekGrid({
   }
 
   return (
-    <section aria-label="Disponibilidad semanal">
+    <section aria-label="Disponibilidad semanal" className="@container/week">
       <div
         className={cn(
           "hidden overflow-clip rounded-lg border border-border",
-          "md:grid md:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
+          "@min-[44rem]/week:grid @min-[44rem]/week:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
         )}
       >
         <div aria-hidden="true">
@@ -141,6 +141,7 @@ export function WeekGrid({
                           onClick={() => handleBlockClick(block)}
                           className={cn(
                             "size-full flex-col items-start justify-start gap-0 overflow-hidden rounded-md px-1.5 py-0.5 text-left text-xs leading-[15px] font-semibold",
+                            density === "compact" && "justify-center py-0 leading-none",
                             STATE_BUTTON_CLASSES[block.state],
                             isSelected && SELECTED_BLOCK_CLASSES
                           )}

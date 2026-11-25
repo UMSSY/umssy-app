@@ -7,8 +7,8 @@
     <link rel="icon" href="/icons/icon-umssy.svg" />
     <style>
       :root { color-scheme: light dark; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f6f7f9; color: #0b1f2e; }
-      main { max-width: 26rem; margin: 1rem; padding: 2rem 1.5rem; border-radius: 1rem; background: #fff; text-align: center; box-shadow: 0 1px 3px rgba(11, 31, 46, 0.12); }
+      body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; background: #f6f7f9; color: #0b1f2e; }
+      main { max-width: 26rem; margin: 1rem; padding: clamp(1rem, 6dvh, 2rem) 1.5rem; border-radius: 1rem; background: #fff; text-align: center; box-shadow: 0 1px 3px rgba(11, 31, 46, 0.12); }
       img { width: 3.5rem; height: 3.5rem; }
       h1 { margin: 1rem 0 0.5rem; font-size: 1.25rem; }
       p { margin: 0 0 1.5rem; line-height: 1.5; color: #4a5865; }
@@ -30,7 +30,7 @@
       <h1>Estás sin conexión</h1>
       <p id="offline-instructions">Esta página necesita conexión a Internet. Puedes intentar abrir tus pases guardados en Mis inscripciones.</p>
       <div class="actions">
-        <a id="open-passes" href="/events/my-passes">Ir a Mis inscripciones</a>
+        <a id="open-passes" href="/offline/passes">Ir a mis pases guardados</a>
         <a class="secondary" href="" onclick="location.reload(); return false;">Reintentar</a>
       </div>
     </main>

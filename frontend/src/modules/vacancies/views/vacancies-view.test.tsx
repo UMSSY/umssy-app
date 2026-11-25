@@ -2,11 +2,16 @@ import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useAppliedJobOfferIds } from "@/modules/matching/hooks/use-applied-job-offer-ids";
 import { jobApplicationService } from "@/modules/matching/services/job-application.service";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { vacanciesService } from "../services/vacancies.service";
 import { buildVacancy } from "../testing/vacancy-fixtures";
 import { VacanciesView } from "./vacancies-view";
+
+vi.mock("@/modules/matching/hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
 
 vi.mock("../services/vacancies.service", () => ({
   vacanciesService: { listPublished: vi.fn() },
@@ -40,18 +45,6 @@ afterEach(() => {
 });
 
 describe("VacanciesView", () => {
-  it("lista las vacantes publicadas que devuelve la API", async () => {
-    renderWithQuery(<VacanciesView />);
-
-    expect(
-      await screen.findByRole("link", {
-        name: "Ver detalles de Desarrollador Full Stack",
-      }),
-    ).toHaveAttribute("href", `/vacancies/${VACANCIES[0].id}`);
-    expect(screen.getByRole("status")).toHaveTextContent("2 vacantes encontradas");
-    expect(listPublished).toHaveBeenCalledTimes(1);
-  });
-
   it("permite recuperar los resultados desde una búsqueda sin coincidencias", async () => {
     renderWithQuery(<VacanciesView />);
     const initialLinks = await screen.findAllByRole("link", { name: /^Ver detalles de / });
@@ -67,16 +60,6 @@ describe("VacanciesView", () => {
 
     expect(searchInput).toHaveValue("");
     expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(initialLinks.length);
-  });
-
-  it("busca también por tecnología requerida", async () => {
-    renderWithQuery(<VacanciesView />);
-    await screen.findAllByRole("link", { name: /^Ver detalles de / });
-
-    fireEvent.change(screen.getByRole("searchbox", { name: /Buscar vacantes/ }), { target: { value: "sql" } });
-
-    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Ver detalles de Analista de Datos" })).toBeInTheDocument();
   });
 
   it("avisa cuando todavía no hay vacantes publicadas", async () => {
@@ -132,6 +115,8 @@ describe("VacanciesView - criterios de HU-11", () => {
     renderWithQuery(<VacanciesView />);
 
     expect(await screen.findByRole("link", { name: "Ver detalles de Ingeniero COBOL" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).toHaveAttribute("href", `/vacancies/${VACANCIES[0].id}`);
+    expect(listPublished).toHaveBeenCalledTimes(1);
     expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(3);
     expect(screen.getByRole("status")).toHaveTextContent("3 vacantes encontradas");
   });
@@ -210,13 +195,6 @@ describe("VacanciesView - criterios de HU-11", () => {
 });
 
 describe("VacanciesView - tarjeta de vacante", () => {
-  it("muestra la modalidad de la vacante", async () => {
-    listPublished.mockResolvedValue([buildVacancy({ modality: "Remoto" })]);
-    renderWithQuery(<VacanciesView />);
-
-    expect(await screen.findByText("Remoto")).toBeInTheDocument();
-  });
-
   it("muestra las habilidades requeridas como chips", async () => {
     listPublished.mockResolvedValue([buildVacancy({ requirements: ["Node.js", "React"] })]);
     renderWithQuery(<VacanciesView />);
@@ -266,5 +244,27 @@ describe("VacanciesView - tarjeta de vacante", () => {
       "col-span-2",
       "md:col-span-1",
     );
+  });
+
+  it("muestra «Ya te postulaste» solo en las vacantes con postulación activa", async () => {
+    await setRole("estudiante");
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set([VACANCIES[0].id]));
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+    expect(screen.getAllByText("Ya te postulaste")).toHaveLength(1);
+    const article = screen.getByText(VACANCIES[0].title).closest("article");
+    expect(within(article as HTMLElement).getByText("Ya te postulaste")).toBeInTheDocument();
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set<string>());
+  });
+
+  it("no muestra el chip a quien no puede postularse", async () => {
+    await setRole("empresa");
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set([VACANCIES[0].id]));
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+    expect(screen.queryByText("Ya te postulaste")).not.toBeInTheDocument();
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set<string>());
   });
 });

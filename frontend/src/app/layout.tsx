@@ -1,20 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Inter_Tight } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { RegisterServiceWorker } from "./register-service-worker";
 import { Providers } from "./providers";
-import { PwaInstallProvider } from "@/shared/contexts/pwa-install-context";
 
-const inter = Inter({
+const inter = localFont({
+  src: "./fonts/Inter.ttf",
   variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "600"],
+  display: "swap",
 });
 
-const interTight = Inter_Tight({
+const interTight = localFont({
+  src: "./fonts/InterTight.ttf",
   variable: "--font-inter-tight",
-  subsets: ["latin"],
-  weight: ["700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -45,12 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <PwaInstallProvider>
-          <Providers>
-            <RegisterServiceWorker />
-            {children}
-          </Providers>
-        </PwaInstallProvider>
+        <Providers>
+          <RegisterServiceWorker />
+          {children}
+        </Providers>
       </body>
     </html>
   );

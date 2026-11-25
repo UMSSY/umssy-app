@@ -43,7 +43,7 @@ export function JobApplicationAction({
     <div className="flex flex-col items-end gap-1">
       {application ? (
         <>
-          <Button size="sm" variant="secondary" disabled>
+          <Button variant="secondary" disabled>
             <CircleCheck className="size-4" aria-hidden="true" />
             {JOB_APPLICATION_MESSAGES.alreadyApplied}
           </Button>
@@ -55,7 +55,6 @@ export function JobApplicationAction({
         </>
       ) : (
         <Button
-          size="sm"
           onClick={() => {
             setConsentCv(false);
             setConsentRadar(false);
@@ -124,7 +123,8 @@ export function JobApplicationAction({
           )}
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="cancel"
+              size="lg"
               disabled={isApplying}
               onClick={() => setConsentJobId(null)}
             >

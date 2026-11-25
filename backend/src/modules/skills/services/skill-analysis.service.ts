@@ -10,6 +10,8 @@ import type { DetectedSkillPayload } from '../types/detected-skill-payload.type.
 import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 import { toUserSkillSummary } from '../mappers/user-skill-summary.mapper.js';
 import type { UserSkillSummaryResponse } from '../responses/user-skill-summary.response.js';
+import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
+import { isVisibleNlpSkill } from '../../nlp/utils/is-visible-nlp-skill.js';
 
 @Injectable()
 export class SkillAnalysisService {
@@ -19,8 +21,14 @@ export class SkillAnalysisService {
     private readonly users: UsersService,
   ) {}
 
-  hasProfileSkills(userId: string): Promise<boolean> {
-    return this.repository.hasProfileSkills(userId);
+  async hasProfileSkills(userId: string): Promise<boolean> {
+    const rows = await this.repository.findProfileSkillRows(userId);
+    return rows.some(
+      (row) =>
+        row.source === USER_SKILL_SOURCES.manual ||
+        (row.source === USER_SKILL_SOURCES.nlp &&
+          isVisibleNlpSkill(row.skill.name, row.evidenceRefs)),
+    );
   }
 
   async listReviewQueue() {
@@ -69,8 +77,13 @@ export class SkillAnalysisService {
     ).length;
   }
 
-  findProfileSkillRows(userId: string): Promise<ProfileSkillRowResponse[]> {
-    return this.repository.findProfileSkillRows(userId);
+  findProfileSkillRows(
+    userId: string,
+    context?: TransactionContext,
+  ): Promise<ProfileSkillRowResponse[]> {
+    return context
+      ? this.repository.findProfileSkillRows(userId, context)
+      : this.repository.findProfileSkillRows(userId);
   }
 
   findApprovedPublicationSkills(userId: string, context: TransactionContext) {
@@ -82,16 +95,16 @@ export class SkillAnalysisService {
     detected: readonly DetectedSkillPayload[],
     context: TransactionContext,
   ): Promise<boolean> {
-    const rows = await this.repository.findProfileSkillRows(userId, context);
-
-    const plan = planSkillReconciliation(rows, detected);
-
-    await this.repository.applyReconciliation(userId, plan, context);
-
-    const [updated, sources] = await Promise.all([
+    const [rows, sources] = await Promise.all([
       this.repository.findProfileSkillRows(userId, context),
       this.sources.load(userId, context),
     ]);
+
+    const plan = planSkillReconciliation(rows, detected, sources.live);
+
+    await this.repository.applyReconciliation(userId, plan, context);
+
+    const updated = await this.repository.findProfileSkillRows(userId, context);
     const approved: string[] = [],
       pending: string[] = [];
     for (const row of updated) {

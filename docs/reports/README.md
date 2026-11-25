@@ -2,9 +2,9 @@
 
 ## Purpose
 
-The `reports` module gives administrative staff the accepted and rejected users reports, their CSV and PDF export, and the history of generated reports. It also exposes academic semester utilities and the history to other domains (for example, the survey PDF report).
+The `reports` module gives administrative staff the accepted and rejected users reports, their CSV and PDF export, and the history of generated reports. It also exposes academic semester utilities and the history to other domains (for example, the survey PDF report), and the PDF renderer and author resolution to analytics (heatmap PDF export).
 
-- Backend: `backend/src/modules/reports` (`ReportsController`, `ReportsService`, `ReportPdfService`, `ReportHistoryService`, user and generated report repositories).
+- Backend: `backend/src/modules/reports` (`ReportsController`, `ReportsService`, `ReportPdfService`, `ReportAuthorService`, `ReportHistoryService`, user and generated report repositories).
 - Frontend: `frontend/src/modules/reports` (accepted users, rejected users and history views, download menu with format and scope, academic year menu).
 
 ## Functionality
@@ -34,13 +34,17 @@ flowchart LR
     RC --> SVC[ReportsService]
     RC --> HS[ReportHistoryService]
     SVC --> PDF[ReportPdfService]
+    SVC --> AU[ReportAuthorService]
     SVC --> UR[ReportUsersRepository]
+    AU --> UR
     HS --> GR[GeneratedReportsRepository]
   end
   PDF --> SPD[common: SimplePdfDocument]
   UR --> DB[(users, access_requests)]
   GR --> DB2[(admin_export_histories)]
   SURV[surveys: exportSurveyPdf] --> HS
+  HM[analytics: HeatmapPdfService] --> PDF
+  HM --> AU
 ```
 
 ## Key flows
@@ -54,6 +58,7 @@ sequenceDiagram
   participant H as useExportReportCsv
   participant C as ReportsController
   participant S as ReportsService
+  participant AU as ReportAuthorService
   participant P as ReportPdfService
   participant RH as ReportHistoryService
   A->>UI: Download -> format (PDF/CSV) and scope (filtered / current page)
@@ -63,7 +68,8 @@ sequenceDiagram
   alt format = pdf
     C->>S: exportRegisteredUsersPdf(filters, userId)
     S->>S: Filters and paginates in memory if page and limit are sent
-    S->>S: findAuthor(userId) (404 REPORT_AUTHOR_NOT_FOUND if they have no name)
+    S->>AU: resolveLabel(userId)
+    AU-->>S: Nombre Apellido (Administrativo) (404 REPORT_AUTHOR_NOT_FOUND if they have no name)
     S->>P: render(title, author, date, filters, rows)
     P-->>S: PDF Buffer
   else format = csv (default)
@@ -108,6 +114,8 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 | `ReportHistoryService.registerGeneratedReport` | surveys | Record a survey's PDF report |
 | `GeneratedReportsRepository` | surveys | Access to the history |
 | `getAcademicPeriod` (`utils/academic-period.ts`) | surveys | Academic semester of a date |
+| `ReportPdfService.render(content)` | analytics | Heatmap PDF with the institutional report layout |
+| `ReportAuthorService.resolveLabel(authorId)` | analytics | "Generado por" label of the heatmap PDF |
 
 ## Dependencies
 
@@ -115,11 +123,16 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 | --- | --- | --- |
 | Uses | common | `SimplePdfDocument`, `formatBoliviaDateTime`, pagination, `ResponseInterceptor` |
 | Used by | [surveys](../surveys/README.md) | Report history and academic semesters |
+| Used by | [analytics](../analytics/README.md) | `ReportPdfService` and `ReportAuthorService` for the heatmap PDF export |
 | Uses (frontend) | shared | `ExportFormatMenu` (format menu shared with the heatmaps), `downloadFile` |
 
 ## Data
 
 Reads `users` and `access_requests` for the user reports and writes to `admin_export_histories` (history). See [backend/prisma/README.md](../../backend/prisma/README.md).
+
+## Action styling
+
+The export format menu uses the institutional primary style for downloads in both registered and rejected user reports.
 
 ## Sprint History
 

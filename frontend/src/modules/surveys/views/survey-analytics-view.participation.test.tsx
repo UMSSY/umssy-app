@@ -13,6 +13,7 @@ import type { SurveyParticipation } from "../types/survey-participation.types";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const STATISTICS = buildStatistics({ totalResponses: 48 });
 const REMINDER_RESULT = {
@@ -68,19 +69,21 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
   });
 
   it.each([
-    [35, 42, "Participación baja"],
-    [36, 43, "Participación media"],
-    [65, 78, "Participación media"],
-    [66, 79, "Participación esperada"],
-  ])("informa el nivel de %i%% como texto sin codificar color", async (responseRate, respondedCount, label) => {
+    [35, 42, "Participación baja", "bg-danger"],
+    [36, 43, "Participación media", "bg-gold"],
+    [65, 78, "Participación media", "bg-gold"],
+    [66, 79, "Participación esperada", "bg-success"],
+    [100, 120, "Participación esperada", "bg-success"],
+  ])("pinta el meter con %i%% según su rango", async (responseRate, respondedCount, label, colorClass) => {
     mockParticipation({ responseRate, respondedCount, pendingCount: 120 - respondedCount });
     await renderLoaded(`${respondedCount} de 120 titulados han respondido`);
 
     const card = screen.getByLabelText("Tasa de respuesta", { selector: "[data-slot=card]" });
     const meter = within(card).getByRole("progressbar", { name: "Tasa de respuesta" });
+    const meterRoot = card.querySelector("[data-slot=progress]");
     expect(within(card).getByText(label)).toBeInTheDocument();
     expect(meter).toHaveAttribute("aria-valuetext", `${responseRate}% · ${label}`);
-    expect(card.innerHTML).not.toMatch(/bg-(gold|danger|success)|text-(gold|danger|success)/);
+    expect(meterRoot).toHaveClass(`**:data-[slot=progress-indicator]:${colorClass}`);
   });
 
   it("muestra la cantidad exacta de pendientes en el botón", async () => {
@@ -176,7 +179,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     const dialog = await openAlerts(user);
 
     expect(within(dialog).getByRole("switch", { name: "Activar alertas" })).toBeChecked();
-    expect(within(dialog).getByRole("spinbutton", { name: "Umbral de cambio" })).toHaveValue(10);
+    expect(within(dialog).getByRole("textbox", { name: "Umbral de cambio" })).toHaveValue("10");
     expect(within(dialog).getByText("1 de 2")).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Marcar todas" }));
@@ -192,13 +195,13 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await renderLoaded();
     const dialog = await openAlerts(user);
 
-    const threshold = within(dialog).getByRole("spinbutton", { name: "Umbral de cambio" });
+    const threshold = within(dialog).getByRole("textbox", { name: "Umbral de cambio" });
     await user.clear(threshold);
     await user.type(threshold, "60");
     await user.click(within(dialog).getByRole("button", { name: "Desmarcar todas" }));
     await user.click(within(dialog).getByRole("button", { name: "Guardar" }));
 
-    expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.thresholdError)).toBeInTheDocument();
+    expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.thresholdMax)).toBeInTheDocument();
     expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.questionsError)).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
   });
@@ -241,6 +244,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await renderLoaded();
     const dialog = await openAlerts(user);
 
+    await user.click(within(dialog).getByRole("checkbox", { name: /¿Qué competencias usas/ }));
     await user.click(within(dialog).getByRole("button", { name: "Guardar" }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(SURVEY_ALERTS_TEXT.saveError, expect.anything()));

@@ -10,6 +10,7 @@ import { UserSkillRepository } from '../repositories/user-skill.repository.js';
 import type { UpdateUserSkillsRequest } from '../requests/update-user-skills.request.js';
 import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import type { SkillResponse } from '../responses/skill.response.js';
+import { matchingSkillUserIds } from '../user-skills-search.js';
 
 @Injectable()
 export class UserSkillService {
@@ -21,6 +22,14 @@ export class UserSkillService {
     private readonly skillsAnalysis: ProfileSkillsAnalysisService,
     private readonly evidence: UserSkillEvidenceRepository,
   ) {}
+
+  matchingUserIds(term: string) {
+    return matchingSkillUserIds(term);
+  }
+
+  getAffinitySkillNames(userId: string): Promise<string[]> {
+    return this.userSkillRepository.findAffinitySkillNames(userId);
+  }
 
   replaceExperienceEvidence(
     userId: string,

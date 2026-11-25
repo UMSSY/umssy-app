@@ -107,6 +107,34 @@ describe('contrato de solicitudes HU7-2', () => {
     });
   });
 
+  it('reserva data.code para conflictos recuperables y conserva el código de dominio en 400/403', async () => {
+    for (const [result, statusCode] of [
+      ['INVALID_PREFERENCES', 400],
+      ['NOT_ELIGIBLE', 403],
+    ] as const) {
+      const service = new MentorParticipationService({
+        createRequest: vi.fn().mockResolvedValue({ result }),
+      } as unknown as MentorParticipationRepository);
+
+      await expect(service.create('user', preferences)).rejects.toMatchObject({
+        statusCode,
+        code: 'MENTOR_PARTICIPATION_ERROR',
+        data: null,
+      });
+    }
+
+    const conflict = new MentorParticipationService({
+      createRequest: vi
+        .fn()
+        .mockResolvedValue({ result: 'CAPACITY_AVAILABLE' }),
+    } as unknown as MentorParticipationRepository);
+    await expect(conflict.create('user', preferences)).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'CAPACITY_AVAILABLE',
+      data: { code: 'CAPACITY_AVAILABLE' },
+    });
+  });
+
   it('propaga errores de almacenamiento sin convertirlos en respuestas exitosas', async () => {
     const failure = new Error('DB unavailable');
     const repository = {

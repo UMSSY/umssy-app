@@ -1,12 +1,20 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { MentorshipProjection } from '../components/mentorship-projection';
+import { MentorshipAvailability } from '../components/mentorship-projection';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PageHeading } from '@/shared/components/layout';
+import { useSkillCatalog } from '@/modules/skills';
+import { useRadarSimulationEligibility } from '../hooks/use-radar-simulation-eligibility';
+import { RadarAreaActions } from '../components/radar-area-actions';
+import { SkillSimulationDialog } from '../components/skill-simulation-dialog';
+import { cn } from '@/lib/utils';
+import {
+  readSessionStorage,
+  writeSessionStorage,
+} from '@/shared/services/storage/browser-session-storage';
 import { AffinityRadarChart } from '../components/affinity-radar-chart';
 import { AreaBreakdownPanel } from '../components/area-breakdown-panel';
 import type { AreaId } from '../types/area-id.types';
@@ -53,13 +61,40 @@ export function RadarProfileView() {
     areaId: AreaId;
     score: number;
   } | null>(null);
-  const [isSimulationOpen, setIsSimulationOpen] = useState(false);
+  const [simulationArea, setSimulationArea] = useState<AreaId | null>(null);
+  const simulationCatalog = useSkillCatalog(simulationArea !== null);
+  const [showMentorship, setShowMentorship] = useState(false);
+  const simulationEligibility = useRadarSimulationEligibility(
+    data?.userId,
+    simulationArea !== null,
+  );
+  const simulationLoading =
+    simulationEligibility.isFetching || simulationCatalog.isFetching;
+  const simulationError =
+    simulationEligibility.isError || simulationCatalog.isError ||
+    simulationEligibility.isPaused || simulationCatalog.isPaused;
+  const simulationReady = !simulationLoading && !simulationError &&
+    simulationEligibility.isSuccess && simulationCatalog.isSuccess;
+  const closeSimulation = () => {
+    setProjection(null);
+    setSimulationArea(null);
+    setShowMentorship(false);
+  };
   const [isEvidenceVisible, setIsEvidenceVisible] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
-  const selectedPanelRef = useRef<HTMLElement>(null);
+  const [comparisonPreference, setComparisonPreference] = useState<{
+    key: string;
+    enabled: boolean;
+  } | null>(null);
+  const comparisonKey = data ? `radar:comparison:${data.userId}` : null;
+  const isComparing = comparisonKey
+    ? comparisonPreference?.key === comparisonKey
+      ? comparisonPreference.enabled
+      : readSessionStorage(comparisonKey) === 'true'
+    : false;
+  const selectedPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!selectedArea || isEvidenceVisible || isSimulationOpen) return;
+    if (!selectedArea || isEvidenceVisible || simulationArea) return;
     const dismissOutside = (event: PointerEvent) => {
       if (
         event.target instanceof Node &&
@@ -77,7 +112,7 @@ export function RadarProfileView() {
       document.removeEventListener('pointerdown', dismissOutside);
       document.removeEventListener('keydown', dismissWithEscape);
     };
-  }, [selectedArea, isEvidenceVisible, isSimulationOpen]);
+  }, [selectedArea, isEvidenceVisible, simulationArea]);
 
   const handleSelectArea = (id: AreaId) => {
     setSelectedArea(id);
@@ -99,11 +134,19 @@ export function RadarProfileView() {
       : 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 font-sans">
-      <PageHeading
-        title="Radar de afinidad"
-        description="Competencias verificadas de tu perfil. Las habilidades pendientes no alteran las puntuaciones publicadas."
-      />
+    <main className="mx-auto flex w-full max-w-[1344px] flex-col gap-6 font-sans">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-tight text-[32px] font-semibold text-accent">Radar de afinidad</h1>
+          <p className="mt-3 text-sm text-text-secondary">Conoce tus fortalezas y encuentra orientación para seguir creciendo.</p>
+        </div>
+        {data && (
+          <div className="text-accent sm:text-right">
+            <p className="text-4xl font-bold tabular-nums">{data.average.toLocaleString('es-BO', { maximumFractionDigits: 2 })}</p>
+            <p className="text-xs uppercase">Promedio oficial</p>
+          </div>
+        )}
+      </header>
       {snapshotId && historical.isPending ? (
         <p role="status">Cargando publicacion...</p>
       ) : null}
@@ -123,7 +166,6 @@ export function RadarProfileView() {
             onClick={() => {
               setDismissedSnapshot(snapshotId);
               window.history.replaceState(null, '', window.location.pathname);
-              setIsComparing(false);
               setSelectedArea(null);
             }}
           >
@@ -165,9 +207,9 @@ export function RadarProfileView() {
       ) : null}
       {data ? (
         <>
-          <details className="group rounded-lg border border-border bg-surface p-5">
-            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
-              <div>
+          <details className="group order-10 rounded-xl border border-border bg-surface p-4 sm:p-5">
+            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:gap-4 [&::-webkit-details-marker]:hidden">
+              <div className="min-w-0">
                 <h2 className="text-lg font-semibold text-ink">
                   Mi perfil profesional
                 </h2>
@@ -175,7 +217,7 @@ export function RadarProfileView() {
                   Competencias y evidencias de tu perfil
                 </p>
               </div>
-              <div className="ml-auto text-right text-xs text-text-secondary">
+              <div className="text-left text-xs text-text-secondary max-sm:order-last max-sm:w-full sm:ml-auto sm:text-right">
                 <p role="status" className="font-semibold text-ink">
                   {data.status === 'ready'
                     ? data.approved.length
@@ -206,9 +248,9 @@ export function RadarProfileView() {
           </details>
           <div
             aria-label="Resumen del perfil"
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4"
           >
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">
                 {data.average.toLocaleString('es-BO', {
                   maximumFractionDigits: 2,
@@ -222,20 +264,20 @@ export function RadarProfileView() {
                   : `${variation >= 0 ? '+' : ''}${variation.toFixed(2)} vs. anterior`}
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">
                 {areas.filter((a) => a.score > 0).length} / 6
               </b>
               <p className="text-xs">Áreas con puntuación</p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">{data.keywordCount}</b>
               <p className="text-xs">Habilidades aprobadas</p>
               <p className="text-xs text-text-secondary">
                 {data.highRelevanceCount} de alta relevancia
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">{data.pendingCount}</b>
               <p className="text-xs">Habilidades pendientes</p>
             </div>
@@ -262,10 +304,10 @@ export function RadarProfileView() {
               próxima versión de tu radar.
             </p>
           ) : null}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.06fr)_minmax(300px,1fr)]">
             <AffinityRadarChart
               projectedScores={
-                projection && projection.areaId === selectedArea
+                simulationArea && projection
                   ? { [projection.areaId]: projection.score }
                   : undefined
               }
@@ -273,39 +315,37 @@ export function RadarProfileView() {
               previousPublishedAt={previous?.updatedAt}
               publishedAt={data.updatedAt}
               isComparisonEnabled={Boolean(comparison)}
+              highlightedArea={comparison ? selected?.id : undefined}
               onComparisonChange={(enabled) => {
-                setIsComparing(enabled);
+                if (!comparisonKey) return;
+                writeSessionStorage(comparisonKey, String(enabled));
+                setComparisonPreference({ key: comparisonKey, enabled });
                 setSelectedArea(null);
+                setIsEvidenceVisible(false);
               }}
               areas={data.version === 0 ? [] : areas}
-              average={data.average}
-              onAreaClick={handleSelectArea}
+              className="min-w-0 rounded-none shadow-none"
+              plotClassName="h-[340px] sm:h-[436px]"
+              onAreaClick={(id) => {
+                setSelectedArea(id);
+                setIsEvidenceVisible(!comparison);
+              }}
             />
-            <div className="flex min-w-0 flex-col gap-4">
-              {selectedArea && selected ? (
+            <div ref={selectedPanelRef} className="flex min-w-0 flex-col gap-4">
+              {selected && !comparison ? (
                 <section
-                  ref={selectedPanelRef}
                   aria-label="Área seleccionada"
-                  className="space-y-3 rounded-lg border border-border bg-surface p-5"
+                  className="space-y-3"
                 >
-                  <p className="text-sm text-text-secondary">
-                    Área seleccionada
-                  </p>
-                  <h2 className="font-semibold">{selected.name}</h2>
-                  <p>{selected.score.toLocaleString('es-BO')} / 10</p>
-                  <MentorshipProjection
-                    key={selected.id}
-                    area={selected}
-                    areas={areas}
-                    onProjectionChange={setProjection}
-                    onOpenChange={setIsSimulationOpen}
-                  />
-                  <Link
-                    className="block rounded border p-3 text-center text-sm underline"
-                    href={`/mentorship/mentors?area=${encodeURIComponent(selected.name)}&from=radar`}
-                  >
-                    Ver mentores de esta área
-                  </Link>
+                  <RadarAreaActions area={selected} onSimulate={() => setSimulationArea(selected.id)} />
+                  {selectedArea && (
+                    <Button className="w-full" onClick={() => {
+                      setShowMentorship(true);
+                      setSimulationArea(selected.id);
+                    }}>
+                      Proyección con mentoría
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full"
@@ -319,6 +359,7 @@ export function RadarProfileView() {
                 </section>
               ) : null}
               <AreaBreakdownPanel
+                className="rounded-none shadow-none"
                 areas={areas}
                 average={data.average}
                 compact={Boolean(selectedArea) && !isMobile}
@@ -369,7 +410,13 @@ export function RadarProfileView() {
                     Puntaje actual: {selected.score.toLocaleString('es-BO')} /
                     10
                   </span>
-                  <span className="font-semibold">
+                  <span
+                    className={cn(
+                      'font-semibold',
+                      delta > 0 && 'text-success',
+                      delta < 0 && 'text-destructive',
+                    )}
+                  >
                     {delta === 0
                       ? 'Sin cambio'
                       : `${delta > 0 ? 'Subió' : 'Bajó'} ${Math.abs(delta).toLocaleString('es-BO')} puntos`}
@@ -378,14 +425,33 @@ export function RadarProfileView() {
               ) : null}
             </section>
           ) : null}
-          {selectedArea && isEvidenceVisible ? (
+          {selectedArea && isEvidenceVisible && !comparison && !simulationArea ? (
             <RadarEvidencePanel
               key={`${data.userId}:${selectedArea}`}
               selected={selectedArea}
               radar={data}
               onClose={() => setIsEvidenceVisible(false)}
+              actions={selected ? <RadarAreaActions area={selected} onSimulate={() => { setIsEvidenceVisible(false); setSimulationArea(selected.id); }} /> : null}
             />
           ) : null}
+          {simulationArea && (
+            <SkillSimulationDialog
+              key={simulationArea}
+              areas={areas}
+              initialArea={simulationArea}
+              catalog={simulationCatalog.data}
+              approved={data.approved}
+              verification={simulationReady ? simulationEligibility.data : undefined}
+              verificationError={!simulationLoading && simulationError}
+              onRetry={() => {
+                void simulationEligibility.refetch();
+                void simulationCatalog.refetch();
+              }}
+              onProjectionChange={setProjection}
+              availability={showMentorship && selected ? <MentorshipAvailability area={selected} /> : null}
+              onClose={closeSimulation}
+            />
+          )}
           <p className="text-xs text-text-secondary">
             Las puntuaciones reflejan las habilidades aprobadas y sus
             evidencias.

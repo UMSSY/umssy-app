@@ -5,16 +5,21 @@ import { openOfflineRoute } from "@/shared/services/offline-navigation";
 
 export function useLeaveGuard(isActive: boolean) {
   const router = useRouter();
-  const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(isActive);
+  const { pendingHref, pendingAction, clearPendingHref, clearPendingAction } = useUnsavedChangesGuard(isActive);
+  const clearPending = () => {
+    clearPendingHref();
+    clearPendingAction();
+  };
   return {
-    isLeaveDialogOpen: pendingHref !== null,
+    isLeaveDialogOpen: pendingHref !== null || pendingAction !== null,
     confirmLeave: () => {
-      if (pendingHref) {
+      if (pendingAction) pendingAction();
+      else if (pendingHref) {
         if (navigator.onLine === false) void openOfflineRoute(pendingHref);
         else router.push(pendingHref);
       }
-      clearPendingHref();
+      clearPending();
     },
-    cancelLeave: clearPendingHref,
+    cancelLeave: clearPending,
   };
 }

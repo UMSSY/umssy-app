@@ -1,8 +1,14 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChatWorkspace } from '../components/chat-workspace';
+import { MessagingUiProvider, useMessagingUi } from '../contexts/messaging-ui-context';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => new URLSearchParams(window.location.search),
+}));
 
 vi.mock('sonner', () => ({
   toast: {
@@ -20,6 +26,10 @@ vi.mock('../services/chat-api', () => ({
 
 const mockHandleSelectConversation = vi.fn();
 const mockClearSelectedConversation = vi.fn();
+const mockConversationState = vi.hoisted(() => ({
+  hasListError: false,
+  hasSelectedConversation: false,
+}));
 
 vi.mock('../hooks/use-conversations', () => ({
   useConversations: vi.fn(() => ({
@@ -30,14 +40,24 @@ vi.mock('../hooks/use-conversations', () => ({
         updatedAt: '2026-11-15T00:00:00Z',
       },
     ],
-    selectedConversation: null,
+    selectedConversation: mockConversationState.hasSelectedConversation
+      ? {
+          id: 'conv-1',
+          contact: { id: 'user-2', fullName: 'Test Contact' },
+          contextType: 'POSTULACION',
+          contextId: 'application-1',
+          lastMessage: null,
+          unreadCount: 0,
+          updatedAt: '2026-11-15T00:00:00Z',
+        }
+      : null,
     hasMore: false,
     loadMore: vi.fn(),
-    selectedId: null,
+    selectedId: mockConversationState.hasSelectedConversation ? 'conv-1' : null,
     activeFilter: 'all',
     searchQuery: '',
     isLoading: false,
-    isError: false,
+    isError: mockConversationState.hasListError,
     retryConversations: vi.fn(),
     setActiveFilter: vi.fn(),
     setSearchQuery: vi.fn(),
@@ -49,6 +69,10 @@ vi.mock('../hooks/use-conversations', () => ({
     updateConversationLastMessage: vi.fn(),
     setConversationBlocked: vi.fn(),
   })),
+}));
+
+vi.mock('@/shared/contexts/auth-context', () => ({
+  useAuth: () => ({ roles: ['titulado'], isLoading: false }),
 }));
 
 vi.mock('../hooks/use-received-connection-requests', () => ({
@@ -121,6 +145,8 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockConversationState.hasListError = false;
+    mockConversationState.hasSelectedConversation = false;
     queryClient = new QueryClient();
     window.history.pushState({}, '', '/chat');
   });
@@ -171,5 +197,70 @@ describe('ChatWorkspace Deep Links (HU-20)', () => {
       // Should show connection request detail
       expect(screen.getByText('Solicitud de conexión')).toBeInTheDocument();
     });
+  });
+
+  it('does not show the conversation-list error over an opened application chat', () => {
+    mockConversationState.hasListError = true;
+    mockConversationState.hasSelectedConversation = true;
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ChatWorkspace />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByTestId('message-textarea')).toBeInTheDocument();
+    expect(screen.queryByText('Error de conexión')).not.toBeInTheDocument();
+  });
+
+  it('closes the panel on back when another screen opened the chat', () => {
+    mockConversationState.hasSelectedConversation = true;
+    function OpenFromLauncher() {
+      const ui = useMessagingUi();
+      return (
+        <>
+          <Button
+            type="button"
+            onClick={() => {
+              ui?.setLauncherId('contact-button');
+              ui?.setIsPanelOpen(true);
+            }}
+          >
+            Abrir desde otra pantalla
+          </Button>
+          <span data-testid="panel-state">{ui?.isPanelOpen ? 'open' : 'closed'}</span>
+        </>
+      );
+    }
+
+    const { container } = render(
+      <QueryClientProvider client={queryClient}>
+        <MessagingUiProvider>
+          <OpenFromLauncher />
+          <ChatWorkspace isCompact />
+        </MessagingUiProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir desde otra pantalla' }));
+    expect(screen.getByTestId('panel-state')).toHaveTextContent('open');
+    fireEvent.click(within(container).getByTestId('chat-back-button'));
+    expect(screen.getByTestId('panel-state')).toHaveTextContent('closed');
+    expect(mockClearSelectedConversation).not.toHaveBeenCalled();
+  });
+
+  it('goes back to the list when the chat was not opened from another screen', () => {
+    mockConversationState.hasSelectedConversation = true;
+
+    const { container } = render(
+      <QueryClientProvider client={queryClient}>
+        <MessagingUiProvider>
+          <ChatWorkspace isCompact />
+        </MessagingUiProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(within(container).getByTestId('chat-back-button'));
+    expect(mockClearSelectedConversation).toHaveBeenCalled();
   });
 });

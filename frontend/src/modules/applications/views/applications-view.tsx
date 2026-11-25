@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApplicationsMobileList } from "../components/applications-mobile-list";
-import { ApplicationsStatusSelect } from "../components/applications-status-select";
 import { ApplicationsTable } from "../components/applications-table";
 import { ShowWithdrawnToggle } from "../components/show-withdrawn-toggle";
 import { WithdrawApplicationDialog } from "../components/withdraw-application-dialog";
@@ -20,9 +19,7 @@ import { useWithdrawApplication } from "../hooks/use-withdraw-application";
 import { useReactivateApplication } from "../hooks/use-reactivate-application";
 import type { Application } from "../types/application.types";
 import type { ApplicationSort } from "../types/application-sort.types";
-import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 import { excludeWithdrawnApplications } from "../utils/exclude-withdrawn-applications";
-import { filterApplicationsByStatus } from "../utils/filter-applications-by-status";
 import { sortApplications } from "../utils/sort-applications";
 
 export function ApplicationsView() {
@@ -31,7 +28,6 @@ export function ApplicationsView() {
   const { reactivate, resetReactivation, reactivatingId, hasReactivateError } = useReactivateApplication();
   const { contact, contactingId } = useContactApplication();
   const isMobile = useIsMobile();
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
   const [sort, setSort] = useState<ApplicationSort | null>(null);
   const [pendingWithdrawal, setPendingWithdrawal] = useState<Application | null>(null);
   const [pendingReactivation, setPendingReactivation] = useState<Application | null>(null);
@@ -44,18 +40,16 @@ export function ApplicationsView() {
 
 
   const viewingWithdrawn = showWithdrawn && withdrawnCount > 0;
-  const visibleStatusFilter = showWithdrawn && !viewingWithdrawn ? "all" : statusFilter;
 
   const visibleApplications = useMemo(() => {
     const listed = viewingWithdrawn
       ? (data ?? []).filter((application) => application.status === WITHDRAWN_STATUS)
       : excludeWithdrawnApplications(data ?? []);
-    return sortApplications(filterApplicationsByStatus(listed, visibleStatusFilter), sort);
-  }, [data, viewingWithdrawn, visibleStatusFilter, sort]);
+    return sortApplications(listed, sort);
+  }, [data, viewingWithdrawn, sort]);
 
   const handleShowWithdrawnChange = (pressed: boolean) => {
     setShowWithdrawn(pressed);
-    setStatusFilter("all");
   };
 
   const requestWithdraw = (applicationId: string) => {
@@ -112,19 +106,12 @@ export function ApplicationsView() {
 
       {data && data.length > 0 && (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <ApplicationsStatusSelect
-                value={visibleStatusFilter}
-                onValueChange={setStatusFilter}
-                showWithdrawn={viewingWithdrawn}
-              />
-              {withdrawnCount > 0 && (
-                <ShowWithdrawnToggle pressed={viewingWithdrawn} onPressedChange={handleShowWithdrawnChange} />
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <span className="text-sm text-text-secondary">Ordenar:</span>
+          <div className="flex flex-wrap items-center gap-3">
+            {withdrawnCount > 0 && (
+              <ShowWithdrawnToggle pressed={viewingWithdrawn} onPressedChange={handleShowWithdrawnChange} />
+            )}
+            <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+              <span className="shrink-0 text-sm text-text-secondary">Ordenar:</span>
               <Select
                 items={APPLICATION_SORT_OPTIONS}
                 value={sort ? `${sort.key}:${sort.direction}` : "date:desc"}
@@ -133,7 +120,7 @@ export function ApplicationsView() {
                   if (option) setSort({ key: option.key, direction: option.direction });
                 }}
               >
-                <SelectTrigger aria-label="Ordenar postulaciones" className="w-[210px] max-w-full bg-surface">
+                <SelectTrigger aria-label="Ordenar postulaciones" className="flex-1 bg-surface sm:w-[210px] sm:flex-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,9 +136,9 @@ export function ApplicationsView() {
 
           {visibleApplications.length === 0 && (
             <p className="text-sm text-text-secondary">
-              {visibleStatusFilter === "all"
-                ? APPLICATION_MESSAGES.noActiveApplications
-                : APPLICATION_MESSAGES.noApplicationsInStatus}
+              {viewingWithdrawn
+                ? APPLICATION_MESSAGES.noWithdrawnApplications
+                : APPLICATION_MESSAGES.noActiveApplications}
             </p>
           )}
 
@@ -193,7 +180,6 @@ export function ApplicationsView() {
               
               if (showWithdrawn && withdrawnCount <= 1) {
                 setShowWithdrawn(false);
-                setStatusFilter("all");
               }
             },
           });

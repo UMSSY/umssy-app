@@ -157,12 +157,6 @@ export class ChatGateway
       }
 
       await client.join(body.conversationId);
-      this.chatVisibilityService?.setConversationVisibility(
-        user.id,
-        client.id,
-        body.conversationId,
-        true,
-      );
       return { ok: true };
     } catch (error) {
       this.logger.error(
@@ -184,6 +178,7 @@ export class ChatGateway
     body?: {
       conversationId?: string | null;
       isFocused?: boolean;
+      isOpen?: boolean;
       visible?: boolean;
     },
   ) {
@@ -196,12 +191,14 @@ export class ChatGateway
       typeof body?.isFocused === 'boolean'
         ? body.isFocused
         : (body?.visible ?? true);
+    const isOpen = typeof body?.isOpen === 'boolean' ? body.isOpen : isFocused;
 
     this.chatVisibilityService?.setConversationVisibility(
       user.id,
       client.id,
       conversationId,
       Boolean(isFocused),
+      Boolean(isOpen),
     );
 
     return { ok: true };

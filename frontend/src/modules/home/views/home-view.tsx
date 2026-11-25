@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "cn";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { PUBLIC_SLANT_BUTTON_CLASS } from "@/shared/constants/public-navigation.constants";
+import { PUBLIC_CTA_CLASS } from "@/shared/constants/public-navigation.constants";
 import { PublicHeader, PublicFooter } from "@/shared/components/layout";
 import { PublicEventsSection } from "@/modules/events";
 import { HomeHero } from "../components/home-hero";
@@ -27,7 +27,7 @@ export function HomeView() {
             <PublicEventsSection />
             <div className="mt-14 flex flex-col items-center gap-6 border-t border-surface/20 pt-10 text-center">
               <p className="max-w-xl text-lg leading-relaxed text-surface/80">{HOME_WORKSHOPS.gateText}</p>
-              <Link href={HOME_WORKSHOPS.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-danger text-surface hover:bg-danger/85")}>{HOME_WORKSHOPS.action.label}<ArrowRight aria-hidden="true" /></Link>
+              <Link href={HOME_WORKSHOPS.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_CTA_CLASS, "bg-surface text-ink hover:bg-surface-soft")}>{HOME_WORKSHOPS.action.label}<ArrowRight aria-hidden="true" /></Link>
             </div>
           </div>
         </section>

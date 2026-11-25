@@ -7,6 +7,7 @@ import { countCvSelection } from "./count-cv-selection";
 import { isCvHeadlineMissing } from "./is-cv-headline-missing";
 import { isCvSectionFullySelected } from "./is-cv-section-fully-selected";
 import { toCvExtraction } from "./to-cv-extraction";
+import { selectCvSelectionItem } from "./select-cv-selection-item";
 import { toggleCvSection } from "./toggle-cv-section";
 import { toggleCvSelectionItem } from "./toggle-cv-selection-item";
 import { updateListItem } from "./update-list-item";
@@ -49,6 +50,33 @@ describe("buildDefaultCvSelection", () => {
   });
 });
 
+describe("buildDefaultCvSelection with profile records", () => {
+  it("leaves unselected the records that are already in the profile", () => {
+    const record = {
+      id: "11111111-1111-4111-8111-111111111111",
+      companyName: "A",
+      position: "B",
+      startDate: "2020-01-01",
+      endDate: null,
+      isCurrent: false,
+      description: null,
+    };
+    const extraction: CvExtraction = {
+      ...EXTRACTION,
+      workExperiences: [EXTRACTION.workExperiences[0], { ...EXTRACTION.workExperiences[0], position: "C" }],
+    };
+
+    expect(
+      buildDefaultCvSelection(extraction, { education: [], experience: [{ status: "same", record }, { status: "new" }] })
+        .experience,
+    ).toEqual([1]);
+    expect(
+      buildDefaultCvSelection(extraction, { education: [], experience: [{ status: "changed", record }, { status: "new" }] })
+        .experience,
+    ).toEqual([0, 1]);
+  });
+});
+
 describe("toggleCvSection", () => {
   it("selects the whole section when it is partially selected", () => {
     const selection = { ...AVAILABLE, contact: ["cityId" as const] };
@@ -68,6 +96,15 @@ describe("toggleCvSelectionItem", () => {
     expect(withoutSkill.skills).toEqual([]);
     expect(toggleCvSelectionItem(withoutSkill, "skills", 0).skills).toEqual([0]);
     expect(toggleCvSelectionItem(AVAILABLE, "contact", "firstName").contact).toEqual(["cityId"]);
+  });
+});
+
+describe("selectCvSelectionItem", () => {
+  it("adds the item once and keeps the selection when it is already there", () => {
+    const selected = selectCvSelectionItem(AVAILABLE, "education", 0);
+
+    expect(selected.education).toEqual([0]);
+    expect(selectCvSelectionItem(selected, "education", 0)).toBe(selected);
   });
 });
 

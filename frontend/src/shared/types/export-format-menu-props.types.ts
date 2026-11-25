@@ -7,6 +7,7 @@ export interface ExportFormatMenuProps {
   formatTexts: ExportFormatTexts;
   onSelectFormat: (format: ExportFormat) => void;
   formatHeading?: string;
+  cancelLabel?: string;
   disabled?: boolean;
   isLoading?: boolean;
   contentClassName?: string;

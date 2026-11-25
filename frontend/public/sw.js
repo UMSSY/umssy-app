@@ -1,10 +1,12 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_PREFIX = 'umssy-';
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const NAVIGATION_TIMEOUT_MS = 4000;
-const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard'];
+const OFFLINE_PASSES_ROUTE = '/offline/passes';
+const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard', OFFLINE_PASSES_ROUTE];
+const OFFLINE_ROUTE_FALLBACKS = { '/events/my-passes': OFFLINE_PASSES_ROUTE };
 const REQUIRED_ROUTES = [...SHELL_ROUTES, '/login', '/events'];
 const ADDITIONAL_ROUTES = [
   "/affinity-radar/review-queue",
@@ -59,6 +61,7 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/icons/icon-umssy.svg',
   '/icons/icon-192x192.png',
+  '/icons/notification-badge-96x96.png',
   '/icons/icon-512x512.png',
   '/icons/icon-maskable-512x512.png',
   '/icons/umssy-simbolo-web.svg',
@@ -103,8 +106,15 @@ const isCacheable = (response) => {
 const isRscRequest = (request, url) =>
   request.headers.get('RSC') !== null || url.searchParams.has('_rsc');
 
+const discard = (response) => {
+  response?.body?.cancel().catch(() => undefined);
+};
+
 const putIfCacheable = async (cacheName, key, response) => {
-  if (!isCacheable(response)) return false;
+  if (!isCacheable(response)) {
+    discard(response);
+    return false;
+  }
   const cache = await caches.open(cacheName);
   await cache.put(key, response);
   return true;
@@ -130,15 +140,21 @@ const extractNextStaticUrls = (html) =>
 
 const precacheRoute = async (route) => {
   const key = shellKey(route);
-  const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
+  const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit', headers: { 'X-UMSSY-Offline-Shell': '1' } }));
   return cacheShell(key, response);
 };
 
 const cacheShell = async (key, response) => {
-  if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) return;
+  if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) {
+    discard(response);
+    return;
+  }
   const html = await response.clone().text();
   const assets = await Promise.all(extractNextStaticUrls(html).map((url) => fetchAndCache(ASSETS_CACHE, url)));
-  if (assets.some((saved) => !saved)) return false;
+  if (assets.some((saved) => !saved)) {
+    discard(response);
+    return false;
+  }
   return putIfCacheable(SHELL_CACHE, key, response);
 };
 
@@ -174,6 +190,13 @@ const withTimeout = (promise, ms) =>
 const offlineFallback = async () =>
   (await caches.match(OFFLINE_URL, { cacheName: SHELL_CACHE })) || Response.error();
 
+const offlineRouteFor = (key) => {
+  const fallback = OFFLINE_ROUTE_FALLBACKS[new URL(key).pathname];
+  return fallback ? shellKey(fallback) : null;
+};
+
+const isTimeout = (error) => error instanceof Error && error.message === 'timeout';
+
 const handleNavigation = async (event) => {
   const key = shellKey(event.request.url);
   const network = fetch(event.request);
@@ -189,8 +212,12 @@ const handleNavigation = async (event) => {
   }
   try {
     return await withTimeout(network, NAVIGATION_TIMEOUT_MS);
-  } catch {
-    const cached = key ? await caches.match(key, { cacheName: SHELL_CACHE }) : undefined;
+  } catch (error) {
+    const offline = self.navigator?.onLine === false || !isTimeout(error);
+    const offlineKey = key && offline ? offlineRouteFor(key) : null;
+    const cached =
+      (offlineKey ? await caches.match(offlineKey, { cacheName: SHELL_CACHE }) : undefined) ||
+      (key ? await caches.match(key, { cacheName: SHELL_CACHE }) : undefined);
     if (cached) return cached;
     try {
       return await network;
@@ -288,6 +315,9 @@ self.addEventListener('message', (event) => {
   const PUSH_DEFAULT_TITLE = 'UMSSY';
   const PUSH_DEFAULT_BODY = 'Tienes una nueva notificación';
   const PUSH_DEFAULT_ICON = '/icons/icon-192x192.png';
+  // Android pinta el badge solo con el canal alfa: debe ser una silueta
+  // blanca sobre fondo transparente, no el ícono a color (ROSEMARY-492).
+  const PUSH_BADGE_ICON = '/icons/notification-badge-96x96.png';
   const PUSH_DEFAULT_URL = '/dashboard';
   const NOTIFICATION_OPEN_PATH = '/notifications/open';
 
@@ -312,13 +342,18 @@ self.addEventListener('message', (event) => {
     const options = {
       body: String(payload.body || PUSH_DEFAULT_BODY).slice(0, PUSH_TEXT_MAX_LENGTH),
       icon: payload.icon || PUSH_DEFAULT_ICON,
-      badge: PUSH_DEFAULT_ICON,
+      badge: PUSH_BADGE_ICON,
       data: {
         actionUrl: payload.actionUrl || payload.url || PUSH_DEFAULT_URL,
         notificationId: payload.notificationId || null,
       },
-      tag: payload.groupKey || payload.tag || undefined,
     };
+
+    const tag = payload.groupKey || payload.tag;
+    if (tag) {
+      options.tag = tag;
+      options.renotify = true;
+    }
 
     event.waitUntil(self.registration.showNotification(title, options));
   });

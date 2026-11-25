@@ -2,7 +2,7 @@
 
 ## Purpose and responsibilities
 
-The frontend mentor-capacity module provides “Control de cupos” for administrators. The backend mentors module owns calculation, storage and FIFO allocation. The panel does not assign offers locally. MentorCapacityView uses TanStack Query and mentorCapacityService through the shared HTTP client; requests are authenticated, and the backend requires the administrativo role through JwtAuthGuard and RolesGuard.
+The frontend mentor-capacity module provides “Control de cupos” for administrators. The backend mentors module owns calculation, storage and FIFO allocation. The panel does not assign offers locally. Domain hooks own TanStack Query configuration and use mentorCapacityService through the shared HTTP client; MentorCapacityView composes those hooks and visual components. Requests are authenticated, and the backend requires the administrativo role through JwtAuthGuard and RolesGuard.
 
 ## Capacity rules
 
@@ -32,7 +32,7 @@ flowchart LR
   Lock --> DB[(PostgreSQL)]
 ```
 
-The frontend depends on shared API/session infrastructure, institutional UI components and sonner. The backend uses existing mentor SQL helpers, Prisma and authentication guards. See [mentors](../mentors/README.md) for intake, offers and participation responsibilities.
+The frontend depends on shared API/session infrastructure, institutional UI components and sonner. Query keys live in module constants; overview, waiting requests, offer history and percentage mutation live in domain hooks. Numeric conversion and validation, plus date formatting, live in module utilities. Dates are always rendered with `America/La_Paz`, independently of the browser time zone. The backend uses existing mentor SQL helpers, Prisma and authentication guards. See [mentors](../mentors/README.md) for intake, offers and participation responsibilities.
 
 ## Endpoints
 
@@ -86,6 +86,10 @@ sequenceDiagram
 Queries use `['mentor-capacity', 'overview']`, `['mentor-capacity', 'requests', page]` and `['mentor-capacity', 'offers', page]`. The two lists paginate independently, ten records per page. Saving updates overview cache and invalidates both lists. “Actualizar” invalidates the mentor-capacity prefix. Loading placeholders, empty lists, error messages and per-query retry controls preserve the existing presentation.
 
 Invalid input fails locally or through Zod (400); missing authentication and insufficient permissions remain 401/403. A failed mutation displays an error and allows retry. After an ambiguous network failure the client cannot prove whether a server transaction committed: refresh the overview to establish authoritative state. The error message identifies the last observed percentage and asks the administrator to refresh before retrying.
+
+## Action styling
+
+Saving a revised capacity limit uses the institutional primary button. Validation errors remain visible next to the affected inputs.
 
 ## Sprint History
 

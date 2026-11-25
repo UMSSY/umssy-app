@@ -126,7 +126,6 @@ export function PreviewStep({
       <StepActions
         secondaryLabel="Anterior"
         showPreviousIcon
-        primaryVariant="brand"
         primaryLabel={isSubmitting ? busyLabel : confirmLabel}
         onSecondary={onPrevious}
         onPrimary={onConfirm}

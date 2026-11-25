@@ -10,6 +10,10 @@ export class RadarEvidenceSourcesService {
     private readonly cvs: CvSourcesService,
   ) {}
 
+  findLatestScores(userId: string): Promise<unknown> {
+    return this.repository.findLatestScores(userId);
+  }
+
   findPublicationCvStates(userId: string, context: TransactionContext) {
     return this.repository.findPublicationCvStates(userId, context);
   }

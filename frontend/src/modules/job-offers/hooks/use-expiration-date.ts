@@ -1,17 +1,12 @@
 "use client";
 
 import { useState } from "react";
-
-export type ExpirationStatus = "disabled" | "selecting" | "confirming" | "confirmed";
-
-interface ExpirationState {
-  status: ExpirationStatus;
-  date: Date | null;
-}
+import type { ExpirationDate } from "../types/expiration-date.types";
+import type { ExpirationState } from "../types/expiration-state.types";
 
 const INITIAL_STATE: ExpirationState = { status: "disabled", date: null };
 
-export function useExpirationDate() {
+export function useExpirationDate(): ExpirationDate {
   const [state, setState] = useState<ExpirationState>(INITIAL_STATE);
 
   function toggleExpiration(checked: boolean) {
@@ -19,7 +14,7 @@ export function useExpirationDate() {
   }
 
   function selectDate(date: Date | undefined) {
-    if (!date) return; 
+    if (!date) return;
     setState({ status: "confirming", date });
   }
 
@@ -55,5 +50,3 @@ export function useExpirationDate() {
     resetExpiration,
   };
 }
-
-export type ExpirationDate = ReturnType<typeof useExpirationDate>;

@@ -37,6 +37,12 @@ describe("VacancyCard", () => {
     expect(screen.getByText(/Publicado: .* · Hoy/)).toBeInTheDocument();
   });
 
+  it("muestra el ícono de calendario junto a la publicación y a la expiración", () => {
+    const { container } = renderCard();
+
+    expect(container.querySelectorAll("svg.lucide-calendar-days")).toHaveLength(2);
+  });
+
   it("muestra la fecha de expiración", () => {
     renderCard({ offer: buildJobOffer({ expiresAt: "2026-12-31T03:59:00.000Z" }) });
 

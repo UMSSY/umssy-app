@@ -1,3 +1,4 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
 import {
   toMentorProfileSnapshot,
   buildEmptyMentorProfile,
@@ -26,7 +27,7 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
+import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 
@@ -329,7 +330,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
           ? [toMentorProfileSnapshot(profile)]
           : [];
       });
-      const repository = new MentorsRepository({
+      const repository = makeMentorsRepository({
         $queryRaw: queryRaw,
       } as unknown as PrismaService);
       findActiveMentorProfileSnapshot.mockImplementation((id, now) =>

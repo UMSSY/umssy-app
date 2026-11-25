@@ -53,7 +53,7 @@ export function LoginView() {
           className="object-cover"
         />
       </aside>
-      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-10 xl:px-12">
+      <div className="flex min-h-dvh flex-col px-4 py-5 sm:px-8 sm:py-9 lg:px-10 xl:px-12">
         <Link
           href="/"
           className="flex items-center gap-2 self-start text-sm font-medium text-accent"
@@ -61,7 +61,7 @@ export function LoginView() {
           <ArrowLeft className="size-4" aria-hidden="true" />
           Volver al inicio
         </Link>
-        <div className="flex flex-1 items-center justify-center py-12">
+        <div className="flex flex-1 items-center justify-center py-6 sm:py-12">
           <form
             onSubmit={handleSubmit}
             noValidate

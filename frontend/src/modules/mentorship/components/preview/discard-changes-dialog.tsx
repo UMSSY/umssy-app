@@ -24,9 +24,9 @@ export function DiscardChangesDialog({
         if (!nextOpen) onCancel();
       }}
     >
-      <AlertDialogContent className="w-[calc(100%-2rem)] max-w-md gap-0 rounded-lg border border-border bg-surface p-6 text-ink shadow-none ring-0 sm:max-w-md">
+      <AlertDialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md min-w-0 gap-0 overflow-y-auto rounded-lg border border-border bg-surface p-4 text-ink shadow-none ring-0 sm:max-w-md sm:p-6">
         <AlertDialogHeader className="place-items-start gap-0 text-left">
-          <AlertDialogTitle className="mb-2 font-tight text-xl font-bold text-ink">
+          <AlertDialogTitle className="mb-2 font-tight text-xl font-bold break-words text-ink">
             ¿Desea descartar los cambios realizados?
           </AlertDialogTitle>
           <AlertDialogDescription className="mb-6 text-left text-sm text-text-secondary">
@@ -35,18 +35,18 @@ export function DiscardChangesDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter className="mx-0 mb-0 flex-row justify-end gap-2 border-0 bg-transparent p-0">
+        <AlertDialogFooter className="mx-0 mb-0 flex flex-col-reverse gap-2 border-0 bg-transparent p-0 sm:flex-row sm:justify-end">
           <AlertDialogCancel
             type="button"
             onClick={onCancel}
-            className="h-10 rounded-lg px-4 text-sm font-semibold active:translate-y-0"
+            className="mt-0 h-auto min-h-10 w-full rounded-lg px-4 py-2 text-sm font-semibold whitespace-normal active:translate-y-0 sm:w-auto"
           >
             Seguir editando
           </AlertDialogCancel>
           <AlertDialogAction
             type="button"
             onClick={onConfirm}
-            className="h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0"
+            className="h-auto min-h-10 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold whitespace-normal text-primary-foreground hover:bg-brand-hover active:translate-y-0 sm:w-auto"
           >
             Descartar cambios
           </AlertDialogAction>

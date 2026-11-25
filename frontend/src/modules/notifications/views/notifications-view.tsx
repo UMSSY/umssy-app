@@ -9,16 +9,21 @@ import {
   NOTIFICATION_INBOX_FILTER_LABELS,
   NOTIFICATION_INBOX_FILTERS,
 } from "../constants/notification-inbox-filters.constants";
+import { NOTIFICATION_INBOX_EMPTY_MESSAGES } from "../constants/notification-inbox-empty-messages.constants";
 import {
   useNotificationsInbox,
   useUnreadNotificationsCount,
 } from "../hooks/use-notifications";
 import type { NotificationInboxFilter } from "../types/notification-inbox-filter.types";
+import type { NotificationsViewProps } from "../types/notifications-view-props.types";
 import type { NotificationResponse } from "../types/notification-response.types";
 import { getNotificationCategory } from "../utils/get-notification-category";
+import { getNotificationInboxPath } from "../utils/get-notification-inbox-path";
 import { groupNotificationsByDate } from "../utils/group-notifications-by-date";
 import { resolveNotificationLink } from "../utils/resolve-notification-link";
 import { NotificationItem } from "../components/notification-item";
+import { NotificationsInboxEmpty } from "../components/notifications-inbox-empty";
+import { NotificationsInboxLoading } from "../components/notifications-inbox-loading";
 import { NotificationBell } from "../components/notification-bell";
 
 const PAGE_SIZE = 8;
@@ -27,7 +32,7 @@ function isValidInboxFilter(value: string | null): value is NotificationInboxFil
   return value !== null && (NOTIFICATION_INBOX_FILTERS as readonly string[]).includes(value);
 }
 
-export function NotificationsView() {
+export function NotificationsView({ filterSections }: NotificationsViewProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
@@ -84,7 +89,7 @@ export function NotificationsView() {
 
   const handleFilterChange = (filter: NotificationInboxFilter) => {
     setPage(1);
-    router.push(filter === "ALL" ? "/notifications" : `/notifications?filter=${filter}`);
+    router.push(getNotificationInboxPath(filter));
   };
 
   const handleSelectNotification = async (notification: NotificationResponse) => {
@@ -167,15 +172,10 @@ export function NotificationsView() {
         </span>
       </div>
 
+      {filterSections?.[activeFilter]}
+
       {isLoading ? (
-        <div aria-busy="true" className="flex flex-col gap-3">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-18 animate-pulse rounded-xl border border-border bg-muted/60"
-            />
-          ))}
-        </div>
+        <NotificationsInboxLoading />
       ) : isError ? (
         <div
           role="alert"
@@ -189,17 +189,11 @@ export function NotificationsView() {
           </Button>
         </div>
       ) : groupedNotifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-14 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <Bell className="size-6" aria-hidden="true" />
-          </div>
-          <h2 className="mt-2 text-base font-semibold text-foreground">
-            No tienes notificaciones
-          </h2>
-          <p className="max-w-sm text-xs text-muted-foreground">
-            Cuando recibas nuevos avisos sobre encuestas, recordatorios o actividad de tu cuenta, aparecerán aquí.
-          </p>
-        </div>
+        <NotificationsInboxEmpty
+          icon={Bell}
+          title={NOTIFICATION_INBOX_EMPTY_MESSAGES[activeFilter].title}
+          description={NOTIFICATION_INBOX_EMPTY_MESSAGES[activeFilter].description}
+        />
       ) : (
         <div className="flex flex-col gap-6">
           {groupedNotifications.map((group) => (

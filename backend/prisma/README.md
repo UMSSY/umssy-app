@@ -36,6 +36,8 @@ erDiagram
   users ||--o{ job_applications : "user_id"
   job_application_statuses ||--o{ job_applications : "status_id"
   job_applications ||--o| radar_application_consents : "application_id"
+  users ||--o| job_offer_notification_preferences : "user_id"
+  job_alert_modes ||--o{ job_offer_notification_preferences : "mode_id"
 
   work_experiences {
     uuid id PK
@@ -90,6 +92,15 @@ erDiagram
     boolean consent_to_recruiter
     boolean consent_to_cv
     boolean consent_to_contact
+  }
+  job_offer_notification_preferences {
+    uuid user_id PK, FK
+    uuid mode_id FK
+  }
+  job_alert_modes {
+    uuid id PK
+    string title UK
+    string description
   }
 ```
 
@@ -169,7 +180,7 @@ A vacancy published by a company. Prisma model `JobOffer`.
 | `published_at`             | timestamptz(6) | no   | Default now; reset when a vacancy is reopened       |
 | `created_at`, `updated_at` | timestamptz(6) | no   |                                                     |
 
-Relationships: belongs to one company, one modality, one contract type and one status (N:1 each); has many `job_offer_skills` and many `job_applications` (1:N). Indexes: `company_id`, `modality_id`, `contract_type_id`, `status_id`. A vacancy is visible to applicants when its status is `Publicada` and `expires_at` is null or in the future.
+Relationships: belongs to one company, one modality, one contract type and one status (N:1 each); has many `job_offer_skills` and many `job_applications` (1:N). Indexes: `company_id`, `modality_id`, `contract_type_id`, `status_id`, and the composite `(status_id, expires_at)` used by the automatic close to find published vacancies whose closing date has passed. A vacancy is visible to applicants when its status is `Publicada` and `expires_at` is null or in the future.
 
 ### `job_offer_skills`
 
@@ -214,16 +225,42 @@ Consents given when applying. Prisma model `RadarApplicationConsent`.
 
 Relationship: 1:1 with the application (`application_id` is unique). The row is written by the radar-integration module when the application is created, after the matching module has checked that the three consents were given.
 
+### `job_offer_notification_preferences`
+
+Which newly published vacancies a student or graduate wants to be notified about (HU-15). One row per person; a person who never chose has no row and is treated as `ALL`. Module: matching. Prisma model `JobOfferNotificationPreference`.
+
+| Column                     | Type           | Null | Notes                                    |
+| -------------------------- | -------------- | ---- | ---------------------------------------- |
+| `user_id`                  | uuid           | no   | Primary key and FK to `users.id`, cascade |
+| `mode_id`                  | uuid           | no   | FK to `job_alert_modes.id`, restrict     |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                          |
+
+Constraints: the primary key is `user_id`, so there is one preference per person. Indexes: `mode_id` (the primary key covers `user_id`). The row is written by the matching module through `PUT /job-offers/alert-preference`; the notification service never reads or writes it.
+
+### `job_alert_modes`
+
+Catalog of the values of the preference. Prisma model `JobAlertMode`.
+
+| Column                     | Type           | Null | Notes                                                                       |
+| -------------------------- | -------------- | ---- | --------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                 |
+| `title`                    | varchar(30)    | no   | Unique. Stable code used by the API and the code: `ALL`, `MATCHING`, `HIGH_AFFINITY` |
+| `description`              | varchar(255)   | no   | What the mode means, in Spanish                                             |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                             |
+
+The three rows are inserted by the migration. `MATCHING` means an affinity above 0 % and `HIGH_AFFINITY` an affinity of 70 % or more.
+
 ### Catalog tables
 
-All of them have `id`, a unique `title` (varchar(100)), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
+All of them have `id`, a unique `title` (varchar(100), except in `job_alert_modes`, whose `title` is varchar(30) and which also has a `description`), `created_at` and `updated_at`. Rows are inserted by migrations or seeds; the code refers to them through enums.
 
-| Table                      | Used by                       | Values                                                                 |
-| -------------------------- | ----------------------------- | ---------------------------------------------------------------------- |
-| `job_application_statuses` | `job_applications.status_id`  | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
-| `job_offer_statuses`       | `job_offers.status_id`        | `Publicada`, `Cerrada`, `Eliminada`                                    |
-| `job_offer_modalities`     | `job_offers.modality_id`      | `Presencial`, `Remoto`, `Híbrido`                                      |
-| `job_offer_contract_types` | `job_offers.contract_type_id` | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| Table                      | Used by                                      | Values                                                                 |
+| -------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| `job_application_statuses` | `job_applications.status_id`                 | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` |
+| `job_offer_statuses`       | `job_offers.status_id`                       | `Publicada`, `Cerrada`, `Eliminada`                                    |
+| `job_offer_modalities`     | `job_offers.modality_id`                     | `Presencial`, `Remoto`, `Híbrido`                                      |
+| `job_offer_contract_types` | `job_offers.contract_type_id`                | `Tiempo completo`, `Medio tiempo`, `Pasantía`                          |
+| `job_alert_modes`          | `job_offer_notification_preferences.mode_id` | `ALL`, `MATCHING`, `HIGH_AFFINITY`                                     |
 
 ### Referenced tables owned by other modules
 
@@ -239,6 +276,8 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
 | One skill per person; one skill per vacancy; one application per person and vacancy                                                                          | Unique constraints                    |
 | A person's data disappears with the person                                                                                                                   | Cascade from `users`                  |
+| A person without a row in `job_offer_notification_preferences` is notified of every vacancy (`ALL`); `MATCHING` and `HIGH_AFFINITY` can only be saved by someone with at least one skill, and someone who loses all their skills is notified as `ALL` while the saved choice is kept | Application |
+| A notification mode cannot be deleted while a preference uses it                                                                                             | Restrict                              |
 | A skill, status, modality, contract type or company of an experience cannot be deleted while in use                                                          | Restrict                              |
 | A vacancy removes its skills and applications when deleted for good                                                                                          | Cascade from `job_offers`             |
 | Vacancy deletion by a company is logical (`Eliminada`)                                                                                                       | Application                           |
@@ -257,6 +296,8 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | `20261029120000_add_withdrawn_application_status`      | `Retirada` status                                                             |
 | `20261103120000_add_job_offer_published_at`            | `published_at` of vacancies                                                   |
 | `20261106000000_add_radar_application_consents`        | Consents of an application                                                    |
+| `20261112120000_add_job_offer_status_expires_at_index` | Composite index `(status_id, expires_at)` of `job_offers`                     |
+| `20261122180000_add_job_offer_notification_preferences` | Vacancy alert modes catalog and the preference of each person (HU-15)        |
 
 ## Radar and document verification
 
@@ -583,6 +624,7 @@ erDiagram
     timestamptz closing_soon_notified_at "nullable"
     timestamptz closed_notified_at "nullable"
     timestamptz last_reminder_sent_at "nullable"
+    varchar_7 published_notified_period "nullable"
     timestamptz created_at
     timestamptz updated_at
   }
@@ -644,6 +686,7 @@ Encuesta de empleabilidad creada por un administrativo.
 | `closingSoonNotifiedAt` | `closing_soon_notified_at` | `TIMESTAMPTZ(6)` | Sí | | Momento en que se avisó al creador del cierre próximo. `NULL` = aún no avisado |
 | `closedNotifiedAt` | `closed_notified_at` | `TIMESTAMPTZ(6)` | Sí | | Momento en que se avisó al creador del cierre (y se evaluaron las variaciones). `NULL` = aún no avisado |
 | `lastReminderSentAt` | `last_reminder_sent_at` | `TIMESTAMPTZ(6)` | Sí | | Último recordatorio manual entregado a la audiencia pendiente |
+| `publishedNotifiedPeriod` | `published_notified_period` | `VARCHAR(7)` | Sí | | Semestre (`I-AAAA` o `II-AAAA`) en que se avisó a la audiencia de la publicación (`SURVEY_PUBLISHED`). Garantiza un solo aviso por encuesta y semestre. `NULL` = aún no avisado |
 | `createdAt` | `created_at` | `TIMESTAMPTZ(6)` | No | `now()` | Alta |
 | `updatedAt` | `updated_at` | `TIMESTAMPTZ(6)` | No | `@updatedAt` | Última modificación |
 
@@ -696,6 +739,8 @@ Configuración opcional de las alertas de variación de una encuesta. Cuando la 
 ## Catálogo de notificaciones
 
 `NotificationType` (`notification_types`): PK `id`, `code` `VARCHAR(50)` único, `name` `VARCHAR(100)`, `sends_push` y `sends_email` `BOOLEAN` (por defecto `false`). Lo referencia `Notification.typeId`. La semilla del catálogo hace upsert por `code`.
+
+Migration `20261120220000_register_radar_published_notification` adds `RADAR_PUBLISHED` to the central notification catalog if it is missing, with push enabled and email disabled. Existing entries keep their channel settings.
 
 ## Mentor network
 
@@ -998,7 +1043,7 @@ erDiagram
 - Intake operation catalog values are ACTIVATE, REQUEST and LEGACY; the operation compatibility trigger keeps operation and operationId synchronized. `mentor_intake_attempts_identity` and its legacy compatibility index enforce user/operation/idempotency-key uniqueness. Sanction and attempt legacy records have the exact time fields listed above, not invented createdAt/updatedAt fields.
 - Technical/orientation joins have their own UUID PK and unique mentor/catalog pairs; deleting a user cascades selections, but deleting a referenced catalog is restricted. Current role participation is distinct from availability and requests.
 
-Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`. Reconcile against the synchronized schema before applying this proposal; no migration was run.
+Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`.
 
 ## Appointments
 
@@ -1150,10 +1195,758 @@ All of them have `id`, a unique `title` (varchar(100)), an optional `description
 
 Both Sprint 3 migrations only add nullable columns and new tables; they do not change existing rows.
 
+## Workshop sessions and attendance
+
+```mermaid
+erDiagram
+  events ||--o{ event_sessions : "event_id"
+  events ||--o{ event_registrations : "event_id"
+  event_registrations ||--o{ event_attendances : "registration_id"
+  event_sessions |o--o{ event_attendances : "session_id"
+  users |o--o{ event_attendances : "checked_in_by_id"
+
+  events {
+    uuid id PK
+    date event_date
+    time start_time
+    time end_time
+  }
+  event_sessions {
+    uuid id PK
+    uuid event_id FK
+    timestamptz starts_at
+    timestamptz ends_at
+    string location
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  event_registrations {
+    uuid id PK
+    uuid event_id FK
+    uuid user_id FK
+  }
+  event_attendances {
+    uuid id PK
+    uuid registration_id FK
+    uuid session_id FK
+    timestamptz checked_in_at
+    uuid checked_in_by_id FK
+    boolean checked_in_offline
+    timestamptz synced_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+```
+
+`event_sessions` has one row per workshop session, with UTC instants in `starts_at` and `ends_at`, nullable `location`, and audit timestamps. `event_id` references `events.id` with cascade deletion. The table has separate indexes on `event_id`, `starts_at` and `ends_at`, with no uniqueness constraint beyond its primary key. The original `events.event_date`, `start_time` and `end_time` retain the first session for compatibility; registrations and attendance use all session rows when present. The migration backfills one session for every existing event.
+
+`event_attendances.session_id` is nullable for legacy attendance rows and references `event_sessions.id` with cascade deletion. The pair `(registration_id, session_id)` is unique; `session_id` and `checked_in_by_id` have separate indexes. `registration_id` references `event_registrations.id` with cascade deletion; `checked_in_by_id` references `users.id` with `SET NULL`. PostgreSQL permits multiple rows with null `session_id` under this composite unique key; the application handles legacy check-in idempotency separately. The session-attendance migration associates prior rows with a session only when their event has exactly one session.
+
+## Additional schema models
+
+Fields marked `?` are optional. List fields describe the inverse side of relations. Explicit referential actions appear in the relation declaration. Relations without an explicit action use Prisma defaults.
+
+### Relationships for additional models
+
+```mermaid
+erDiagram
+  User ||--o{ Education : "userId"
+  User ||--o{ Certification : "userId"
+  User ||--o| ProfileSkillProcessingState : "userId"
+  User ||--o{ BlockedDate : "mentorId"
+  Appointment ||--o{ TimeProposal : "appointmentId"
+  AvailabilityBlock ||--o{ TimeProposal : "proposedBlockId"
+  ProposalStatus ||--o{ TimeProposal : "statusId"
+  User ||--o{ AdminExportHistory : "userId"
+  AccessRequest ||--o{ ActivationOtp : "accessRequestId"
+  User |o--o{ Conversation : "userAId"
+  User |o--o{ Conversation : "userBId"
+  Event |o--o| Conversation : "eventId"
+  Conversation ||--o{ ConversationParticipant : "conversationId"
+  User ||--o{ ConversationParticipant : "userId"
+  Message ||--o{ MessageAttachment : "messageId"
+  AttachmentType ||--o{ MessageAttachment : "typeId"
+  User ||--o{ ChatUserBlock : "blockerId"
+  User ||--o{ ChatUserBlock : "blockedId"
+  User ||--o{ ConnectionRequest : "senderId"
+  User ||--o{ ConnectionRequest : "receiverId"
+  ConnectionRequestStatus ||--o{ ConnectionRequest : "statusId"
+  User ||--o| UserPresence : "userId"
+  User ||--o{ PasswordResetOtp : "userId"
+  AccessRequest ||--o{ AuditEvent : "accessRequestId"
+  AuditAction ||--o{ AuditEvent : "actionId"
+  User |o--o{ AuditEvent : "actorId"
+  File |o--o{ AuditEvent : "evidenceFileId"
+  AccessRequest ||--o| DocumentValidation : "accessRequestId"
+  User |o--o{ DocumentValidation : "revertedById"
+  User ||--o{ UserSocialAccount : "userId"
+  PortfolioProvider ||--o{ UserSocialAccount : "providerId"
+  User ||--o{ UserPortfolioProject : "userId"
+  UserSocialAccount |o--o{ UserPortfolioProject : "socialAccountId"
+  PortfolioProvider ||--o{ UserPortfolioProject : "providerId"
+  User ||--o{ PushSubscription : "userId"
+  User ||--o| NotificationPreference : "userId"
+```
+
+### `ProposalStatus`
+
+Physical table `proposal_statuses`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `proposals` | `TimeProposal[]` | Uses the Prisma type shown |
+
+
+### `EventModality`
+
+Physical table `event_modalities`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `events` | `Event[]` | Uses the Prisma type shown |
+
+
+### `EventOrigin`
+
+Physical table `event_origins`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `events` | `Event[]` | Uses the Prisma type shown |
+
+
+### `EventStatus`
+
+Physical table `event_statuses`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `events` | `Event[]` | Uses the Prisma type shown |
+
+
+### `RegistrationStatus`
+
+Physical table `registration_statuses`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `eventRegistrations` | `EventRegistration[]` | Uses the Prisma type shown |
+
+
+### `City`
+
+Physical table `cities`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `users` | `User[]` | Uses the Prisma type shown |
+
+
+### `Education`
+
+Physical table `educations`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `institution` | `String` | Uses the Prisma type shown |
+| `degree` | `String` | Uses the Prisma type shown |
+| `startDate` | `DateTime` | `@map("start_date") @db.Date` |
+| `endDate` | `DateTime?` | `@map("end_date") @db.Date` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@index([userId])`
+
+
+### `Certification`
+
+Physical table `certifications`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `name` | `String` | Uses the Prisma type shown |
+| `issuingOrganization` | `String` | `@map("issuing_organization")` |
+| `issueDate` | `DateTime` | `@map("issue_date") @db.Date` |
+| `documentUrl` | `Bytes?` | `@map("document_url")` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@index([userId])`
+
+
+### `ProfileSkillProcessingState`
+
+Physical table `profile_skill_processing_states`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `userId` | `String` | `@id @map("user_id") @db.Uuid` |
+| `status` | `String` | `@default("pending") @db.VarChar(20)` |
+| `inputRevision` | `Int` | `@default(0) @map("input_revision")` |
+| `processedRevision` | `Int?` | `@map("processed_revision")` |
+| `resultVersion` | `Int` | `@default(0) @map("result_version")` |
+| `updatedAt` | `DateTime` | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `dictionaryVersion` | `String?` | `@map("dictionary_version") @db.VarChar(64)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+
+### `BlockedDate`
+
+Physical table `blocked_dates`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `mentorId` | `String` | `@map("mentor_id") @db.Uuid` |
+| `blockedOn` | `DateTime` | `@map("blocked_on") @db.Date` |
+| `reason` | `String?` | `@db.VarChar(100)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `mentor` | `User` | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@unique([mentorId, blockedOn])`
+
+
+### `TimeProposal`
+
+Physical table `time_proposals`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `appointmentId` | `String` | `@map("appointment_id") @db.Uuid` |
+| `proposedBlockId` | `String` | `@map("proposed_block_id") @db.Uuid` |
+| `message` | `String?` | `@db.VarChar(300)` |
+| `statusId` | `String` | `@map("status_id") @db.Uuid` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `respondedAt` | `DateTime?` | `@map("responded_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `appointment` | `Appointment` | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
+| `proposedBlock` | `AvailabilityBlock` | `@relation(fields: [proposedBlockId], references: [id], onDelete: Cascade)` |
+| `status` | `ProposalStatus` | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+
+Model-level constraints and indexes
+
+- `@@index([appointmentId])`
+- `@@index([proposedBlockId])`
+- `@@index([statusId])`
+
+
+### `EventCategory`
+
+Physical table `event_categories`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `name` | `String` | `@unique @db.VarChar(50)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `events` | `Event[]` | Uses the Prisma type shown |
+
+
+### `AdminExportHistory`
+
+Physical table `admin_export_histories`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `reportName` | `String` | `@map("report_name") @db.VarChar(255)` |
+| `reportType` | `String` | `@map("report_type") @db.VarChar(100)` |
+| `user` | `User` | `@relation("AdminExportHistories", fields: [userId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@unique([userId, createdAt])`
+
+
+### `AccessRequestDocumentType`
+
+Physical table `access_request_document_types`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `accessRequests` | `AccessRequest[]` | Uses the Prisma type shown |
+
+
+### `File`
+
+Physical table `files`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `name` | `String` | `@db.VarChar(255)` |
+| `extension` | `String` | `@db.VarChar(10)` |
+| `mimeType` | `String` | `@map("mime_type") @db.VarChar(100)` |
+| `size` | `Int` | Uses the Prisma type shown |
+| `content` | `Bytes` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `accessRequest` | `AccessRequest?` | Uses the Prisma type shown |
+| `auditEvents` | `AuditEvent[]` | `@relation("AuditEventEvidence")` |
+
+
+### `ActivationOtp`
+
+Physical table `activation_otps`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `accessRequestId` | `String` | `@map("access_request_id") @db.Uuid` |
+| `codeHash` | `String` | `@map("code_hash") @db.VarChar(255)` |
+| `expiresAt` | `DateTime` | `@map("expires_at") @db.Timestamptz(6)` |
+| `attempts` | `Int` | `@default(0)` |
+| `usedAt` | `DateTime?` | `@map("used_at") @db.Timestamptz(6)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `accessRequest` | `AccessRequest` | `@relation(fields: [accessRequestId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@index([accessRequestId])`
+
+
+### `MessageStatus`
+
+Physical table `message_statuses`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(30)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `messages` | `Message[]` | Uses the Prisma type shown |
+
+
+### `ConnectionRequestStatus`
+
+Physical table `connection_request_statuses`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(30)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `connectionRequests` | `ConnectionRequest[]` | Uses the Prisma type shown |
+
+
+### `AttachmentType`
+
+Physical table `attachment_types`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(30)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `messageAttachments` | `MessageAttachment[]` | Uses the Prisma type shown |
+
+
+### `Conversation`
+
+Physical table `conversations`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userAId` | `String?` | `@map("user_a_id") @db.Uuid` |
+| `userBId` | `String?` | `@map("user_b_id") @db.Uuid` |
+| `lastMessageId` | `String?` | `@map("last_message_id") @db.Uuid` |
+| `lastMessageAt` | `DateTime?` | `@map("last_message_at") @db.Timestamptz(6)` |
+| `eventId` | `String?` | `@unique @map("event_id") @db.Uuid` |
+| `contextType` | `String?` | `@map("context_type") @db.VarChar(50)` |
+| `contextId` | `String?` | `@unique @map("context_id") @db.Uuid` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `userA` | `User?` | `@relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)` |
+| `userB` | `User?` | `@relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)` |
+| `event` | `Event?` | `@relation(fields: [eventId], references: [id], onDelete: Cascade)` |
+| `participants` | `ConversationParticipant[]` | Uses the Prisma type shown |
+| `messages` | `Message[]` | `@relation("ConversationMessages")` |
+
+Model-level constraints and indexes
+
+- `@@index([userAId, lastMessageAt(sort: Desc)])`
+- `@@index([userBId, lastMessageAt(sort: Desc)])`
+- `@@index([userAId, userBId])`
+- `@@index([contextType, contextId])`
+
+
+### `ConversationParticipant`
+
+Physical table `conversation_participants`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `conversationId` | `String` | `@map("conversation_id") @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `lastReadAt` | `DateTime` | `@map("last_read_at") @db.Timestamptz(6)` |
+| `isMuted` | `Boolean` | `@default(false) @map("is_muted")` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `conversation` | `Conversation` | `@relation(fields: [conversationId], references: [id], onDelete: Cascade)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@unique([conversationId, userId])`
+- `@@index([userId])`
+
+
+### `MessageAttachment`
+
+Physical table `message_attachments`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `messageId` | `String` | `@map("message_id") @db.Uuid` |
+| `typeId` | `String` | `@map("type_id") @db.Uuid` |
+| `fileName` | `String` | `@map("file_name") @db.VarChar(255)` |
+| `mimeType` | `String` | `@map("mime_type") @db.VarChar(100)` |
+| `fileSize` | `Int` | `@map("file_size")` |
+| `fileData` | `Bytes?` | `@map("file_data")` |
+| `url` | `String?` | `@db.VarChar(1000)` |
+| `thumbnailUrl` | `String?` | `@map("thumbnail_url") @db.VarChar(1000)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `message` | `Message` | `@relation(fields: [messageId], references: [id], onDelete: Cascade)` |
+| `type` | `AttachmentType` | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
+
+Model-level constraints and indexes
+
+- `@@index([messageId])`
+- `@@index([typeId])`
+
+
+### `ChatUserBlock`
+
+Physical table `chat_user_blocks`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `blockerId` | `String` | `@map("blocker_id") @db.Uuid` |
+| `blockedId` | `String` | `@map("blocked_id") @db.Uuid` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `blocker` | `User` | `@relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)` |
+| `blocked` | `User` | `@relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@unique([blockerId, blockedId])`
+- `@@index([blockedId])`
+
+
+### `ConnectionRequest`
+
+Physical table `connection_requests`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `senderId` | `String` | `@map("sender_id") @db.Uuid` |
+| `receiverId` | `String` | `@map("receiver_id") @db.Uuid` |
+| `statusId` | `String` | `@map("status_id") @db.Uuid` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `sender` | `User` | `@relation("SentConnectionRequests", fields: [senderId], references: [id], onDelete: Cascade)` |
+| `receiver` | `User` | `@relation("ReceivedConnectionRequests", fields: [receiverId], references: [id], onDelete: Cascade)` |
+| `status` | `ConnectionRequestStatus` | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+
+Model-level constraints and indexes
+
+- `@@index([senderId])`
+- `@@index([receiverId])`
+- `@@index([receiverId, statusId])`
+- `@@index([statusId])`
+
+
+### `UserPresence`
+
+Physical table `user_presences`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `userId` | `String` | `@id @map("user_id") @db.Uuid` |
+| `isOnline` | `Boolean` | `@default(false) @map("is_online")` |
+| `lastSeenAt` | `DateTime` | `@default(now()) @map("last_seen_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+
+### `PasswordResetOtp`
+
+Physical table `password_reset_otps`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `codeHash` | `String` | `@map("code_hash") @db.VarChar(255)` |
+| `expiresAt` | `DateTime` | `@map("expires_at") @db.Timestamptz(6)` |
+| `attempts` | `Int` | `@default(0) @db.SmallInt` |
+| `usedAt` | `DateTime?` | `@map("used_at") @db.Timestamptz(6)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@index([userId])`
+- `@@index([expiresAt])`
+
+
+### `AuditAction`
+
+Physical table `audit_actions`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `title` | `String` | `@unique @db.VarChar(100)` |
+| `description` | `String?` | Uses the Prisma type shown |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `auditEvents` | `AuditEvent[]` | Uses the Prisma type shown |
+
+
+### `AuditEvent`
+
+Physical table `audit_events`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `number` | `Int` | `@unique @default(autoincrement())` |
+| `accessRequestId` | `String` | `@map("access_request_id") @db.Uuid` |
+| `requestCode` | `String` | `@map("request_code") @db.VarChar(20)` |
+| `applicantName` | `String` | `@map("applicant_name") @db.VarChar(201)` |
+| `applicantCareer` | `String` | `@map("applicant_career") @db.VarChar(100)` |
+| `actionId` | `String` | `@map("action_id") @db.Uuid` |
+| `actorId` | `String?` | `@map("actor_id") @db.Uuid` |
+| `actorName` | `String` | `@map("actor_name") @db.VarChar(201)` |
+| `actorRole` | `String` | `@map("actor_role") @db.VarChar(50)` |
+| `detail` | `String?` | `@db.VarChar(500)` |
+| `evidenceFileId` | `String?` | `@map("evidence_file_id") @db.Uuid` |
+| `occurredAt` | `DateTime` | `@default(now()) @map("occurred_at") @db.Timestamptz(6)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `accessRequest` | `AccessRequest` | `@relation(fields: [accessRequestId], references: [id], onDelete: Restrict)` |
+| `action` | `AuditAction` | `@relation(fields: [actionId], references: [id], onDelete: Restrict)` |
+| `actor` | `User?` | `@relation("AuditEventActor", fields: [actorId], references: [id], onDelete: SetNull)` |
+| `evidenceFile` | `File?` | `@relation("AuditEventEvidence", fields: [evidenceFileId], references: [id], onDelete: Restrict)` |
+
+Model-level constraints and indexes
+
+- `@@index([occurredAt(sort: Desc), number(sort: Desc)])`
+- `@@index([accessRequestId, occurredAt])`
+- `@@index([actionId])`
+- `@@index([actorId])`
+- `@@index([evidenceFileId])`
+
+
+### `DocumentValidation`
+
+Physical table `document_validations`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `accessRequestId` | `String` | `@unique @map("access_request_id") @db.Uuid` |
+| `result` | `String` | `@db.VarChar(30)` |
+| `matchScore` | `Int?` | `@map("match_score") @db.SmallInt` |
+| `reason` | `String?` | `@db.VarChar(200)` |
+| `fieldResults` | `Json?` | `@map("field_results")` |
+| `queuedAt` | `DateTime` | `@default(now()) @map("queued_at") @db.Timestamptz(6)` |
+| `readAt` | `DateTime?` | `@map("read_at") @db.Timestamptz(6)` |
+| `revertedAt` | `DateTime?` | `@map("reverted_at") @db.Timestamptz(6)` |
+| `revertedById` | `String?` | `@map("reverted_by_id") @db.Uuid` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `accessRequest` | `AccessRequest` | `@relation(fields: [accessRequestId], references: [id], onDelete: Cascade)` |
+| `revertedBy` | `User?` | `@relation("DocumentValidationRevertedBy", fields: [revertedById], references: [id], onDelete: SetNull)` |
+
+Model-level constraints and indexes
+
+- `@@index([result])`
+- `@@index([revertedById])`
+
+
+### `PortfolioProvider`
+
+Physical table `portfolio_providers`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `name` | `String` | `@unique @db.VarChar(50)` |
+| `description` | `String?` | `@db.VarChar(150)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `socialAccounts` | `UserSocialAccount[]` | Uses the Prisma type shown |
+| `portfolioProjects` | `UserPortfolioProject[]` | Uses the Prisma type shown |
+
+
+### `UserSocialAccount`
+
+Physical table `user_social_accounts`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `providerId` | `String` | `@map("provider_id") @db.Uuid` |
+| `externalId` | `String` | `@map("external_id") @db.VarChar(100)` |
+| `username` | `String` | `@db.VarChar(100)` |
+| `profileUrl` | `String?` | `@map("profile_url") @db.VarChar(500)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| `provider` | `PortfolioProvider` | `@relation(fields: [providerId], references: [id], onDelete: Restrict)` |
+| `portfolioProjects` | `UserPortfolioProject[]` | Uses the Prisma type shown |
+
+Model-level constraints and indexes
+
+- `@@unique([userId, providerId])`
+- `@@unique([providerId, externalId])`
+- `@@index([providerId])`
+
+
+### `UserPortfolioProject`
+
+Physical table `user_portfolio_projects`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `socialAccountId` | `String?` | `@map("social_account_id") @db.Uuid` |
+| `providerId` | `String` | `@map("provider_id") @db.Uuid` |
+| `repoName` | `String` | `@map("repo_name") @db.VarChar(150)` |
+| `repoUrl` | `String` | `@map("repo_url") @db.VarChar(500)` |
+| `description` | `String?` | `@db.Text` |
+| `language` | `String?` | `@db.VarChar(60)` |
+| `starsCount` | `Int` | `@default(0) @map("stars_count")` |
+| `isOwner` | `Boolean` | `@default(true) @map("is_owner")` |
+| `displayOrder` | `Int` | `@default(0) @map("display_order") @db.SmallInt` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| `socialAccount` | `UserSocialAccount?` | `@relation(fields: [socialAccountId], references: [id], onDelete: SetNull)` |
+| `provider` | `PortfolioProvider` | `@relation(fields: [providerId], references: [id], onDelete: Restrict)` |
+
+Model-level constraints and indexes
+
+- `@@unique([userId, providerId, repoName])`
+- `@@index([userId, displayOrder])`
+- `@@index([socialAccountId])`
+- `@@index([providerId])`
+
+
+### `PushSubscription`
+
+Physical table `push_subscriptions`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `id` | `String` | `@id @default(uuid()) @db.Uuid` |
+| `userId` | `String` | `@map("user_id") @db.Uuid` |
+| `endpoint` | `String` | `@unique @db.VarChar(500)` |
+| `p256dh` | `String` | `@db.VarChar(255)` |
+| `auth` | `String` | `@db.VarChar(255)` |
+| `userAgent` | `String?` | `@map("user_agent") @db.VarChar(255)` |
+| `lastUsedAt` | `DateTime?` | `@map("last_used_at") @db.Timestamptz(6)` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+Model-level constraints and indexes
+
+- `@@index([userId])`
+
+
+### `NotificationPreference`
+
+Physical table `notification_preferences`.
+
+| Prisma field | Type | Column mapping, default, constraint or relation |
+| --- | --- | --- |
+| `userId` | `String` | `@id @map("user_id") @db.Uuid` |
+| `pushEnabled` | `Boolean` | `@default(false) @map("push_enabled")` |
+| `emailEnabled` | `Boolean` | `@default(true) @map("email_enabled")` |
+| `inAppEnabled` | `Boolean` | `@default(true) @map("in_app_enabled")` |
+| `createdAt` | `DateTime` | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| `updatedAt` | `DateTime` | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| `user` | `User` | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+
+
 ## Sprint History
 
 ### Sprint 3
 
+- Added `event_sessions` for multi-session workshops and nullable `event_attendances.session_id` with per-session uniqueness, indexes, foreign keys and cascade behavior.
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.
 - Unique `(job_offer_id, user_id)` on applications, which supports withdrawing and applying again on the same row.
@@ -1161,6 +1954,17 @@ Both Sprint 3 migrations only add nullable columns and new tables; they do not c
 - Migración `20261115120000_add_survey_alert_configs_and_notification_flags`:
   - Nueva tabla `survey_alert_configs` (`SurveyAlertConfig`) con relación 1:0..1 con `surveys`, índice único sobre `survey_id` y borrado en cascada.
   - Nuevas columnas nullable en `surveys`: `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, que permiten un único aviso de cierre próximo y de cierre por encuesta y registran el último recordatorio manual.
+- Migración `20261119120000_add_survey_published_notified_period`:
+  - Nueva columna nullable `published_notified_period` (`VARCHAR(7)`) en `surveys`. Guarda el semestre en que se notificó la publicación de la encuesta, así se envía un solo aviso `SURVEY_PUBLISHED` por encuesta y semestre. No modifica filas existentes.
+- Migración `20261122180000_add_job_offer_notification_preferences` (HU-15):
+  - Nueva tabla catálogo `job_alert_modes` con los modos `ALL`, `MATCHING` y `HIGH_AFFINITY`, insertados por la migración.
+  - Nueva tabla `job_offer_notification_preferences` (una fila por usuario, clave primaria `user_id` con borrado en cascada desde `users`, `mode_id` con restricción de borrado sobre el catálogo). Solo agrega tablas; no modifica filas existentes.
+- Migración `20261124230000_normalize_survey_notification_links`:
+  - Migración solo de datos, sin cambios en `schema.prisma`. En `notifications.link` elimina el esquema y el host solo cuando el enlace coincide con la ruta histórica de su tipo de aviso, conservando query y hash, y actualiza `updated_at`:
+    - `SURVEY_PUBLISHED`: `/notifications?filter=SURVEYS` o `/surveys/:id`.
+    - `SURVEY_REMINDER`: `/surveys/:id`.
+    - `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT`: `/backoffice/surveys/statistics/:id`.
+  - `:id` es el UUID de la encuesta. Los enlaces absolutos con otra ruta no se modifican, así ninguna ruta ajena a encuestas queda como destino interno. Es idempotente y no modifica otros tipos de notificación.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
 - Mentor network (Sprint 3): documented participation models, requests, FIFO offers, capacity, technical selections, catalogs, idempotency, sanctions, indexes, SQL constraints, relationships, and deletion behavior.
 - Documented the Appointments tables: `appointments` with the new `cancellation_reason` and `cancelled_at`, `appointment_notifications` and its three catalogs (`appointment_notification_events`, `appointment_notification_channels`, `appointment_notification_statuses`), with keys, relationships, indexes and deletion behavior.
