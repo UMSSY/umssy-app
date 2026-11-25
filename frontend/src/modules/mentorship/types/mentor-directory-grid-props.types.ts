@@ -6,5 +6,6 @@ export type MentorDirectoryGridProps = {
   returnTo?: string;
   showAffinityBadge?: boolean;
   selectedArea?: string;
+  radarAreas?: string[];
   highlightAvailability?: boolean;
 };
