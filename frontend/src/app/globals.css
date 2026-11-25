@@ -208,3 +208,130 @@
     @apply font-heading text-balance;
   }
 }
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) {
+  padding: 2.25rem 1rem 1rem 1rem !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  column-gap: 0.75rem !important;
+  row-gap: 0.625rem !important;
+  align-items: start !important;
+  min-width: min(20rem, calc(100vw - 2rem)) !important;
+  max-width: calc(100vw - 2rem) !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"])::before {
+  content: "UMSSY · umssy.com";
+  position: absolute;
+  top: 0.625rem;
+  left: 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-image: url("/icons/icon-umssy.svg");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0.875rem 0.875rem;
+  padding-left: 1.125rem;
+  height: 0.875rem;
+  line-height: 0.875rem;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"])::after {
+  content: "Ahora";
+  position: absolute;
+  top: 0.625rem;
+  right: 2.25rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  line-height: 0.875rem;
+}
+
+[data-sonner-toast].cn-toast [data-close-button] {
+  left: auto !important;
+  right: 0.75rem !important;
+  top: 0.5rem !important;
+  transform: none !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--color-text-secondary) !important;
+  opacity: 0.7 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+[data-sonner-toast].cn-toast [data-close-button]:hover {
+  opacity: 1 !important;
+  background: transparent !important;
+  color: var(--color-ink) !important;
+}
+
+[data-sonner-toast].cn-toast [data-close-button] svg {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-icon] {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  margin: 0 !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-content] {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-title] {
+  font-size: 0.9375rem !important;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+  line-height: 1.25 !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-description] {
+  font-size: 0.8125rem !important;
+  color: var(--color-ink-soft) !important;
+  opacity: 1 !important;
+  line-height: 1.3 !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-button] {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  padding: 0.375rem 0.875rem !important;
+  border-radius: 0.375rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) [data-button]:hover {
+  background-color: var(--color-brand-hover) !important;
+}
