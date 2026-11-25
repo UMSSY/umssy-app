@@ -206,4 +206,50 @@ describe("AuditLogView", () => {
     expect(screen.getByRole("button", { name: "Página 2" })).toHaveAttribute("aria-current", "page");
     expect(screen.getAllByLabelText("Desde")[0]).toHaveValue("01/09/2026");
   });
+
+  it("al cerrar el detalle restaura la posición del scroll de la página", async () => {
+    listEvents.mockResolvedValue(page([event(1)], 25));
+    getEventDetail.mockResolvedValue({
+      ok: true,
+      data: {
+        id: "evt-1",
+        code: "EVT-2026-000001",
+        occurredAt: "2026-09-22T15:41:00.000Z",
+        action: "approved",
+        request: { id: "req-1", code: "SOL-2026-0141" },
+        applicant: { fullName: "Persona 1", career: "Ingeniería de Sistemas", graduationYear: 2024 },
+        responsible: { id: "admin-1", name: "Carla Montaño", role: "administrativo" },
+        rejectionReason: null,
+        documentType: "Diploma académico",
+        evidence: null,
+      },
+    });
+    getEventTimeline.mockResolvedValue({
+      ok: true,
+      data: { requestCode: "SOL-2026-0141", focusedEventId: "evt-1", items: [] },
+    });
+    const root = document.documentElement;
+    let scrollTop = 480;
+    Object.defineProperty(root, "scrollTop", {
+      configurable: true,
+      get: () => scrollTop,
+      set: (value: number) => {
+        scrollTop = value;
+      },
+    });
+
+    try {
+      renderWithQuery(<AuditLogView />);
+      fireEvent.click((await screen.findAllByRole("button", { name: /SOL-2026-0141/ }))[0]);
+      const panel = await screen.findByRole("dialog");
+
+      scrollTop = 0;
+      fireEvent.click(within(panel).getByRole("button", { name: "Cerrar" }));
+
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      await waitFor(() => expect(scrollTop).toBe(480));
+    } finally {
+      delete (root as { scrollTop?: number }).scrollTop;
+    }
+  });
 });
