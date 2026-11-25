@@ -123,6 +123,28 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
     expect(mockedService.apply).not.toHaveBeenCalled();
   });
 
+  it("links to Mis postulaciones once the person has applied", async () => {
+    mockedService.getMine.mockResolvedValue({
+      hasApplied: true,
+      application: APPLICATION,
+    });
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    expect(
+      await screen.findByRole("link", { name: "Ver mis postulaciones" }),
+    ).toHaveAttribute("href", "/vacancies/my-applications");
+  });
+
+  it("does not link to Mis postulaciones before the person has applied", async () => {
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    await screen.findByRole("button", { name: "Enviar postulación" });
+
+    expect(
+      screen.queryByRole("link", { name: "Ver mis postulaciones" }),
+    ).not.toBeInTheDocument();
+  });
+
   it('AC-02.8: shows "Ya te postulaste" when the backend answers 409', async () => {
     mockedService.apply.mockRejectedValue(conflictError());
     renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);

@@ -16,6 +16,7 @@ export const JOB_APPLICATION_MESSAGES = {
   applying: "Enviando…",
   alreadyApplied: "Ya te postulaste",
   appliedOn: "Postulaste el",
+  viewMyApplications: "Ver mis postulaciones",
   successTitle: "¡Postulación enviada!",
   successDescription: "Tu postulación se registró correctamente.",
   summaryJob: "Vacante",

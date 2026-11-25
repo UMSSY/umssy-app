@@ -3,6 +3,7 @@
 import { Label } from '@/components/ui/label';
 
 import { CircleCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { MY_APPLICATIONS_ROUTE } from '@/modules/applications';
 import { formatBoliviaDate } from '@/shared/utils/date-time';
 import { JOB_APPLICATION_MESSAGES } from '../constants/job-application.constants';
 import { useJobApplication } from '../hooks/use-job-application';
@@ -52,6 +54,12 @@ export function JobApplicationAction({
             {formatBoliviaDate(application.appliedAt)} ·
             <Badge variant="outline">{application.status}</Badge>
           </p>
+          <Link
+            href={MY_APPLICATIONS_ROUTE}
+            className="text-xs font-medium text-accent underline-offset-4 hover:underline"
+          >
+            {JOB_APPLICATION_MESSAGES.viewMyApplications}
+          </Link>
         </>
       ) : (
         <Button
