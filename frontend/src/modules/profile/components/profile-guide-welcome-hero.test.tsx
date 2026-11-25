@@ -30,7 +30,7 @@ describe('ProfileGuideWelcomeHero', () => {
     expect(container.firstElementChild).toHaveClass('relative', 'bg-interaction');
     expect(
       screen.getByRole('img', { name: 'Asistente virtual UMSSY' }),
-    ).toHaveClass('size-72');
+    ).toHaveClass('aspect-square', 'h-auto', 'max-w-[90%]');
     expect(container.querySelector('img.opacity-100')).toHaveAttribute(
       'data-frame',
       'wave',
