@@ -17,8 +17,8 @@ export const PUBLIC_NAV_LABELS = {
 export const PUBLIC_NAV_LINK_CLASS =
   "px-3 py-2 font-tight text-sm font-extrabold tracking-wide whitespace-nowrap text-surface uppercase underline-offset-8 transition-colors hover:underline focus-visible:underline focus-visible:outline-none";
 
-export const PUBLIC_SLANT_BUTTON_CLASS =
-  "h-12 rounded-none px-10 font-tight text-sm font-extrabold tracking-wide uppercase [clip-path:polygon(1rem_0,100%_0,calc(100%-1rem)_100%,0_100%)]";
+export const PUBLIC_CTA_CLASS =
+  "h-12 px-10 font-tight text-sm font-extrabold tracking-wide uppercase";
 
 export const PUBLIC_FOOTER = {
   name: "UMSSY",

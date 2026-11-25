@@ -10,4 +10,6 @@ export interface MessagingUiContextValue {
   setIsSending: Dispatch<SetStateAction<boolean>>;
   isPanelOpen: boolean;
   setIsPanelOpen: Dispatch<SetStateAction<boolean>>;
+  launcherId: string | null;
+  setLauncherId: Dispatch<SetStateAction<string | null>>;
 }

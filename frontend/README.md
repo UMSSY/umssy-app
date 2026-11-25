@@ -103,3 +103,4 @@ pnpm dlx shadcn@latest add card
 ```
 
 Components are added to `src/components/ui/`. You can browse all available components at [ui.shadcn.com/docs/components](https://ui.shadcn.com/docs/components).
+
