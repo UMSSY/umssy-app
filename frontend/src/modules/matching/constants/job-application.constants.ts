@@ -22,7 +22,6 @@ export const JOB_APPLICATION_MESSAGES = {
   summaryJob: "Vacante",
   summaryCompany: "Empresa",
   summaryDate: "Fecha",
-  summaryStatus: "Estado",
   close: "Entendido",
   applyError: "No pudimos enviar tu postulación. Intenta nuevamente.",
 } as const;

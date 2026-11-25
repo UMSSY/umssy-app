@@ -11,11 +11,10 @@ describe("VacancyClosedBadge", () => {
     expect(screen.getByText("Vacante cerrada")).toBeInTheDocument();
   });
 
-  it("uses the neutral gray tokens and not the destructive color", () => {
+  it("uses the light red tint that job-offers applies to deleted vacancies", () => {
     render(<VacancyClosedBadge />);
 
     const badge = screen.getByText("Vacante cerrada");
-    expect(badge).toHaveClass("bg-surface-soft", "text-text-secondary");
-    expect(badge.className).not.toContain("destructive");
+    expect(badge).toHaveClass("border-destructive/30", "bg-destructive/10", "text-destructive");
   });
 });

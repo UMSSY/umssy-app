@@ -88,7 +88,7 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
     expect(dialog).toHaveTextContent("DevOps Senior");
     expect(dialog).toHaveTextContent("TechBolivia");
     expect(dialog).toHaveTextContent("10/11/2026");
-    expect(dialog).toHaveTextContent("En revisión");
+    expect(dialog).not.toHaveTextContent("En revisión");
   });
 
   it('AC-02.8: replaces the button with "Ya te postulaste" after applying', async () => {
@@ -120,6 +120,7 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
       await screen.findByRole("button", { name: "Ya te postulaste" }),
     ).toBeDisabled();
     expect(screen.getByText(/Postulaste el 10\/11\/2026/)).toBeInTheDocument();
+    expect(screen.queryByText("En revisión")).not.toBeInTheDocument();
     expect(mockedService.apply).not.toHaveBeenCalled();
   });
 

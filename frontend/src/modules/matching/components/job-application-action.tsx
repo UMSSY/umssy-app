@@ -6,7 +6,6 @@ import { CircleCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -49,10 +48,9 @@ export function JobApplicationAction({
             <CircleCheck className="size-4" aria-hidden="true" />
             {JOB_APPLICATION_MESSAGES.alreadyApplied}
           </Button>
-          <p className="flex items-center gap-2 text-xs text-text-secondary">
+          <p className="text-xs text-text-secondary">
             {JOB_APPLICATION_MESSAGES.appliedOn}{' '}
-            {formatBoliviaDate(application.appliedAt)} ·
-            <Badge variant="outline">{application.status}</Badge>
+            {formatBoliviaDate(application.appliedAt)}
           </p>
           <Link
             href={MY_APPLICATIONS_ROUTE}
@@ -186,12 +184,6 @@ export function JobApplicationAction({
               </dt>
               <dd className="font-semibold text-ink">
                 {formatBoliviaDate(submittedApplication.appliedAt)}
-              </dd>
-              <dt className="text-text-secondary">
-                {JOB_APPLICATION_MESSAGES.summaryStatus}
-              </dt>
-              <dd>
-                <Badge variant="outline">{submittedApplication.status}</Badge>
               </dd>
             </dl>
           )}

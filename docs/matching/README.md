@@ -241,7 +241,7 @@ Reads `job_offers`, `job_offer_skills`, `skills`, `user_skills`, `educations` an
 
 ## Frontend
 
-- Routes: `/vacancies/recommended` (`RecommendedJobsView`) and `/vacancies/recommended/[id]` (`JobMatchDetailView`). `JobApplicationAction` is reused by the vacancy detail in [vacancies](../vacancies/README.md). Once the person has applied it shows "Ya te postulaste", the date and status of the application and a "Ver mis postulaciones" link to the list in [applications](../applications/README.md).
+- Routes: `/vacancies/recommended` (`RecommendedJobsView`) and `/vacancies/recommended/[id]` (`JobMatchDetailView`). `JobApplicationAction` is reused by the vacancy detail in [vacancies](../vacancies/README.md). Once the person has applied it shows "Ya te postulaste", the date of the application and a "Ver mis postulaciones" link to the list in [applications](../applications/README.md).
 - The feed has filters by modality and text and a "high affinity" option; "Limpiar" restores the list. Dates use the Bolivia time formatter.
 - The module also contains the recruiter views of the radar (candidate list, comparison and CV evidence); their backend is `radar-integration` and they are not described here.
 - In the recruiter candidate panel, the "Contactar" button opens or reuses the application conversation with the candidate in the chat side panel. The application is not accepted or rejected from this screen.

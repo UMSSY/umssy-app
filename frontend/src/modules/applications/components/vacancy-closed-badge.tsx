@@ -5,7 +5,7 @@ import type { VacancyClosedBadgeProps } from "../types/vacancy-closed-badge-prop
 
 export function VacancyClosedBadge({ className }: VacancyClosedBadgeProps) {
   return (
-    <Badge variant="secondary" className={cn("border-border bg-surface-soft", className)}>
+    <Badge variant="destructive" className={cn("border-destructive/30 bg-destructive/10", className)}>
       {APPLICATION_MESSAGES.vacancyClosed}
     </Badge>
   );
