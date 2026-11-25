@@ -141,6 +141,7 @@ export function WeekGrid({
                           onClick={() => handleBlockClick(block)}
                           className={cn(
                             "size-full flex-col items-start justify-start gap-0 overflow-hidden rounded-md px-1.5 py-0.5 text-left text-xs leading-[15px] font-semibold",
+                            density === "compact" && "justify-center py-0 leading-none",
                             STATE_BUTTON_CLASSES[block.state],
                             isSelected && SELECTED_BLOCK_CLASSES
                           )}
