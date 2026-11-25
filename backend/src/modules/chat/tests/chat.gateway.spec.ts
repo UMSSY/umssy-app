@@ -100,6 +100,35 @@ describe('ChatGateway (HU-5 Handshake)', () => {
     expect(mockSocket.data.user.id).toBe('user-123');
   });
 
+  it('autentica el socket usando la cookie umssy_access cuando auth.token no se envía', async () => {
+    const mockServer: any = { use: vi.fn() };
+    gateway.afterInit(mockServer);
+    const middleware = mockServer.use.mock.calls[0][0];
+
+    const mockSocket: any = {
+      handshake: {
+        auth: {},
+        headers: { cookie: 'umssy_access=cookie-valid-token' },
+      },
+      data: {},
+    };
+    const mockNext = vi.fn();
+
+    vi.mocked(jwtService.verifyAsync).mockResolvedValue({
+      sub: 'user-cookie-1',
+    } as any);
+    vi.mocked(sessionService.getAuthenticatedUser).mockResolvedValue({
+      id: 'user-cookie-1',
+      roles: ['titulado'],
+    } as any);
+
+    await middleware(mockSocket, mockNext);
+
+    expect(jwtService.verifyAsync).toHaveBeenCalledWith('cookie-valid-token');
+    expect(mockNext).toHaveBeenCalledWith();
+    expect(mockSocket.data.user?.id).toBe('user-cookie-1');
+  });
+
   it('atiende message:send y conserva la difusión message:new de la epic', async () => {
     const client = { data: { user: { id: 'user-1' } } } as unknown as Socket;
     const message = {

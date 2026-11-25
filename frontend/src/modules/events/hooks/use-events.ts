@@ -21,9 +21,9 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
     queryFn: ({ pageParam, signal }) => eventsService.getEvents({
       page: pageParam, limit: 50,
       includeProposals: true,
-      ...(search && { search }), 
-      ...(categoryId && { categoryId }), 
-      ...(sort && { sort }), 
+      ...(search && { search }),
+      ...(categoryId && { categoryId }),
+      ...(sort && { sort }),
       ...(statusId && { statusId }),
       ...(scope && { scope }),
     }, signal, accessToken),

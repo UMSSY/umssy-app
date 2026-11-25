@@ -11,11 +11,11 @@ The module has no tables of its own: it only reads data from other domains throu
 
 ## Functionality
 
-| Map | Type (`:type`) | Columns | Frontend route |
-| --- | --- | --- | --- |
-| Skills by career | `skills-by-career` | Careers (Sistemas, Informática) | `/backoffice/reports/heatmaps/skills-by-career` |
-| NLP skills vs. salary range | `skills-by-salary` | 5 monthly salary ranges | `/backoffice/reports/heatmaps/skills-by-salary` |
-| Employability and skills | `employability` | 4 employment statuses + total and job retention | `/backoffice/reports/heatmaps/employability` |
+| Map                            | Type (`:type`)         | Columns                                                  | Frontend route                                      |
+| ------------------------------ | ---------------------- | -------------------------------------------------------- | --------------------------------------------------- |
+| Skills by career               | `skills-by-career`     | Careers (Sistemas, Informática)                          | `/backoffice/reports/heatmaps/skills-by-career`     |
+| NLP skills vs. salary range    | `skills-by-salary`     | 5 monthly salary ranges                                  | `/backoffice/reports/heatmaps/skills-by-salary`     |
+| Employability and skills       | `employability`        | 4 employment statuses + total and job retention          | `/backoffice/reports/heatmaps/employability`        |
 | Skills vs. years of experience | `skills-by-experience` | Junior, Semi-Senior, Senior + total and highest adoption | `/backoffice/reports/heatmaps/skills-by-experience` |
 
 `/backoffice/reports/heatmaps` redirects to the skills by career map. The sidebar has its own "Mapas de calor" section.
@@ -127,34 +127,34 @@ sequenceDiagram
 
 ### Exposed
 
-| Method | Path | Roles | Query | Response | Errors |
-| --- | --- | --- | --- | --- | --- |
-| GET | `/analytics/heatmap/:type` | `administrativo` | `careerId` (uuid), `year`, `month`, `startTimestamp`, `endTimestamp` | 200 `HeatmapResponse` (`heatmapType`, `baseCount`, `baseLabel`, `columns`, `extraColumnsConfig?`, `rows`, `quickReadSummary?`) | 400 validation or `INVALID_HEATMAP_RANGE`, 401, 403, 500 |
-| GET | `/analytics/heatmap/:type/export` | `administrativo` | `format` (`pdf`, default), `careerId` (uuid), `year`, `month`, `startTimestamp`, `endTimestamp` | 200 `application/pdf` binary, `Content-Disposition: attachment; filename="mapa-calor-TIPO.pdf"` | 400 validation or `INVALID_HEATMAP_RANGE`, 401, 403, 404 `REPORT_AUTHOR_NOT_FOUND`, 500 |
+| Method | Path                              | Roles            | Query                                                                                           | Response                                                                                                                       | Errors                                                                                  |
+| ------ | --------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| GET    | `/analytics/heatmap/:type`        | `administrativo` | `careerId` (uuid), `year`, `month`, `startTimestamp`, `endTimestamp`                            | 200 `HeatmapResponse` (`heatmapType`, `baseCount`, `baseLabel`, `columns`, `extraColumnsConfig?`, `rows`, `quickReadSummary?`) | 400 validation or `INVALID_HEATMAP_RANGE`, 401, 403, 500                                |
+| GET    | `/analytics/heatmap/:type/export` | `administrativo` | `format` (`pdf`, default), `careerId` (uuid), `year`, `month`, `startTimestamp`, `endTimestamp` | 200 `application/pdf` binary, `Content-Disposition: attachment; filename="mapa-calor-TIPO.pdf"`                                | 400 validation or `INVALID_HEATMAP_RANGE`, 401, 403, 404 `REPORT_AUTHOR_NOT_FOUND`, 500 |
 
 Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles, parameters and constraints taken from the Zod schemas, success examples with the `{ statusCode, ok, detail, data }` envelope, the errors thrown by the code, and 401, 403 and 500 declared explicitly. The examples live in the module's `constants/*-swagger.constants.ts` and the shared error schema in `backend/src/common/constants/api-error-swagger.constants.ts`.
 
 ### Consumed
 
-| Module | Service / endpoint | Use |
-| --- | --- | --- |
-| surveys | `SurveyEmploymentResponsesService.findEmploymentResponses` | Answered employment status and salary range |
-| surveys | `CareersService.listCareers('desc')`, `GET /careers` (frontend) | Columns and career filter |
-| access-requests | `ApprovedGraduateCareersService.findByUserIds` | Approved career of each graduate |
-| skills | `SkillAnalysisService.findSkillSummariesByUserIds` | Skills and their origin (`nlp`, manual) |
-| work-experience | `WorkExperienceSourcesService.findPeriodsByUserIds` | Work periods to calculate years of experience |
-| reports | `ReportAuthorService.resolveLabel`, `ReportPdfService.render` | Author label and PDF rendering with the institutional header |
+| Module          | Service / endpoint                                              | Use                                                          |
+| --------------- | --------------------------------------------------------------- | ------------------------------------------------------------ |
+| surveys         | `SurveyEmploymentResponsesService.findEmploymentResponses`      | Answered employment status and salary range                  |
+| surveys         | `CareersService.listCareers('desc')`, `GET /careers` (frontend) | Columns and career filter                                    |
+| access-requests | `ApprovedGraduateCareersService.findByUserIds`                  | Approved career of each graduate                             |
+| skills          | `SkillAnalysisService.findSkillSummariesByUserIds`              | Skills and their origin (`nlp`, manual)                      |
+| work-experience | `WorkExperienceSourcesService.findPeriodsByUserIds`             | Work periods to calculate years of experience                |
+| reports         | `ReportAuthorService.resolveLabel`, `ReportPdfService.render`   | Author label and PDF rendering with the institutional header |
 
 ## Dependencies
 
-| Direction | Module | Use |
-| --- | --- | --- |
-| Uses | [surveys](../surveys/README.md) | Employability responses and career catalog |
-| Uses | [access-requests](../access-requests/README.md) | Approved career per graduate |
-| Uses | [skills](../skills/README.md) | Skill summary per user (`SkillAnalysisModule`) |
-| Uses | [work-experience](../work-experience/README.md) | Work periods (`WorkExperienceSourcesModule`) |
-| Uses | [reports](../reports/README.md) | PDF rendering and author label (`ReportsModule`) |
-| Uses (frontend) | surveys (`useCareers`), shared (`ExportFormatMenu`, `WorkspacePage`, `downloadFile`) | Filters, export menu and layout |
+| Direction       | Module                                                                               | Use                                              |
+| --------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| Uses            | [surveys](../surveys/README.md)                                                      | Employability responses and career catalog       |
+| Uses            | [access-requests](../access-requests/README.md)                                      | Approved career per graduate                     |
+| Uses            | [skills](../skills/README.md)                                                        | Skill summary per user (`SkillAnalysisModule`)   |
+| Uses            | [work-experience](../work-experience/README.md)                                      | Work periods (`WorkExperienceSourcesModule`)     |
+| Uses            | [reports](../reports/README.md)                                                      | PDF rendering and author label (`ReportsModule`) |
+| Uses (frontend) | surveys (`useCareers`), shared (`ExportFormatMenu`, `WorkspacePage`, `downloadFile`) | Filters, export menu and layout                  |
 
 ## Data
 
