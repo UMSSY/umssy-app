@@ -17,10 +17,12 @@ import { CV_ERROR_MESSAGES } from '../constants/cv-error-messages.constants';
 import { CV_FILE_INPUT_ACCEPT } from '../constants/cv-upload.constants';
 import { useCvDocument } from '../hooks/use-cv-document';
 import { useApplyCvExtraction } from '../hooks/use-apply-cv-extraction';
+import { useCvEducationNamesResolver } from '../hooks/use-cv-education-names-resolver';
 import { useCvExtraction } from '../hooks/use-cv-extraction';
 import { useCvFeedback } from '../hooks/use-cv-feedback';
 import { useCvViewer } from '../hooks/use-cv-viewer';
 import type { SavedCv } from '../types/saved-cv.types';
+import { getCvContactErrors } from '../utils/get-cv-contact-errors';
 import { getCvErrorMessage } from '../utils/get-cv-error-message';
 import { isCvFileRejection } from '../utils/is-cv-file-rejection';
 import { validateCvFile } from '../utils/validate-cv-file';
@@ -48,6 +50,7 @@ export function DocumentsCvContent({
   const { profile } = useProfile();
   const cvExtraction = useCvExtraction({ currentHeadline: profile?.headline });
   const cvApply = useApplyCvExtraction();
+  const resolveEducationNames = useCvEducationNamesResolver();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<File | null>(
@@ -191,7 +194,12 @@ export function DocumentsCvContent({
   const applyCvExtraction = async () => {
     const { extraction, selection } = cvExtraction;
     if (!extraction) return;
-    const results = await cvApply.apply(extraction, selection, profile);
+    const results = await cvApply.apply({
+      extraction,
+      selection,
+      profile,
+      resolveEducationNames,
+    });
 
     if (results.every(({ isApplied }) => isApplied)) {
       closeCvExtraction();
@@ -271,9 +279,7 @@ export function DocumentsCvContent({
         className={
           guideCallbacks
             ? 'flex flex-col gap-6'
-            : verification
-              ? 'grid items-start gap-6 lg:grid-cols-2'
-              : 'grid grid-cols-2 items-start gap-6'
+            : 'grid grid-cols-1 items-start gap-6 lg:grid-cols-2'
         }
       >
         <div className="flex min-w-0 flex-col gap-6">
@@ -335,6 +341,11 @@ export function DocumentsCvContent({
         extraction={cvExtraction.extraction}
         available={cvExtraction.available}
         selection={cvExtraction.selection}
+        contactErrors={getCvContactErrors(
+          profile,
+          cvExtraction.extraction,
+          cvExtraction.selection,
+        )}
         errorMessage={cvExtraction.errorMessage}
         canRetry={cvExtraction.isRetryable}
         onRetry={cvExtraction.retry}

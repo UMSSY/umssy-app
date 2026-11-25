@@ -18,14 +18,26 @@ describe('Portfolio providers request schemas', () => {
   });
 
   describe('oauthCallbackSchema', () => {
-    it('accepts non-empty code', () => {
-      const parsed = oauthCallbackSchema.parse({ code: '  auth-code-123  ' });
-      expect(parsed.code).toBe('auth-code-123');
+    const validVerifier = 'a'.repeat(43);
+
+    it('accepts valid code, state and verifier', () => {
+      const parsed = oauthCallbackSchema.parse({
+        code: '  auth-code-123  ',
+        state: '  state-123  ',
+        verifier: validVerifier,
+      });
+      expect(parsed).toEqual({
+        code: 'auth-code-123',
+        state: 'state-123',
+        verifier: validVerifier,
+      });
     });
 
-    it('rejects empty code', () => {
-      expect(() => oauthCallbackSchema.parse({ code: '' })).toThrow();
-      expect(() => oauthCallbackSchema.parse({ code: '   ' })).toThrow();
+    it('rejects missing or empty code, state, or invalid verifier', () => {
+      expect(() => oauthCallbackSchema.parse({ code: '', state: 'state', verifier: validVerifier })).toThrow();
+      expect(() => oauthCallbackSchema.parse({ code: 'code', state: '   ', verifier: validVerifier })).toThrow();
+      expect(() => oauthCallbackSchema.parse({ code: 'code', state: 'state', verifier: 'short' })).toThrow();
+      expect(() => oauthCallbackSchema.parse({ code: 'code' })).toThrow();
       expect(() => oauthCallbackSchema.parse({})).toThrow();
     });
   });

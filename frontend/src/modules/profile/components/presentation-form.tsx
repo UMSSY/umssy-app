@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useProfileCompletionFocus } from "../hooks/use-profile-completion-focus";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { getFieldErrorProps } from "../utils/get-field-error-props";
 import { trimFormValues } from "../utils/trim-form-values";
 import { validatePresentation } from "../utils/validate-presentation";
 import { FormField } from "./form-field";
+import { PresentationLeaveDialog } from "./presentation-leave-dialog";
 import { SectionCard } from "./section-card";
 import { FormFieldset } from "@/shared/components/layout/form-fieldset";
 
@@ -21,11 +22,14 @@ export function PresentationForm({
   saveLabel = "Guardar presentación",
   initialValues,
   isSaving = false,
+  guardProfileReview = false,
   serverErrors = {},
   onEdit,
   onSubmit,
 }: PresentationFormProps) {
-  const [values, setValues] = useState<PresentationValues>(initialValues);
+  const [draft, setDraft] = useState<PresentationValues | null>(null);
+  const values = draft ?? initialValues;
+  const lastEditedField = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const [localErrors, setErrors] = useState<PresentationErrors>({});
   const errors = { ...localErrors, ...serverErrors };
   const fieldIds = {
@@ -40,27 +44,34 @@ export function PresentationForm({
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const field = event.target.name as keyof PresentationValues;
     onEdit?.(field);
-    const { value } = event.target;
-    setValues((current) => ({ ...current, [field]: value }));
+    lastEditedField.current = event.target;
+    const next = { ...values, [field]: event.target.value };
+    const isUnchanged = next.headline === initialValues.headline && next.aboutMe === initialValues.aboutMe;
+    setDraft(isUnchanged ? null : next);
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
   const handleCancel = () => {
     onEdit?.();
-    setValues(initialValues);
+    setDraft(null);
     setErrors({});
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (isSaving) return;
+  const saveValues = async () => {
+    if (isSaving) return false;
     const trimmedValues = trimFormValues(values);
     const validationErrors = validatePresentation(trimmedValues);
     setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length === 0) {
-      onSubmit(trimmedValues);
-    }
+    if (Object.keys(validationErrors).length > 0) return false;
+    const saved = await onSubmit(trimmedValues);
+    if (saved) setDraft(null);
+    return saved === true;
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void saveValues();
   };
 
   return (
@@ -100,28 +111,37 @@ export function PresentationForm({
           </FormField>
 
           </FormFieldset>
-          <div className="flex flex-wrap items-center justify-end gap-4 border-t border-border pt-5">
+          <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-text-secondary">
               Los cambios se muestran al guardar.
             </p>
-            <div className="flex gap-3">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="cancel"
                 size="lg"
-                className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+                className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
                 disabled={isSaving}
                 onClick={handleCancel}
               >
                 Cancelar
               </Button>
-              <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+              <Button type="submit" className={cn("h-10 w-full bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover sm:w-auto sm:min-w-44")} disabled={isSaving}>
                 {isSaving ? "Guardando..." : saveLabel}
               </Button>
             </div>
           </div>
         </form>
       </SectionCard>
+      {guardProfileReview && (
+        <PresentationLeaveDialog
+          dirty={values.headline !== initialValues.headline || values.aboutMe !== initialValues.aboutMe}
+          isSaving={isSaving}
+          returnFocus={lastEditedField}
+          onSave={saveValues}
+          onDiscard={handleCancel}
+        />
+      )}
 
     </div>
   );

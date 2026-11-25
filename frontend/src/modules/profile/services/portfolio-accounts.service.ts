@@ -20,11 +20,12 @@ export const portfolioAccountsService = {
   getOAuthAuthorizationUrl: async (
     provider: PortfolioProviderName,
     state?: string,
+    challenge?: string,
   ): Promise<PortfolioOAuthUrlResponse> => {
     const response = await apiClient.get<ApiResponse<PortfolioOAuthUrlResponse>>(
       `/profile/portfolio/oauth/${provider}/url`,
       {
-        params: state ? { state } : undefined,
+        params: state || challenge ? { ...(state ? { state } : {}), ...(challenge ? { challenge } : {}) } : undefined,
         headers: getAuthHeaders(),
       },
     );

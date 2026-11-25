@@ -51,6 +51,7 @@ export function PresentationSettings({
         <>
           <FeedbackMessage feedback={feedback} />
           <PresentationForm
+            guardProfileReview={!guide}
             idPrefix={guide ? 'profile-guide-' : undefined}
             saveLabel={guide ? 'Guardar cambios' : undefined}
             initialValues={toPresentationValues(profile)}
@@ -63,10 +64,12 @@ export function PresentationSettings({
             onSubmit={async (values) => {
               guide?.onBusyChange(true);
               try {
-                if (await savePresentation(values)) {
+                const saved = await savePresentation(values);
+                if (saved) {
                   guide?.onDirtyChange(false);
                   guide?.onSaved();
                 }
+                return saved;
               } finally {
                 guide?.onBusyChange(false);
               }
