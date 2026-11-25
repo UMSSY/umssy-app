@@ -199,4 +199,17 @@ describe('EventsCatalogService', () => {
       expect(secondPage.data.total).toBe(3);
     });
   });
+
+  it('lists finished workshops by date even when a ranking is requested', async () => {
+    for (const sort of ['popular', 'recommended'] as const) {
+      eventsService.findAll.mockClear();
+      await service.findAll({ page: 1, limit: 10, sort, scope: 'finished' }, 'user-1');
+      expect(eventsService.findAll).toHaveBeenCalledWith(
+        { page: 1, limit: 10, sort, scope: 'finished' },
+        'user-1',
+      );
+    }
+    expect(eventsService.findAndCount).not.toHaveBeenCalled();
+    expect(signals.findByUserId).not.toHaveBeenCalled();
+  });
 });
