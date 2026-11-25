@@ -29,7 +29,7 @@ export function DiscardChangesDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{SURVEY_TEXT.keepEditing}</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onConfirm}>
+          <AlertDialogAction variant="outline" onClick={onConfirm}>
             {SURVEY_TEXT.discard}
           </AlertDialogAction>
         </AlertDialogFooter>

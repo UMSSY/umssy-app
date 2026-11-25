@@ -29,7 +29,7 @@ export function LeaveRequestDialog({ open, onConfirm, onCancel }: LeaveRequestDi
             {LEAVE_REQUEST_TEXT.stay}
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-critical-action px-4 text-critical-action-foreground hover:bg-critical-action/90"
+            variant="outline"
             onClick={onConfirm}
           >
             {LEAVE_REQUEST_TEXT.leave}

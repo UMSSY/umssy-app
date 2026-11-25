@@ -181,7 +181,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-5">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
             {statistics.questions.map((question) => (
               <SurveyQuestionResultCard key={question.id} question={question} />
             ))}

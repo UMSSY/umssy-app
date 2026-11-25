@@ -107,7 +107,8 @@ export function PresentationForm({
             <div className="flex gap-3">
               <Button
                 type="button"
-                variant="outline"
+                variant="cancel"
+                size="lg"
                 className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
                 disabled={isSaving}
                 onClick={handleCancel}

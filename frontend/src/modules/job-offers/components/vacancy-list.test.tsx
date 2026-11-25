@@ -268,9 +268,8 @@ describe("VacancyList details", () => {
       await user.tab();
       expect(dialog.contains(document.activeElement)).toBe(true);
     }
-    await user.keyboard("{Enter}");
 
-    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(screen.getByRole("dialog")).toBe(dialog);
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 

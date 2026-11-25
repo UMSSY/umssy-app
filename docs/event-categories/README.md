@@ -32,6 +32,18 @@ The events module consumes category IDs for workshop classification and filters.
 | --- | --- | --- |
 | GET | `/api/event-categories` | Paginated category list; optional `page`, `limit` and `search`. |
 
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Event categories API"]
+  API --> Service["Category service"]
+  Service --> Data[("Event categories")]
+  Service --> Related[("Events")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
 ## Sprint History
 
 ### Sprint 3

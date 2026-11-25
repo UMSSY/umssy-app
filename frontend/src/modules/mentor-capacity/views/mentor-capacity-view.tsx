@@ -315,7 +315,6 @@ export function MentorCapacityView() {
                   savePercentage.isPending || Boolean(capacityValidationError)
                 }
                 type="submit"
-                variant="brand"
               >
                 <Check aria-hidden="true" />
                 {savePercentage.isPending ? 'Guardando...' : 'Guardar límite'}

@@ -15,7 +15,7 @@
 
 **Fundamental rule:** Every color must serve an informational or brand purpose. Colors are not used purely for aesthetics, except for a strictly ornamental gold stroke (`#C9A227`) on headings.
 
-**Main palette:** Anchored in the UMSS identity, it uses “UMSS Red” for accents, primary buttons, and active indicators. Text uses dark “Ink” tones (`#0B1F2E` and `#33465A`), supported by neutral backgrounds (white and soft grays).
+**Main palette:** Anchored in the UMSS identity, it uses “UMSS Red” for accents and active indicators. Text uses dark “Ink” tones (`#0B1F2E` and `#33465A`), supported by neutral backgrounds (white and soft grays).
 
 **Alerts and interactions:** To avoid competing with the brand red, “Dark Red” is reserved strictly for critical or negative alerts. “Soft Red” is limited to indicating selection or interaction in forms.
 
@@ -32,7 +32,7 @@
 Clean components:
 
 - **Sidebar:** Dark background with reduced-opacity white text. Active items use a red dot and a subtle background rather than solid color blocks.
-- **Buttons:** Red primary buttons (used sparingly to avoid competing with alerts) and transparent secondary (ghost) buttons with light borders.
+- **Buttons:** Use institutional blue for primary buttons. Reserve red buttons for actions that delete or remove data, including actions backed by an HTTP DELETE request. Use an outlined button with a strong border, ink text and a soft surface hover for Cancel controls that dismiss an operation.
 - **Tables:** Clean design without zebra striping, using only 1px divider lines and small uppercase headers (11.5px).
 
 ### 1.2 Layer and Module Responsibilities

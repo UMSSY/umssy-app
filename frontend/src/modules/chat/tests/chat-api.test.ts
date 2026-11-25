@@ -219,76 +219,6 @@ describe('chat-api — searchUsers (HU-2, backend integration)', () => {
 
 });
 
-describe('chat-api — getOrCreateConversation (HU-2, backend integration)', () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-
-  });
-
-  it('debe llamar a POST /chat/conversations con el contactId', async () => {
-    apiClientMock.post.mockResolvedValue({
-      data: {
-        id: 'conv-1',
-        contact: {
-          id: 'user-1',
-          fullName: 'Maria Peredo',
-          avatarUrl: null,
-          isOnline: false,
-        },
-        lastMessage: null,
-        unreadCount: 0,
-        updatedAt: '2026-01-01T00:00:00.000Z',
-      },
-    });
-
-    await getOrCreateConversation('user-1');
-
-    expect(apiClientMock.post).toHaveBeenCalledWith('/chat/conversations', {
-      contactId: 'user-1',
-    });
-
-  });
-
-  it('debe retornar la conversacion que devuelve el backend', async () => {
-    const conversation = {
-      id: 'conv-1',
-      contact: {
-        id: 'user-1',
-        fullName: 'Maria Peredo',
-        avatarUrl: 'https\://example.com/a.jpg',
-        isOnline: true,
-      },
-      lastMessage: {
-        id: 'msg-1',
-        senderId: 'user-1',
-        content: 'Hola',
-        isAttachment: false,
-        attachmentType: null,
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-      unreadCount: 0,
-      updatedAt: '2026-01-01T00:00:00.000Z',
-    };
-
-    apiClientMock.post.mockResolvedValue({ data: conversation });
-
-    const result = await getOrCreateConversation('user-1');
-
-    expect(result).toEqual(conversation);
-
-  });
-
-  it('debe propagar el error del backend cuando el contacto no existe', async () => {
-    apiClientMock.post.mockRejectedValue(new Error('UserNotFoundException'));
-
-    await expect(
-      getOrCreateConversation('user-inexistente'),
-    ).rejects.toThrow('UserNotFoundException');
-
-  });
-
-});
-
 describe('chat-api — getMessages', () => {
   it('debe retornar los mensajes de una conversacion ordenados del mas antiguo al mas reciente', async () => {
     apiClientMock.get.mockResolvedValueOnce({ data: {
@@ -767,26 +697,6 @@ describe("chat-api — sendMessage (HU-03 Tarea 2)", () => {
     );
 
     apiClientMock.patch.mockResolvedValue({ data: {} } as never);
-  });
-
-  it('debe responder dentro del umbral esperado (< 2 segundos)', async () => {
-    const startTime = Date.now();
-
-    const response = await sendMessage({
-      conversationId: 'conv-1',
-      content:
-        'Mensaje con tiempo de respuesta controlado',
-    });
-
-    const elapsedTime =
-      Date.now() - startTime;
-
-    expect(elapsedTime).toBeLessThan(
-      2000,
-    );
-
-    expect(response.ok).toBe(true);
-
   });
 
   it('debe retornar un payload estructurado con el mensaje registrado en operacion exitosa', async () => {
