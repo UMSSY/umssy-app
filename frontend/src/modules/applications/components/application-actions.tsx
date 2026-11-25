@@ -3,6 +3,7 @@ import { WITHDRAWN_STATUS } from "../constants/application.constants";
 import type { ApplicationActionsProps } from "../types/application-actions-props.types";
 import { ContactApplicationButton } from "./contact-application-button";
 import { ReactivateApplicationButton } from "./reactivate-application-button";
+import { ViewVacancyLink } from "./view-vacancy-link";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
 
 export function ApplicationActions({
@@ -27,6 +28,7 @@ export function ApplicationActions({
       ) : (
         <WithdrawApplicationButton application={application} withdrawingId={withdrawingId} onWithdraw={onWithdraw} />
       )}
+      <ViewVacancyLink application={application} />
     </div>
   );
 }

@@ -2,20 +2,21 @@
 
 ## Purpose
 
-Lets a graduate or student follow the job applications they have submitted ("Mis postulaciones"): list them with their affinity percentage, sort them, withdraw an active one, apply again to a vacancy after withdrawing, and open a chat with the company's recruiter. The applicant-facing flow distinguishes active applications (`Postulada`) from withdrawn applications (`Retirada`). Internally, the backend uses `En revisión` for newly submitted and reactivated applications; it also reads other catalog statuses when evaluating withdrawal and contact permissions, without managing recruiter decisions. This module does not dispatch status-change notifications.
+Lets a graduate or student follow the job applications they have submitted ("Mis postulaciones"): list them with their affinity percentage, sort them, withdraw an active one, apply again to a vacancy after withdrawing, open the detail of the vacancy, and open a chat with the company's recruiter. The applicant-facing view does not display the status: it only separates withdrawn applications (`Retirada`, hidden by default) from the rest. Internally, the backend uses `En revisión` for newly submitted and reactivated applications; it also reads other catalog statuses when evaluating withdrawal and contact permissions, without managing recruiter decisions. This module does not dispatch status-change notifications.
 
 Creating an application (the "Postularme" action) belongs to the [matching](../matching/README.md) module. This module starts once the application exists.
 
 ## Functionality
 
-| Feature                                                               | Where                                                |
-| --------------------------------------------------------------------- | ---------------------------------------------------- |
-| List my applications with vacancy, company, affinity, status and date | `GET /applications/me`, `/vacancies/my-applications` |
-| Sort by date, vacancy, company or affinity (eight options)            | Client-side sort selector                            |
-| Withdraw an application that is in review or in interview             | `PATCH /applications/:id/withdraw`                   |
-| Show withdrawn applications only on demand (toggle)                   | Frontend                                             |
-| Apply again to a vacancy after withdrawing ("Volver a postular")      | `PATCH /applications/:id/reactivate`                 |
-| Contact the recruiter from an application                             | `GET /applications/:id/contact` + chat deep link     |
+| Feature                                                          | Where                                                |
+| ---------------------------------------------------------------- | ---------------------------------------------------- |
+| List my applications with vacancy, company, affinity and date    | `GET /applications/me`, `/vacancies/my-applications` |
+| Sort by date, vacancy, company or affinity (eight options)       | Client-side sort selector                            |
+| Withdraw an application that is in review or in interview        | `PATCH /applications/:id/withdraw`                   |
+| Show withdrawn applications only on demand (toggle)              | Frontend                                             |
+| Apply again to a vacancy after withdrawing ("Volver a postular") | `PATCH /applications/:id/reactivate`                 |
+| Contact the recruiter from an application                        | `GET /applications/:id/contact` + chat deep link     |
+| Open the vacancy detail from an application ("Ver vacante")      | Link to `/vacancies/:id`                             |
 
 ## Architecture
 
@@ -124,14 +125,14 @@ sequenceDiagram
 
 ## Business rules
 
-- The status catalog `job_application_statuses` contains `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado` and `Retirada` (`ApplicationStatus` enum). The applicant-facing view labels non-withdrawn applications as `Postulada` and withdrawn ones as `Retirada`; `Postulada` is a display label, not a catalog status. The applicant-facing module performs transitions to `Retirada` (withdrawal) and back to `En revisión` (reactivation); it does not implement recruiter decisions that assign `Entrevista`, `Aceptada` or `No seleccionado`. Nevertheless, the withdrawal and contact operations must recognize these catalog statuses according to the rules below.
+- The status catalog `job_application_statuses` contains `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado` and `Retirada` (`ApplicationStatus` enum). The applicant-facing view does not display the status; it only separates `Retirada` applications (hidden by default) from the rest. The applicant-facing module performs transitions to `Retirada` (withdrawal) and back to `En revisión` (reactivation); it does not implement recruiter decisions that assign `Entrevista`, `Aceptada` or `No seleccionado`. Nevertheless, the withdrawal and contact operations must recognize these catalog statuses according to the rules below.
 - Only the owner of an application can read, withdraw, reactivate or contact from it. Withdraw/reactivate answer 404 when it does not exist and 403 when it belongs to someone else; contact answers 404 in both cases so it does not reveal other users' applications.
 - An application can be withdrawn only from `En revisión` or `Entrevista`. The check is part of the `UPDATE ... WHERE`, so a concurrent status change is rejected instead of overwritten.
 - An application can be reactivated only from `Retirada`, only if the vacancy is `Publicada` and has not expired. Reactivating moves it to `En revisión` and resets `appliedAt` to the current time. The `(job_offer_id, user_id)` pair is unique, so the same row is reused.
 - Contact is allowed only for `En revisión`, `Entrevista` and `Aceptada`; otherwise 403 `APPLICATION_CONTACT_RESTRICTED`. The chat opens with the first active recruiter of the vacancy's company.
 - Chat validation (`validateApplicationForChat`) rejects the conversation when the application does not belong to the student, does not belong to the company, or is rejected, withdrawn or cancelled.
 - Affinity is not stored: it is calculated on every request by the matching module (see [matching](../matching/README.md)). When no score is available for a vacancy, the item shows 0.
-- This module does not send status-change notifications. Status-change notifications, where applicable, are handled outside the applications module.
+- This module does not send status-change notifications, and no module emits `APPLICATION_STATUS_CHANGED` yet: the type exists in the notification catalog but nothing triggers it.
 - Dates are shown in Bolivia time with the shared `formatBoliviaDate` formatter.
 
 ## Endpoints
@@ -161,13 +162,14 @@ Internal contracts used by other modules (not HTTP) include `validateApplication
 
 ## Dependencies
 
-| Direction | Module                            | Use                                                                                                 |
-| --------- | --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Uses      | [matching](../matching/README.md) | `JobRecommendationsService.scoresForOffers` for the affinity column                                 |
-| Uses      | job-offers                        | `JobOffersService` for the vacancy data                                                             |
-| Uses      | users                             | `UsersService.findActiveRecruitersByCompany` (the module does not read users or companies directly) |
-| Used by   | chat                              | `validateApplicationForChat`                                                                        |
-| Used by   | radar-integration                 | recruiter decision and application lookup contracts                                                 |
+| Direction | Module                              | Use                                                                                                 |
+| --------- | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Uses      | [matching](../matching/README.md)   | `JobRecommendationsService.scoresForOffers` for the affinity column                                 |
+| Uses      | job-offers                          | `JobOffersService` for the vacancy data                                                             |
+| Uses      | [vacancies](../vacancies/README.md) | Detail screen opened by the "Ver vacante" link (frontend)                                           |
+| Uses      | users                               | `UsersService.findActiveRecruitersByCompany` (the module does not read users or companies directly) |
+| Used by   | chat                                | `validateApplicationForChat`                                                                        |
+| Used by   | radar-integration                   | recruiter decision and application lookup contracts                                                 |
 
 ## Data
 
@@ -178,6 +180,7 @@ Tables `job_applications` and `job_application_statuses` (see [backend/prisma/RE
 - Route: `/vacancies/my-applications` (`ApplicationsView`).
 - Responsive: table on desktop, cards on mobile. Sort selector (eight options), "show withdrawn" toggle and empty/error states with retry.
 - Withdraw and reactivate use confirmation dialogs; the reactivation button and dialog use the green `success` color of the design tokens.
+- Every application, withdrawn or not, has a "Ver vacante" link (`ViewVacancyLink`, inside `ApplicationActions`) to `/vacancies/<jobOfferId>`, the detail dialog of the [vacancies](../vacancies/README.md) module. When the vacancy has expired, was closed or was withdrawn, that screen shows its "Esta vacante ya no está disponible" notice instead of the detail; the application itself stays in the list.
 - The client uses `canContactApplication` to block contact for `Retirada` applications before calling the API. For other statuses, the backend enforces the full contact rule (`En revisión`, `Entrevista` and `Aceptada` are allowed; otherwise 403 `APPLICATION_CONTACT_RESTRICTED`). Retryable failures (network or 5xx) show a toast with an option to retry.
 
 ## Design decisions
@@ -196,9 +199,10 @@ Withdrawing an application updates its status through the withdrawal PATCH endpo
 
 ### Sprint 3
 
-- "Mis postulaciones" list with affinity, status and date, empty and error states.
+- "Mis postulaciones" list with affinity and date, empty and error states.
 - Eight sort options (date, vacancy, company and affinity, each ascending/descending), withdrawn applications behind a toggle, mobile cards.
 - Withdraw with confirmation and conflict-safe update.
 - Apply again after withdrawing ("Volver a postular") with confirmation.
 - Contact the recruiter from an application through the contextual chat.
+- "Ver vacante" link from each application to the vacancy detail.
 - Dates unified to Bolivia time with a single formatter.

@@ -13,6 +13,10 @@ export function getApplicationContactEndpoint(applicationId: string): string {
   return `/applications/${applicationId}/contact`;
 }
 
+export function getApplicationVacancyPath(jobOfferId: string): string {
+  return `/vacancies/${jobOfferId}`;
+}
+
 export function getApplicationChatPath(contactId: string, applicationId: string): string {
   const params = new URLSearchParams({
     contactId,
@@ -37,6 +41,7 @@ export const APPLICATION_MESSAGES = {
   withdraw: "Retirar",
   withdrawing: "Retirando…",
   withdrawError: "No pudimos retirar la postulación. Intenta nuevamente.",
+  viewVacancy: "Ver vacante",
   contact: "Contactar",
   contacting: "Abriendo chat…",
   contactRestricted: "Esta postulación ya no permite la comunicación directa con el reclutador.",

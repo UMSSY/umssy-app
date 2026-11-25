@@ -25,6 +25,24 @@ describe("ApplicationsTable", () => {
     expect(screen.queryByText("En revisión")).not.toBeInTheDocument();
   });
 
+  it("links each application to the detail of its own vacancy", () => {
+    render(
+      <ApplicationsTable
+        applications={[
+          buildApplication({ id: "application-1", jobOfferId: "offer-1", vacancyTitle: "Analista de Datos" }),
+          buildApplication({ id: "application-2", jobOfferId: "offer-2", vacancyTitle: "Diseñador UX" }),
+        ]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Ver vacante: Analista de Datos" })).toHaveAttribute("href", "/vacancies/offer-1");
+    expect(screen.getByRole("link", { name: "Ver vacante: Diseñador UX" })).toHaveAttribute("href", "/vacancies/offer-2");
+  });
+
   it("lets the person withdraw an application that is still open", () => {
     const onWithdraw = vi.fn();
     render(
