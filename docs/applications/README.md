@@ -2,21 +2,20 @@
 
 ## Purpose
 
-Lets a graduate or student follow the job applications they have submitted ("Mis postulaciones"): list them with their affinity percentage, sort them, withdraw an active one, apply again to a vacancy after withdrawing, and open a chat with the company's recruiter. This module manages the applicant-side transitions between `En revisión` and `Retirada`; it does not dispatch status-change notifications.
+Lets a graduate or student follow the job applications they have submitted ("Mis postulaciones"): list them with their affinity percentage, sort them, withdraw an active one, apply again to a vacancy after withdrawing, and open a chat with the company's recruiter. The applicant-facing flow distinguishes active applications (`Postulada`) from withdrawn applications (`Retirada`). Internally, the backend uses `En revisión` for newly submitted and reactivated applications and retains other catalog statuses for compatibility with recruiter decisions. This module does not dispatch status-change notifications.
 
 Creating an application (the "Postularme" action) belongs to the [matching](../matching/README.md) module. This module starts once the application exists.
 
-
 ## Functionality
 
-| Feature                                                                 | Where                                                |
-| ----------------------------------------------------------------------- | ---------------------------------------------------- |
-| List my applications with vacancy, company, affinity, status and date   | `GET /applications/me`, `/vacancies/my-applications` |
-| Sort by date, vacancy, company or affinity (eight options)              | Client-side sort selector                            |
-| Withdraw an application that is in review or in interview               | `PATCH /applications/:id/withdraw`                   |
-| Show withdrawn applications only on demand (toggle)                     | Frontend                                             |
-| Apply again to a vacancy after withdrawing ("Volver a postular")        | `PATCH /applications/:id/reactivate`                 |
-| Contact the recruiter from an application                               | `GET /applications/:id/contact` + chat deep link     |
+| Feature                                                               | Where                                                |
+| --------------------------------------------------------------------- | ---------------------------------------------------- |
+| List my applications with vacancy, company, affinity, status and date | `GET /applications/me`, `/vacancies/my-applications` |
+| Sort by date, vacancy, company or affinity (eight options)            | Client-side sort selector                            |
+| Withdraw an application that is in review or in interview             | `PATCH /applications/:id/withdraw`                   |
+| Show withdrawn applications only on demand (toggle)                   | Frontend                                             |
+| Apply again to a vacancy after withdrawing ("Volver a postular")      | `PATCH /applications/:id/reactivate`                 |
+| Contact the recruiter from an application                             | `GET /applications/:id/contact` + chat deep link     |
 
 ## Architecture
 
@@ -125,7 +124,7 @@ sequenceDiagram
 
 ## Business rules
 
-- The status catalog `job_application_statuses` contains `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado` and `Retirada` (`ApplicationStatus` enum). This module only manages the applicant-side states `En revisión` and `Retirada`. `Entrevista`, `Aceptada` and `No seleccionado` are catalog states that this module no longer manages.
+- The status catalog `job_application_statuses` contains `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado` and `Retirada` (`ApplicationStatus` enum). Epic 5 presents the applicant-facing states as `Postulada` and `Retirada`; `Postulada` is a user-facing label, not an additional value in the status catalog. The backend retains `En revisión`, `Entrevista`, `Aceptada` and `No seleccionado` for existing application records and recruiter workflows. The withdrawal and contact operations still recognize some of these internal statuses according to the rules below.
 - Only the owner of an application can read, withdraw, reactivate or contact from it. Withdraw/reactivate answer 404 when it does not exist and 403 when it belongs to someone else; contact answers 404 in both cases so it does not reveal other users' applications.
 - An application can be withdrawn only from `En revisión` or `Entrevista`. The check is part of the `UPDATE ... WHERE`, so a concurrent status change is rejected instead of overwritten.
 - An application can be reactivated only from `Retirada`, only if the vacancy is `Publicada` and has not expired. Reactivating moves it to `En revisión` and resets `appliedAt` to the current time. The `(job_offer_id, user_id)` pair is unique, so the same row is reused.
@@ -139,12 +138,24 @@ sequenceDiagram
 
 All endpoints require a valid JWT and the role `titulado` or `estudiante`.
 
-| Method | Path                           | Description                                                                                                                                                              | Success                          | Errors                                                                                       |
-| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- | -------------------------------------------------------------------------------------------- |
-| GET    | `/applications/me`             | Own applications. The client sorts by `vacancy`, `company`, `affinity` or `date` (ascending or descending); the API also accepts its documented query parameters | 200 `ApplicationItemResponse[]`  | 400 invalid query                                                                            |
-| PATCH  | `/applications/:id/withdraw`   | Withdraws an application                                                                                                                                                 | 204                              | 400 `APPLICATION_NOT_WITHDRAWABLE`, 403 `APPLICATION_FORBIDDEN`, 404 `APPLICATION_NOT_FOUND` |
-| PATCH  | `/applications/:id/reactivate` | Applies again after withdrawing                                                                                                                                          | 204                              | 403 `APPLICATION_FORBIDDEN`, 404 `APPLICATION_NOT_FOUND`, 409 not reactivable                |
-| GET    | `/applications/:id/contact`    | Recruiters available to chat with                                                                                                                                        | 200 `ApplicationContactResponse` | 403 `APPLICATION_CONTACT_RESTRICTED`, 404 `APPLICATION_NOT_FOUND`                            |
+| Method | Path                           | Description                                                                                                                                         | Success                          | Errors                                                                                       |
+| ------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------- |
+| GET    | `/applications/me`             | Own applications. Optional query: `status`, `sortBy`, `sortOrder` (detailed below). The client sorts locally by vacancy, company, affinity or date. | 200 `ApplicationItemResponse[]`  | 400 invalid query                                                                            |
+| PATCH  | `/applications/:id/withdraw`   | Withdraws an application                                                                                                                            | 204                              | 400 `APPLICATION_NOT_WITHDRAWABLE`, 403 `APPLICATION_FORBIDDEN`, 404 `APPLICATION_NOT_FOUND` |
+| PATCH  | `/applications/:id/reactivate` | Applies again after withdrawing                                                                                                                     | 204                              | 403 `APPLICATION_FORBIDDEN`, 404 `APPLICATION_NOT_FOUND`, 409 not reactivable                |
+| GET    | `/applications/:id/contact`    | Recruiters available to chat with                                                                                                                   | 200 `ApplicationContactResponse` | 403 `APPLICATION_CONTACT_RESTRICTED`, 404 `APPLICATION_NOT_FOUND`                            |
+
+### `GET /applications/me` query parameters
+
+All query parameters are optional:
+
+| Parameter   | Accepted values                                                        | Behavior                                                   |
+| ----------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `status`    | `En revisión`, `Entrevista`, `Aceptada`, `No seleccionado`, `Retirada` | Filters by the internal `ApplicationStatus` catalog value. |
+| `sortBy`    | `vacancy`, `company`, `affinity`, `status`, `date`                     | Selects the backend sorting field.                         |
+| `sortOrder` | `asc`, `desc`                                                          | Sorting direction; defaults to `desc`.                     |
+
+The frontend does not expose the internal status filter or status-based sorting. Its local sort selector provides eight options: ascending and descending order for vacancy, company, affinity and date. The separate withdrawn-applications toggle controls whether withdrawn items appear in the client.
 
 Internal contracts used by other modules (not HTTP) include `validateApplicationForChat`, `findRecruitmentApplicationsByUser`, `findRecruitmentApplicants` and `recordRecruiterDecision`. The recruiter decision endpoint `PATCH /radar-integration/recruiter/applications/:id` belongs to the `radar-integration` module and is not managed by this module.
 
@@ -156,7 +167,7 @@ Internal contracts used by other modules (not HTTP) include `validateApplication
 | Uses      | job-offers                        | `JobOffersService` for the vacancy data                                                             |
 | Uses      | users                             | `UsersService.findActiveRecruitersByCompany` (the module does not read users or companies directly) |
 | Used by   | chat                              | `validateApplicationForChat`                                                                        |
-| Used by   | radar-integration                 | recruiter decision and application lookup contracts                                               |
+| Used by   | radar-integration                 | recruiter decision and application lookup contracts                                                 |
 
 ## Data
 

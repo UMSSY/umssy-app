@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from 'vitest';
 import { createWorkExperienceSchema } from '../requests/create-work-experience.request.js';
 import { updateWorkExperienceSchema } from '../requests/update-work-experience.request.js';

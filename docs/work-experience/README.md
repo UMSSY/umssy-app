@@ -8,13 +8,13 @@ Owner: group 5. The text analysis that turns descriptions into skills is shared 
 
 ## Functionality
 
-| Feature                                                                                 | Where                                                         |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| List, create, edit and delete my work experiences                                       | `/work-experiences` endpoints, profile page and profile guide |
-| Group experiences by company, collapsed by default when a company has several positions | `WorkExperienceListCard`                                      |
-| Live skill suggestions while typing the description                                     | `POST /work-experiences/:id/skills/preview`                   |
-| Skills of the profile refreshed after every change                                      | `ProfileSkillsAnalysisService.refreshAfterChange`             |
-| Light blue chips showing the skills that come from each experience                      | `skillsByExperience`                                          |
+| Feature                                                                            | Where                                                         |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| List, create, edit and delete my work experiences                                  | `/work-experiences` endpoints, profile page and profile guide |
+| Group experiences by company, with all groups collapsible and collapsed by default | `WorkExperienceListCard`                                      |
+| Live skill suggestions while typing the description                                | `POST /work-experiences/:id/skills/preview`                   |
+| Skills of the profile refreshed after every change                                 | `ProfileSkillsAnalysisService.refreshAfterChange`             |
+| Light blue chips showing the skills that come from each experience                 | `skillsByExperience`                                          |
 
 ## Architecture
 
@@ -110,7 +110,7 @@ sequenceDiagram
 - An update that finds the dates changed by someone else during the operation answers 409 `WORK_EXPERIENCE_UPDATE_CONFLICT`.
 - The company is a row of `companies`: it is found by its exact name or created. The same table holds the companies that publish vacancies, so an experience at a company that later publishes vacancies points to the same row.
 - Every create, update and delete awaits `refreshAfterChange`. The detection result is already stored when the response arrives, so the client does not ask for it again; it only refreshes the skill queries. A failure of the detection is logged and never fails the save.
-- In the client, experiences are ordered with the current job first and then by start date, newest first. They are grouped by company name ignoring case and extra spaces. A company with one position is a plain card; a company with several positions is collapsible, starts collapsed, and each group opens and closes independently.
+- In the client, experiences are ordered with the current job first and then by start date, newest first. They are grouped by company name ignoring case and extra spaces. Every company group is collapsible, including groups with a single position. All groups start collapsed, and each group opens and closes independently.
 - After saving, a status line says that the skills are being refreshed in the background and the person can continue with the profile (the guide does not wait for it).
 
 ## Endpoints
@@ -155,7 +155,7 @@ Table `work_experiences`, related to `users` and `companies` (see [backend/prism
 - **Preview and persisted analysis are different calls.** Typing only previews; nothing is stored until the experience is saved.
 - **Skills come from evidence, not from a flag on the experience.** When an experience is removed, the skills that came only from it disappear and manual skills remain (see [skills](../skills/README.md)).
 - **Companies are shared rows** so work history and vacancies refer to the same company record.
-- **Collapsible only when it helps.** A company with a single position is not collapsible; groups start collapsed to keep long histories short.
+- **Consistent company grouping.** Every company group, including one with a single position, can be expanded or collapsed. All groups start collapsed to keep long histories short.
 - **The save does not wait for the skills refresh**, so the guide can continue immediately.
 
 ## Read services for other domains
@@ -164,8 +164,8 @@ The `work-experience` module manages the work experiences of each person's profi
 
 `WorkExperienceSourcesService` (exported by `WorkExperienceSourcesModule`):
 
-| Method | Returns | Consumer |
-| --- | --- | --- |
+| Method                          | Returns                                                                                                                            | Consumer                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `findPeriodsByUserIds(userIds)` | `WorkPeriodResponse[]` (`userId`, `startDate`, `endDate` null if still ongoing). With an empty list it does not query the database | [analytics](../analytics/README.md) (years of experience in the skills vs. experience map) |
 
 ```mermaid
@@ -199,9 +199,9 @@ sequenceDiagram
 
 ### Read dependencies
 
-| Direction | Module | Use |
-| --- | --- | --- |
-| Used by | [analytics](../analytics/README.md) | Work periods per graduate |
+| Direction | Module                              | Use                       |
+| --------- | ----------------------------------- | ------------------------- |
+| Used by   | [analytics](../analytics/README.md) | Work periods per graduate |
 
 ### Read frontend integration
 
