@@ -4,7 +4,7 @@
 
 Lets a person register the jobs they have held (company, position, period and a description of their duties) as part of their profile. The description is also the main source from which the platform detects the person's skills, so saving, editing or deleting an experience keeps the skills of the profile up to date.
 
-Owner: group 5. The text analysis that turns descriptions into skills is shared with the [matching](../matching/README.md) and [skills](../skills/README.md) modules and with the `nlp` module, which is owned by another team.
+The text analysis that turns descriptions into skills is shared with the [matching](../matching/README.md) and [skills](../skills/README.md) modules and with the `nlp` module, which is owned by another team.
 
 ## Functionality
 

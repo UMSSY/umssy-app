@@ -34,7 +34,7 @@ The `GET /job-offers/alert-preference` endpoint returns the authenticated user's
 | `canFilterByProfile: true`  | The user's profile has skills, so affinity-based modes are available.                                                                        |
 | `canFilterByProfile: false` | The effective `mode` is `ALL`; `savedMode` retains the stored choice. Attempting to save a filtered mode raises `JOB_ALERT_SKILLS_REQUIRED`. |
 
-The preference endpoints store and retrieve choices. The matching module also selects alert recipients through `JobAlertRecipientsService`; actual notification delivery belongs to the consuming notification workflow. The `nlp` and `radar-integration` modules retain their own responsibilities.
+The preference endpoints store and retrieve choices. The matching module also selects alert recipients through `JobAlertRecipientsService`; the [job-offers](../job-offers/README.md) module uses it when a vacancy is published and sends the notification itself. The `nlp` and `radar-integration` modules retain their own responsibilities.
 
 ### Job alert recipient selection
 
@@ -198,7 +198,7 @@ sequenceDiagram
 - Skill detection: an empty text gives an empty list, the text is limited to 5000 characters, a term only matches when it equals exactly one catalog skill (if two skills collapse to the same key, only an exact name match is accepted), and symbols are kept (`C++`, `C#`, `Node.js`, `.NET`).
 - `POST /work-experiences/:id/skills/preview` never writes anything; `/analysis` replaces the skills detected for that experience. Both check that the experience belongs to the caller.
 
-- **Job alert recipients are selected in matching.** `JobAlertRecipientsService` retrieves active eligible contacts and their filtered preferences, includes contacts without a filtered preference, and applies the selected affinity threshold to candidates with skills. Candidates without skills pass this recipient filter; failures during affinity evaluation exclude the affected candidate. Delivery is handled outside this service.
+- **Job alert recipients are selected in matching.** `JobAlertRecipientsService` retrieves active eligible contacts and their filtered preferences, includes contacts without a filtered preference, and applies the selected affinity threshold to candidates with skills. Candidates without skills pass this recipient filter; failures during affinity evaluation exclude the affected candidate. The service only returns the recipients; job-offers sends the notification.
 
 ## Endpoints
 
@@ -228,6 +228,7 @@ The match and recommendation items include `jobOfferId`, `title`, `companyName`,
 | Uses      | radar-integration                                          | Stores the consents of an application (`RadarApplicationConsentsService`)          |
 | Uses      | job-connect                                                | `SkillDictionaryService` to extract skills from experience text                    |
 | Used by   | [applications](../applications/README.md)                  | `scoresForOffers` for the affinity column                                          |
+| Used by   | [job-offers](../job-offers/README.md)                      | `JobAlertRecipientsService.resolve` to select who is alerted about a new vacancy   |
 | Used by   | [job-offers](../job-offers/README.md) (frontend)           | `/matching/requirements/terms` to detect skills while writing requirements         |
 | Used by   | [work-experience](../work-experience/README.md) (frontend) | `/skills/preview` for the live chips                                               |
 

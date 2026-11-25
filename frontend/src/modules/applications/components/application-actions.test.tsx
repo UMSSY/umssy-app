@@ -43,6 +43,15 @@ describe("ApplicationActions", () => {
     expect(screen.queryByRole("button", { name: "Retirar" })).not.toBeInTheDocument();
   });
 
+  it.each<ApplicationStatus>(["En revisión", "Entrevista", "Aceptada", "No seleccionado", "Retirada"])(
+    "links to the vacancy when the status is %s",
+    (status) => {
+      renderActions(status);
+
+      expect(screen.getByRole("link", { name: /^Ver vacante/ })).toHaveAttribute("href", "/vacancies/offer-1");
+    },
+  );
+
   it("keeps the withdraw button of a withdrawn application when there is no way to reactivate it", () => {
     renderActions("Retirada", false);
 

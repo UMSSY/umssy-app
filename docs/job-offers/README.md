@@ -4,10 +4,10 @@
 
 Owns the job offers (vacancies) that companies publish. It has two faces:
 
-- **Applicant side** (used by group 5): the list of published vacancies, the skill catalog used by vacancies, and the data that [matching](../matching/README.md) needs to score a vacancy. The applicant screens live in the frontend module [vacancies](../vacancies/README.md).
+- **Applicant side**: the list of published vacancies, the skill catalog used by vacancies, and the data that [matching](../matching/README.md) needs to score a vacancy. The applicant screens live in the frontend module [vacancies](../vacancies/README.md).
 - **Company side**: publishing, editing, listing, reopening and deleting the vacancies of a company, and the history screen. This part is shared with the recruiters/companies team; it is described here so the module has one complete README, and that team can complete or correct it.
 
-Group 5 contribution: published listing, skill selection and real-time skill detection in the requirements step, dates of the vacancies, and the match data source.
+Applicant-side coverage: published listing, skill selection and real-time skill detection in the requirements step, dates of the vacancies, the match data source and the alert sent to applicants when a vacancy is published.
 
 ## Functionality
 

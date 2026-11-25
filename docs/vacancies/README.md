@@ -6,18 +6,17 @@ Public-facing catalog of open job vacancies for graduates and students ("Todas l
 
 This is a **frontend-only module**: there is no `backend/src/modules/vacancies`. The data comes from the published job offers of the [job-offers](../job-offers/README.md) module, and the application itself is created by [matching](../matching/README.md).
 
-Owner: group 5.
-
 ## Functionality
 
-| Feature                                                                          | Where                                                         |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| List all published, not expired vacancies as cards                               | `GET /job-offers`, `/vacancies`                               |
-| Search by title, company, description, modality, contract type or required skill | Client-side filter                                            |
-| Counter of found vacancies and empty states (no vacancies, no results)           | `VacanciesView`                                               |
-| Vacancy detail with conditions, description and required technologies            | Dialog on `/vacancies/[id]` (deep link)                       |
-| Publication and expiry dates of every vacancy                                    | Date badges and detail                                        |
-| Apply from the detail                                                            | `JobApplicationAction` from [matching](../matching/README.md) |
+| Feature                                                                          | Where                                                                                    |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| List all published, not expired vacancies as cards                               | `GET /job-offers`, `/vacancies`                                                          |
+| Search by title, company, description, modality, contract type or required skill | Client-side filter                                                                       |
+| Counter of found vacancies and empty states (no vacancies, no results)           | `VacanciesView`                                                                          |
+| Vacancy detail with conditions, description and required technologies            | Dialog on `/vacancies/[id]` (deep link)                                                  |
+| Entry points to the detail besides the cards                                     | New-vacancy notifications and "Ver vacante" in [applications](../applications/README.md) |
+| Publication and expiry dates of every vacancy                                    | Date badges and detail                                                                   |
+| Apply from the detail                                                            | `JobApplicationAction` from [matching](../matching/README.md)                            |
 
 ## Architecture
 
