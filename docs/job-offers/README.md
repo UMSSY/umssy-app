@@ -22,6 +22,7 @@ Group 5 contribution: published listing, skill selection and real-time skill det
 | Close a published vacancy by hand                               | `PATCH .../:jobOfferId/close`, "Cerrar" button in the company portal                    |
 | Close vacancies automatically when their closing date passes    | `JobOfferExpirationScheduler` (every 5 minutes)                                        |
 | Detect required skills while the company writes the description | `POST /matching/requirements/terms` (from [matching](../matching/README.md))           |
+| Alert eligible applicants when a vacancy is published           | `JobOfferNotificationsService`, after `POST /companies/:companyId/job-offers`          |
 
 ## Architecture
 
@@ -45,10 +46,14 @@ flowchart LR
     S --> SK[JobOfferSkillsService]
     S --> MR[JobOfferMatchRepository]
     S --> M[JobOfferMapper]
+    S --> JN[JobOfferNotificationsService]
+    JN --> MR
   end
   R --> DB[(job_offers, job_offer_skills, catalogs)]
   MR --> DB
   SK --> CAT[skills: SkillCatalogService]
+  JN -->|who receives the alert| RC[matching: JobAlertRecipientsService]
+  JN -->|notify| NT[notifications: NotificationsService]
   MT -. scoring data .-> S
 ```
 
@@ -74,6 +79,38 @@ sequenceDiagram
   S->>S: company exists, skills exist, catalog values exist
   S->>S: repository.create with status Publicada
   S-->>F: 201 created offer
+```
+
+### Alert applicants about a new vacancy
+
+```mermaid
+sequenceDiagram
+  participant C as JobOffersController
+  participant S as JobOffersService
+  participant R as JobOffersRepository
+  participant N as JobOfferNotificationsService
+  participant M as JobOfferMatchRepository
+  participant A as JobAlertRecipientsService
+  participant NT as NotificationsService
+  C->>S: create(companyId, request)
+  S->>R: create(offer)
+  R-->>S: { id, createdAt }
+  S--)N: notifyPublished(id)
+  S-->>C: 201 { id, createdAt }
+  N->>M: findPublishedById(id, now)
+  alt the vacancy is not published
+    N-->>N: nothing is sent
+  else
+    N->>A: resolve(vacancy)
+    A-->>N: ids of the people who accept the alert
+    alt nobody accepts it
+      N-->>N: nothing is sent
+    else
+      N->>N: validate the payload with jobOfferPublishedPayloadSchema (zod)
+      N->>NT: notify(JOB_OFFER_PUBLISHED, actionUrl = /vacancies/:id)
+    end
+  end
+  Note over N: Any failure is logged and never reaches the company's request
 ```
 
 ### Published listing and match source
@@ -109,6 +146,7 @@ sequenceDiagram
 - **Delete** is logical: the status changes to `Eliminada`. The company history still lists and can read it, but it cannot be edited, reopened or deleted again (404).
 - **History filters.** By modality, contract type, publication date range (Bolivia time, both days included), text in the title (up to 60 characters, case-insensitive), and sorting by publication date or by number of applicants (ties broken by date), ascending or descending (default newest first).
 - **Detection while writing.** After 500 ms without typing, the description is analyzed and the recognized catalog skills are added to the selection until the limit of 10 is reached. Once the person removes a skill, it is not added again. Detection only starts after the person types, so an existing vacancy opened for editing keeps its skills.
+- **Publish alert.** Right after a vacancy is created, `JobOfferNotificationsService` asks matching for the people who accept the alert (`JobAlertRecipientsService`, which applies each person's alert preference) and sends one `JOB_OFFER_PUBLISHED` notification through `NotificationsService.notify()` that links to `/vacancies/:id`, with the vacancy title and the company name. It runs detached from the request, so the company gets its 201 without waiting for the affinity calculation, and any failure is logged and swallowed. Reopening a vacancy does not alert again.
 - **Scoring data.** The match repository exposes only what scoring needs (title, description, dates, company, modality, skills, careers, minimum experience and other requirements).
 
 ## Endpoints
@@ -132,6 +170,8 @@ sequenceDiagram
 | Direction | Module                                         | Use                                                                                       |
 | --------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Uses      | skills                                         | `SkillCatalogService` to list and validate the skills of a vacancy                        |
+| Uses      | [matching](../matching/README.md)              | `JobAlertRecipientsService.resolve` to choose who receives the new-vacancy alert          |
+| Uses      | notifications                                  | `NotificationsService.notify` with `JOB_OFFER_PUBLISHED`                                  |
 | Used by   | [matching](../matching/README.md)              | `findPublishedMatches`, `findPublishedMatchById`, `findScoringOffers`, `findCompanyOffer` |
 | Used by   | [applications](../applications/README.md)      | Vacancy data of an application                                                            |
 | Used by   | [vacancies](../vacancies/README.md) (frontend) | `GET /job-offers` and `getSafeMapsUrl`                                                    |
@@ -155,6 +195,7 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - **Detection is a helper, not an authority.** It suggests skills while the company writes, and the company keeps the final say (it can remove any suggestion and add others).
 - **Logical delete** keeps the history and the applications that reference the vacancy; the status is what hides it from applicants.
 - **A separate repository for scoring** (`JobOfferMatchRepository`) selects only the columns matching needs, so the scoring code does not depend on the company-side shape of the offer.
+- **Matching and job offers know each other.** Matching reads the vacancies and job offers asks matching who to alert about a new one, so both module imports use `forwardRef`.
 
 ## Sprint History
 
@@ -167,3 +208,4 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - Company side (shared): publish, edit, history with filters, reopen and delete.
 - Company vacancy list in the company portal: cards with time open and expiry date, title search, and a message for accounts that are not linked to a company.
 - Closing date when publishing, automatic close every 5 minutes and manual close with confirmation.
+- Alert to the applicants who accept it when a vacancy is published, following each person's alert preference.
