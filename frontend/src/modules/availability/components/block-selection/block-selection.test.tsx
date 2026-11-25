@@ -22,6 +22,7 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: v
 vi.mock("@/modules/mentorship", () => ({
   useMentorProfile: () => ({
     data: {
+      technicalAreas: [{ id: "qa-id", name: "QA" }],
       orientationTypes: [
         { id: "t1", name: "Revisión de CV", description: null },
         { id: "t2", name: "Entrevistas", description: null },
@@ -52,11 +53,16 @@ const weekRange = getWeekRange(tuesdayBlock.startAt)
 const tuesdayButton = "libre, 18:00 a 19:00"
 const saturdayButton = "libre, 10:00 a 11:00"
 
-const renderSelection = (fetchFreeBlocks: () => Promise<AvailabilityBlock[]>, onActivityChange?: (active: boolean) => void) =>
+const renderSelection = (
+  fetchFreeBlocks: () => Promise<AvailabilityBlock[]>,
+  onActivityChange?: (active: boolean) => void,
+  areaContext?: Pick<React.ComponentProps<typeof BlockSelection>, "area" | "selectedAreaId">,
+) =>
   renderWithQuery(
     <>
       <Link href="/mentors/m1">Volver al perfil</Link>
       <BlockSelection
+        {...areaContext}
         mentorId="m1"
         blocks={[tuesdayBlock, saturdayBlock]}
         weekRange={weekRange}
@@ -89,6 +95,29 @@ describe("BlockSelection", () => {
 
   afterEach(() => {
     cleanup()
+  })
+
+  it.each([
+    [{ area: "QA" }, true],
+    [{ area: "QA", selectedAreaId: "qa-id" }, true],
+    [{ area: "QA", selectedAreaId: "otro-id" }, false],
+    [{ area: "Otra especialidad" }, false],
+  ] as const)("valida la especialidad solicitada contra el perfil (%j)", async (areaContext, isValid) => {
+    const create = vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+    const user = userEvent.setup()
+    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]), undefined, areaContext)
+    await selectTuesday(user)
+    const heading = screen.queryByText(/Área de mentoría: QA/)
+    if (isValid) expect(heading).toBeInTheDocument()
+    else expect(heading).not.toBeInTheDocument()
+
+    await fillRequest(user)
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+    expect(create).toHaveBeenCalledWith({
+      blockId: tuesdayBlock.id,
+      orientationTypeId: "t1",
+      message: isValid ? "Área de mentoría: QA.\nQuiero revisar mi CV" : "Quiero revisar mi CV",
+    })
   })
 
   it("notifica si tiene selección y deja de retener el panel al desmontarse", async () => {

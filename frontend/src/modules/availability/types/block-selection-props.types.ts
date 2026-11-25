@@ -4,6 +4,8 @@ import type { WeekGridDensity } from "./week-grid-density.types";
 
 export interface BlockSelectionProps {
   mentorId: string;
+  selectedAreaId?: string;
+  area?: string;
   blocks: AvailabilityBlock[];
   weekRange: WeekRange;
   fetchFreeBlocks: () => Promise<AvailabilityBlock[]>;

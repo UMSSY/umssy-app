@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { radarSkillPoints } from '../../../common/radar/radar-skill-rubric.js';
 
 export const AREA_IDS = [
   'desarrollo',
@@ -35,7 +36,7 @@ export function scoreVerifiedSkills(skills: readonly EvidenceSkill[]): {
   )) {
     if (!AREA_IDS.some((id) => id === s.areaId)) continue;
     const id = s.areaId as RadarAreaId;
-    scores[id] = Math.min(10, scores[id] + 1 + (s.isHighRelevance ? 0.5 : 0));
+    scores[id] = Math.min(10, scores[id] + radarSkillPoints(s.isHighRelevance));
     evidence[id].push({ id: s.id, name: s.name });
   }
   const average = Number(
