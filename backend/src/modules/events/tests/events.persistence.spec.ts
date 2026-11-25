@@ -314,4 +314,15 @@ describe('EventsService', () => {
     );
     expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
   });
+
+  it('orders finished workshops from the most recent', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+    await repository.findAndCount({ newestFirst: true, skip: 0, take: 10 });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ eventDate: 'desc' }, { startTime: 'desc' }, { id: 'asc' }],
+      }),
+    );
+  });
 });

@@ -10,4 +10,6 @@ export interface FindEventsPayload {
   take?: number;
   // Filtro de estado y horario armado por el servicio; reemplaza el filtro por estado.
   visibility?: Prisma.EventWhereInput;
+  // Los talleres finalizados se listan del más reciente al más antiguo.
+  newestFirst?: boolean;
 }
