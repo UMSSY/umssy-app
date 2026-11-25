@@ -87,6 +87,10 @@ Queries use `['mentor-capacity', 'overview']`, `['mentor-capacity', 'requests', 
 
 Invalid input fails locally or through Zod (400); missing authentication and insufficient permissions remain 401/403. A failed mutation displays an error and allows retry. After an ambiguous network failure the client cannot prove whether a server transaction committed: refresh the overview to establish authoritative state. The error message identifies the last observed percentage and asks the administrator to refresh before retrying.
 
+## Action styling
+
+Saving a revised capacity limit uses the institutional primary button. Validation errors remain visible next to the affected inputs.
+
 ## Sprint History
 
 ### Sprint 3

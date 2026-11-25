@@ -132,6 +132,10 @@ sequenceDiagram
 | Uses      | events                                        | Event room name for group notifications                       |
 | Used by   | notifications (frontend)                      | `getActiveConversationId()` to skip the toast of the open chat |
 
+## Action styling
+
+Blocking is a moderation action with a confirmation dialog. Its controls use neutral styling and the dismissal action uses the shared Cancel treatment.
+
 ## Sprint History
 
 ### Sprint 3
@@ -140,4 +144,5 @@ sequenceDiagram
 - The open conversation is exposed through the typed `getActiveConversationId()` contract instead of a global `window` property.
 - Handled `conversationId` and `tab` parameters are removed from the URL, so repeated links to the same conversation work.
 - `visibility:changed` reports the open conversation so the backend does not notify a recipient who is reading it.
-- Another screen opens a conversation in the side panel through `useOpenContextualChat` (exported by the module): it reuses the conversation of the same context or creates it, keeps it in the chat's own conversations cache, selects it and opens the panel. The caller can pass the contact's professional headline, which the room header shows as the subtitle, and register its button as the launcher. The chat's own deep link to a context conversation uses the same lookup and cache update; each caller only decides what to open afterwards. On mobile the open panel follows the visible area of the screen (`visualViewport` height and offset). When the keyboard opens after the page was scrolled, Chrome on Android still counts its address bar as hidden, so the panel subtracts that extra height (the difference with the window height seen while the bar was visible). This way the message input and "Enviar" stay above the on-screen keyboard. While it is open on mobile the page behind does not scroll, and when the visible area changes the focused field is scrolled back into view. Closing the panel returns the focus to that button, and the back arrow closes the panel instead of showing the list. A new application conversation shows the start of the conversation and today's date, and the input starts empty.
+- Another screen opens a conversation in the side panel through `useOpenContextualChat` (exported by the module): it reuses the conversation of the same context or creates it, keeps it in the chat's own conversations cache, selects it and opens the panel. The caller can pass the contact's professional headline, which the room header shows as the subtitle, and register its button as the launcher. The chat's own deep link to a context conversation uses the same lookup and cache update; each caller only decides what to open afterwards. Closing the panel returns the focus to that button, and the back arrow closes the panel instead of showing the list. A new application conversation shows the start of the conversation and today's date, and the input starts empty.
+- On narrow screens, the event chat header opens group information and participants through the **Información del grupo** button. From the large breakpoint, this information appears beside the conversation.

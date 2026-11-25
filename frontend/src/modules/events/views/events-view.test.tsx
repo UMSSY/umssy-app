@@ -668,7 +668,7 @@ describe("EventsView proposal support", () => {
     mockUseEvents.mockReturnValue({ isProfileComplete: true, events: [published], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
     rerender(<EventsView initialProposalId={PROPOSAL.id} />);
 
-    expect(screen.getByRole("button", { name: "Inscribirme" })).toHaveClass("bg-brand-red");
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toHaveClass("bg-primary");
     expect(screen.queryByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).not.toBeInTheDocument();
   });
 
