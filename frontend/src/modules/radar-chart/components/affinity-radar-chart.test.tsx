@@ -1,5 +1,11 @@
 import { cloneElement, type ReactElement } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GLOBAL_AVERAGE } from '../data/area-details.data';
 import { RADAR_AREA_SCORES } from '../data/radar-profile.data';
@@ -165,21 +171,35 @@ describe('HU3 touch targets with comparison and projection', () => {
   afterEach(cleanup);
   it('adds one hit region per current area without making overlay points interactive', () => {
     const onAreaClick = vi.fn();
-    render(
+    const previousScores = Object.fromEntries(
+      RADAR_AREA_SCORES.map((area) => [area.id, Math.max(0, area.score - 1)]),
+    );
+    const { container } = render(
       <AffinityRadarChart
         areas={RADAR_AREA_SCORES}
-        previousScores={{ qa: 2 }}
-        comparisonEnabled
+        previousScores={previousScores}
+        isComparisonEnabled
         projectedScores={{ qa: 10 }}
         onAreaClick={onAreaClick}
       />,
     );
-    expect(document.querySelectorAll('.recharts-radar')).toHaveLength(3);
-    expect(screen.getAllByTestId(/^radar-hit-/)).toHaveLength(
+    const { getByTestId, getAllByTestId } = within(container);
+    expect(container.querySelectorAll('.recharts-radar')).toHaveLength(3);
+    expect(
+      container.querySelectorAll(
+        '.recharts-radar-polygon path[stroke-dasharray="6 4"]',
+      ),
+    ).toHaveLength(1);
+    expect(
+      container.querySelectorAll(
+        '.recharts-radar-polygon path[stroke-dasharray="4 3"]',
+      ),
+    ).toHaveLength(1);
+    expect(getAllByTestId(/^radar-hit-/)).toHaveLength(
       RADAR_AREA_SCORES.length,
     );
     for (const area of RADAR_AREA_SCORES) {
-      const hit = screen.getByTestId(`radar-hit-${area.id}`);
+      const hit = getByTestId(`radar-hit-${area.id}`);
       expect(hit).toHaveAttribute('width', '48');
       expect(hit).toHaveAttribute('height', '48');
       fireEvent.click(hit);
