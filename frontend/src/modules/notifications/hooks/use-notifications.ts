@@ -14,6 +14,10 @@ import {
   subscribeAccessToken,
 } from "@/shared/services/storage/access-token-storage";
 import {
+  hasCookieSession,
+  subscribeCookieSession,
+} from "@/shared/services/storage/cookie-session-state";
+import {
   NOTIFICATION_NEW_EVENT,
   UNREAD_COUNT_UPDATED_EVENT,
 } from "../constants/notification-socket-events.constants";
@@ -80,10 +84,12 @@ export const NOTIFICATIONS_QUERY_KEYS = {
 
 export function useNotificationsRealtimeSync(): void {
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const cookieSession = useSyncExternalStore(subscribeCookieSession, hasCookieSession, () => false);
+  const hasSession = Boolean(token) || cookieSession;
   const queryClient = useContext(QueryClientContext);
 
   useEffect(() => {
-    if (!token || !queryClient || isTestEnvironment()) return;
+    if (!hasSession || !queryClient || isTestEnvironment()) return;
 
     let channel: BroadcastChannel | null = null;
     if (typeof window !== "undefined" && typeof window.BroadcastChannel !== "undefined") {
@@ -206,11 +212,13 @@ export function useNotificationsRealtimeSync(): void {
         socket.off(NOTIFICATION_NEW_EVENT, handleNewNotification);
       }
     };
-  }, [token, queryClient]);
+  }, [hasSession, queryClient]);
 }
 
 export function useUnreadNotificationsCount() {
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const cookieSession = useSyncExternalStore(subscribeCookieSession, hasCookieSession, () => false);
+  const hasSession = Boolean(token) || cookieSession;
   const queryClient = useContext(QueryClientContext);
   const isTest = isTestEnvironment();
 
@@ -218,7 +226,7 @@ export function useUnreadNotificationsCount() {
     {
       queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount,
       queryFn: getUnreadCount,
-      enabled: Boolean(token && queryClient && !isTest),
+      enabled: Boolean(hasSession && queryClient && !isTest),
       retry: isTest ? false : 3,
     },
     queryClient ?? FALLBACK_QUERY_CLIENT,
@@ -228,13 +236,15 @@ export function useUnreadNotificationsCount() {
 export function useNotificationsInbox(options: UseNotificationsInboxOptions = {}) {
   const { filter = "ALL", page = 1, limit = 8 } = options;
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const cookieSession = useSyncExternalStore(subscribeCookieSession, hasCookieSession, () => false);
+  const hasSession = Boolean(token) || cookieSession;
   const queryClient = useQueryClient();
   const isTest = isTestEnvironment();
 
   const listQuery = useQuery({
     queryKey: NOTIFICATIONS_QUERY_KEYS.list("ALL", 1, MAX_BACKEND_INBOX_LIMIT),
     queryFn: () => getNotifications({ filter: "ALL", page: 1, limit: MAX_BACKEND_INBOX_LIMIT }),
-    enabled: Boolean(token && !isTest),
+    enabled: Boolean(hasSession && !isTest),
     retry: isTest ? false : 3,
   });
 

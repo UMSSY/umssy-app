@@ -2,22 +2,26 @@
 
 import { useMutation } from "@tanstack/react-query";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { isApiError } from "@/shared/services/api-client";
 import { authService } from "../services/auth.service";
 import type { LoginPayload, LoginResponse } from "../types/auth-types";
 
-export function useLogin() {
+export function useLogin(onFailure?: (cause: unknown, payload: LoginPayload) => boolean) {
+  const inFlight = useRef(false);
   const mutation = useMutation({ mutationFn: (request: () => Promise<LoginResponse>) => request() });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function login(payload: LoginPayload): Promise<LoginResponse | null> {
+    if (inFlight.current) return null;
+    inFlight.current = true;
     setIsLoading(true);
     setError(null);
     try {
       return await mutation.mutateAsync(() => authService.login(payload));
     } catch (cause: unknown) {
+      if (onFailure?.(cause, payload)) return null;
       if (isApiError(cause)) {
         if (!cause.response) {
           setError("No se pudo conectar con el backend. Revisa que esté encendido y que la URL y CORS estén configurados.");
@@ -32,6 +36,7 @@ export function useLogin() {
       }
       return null;
     } finally {
+      inFlight.current = false;
       setIsLoading(false);
     }
   }
