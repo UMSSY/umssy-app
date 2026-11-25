@@ -1,7 +1,8 @@
-'use client';
-import Link from 'next/link';
-import { RADAR_AXIS_NAMES } from '@/modules/radar-chart';
-import type { MentorDirectoryViewProps } from '../types/mentor-directory-view-props.types';
+"use client";
+import type { MentorDirectoryViewProps } from "../types/mentor-directory-view-props.types";
+import Link from "next/link";
+import { resolveRadarMentorAreas } from "../utils/radar-mentor-area";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart";
 
 import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -12,19 +13,18 @@ import { cn } from '@/lib/utils';
 import {
   NativeSelect,
   NativeSelectOption,
-} from '@/components/ui/native-select';
-import { PageHeading } from '@/shared/components/layout';
-import { MentorDirectoryGrid } from '../components/mentor/mentor-directory-grid';
-import { MentorSearchBar } from '../components/mentor/mentor-search-bar';
-import { MentorFiltersBar } from '../components/mentor/mentor-filters-bar';
-import { MentorFiltersSummary } from '../components/mentor/mentor-filters-summary';
-import { MentorDirectoryPagination } from '../components/mentor/mentor-directory-pagination';
-import { MentorQueryFeedback } from '../components/mentor/mentor-query-feedback';
-import { MentorQuerySkeleton } from '../components/mentor/mentor-query-skeleton';
-import { useCurrentUserId } from '../hooks/use-current-user-id';
-import { useMentorDirectory } from '../hooks/use-mentor-directory';
-import { useMentorshipCatalogs } from '../hooks/use-mentorship-catalogs';
-import type { MentorSort } from '../types/mentor-directory.types';
+} from "@/components/ui/native-select";
+import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
+import { MentorSearchBar } from "../components/mentor/mentor-search-bar";
+import { MentorFiltersBar } from "../components/mentor/mentor-filters-bar";
+import { MentorFiltersSummary } from "../components/mentor/mentor-filters-summary";
+import { MentorDirectoryPagination } from "../components/mentor/mentor-directory-pagination";
+import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
+import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
+import { useCurrentUserId } from "../hooks/use-current-user-id";
+import { useMentorDirectory } from "../hooks/use-mentor-directory";
+import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
+import type { MentorSort } from "../types/mentor-directory.types";
 import {
   MENTOR_DIRECTORY_DEFAULTS,
   normalizeMentorDirectoryParams,
@@ -44,15 +44,41 @@ export function MentorDirectoryView({
   const {
     page,
     search,
-    area,
+    area: rawArea,
     orientation,
-    available: isAvailableOnly,
+    available: requestedAvailable,
     sort: sortBy,
   } = parseMentorDirectoryState(new URLSearchParams(queryString));
 
   const { currentUserId } = useCurrentUserId();
 
-  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
+  const { technicalAreas, orientationTypes, isTechnicalAreasLoading, isTechnicalAreasError, retryTechnicalAreas } = useMentorshipCatalogs();
+  const requestedAxis = RADAR_AXIS_NAMES.find(axis => axis.id === searchParams.get("radarArea"));
+  const isHu2Flow = fromRadar || Boolean(requestedAxis) || searchParams.get("hu2") === "radar";
+  const radarAxis = requestedAxis ?? (isHu2Flow && !searchParams.has("areaId")
+    ? RADAR_AXIS_NAMES.find(axis => axis.name === rawArea)
+    : undefined);
+  const isAvailableOnly = isHu2Flow || requestedAvailable;
+  const radarAreas = radarAxis ? resolveRadarMentorAreas(radarAxis.id, technicalAreas) : [];
+  const [resolvedArea] = radarAreas;
+  const area = radarAxis ? resolvedArea?.name ?? radarAxis.name : rawArea;
+  const missingRadarArea = Boolean(radarAxis && !resolvedArea);
+
+  const radarQuery = new URLSearchParams(queryString);
+  if (resolvedArea && radarAxis) {
+    radarQuery.set("radarArea", radarAxis.id);
+    radarQuery.set("area", resolvedArea.name);
+    radarQuery.set("areaId", resolvedArea.id);
+    radarQuery.set("hu2", "radar");
+    radarQuery.delete("available");
+  }
+  const resolvedQuery = radarQuery.toString();
+
+  useEffect(() => {
+    if (resolvedQuery !== queryString) {
+      router.replace(`${pathname}?${resolvedQuery}`, { scroll: false });
+    }
+  }, [resolvedQuery, queryString, pathname, router]);
 
   const {
     data: directory,
@@ -63,16 +89,23 @@ export function MentorDirectoryView({
   } = useMentorDirectory({
     page,
     search,
-    area,
+    area: radarAreas.length > 1
+      ? ""
+      : technicalAreas.find(item => item.id === searchParams.get("areaId") && item.name === area)?.id ?? resolvedArea?.id ?? area,
+    areaIds: radarAreas.length > 1 ? radarAreas.map(item => item.id) : undefined,
     orientation,
-    available: fromRadar || isAvailableOnly,
+    available: isAvailableOnly,
     sort: sortBy,
-  });
+  }, !missingRadarArea);
 
-  const mentors = useMemo(() => directory?.items ?? [], [directory?.items]);
+  const mentors = useMemo(
+    () => missingRadarArea ? [] : directory?.items ?? [],
+    [directory?.items, missingRadarArea],
+  );
 
-  const totalItems = directory?.totalItems ?? 0;
-  const totalPages = directory?.totalPages ?? directoryState?.totalPages ?? 0;
+  const totalItems = missingRadarArea ? 0 : directory?.totalItems ?? 0;
+  const totalPages =
+    directory?.totalPages ?? directoryState?.totalPages ?? 0;
 
   const effectiveSort: MentorSort =
     sortBy !== 'affinity'
@@ -133,10 +166,21 @@ export function MentorDirectoryView({
     sort?: MentorSort;
     page?: number;
   }) {
+    const nextAxis = isHu2Flow && RADAR_AXIS_NAMES.find(axis => axis.name === updates.area);
+    const selected = nextAxis
+      ? resolveRadarMentorAreas(nextAxis.id, technicalAreas)[0]
+      : technicalAreas.find(item => item.name === updates.area);
     const next = updateMentorDirectoryParams(
       new URLSearchParams(queryString),
-      updates,
+      isHu2Flow ? { ...updates, area: nextAxis ? selected?.name ?? "" : updates.area, available: true } : updates,
     );
+    if (isHu2Flow) next.set("hu2", "radar");
+    if (updates.area !== undefined) {
+      if (nextAxis) next.set("radarArea", nextAxis.id);
+      else next.delete("radarArea");
+      next.delete("areaId");
+      if (selected) next.set("areaId", selected.id);
+    }
 
     const query = next.toString();
 
@@ -155,64 +199,32 @@ export function MentorDirectoryView({
     });
   }
 
-  const returnTo = queryString ? `${pathname}?${queryString}` : pathname;
+  const returnTo = resolvedQuery ? `${pathname}?${resolvedQuery}` : pathname;
 
   return (
-    <main className="min-h-full bg-background">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        {fromRadar ? (
-          <>
-            <Link href="/profile/radar" className="underline">
-              Volver al radar
-            </Link>
-            <nav aria-label="Áreas del radar" className="flex flex-wrap gap-2">
-              <Button
-                variant={!area ? 'default' : 'outline'}
-                aria-pressed={!area}
-                onClick={() => navigateWithUpdates({ area: '' })}
-              >
-                Todos
-              </Button>
-              {RADAR_AXIS_NAMES.map((item) => (
-                <Button
-                  key={item.id}
-                  variant={area === item.name ? 'default' : 'outline'}
-                  aria-pressed={area === item.name}
-                  onClick={() => navigateWithUpdates({ area: item.name })}
-                >
-                  {item.name}
-                </Button>
-              ))}
-            </nav>
-          </>
-        ) : null}
-        <header>
-          <PageHeading
-            title="Encuentra un mentor"
-            description="Busca por nombre o área de experiencia."
-          />
+    <main className="min-h-full bg-background lg:-mx-12 lg:-mt-10">
+      <div className="mx-auto flex w-full flex-col gap-5 lg:pr-10 lg:pl-14">
+        <div role="search" aria-label="Filtros de mentores" className="flex flex-wrap gap-5">
+        <header className="w-full space-y-2 border-b border-border bg-interaction px-4 py-6 sm:px-8 lg:-mr-10 lg:-ml-14 lg:w-[calc(100%+6rem)] lg:shrink-0 lg:px-14 lg:pt-11 lg:pb-8">
+          <p className="text-[11px] font-bold tracking-[0.14em] text-accent uppercase">Mentorías</p>
+          <h1 className="max-w-[650px] font-tight text-3xl leading-[1.13] font-semibold tracking-tight text-wrap text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
+          <p className="max-w-[690px] text-sm leading-[22px] text-text-secondary">Conecta con profesionales titulados de nuestra comunidad y recibe orientación en el área que quieres desarrollar.</p>
+          <div className="max-w-[610px] pt-4">
+            <MentorSearchBar value={search} onSearchChange={(nextSearch) => navigateWithUpdates({ search: nextSearch })} />
+          </div>
         </header>
+        {missingRadarArea ? <div className="rounded-lg border border-border bg-surface-soft p-4">
+          {isTechnicalAreasLoading ? <p role="status">Cargando especialidades...</p> : isTechnicalAreasError ? <div role="alert">No pudimos cargar las especialidades. <Button variant="outline" onClick={retryTechnicalAreas}>Reintentar</Button></div> : <p role="status">La especialidad {radarAxis?.name} no está registrada en el catálogo.</p>}
+        </div> : null}
 
-        <div
-          role="search"
-          aria-label="Filtros de mentores"
-          className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4"
-        >
-          <MentorSearchBar
-            value={search}
-            onSearchChange={(nextSearch) =>
-              navigateWithUpdates({
-                search: nextSearch,
-              })
-            }
-          />
-
+        <div className="flex w-full flex-wrap items-end gap-x-4 gap-y-2">
           <MentorFiltersBar
-            area={area}
+            areaAsChips
+            area={radarAxis?.name ?? area}
             orientation={orientation}
             technicalAreas={
-              fromRadar
-                ? RADAR_AXIS_NAMES.map((item) => item.name)
+              isHu2Flow
+                ? [...new Set([...RADAR_AXIS_NAMES.map((item) => item.name), ...technicalAreas.map((item) => item.name)])]
                 : technicalAreas.map((item) => item.name)
             }
             orientationTypes={orientationTypes.map((item) => item.name)}
@@ -229,8 +241,8 @@ export function MentorDirectoryView({
             )}
           >
             <Checkbox
-              disabled={fromRadar}
-              checked={fromRadar || isAvailableOnly}
+              checked={isAvailableOnly}
+              disabled={isHu2Flow}
               onCheckedChange={(checked) =>
                 navigateWithUpdates({
                   available: checked === true,
@@ -279,9 +291,11 @@ export function MentorDirectoryView({
           <Button variant="ghost" onClick={handleClearFilters}>
             Limpiar
           </Button>
+          <Link href="/profile/radar" className="ml-auto self-center text-xs text-accent hover:underline">Volver al radar</Link>
+        </div>
         </div>
 
-        {isPending || (isError && isFetching) ? (
+        {missingRadarArea ? null : isPending || (isError && isFetching) ? (
           <MentorQuerySkeleton />
         ) : isError ? (
           <MentorQueryFeedback
@@ -296,9 +310,11 @@ export function MentorDirectoryView({
             title={
               totalItems > 0
                 ? 'No hay mentores en esta página'
-                : hasFilters
-                  ? 'No hay mentores que coincidan con tu búsqueda'
-                  : 'No hay mentores disponibles por el momento'
+                : radarAxis && !search.trim() && !orientation
+                  ? `No hay mentores disponibles en ${radarAxis.name}`
+                  : hasFilters
+                    ? 'No hay mentores que coincidan con tu búsqueda'
+                    : 'No hay mentores disponibles por el momento'
             }
             description={
               totalItems > 0
@@ -311,8 +327,8 @@ export function MentorDirectoryView({
           />
         ) : (
           <>
-            <h2 className="text-xl font-semibold text-ink">
-              {sortBy === 'affinity' ? 'Preferencias' : 'Sugerencias'}
+            <h2 className="sr-only">
+              {sortBy === "affinity" ? "Preferencias" : "Sugerencias"}
             </h2>
 
             {affinityMessage ? (
@@ -324,13 +340,15 @@ export function MentorDirectoryView({
               </p>
             ) : null}
 
+            <div className="-mt-2 flex justify-end text-xs">
             <MentorFiltersSummary
               search={search}
-              area={area}
+              area={radarAreas.length > 1 ? radarAxis?.name ?? area : area}
               orientation={orientation}
               available={isAvailableOnly}
               totalItems={totalItems}
             />
+            </div>
 
             <MentorDirectoryGrid
               mentors={mentors}
@@ -338,6 +356,7 @@ export function MentorDirectoryView({
               returnTo={returnTo}
               showAffinityBadge={effectiveSort === 'affinity'}
               selectedArea={area}
+              radarAreas={radarAreas.map(item => item.name)}
               highlightAvailability={isAvailableOnly}
             />
 
