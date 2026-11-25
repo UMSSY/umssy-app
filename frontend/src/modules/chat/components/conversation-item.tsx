@@ -142,6 +142,15 @@ export function ConversationItem({
           </span>
         </div>
 
+        {conversation.contextType === "POSTULACION" && conversation.contextTitle && (
+          <p
+            data-testid="conversation-postulation-vacancy"
+            className="mb-0.5 truncate text-[11px] font-medium text-ink-soft"
+          >
+            {conversation.contextTitle}
+          </p>
+        )}
+
         <div className="flex items-center justify-between gap-2">
           <p
             className={`min-w-0 flex-1 truncate text-xs ${
