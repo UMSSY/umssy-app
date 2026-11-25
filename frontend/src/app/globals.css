@@ -221,9 +221,8 @@
   column-gap: 0.75rem !important;
   row-gap: 0.625rem !important;
   align-items: start !important;
-  width: max-content !important;
-  min-width: 0 !important;
-  max-width: min(20rem, 100%) !important; 
+  min-width: min(20rem, calc(100vw - 2rem)) !important;
+  max-width: calc(100vw - 2rem) !important;
 }
 
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"])::before {
