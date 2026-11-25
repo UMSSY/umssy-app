@@ -56,7 +56,7 @@ export function AuditLogStatus({ error, errorStatus, isEmpty, hasActiveFilters =
           : "Los eventos aparecen aquí cuando se envía, revisa, aprueba o rechaza una solicitud. Cambia el período para ver meses anteriores."}
       </p>
       {hasActiveFilters && onClearFilters ? (
-        <Button type="button" variant="brand" className={BUTTON_CLASS} onClick={onClearFilters}>
+        <Button type="button" className={BUTTON_CLASS} onClick={onClearFilters}>
           Limpiar filtros
         </Button>
       ) : null}
