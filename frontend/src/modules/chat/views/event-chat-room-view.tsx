@@ -6,6 +6,7 @@ import { useEventRoom } from "../hooks/use-event-room";
 import { useChatConnection } from "../hooks/use-chat-connection";
 import { useMessages } from "../hooks/use-messages";
 import { useSendEventRoomMessage } from "../hooks/use-event-room-message";
+import { useConversationVisibility } from "../hooks/use-conversation-visibility";
 import { getCurrentSessionUserId } from "../services/chat-api";
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ export function EventChatRoomView({
   );
 
   useChatConnection(conversationId);
+
+  useConversationVisibility(conversationId);
 
   const { send: sendMessage, isSending, sendError, clearError } =
     useSendEventRoomMessage(conversationId);
