@@ -1,6 +1,8 @@
 'use client';
 
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { hasCookieSession } from "@/shared/services/storage/cookie-session-state";
+import { useCookieSession } from "@/shared/hooks/use-cookie-session";
 import { useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
@@ -16,11 +18,13 @@ import { useOnlineStatus } from './use-online-status';
 
 export function useMyPasses(isActive = true) {
   const accessToken = useRegistrationSession();
+  const cookieSession = useCookieSession();
+  const hasSession = Boolean(accessToken) || cookieSession;
   const queryClient = useQueryClient();
   const isOnline = useOnlineStatus();
   const query = useQuery({
     queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken],
-    enabled: Boolean(accessToken) && isOnline && isActive,
+    enabled: hasSession && isOnline && isActive,
     refetchOnReconnect: 'always',
     queryFn: async ({ signal }) => {
       const registrations = await registrationsService.getMine(
@@ -34,7 +38,7 @@ export function useMyPasses(isActive = true) {
             signal,
           ).catch(() => false)
         : false;
-      if (accessToken && getAccessToken() === accessToken && !signal.aborted) {
+      if (getAccessToken() === accessToken && (Boolean(accessToken) || hasCookieSession()) && !signal.aborted) {
         void queryClient.invalidateQueries({
           queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken],
         });

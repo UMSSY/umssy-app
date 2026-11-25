@@ -1,1 +1,0 @@
-export const TRAILING_ZERO_DECIMAL_PATTERN = /\.0$/;

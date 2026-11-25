@@ -17,6 +17,10 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import {
+  hasCookieSession,
+  subscribeCookieSession,
+} from '@/shared/services/storage/cookie-session-state';
 import { mentorParticipationService } from '../services/mentor-participation.service';
 import { PARTICIPATION_BREADCRUMB_ITEMS } from '../constants/participation-breadcrumb.constants';
 import { ParticipationEmptyState } from '../components/participation/participation-empty-state';
@@ -134,11 +138,17 @@ export function ParticipationView({
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const token = useSyncExternalStore(
+  const bearerToken = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
     getServerToken,
   );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    () => false,
+  );
+  const token = bearerToken ?? (cookieSession ? 'cookie' : null);
 
   const participation = useParticipation(token);
 
