@@ -303,6 +303,10 @@ Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_o
 - `SURVEY_NOTIFICATIONS_PATH` and `SURVEY_NOTIFICATIONS_LABEL` are taken from the public contract of notifications (`getNotificationInboxPath("SURVEYS")` and `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`), the same values the sidebar uses, so the pending badge stays attached to the "Notificaciones de Encuestas" entry.
 - `useCanAnswerSurveys` limits the section and the badge to the roles allowed on `/surveys` (`titulado`, `estudiante`, `mentor`); administrative staff and companies only see the notifications of the central inbox.
 
+## Action styling
+
+Unpublishing a survey updates its publication state through PATCH. The confirmation uses a neutral action, and the Cancel button can dismiss it before submission.
+
 ## Sprint History
 
 ### Sprint 3

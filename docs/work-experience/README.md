@@ -207,6 +207,10 @@ sequenceDiagram
 
 The frontend does not call this service; its data is shown in the backoffice heatmaps (`frontend/src/modules/heatmaps`, `/backoffice/reports/heatmaps/*`).
 
+## Action styling
+
+The record editor uses the outlined Cancel action. Deleting saved experience remains a distinct destructive action.
+
 ## Sprint History
 
 ### Sprint 3

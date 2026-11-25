@@ -133,6 +133,6 @@ describe("WeekDayList", () => {
       />
     );
 
-    expect(container.firstChild).toHaveClass("md:hidden");
+    expect(container.firstChild).toHaveClass("@min-[44rem]/week:hidden");
   });
 });
