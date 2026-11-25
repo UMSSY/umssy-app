@@ -29,8 +29,8 @@ import { SectionCard } from "./section-card";
 const PUSH_DESCRIPTION_BY_ENVIRONMENT = {
   supported: "Te pediremos permiso para activar las alertas.",
   desktop: "Disponible en tu celular.",
-  "ios-old": "Requiere iOS 16.4 o superior.",
-  "ios-not-installed": "Instala UMSSY en tu pantalla de inicio.",
+  "ios-old": "No disponible en tu versión de iOS.",
+  "ios-not-installed": "Primero agrega UMSSY a tu pantalla.",
   unsupported: "Disponible en tu celular.",
 } as const;
 

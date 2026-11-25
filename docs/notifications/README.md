@@ -84,6 +84,7 @@ sequenceDiagram
 - **Email.** The domain can pass `renderMail(context)` in the request itself (`NotifyRequest.renderMail`, type `NotificationMailRenderer`); the `NOTIFICATION_TEMPLATES` catalog only defines the in-app title and body. `renderMail` receives `recipientName` and `actionUrl` and returns a promise with `mjml`, `subject`, `text` and `values`, so the domain can read its own `.mjml` template with `loadMailTemplate`. Without `renderMail`, the generic `mail/mjml/notification.mjml` template is used, loaded only once per send; title and body are truncated and the "Ver en UMSSY" button gets an absolute link built with the shared `frontendBaseUrl()` from the mail module (`FRONTEND_URL`, otherwise the first `CORS_ORIGIN`). Links to another origin are replaced by the frontend home.
 - **Result.** Each channel is summarized as `sent` (everything sent), `partial`, `failed` or `skipped`. `deliveries` contains `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. A critical failure in one dispatcher marks its channel as `failed` without cancelling the others.
 - **Survey notifications.** `SURVEY_PUBLISHED` and `SURVEY_REMINDER` (push and email), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (email only). Their payloads are validated with Zod and their emails are rendered in `backend/src/modules/surveys/notification/`; `notifications` only defines the in-app title and body.
+- **Job offer notifications.** `JOB_OFFER_PUBLISHED` (push only) is a registered notification type whose emission is pending: no flow emits it yet. Once the job offers domain emits it when a vacancy is created, the payload will contain `jobTitle` and `companyName`. The notification is always stored in the in-app inbox, and push is sent only to users who have it enabled as their channel. Emails are not sent for this type (`sends_email = false` in the catalog). It is intended to be sent once per vacancy creation, never on edits, closure, or reopening, and the `actionUrl` points to `/vacancies/:jobOfferId`. `APPLICATION_STATUS_CHANGED` remains a separate registered type that notifies the applicant of an application status change (push only, `sends_email = false`), kept for compatibility with the existing application status flow. Both types describe different events and neither replaces the other.
 
 ## Endpoints
 
@@ -106,7 +107,7 @@ All require JWT (any role). The WebSocket authenticates with `handshake.auth.tok
 
 ### Exported service
 
-`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), and [radar-integration](../radar-integration/README.md).
+`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: [chat](../chat/README.md), [appointments](../appointments/README.md), [surveys](../surveys/README.md), [mentors](../mentors/README.md), [vacancies](../vacancies/README.md) and [radar-integration](../radar-integration/README.md).
 
 ## Dependencies
 
@@ -147,6 +148,49 @@ The module exposes in `index.ts` the visual pieces of the inbox and the route of
 | `NotificationsInboxEmpty` | Empty state with the `icon`, `title` and `description` of each section |
 | `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications?filter=SURVEYS`...), used by the sidebar, the filter tabs and surveys |
 | `NOTIFICATION_INBOX_FILTER_LABELS` | Filter labels; surveys keys its sidebar badge with `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`, so renaming the menu entry does not disconnect the counter |
+
+### Inbox categories and filters
+
+Every notification type is declared in `NOTIFICATION_CATALOG` (`frontend/src/modules/notifications/constants/notification-catalog.constants.ts`) with a category, an icon and a fallback path used when the notification has no `actionUrl`. Types missing from the catalog use `DEFAULT_NOTIFICATION_CATALOG_DEFINITION`: category `SYSTEM`, the `Bell` icon and the `/dashboard` path.
+
+| Category | Notification types | Fallback path |
+| --- | --- | --- |
+| `CHAT` | `CHAT_MESSAGE`, `CHAT_GROUP_MESSAGE` | `/chat` |
+| `SYSTEM` | `CONNECTION_REQUEST_RECEIVED`, `CONNECTION_REQUEST_ACCEPTED` | `/chat` |
+| `SYSTEM` | `MENTOR_SLOT_OFFERED` | `/mentors/participation` |
+| `SYSTEM` | `RADAR_PUBLISHED` | `/profile/radar` |
+| `SYSTEM` | `JOB_OFFER_PUBLISHED` | `/vacancies` |
+| `SYSTEM` | `NEW_JOB_APPLICANT` | `/matching` |
+| `SYSTEM` | `ACCESS_REQUEST_APPROVED` | `/profile` |
+| `SYSTEM` | `APPLICATION_STATUS_CHANGED` | `/vacancies/my-applications` |
+| `REMINDERS` | `APPOINTMENT_CANCELLED`, `APPOINTMENT_BOOKED` | `/appointments` |
+| `REMINDERS` | `SURVEY_REMINDER` | `/surveys` |
+| `REMINDERS` | `EVENT_STARTING_SOON` | `/events` |
+| `SURVEYS` | `SURVEY_PUBLISHED`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED`, `SURVEY_VARIATION_ALERT` | `/backoffice/surveys` |
+
+The inbox filters are defined in `notification-inbox-filters.constants.ts`. `NOTIFICATION_INBOX_FILTERS` lists them in tab order and `NOTIFICATION_INBOX_FILTER_LABELS` holds the visible label of each one:
+
+| Filter | Label | Route |
+| --- | --- | --- |
+| `ALL` | Todas | `/notifications` |
+| `SURVEYS` | Notificaciones de Encuestas | `/notifications?filter=SURVEYS` |
+| `REMINDERS` | Recordatorios | `/notifications?filter=REMINDERS` |
+| `SYSTEM` | Sistema | `/notifications?filter=SYSTEM` |
+
+The `CHAT` category has no filter of its own. `SURVEY_REMINDER` belongs to `REMINDERS`, so it is listed under the Recordatorios filter and not under the surveys one.
+
+### Empty inbox messages
+
+When the active filter has no notifications, the inbox shows `NotificationsInboxEmpty` with a message specific to that filter, defined in `NOTIFICATION_INBOX_EMPTY_MESSAGES` (`notification-inbox-empty-messages.constants.ts`). The title is the same for every filter; only the description changes:
+
+| Filter | Title | Description |
+| --- | --- | --- |
+| `ALL` | `No tienes notificaciones` | `Cuando recibas nuevos avisos sobre encuestas, recordatorios o actividad de tu cuenta, aparecerán aquí.` |
+| `SURVEYS` | `No tienes notificaciones` | `Cuando recibas nuevos avisos sobre encuestas, aparecerán aquí.` |
+| `REMINDERS` | `No tienes notificaciones` | `Cuando recibas nuevos avisos sobre recordatorios, aparecerán aquí.` |
+| `SYSTEM` | `No tienes notificaciones` | `Cuando recibas nuevos avisos del sistema, aparecerán aquí.` |
+
+The general description that mentions surveys, reminders and account activity is only used by the `ALL` filter.
 
 ## Sprint History
 
