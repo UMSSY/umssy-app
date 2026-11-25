@@ -513,7 +513,10 @@ function ChatRoomContent({
               <div className="flex flex-wrap items-center gap-1.5">
                 <h3
                   data-testid="chat-contact-name"
-                  className="text-sm leading-tight font-bold wrap-anywhere text-ink md:text-base"
+                  className={cn(
+                    "min-w-0 text-sm leading-tight font-bold wrap-anywhere text-ink max-md:line-clamp-2 md:text-base",
+                    isCompact && "line-clamp-2",
+                  )}
                 >
                   {conversationName}
                 </h3>
