@@ -183,7 +183,7 @@ export function ForgotPasswordView() {
         />
       </aside>
 
-      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-10 xl:px-12">
+      <div className="flex min-h-dvh flex-col px-4 py-5 sm:px-8 sm:py-9 lg:px-10 xl:px-12">
         <div className="mb-2 flex h-8 items-center transition-opacity duration-200">
           {step === "request" && (
             <Link

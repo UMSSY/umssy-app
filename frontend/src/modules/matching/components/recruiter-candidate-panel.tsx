@@ -171,7 +171,7 @@ export function RecruiterCandidatePanel({
             </Button>
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               className="w-full"
               disabled={decision.isPending}
               onClick={() =>

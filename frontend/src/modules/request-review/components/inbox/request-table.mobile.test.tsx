@@ -22,8 +22,8 @@ describe("RequestTable: tarjetas en celular", () => {
   it("en celular oculta los encabezados y cada fila se muestra como tarjeta", () => {
     render(<RequestTable items={[item]} />);
 
-    expect(screen.getAllByRole("rowgroup")[0]).toHaveClass("max-md:hidden");
-    expect(screen.getAllByRole("row")[1]).toHaveClass("max-md:grid", "max-md:grid-cols-2");
+    expect(screen.getAllByRole("rowgroup")[0]).toHaveClass("@max-[65rem]/requests:hidden");
+    expect(screen.getAllByRole("row")[1]).toHaveClass("@max-[65rem]/requests:grid", "@max-[65rem]/requests:grid-cols-2");
   });
 
   it("cada dato de la tarjeta lleva el nombre de su columna, incluida la coincidencia", () => {
@@ -38,6 +38,6 @@ describe("RequestTable: tarjetas en celular", () => {
   it("el botón Revisar ocupa todo el ancho en celular", () => {
     render(<RequestTable items={[item]} />);
 
-    expect(screen.getByRole("link", { name: "Revisar" })).toHaveClass("max-md:w-full");
+    expect(screen.getByRole("link", { name: "Revisar" })).toHaveClass("@max-[65rem]/requests:w-full");
   });
 });

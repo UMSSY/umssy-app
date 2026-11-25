@@ -224,40 +224,6 @@ describe("ApplicationsView", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
 
-  it("shows only withdrawn applications when the person presses the withdrawn button", async () => {
-
-    getMine.mockResolvedValue(APPLICATIONS);
-    renderWithQuery(<ApplicationsView />);
-    await screen.findByText("Backend Java");
-
-    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
-
-    const toggle = screen.getByRole("button", { name: "Postulaciones retiradas" });
-    expect(toggle).toHaveAttribute("aria-pressed", "false");
-
-    await userEvent.click(toggle);
-
-    await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
-    expect(toggle).toHaveAttribute("aria-pressed", "true");
-    expect(screen.queryByText("Backend Java")).not.toBeInTheDocument();
-  });
-
-  it("goes back to active applications when withdrawn ones are hidden", async () => {
-
-    getMine.mockResolvedValue(APPLICATIONS);
-    renderWithQuery(<ApplicationsView />);
-    await screen.findByText("Backend Java");
-
-    const toggle = screen.getByRole("button", { name: "Postulaciones retiradas" });
-    await userEvent.click(toggle);
-    await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
-
-    await userEvent.click(toggle);
-    await waitFor(() =>
-      expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]),
-    );
-  });
-
   it("switches between active and withdrawn applications without a status filter", async () => {
 
     getMine.mockResolvedValue(APPLICATIONS);
@@ -267,8 +233,10 @@ describe("ApplicationsView", () => {
     const toggle = screen.getByRole("button", { name: "Postulaciones retiradas" });
     expect(screen.queryByRole("combobox", { name: "Mostrar:" })).not.toBeInTheDocument();
 
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
     await userEvent.click(toggle);
     await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
 
     await userEvent.click(toggle);
     await waitFor(() =>

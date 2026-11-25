@@ -44,6 +44,18 @@ The module depends on certification records, shared file validation, transaction
 
 Tests cover ownership, file validation, storage, audit failures, a lost or replaced version, lock ordering, and use of the same transaction for reads and writes.
 
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Certification API"]
+  API --> Service["Document service"]
+  Service --> Data[("Certifications")]
+  Service --> Related[("Stored files")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
 ## Sprint History
 
 ### Sprint 3

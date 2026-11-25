@@ -57,11 +57,11 @@ export function WeekGrid({
   }
 
   return (
-    <section aria-label="Disponibilidad semanal">
+    <section aria-label="Disponibilidad semanal" className="@container/week">
       <div
         className={cn(
           "hidden overflow-clip rounded-lg border border-border",
-          "md:grid md:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
+          "@min-[44rem]/week:grid @min-[44rem]/week:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
         )}
       >
         <div aria-hidden="true">

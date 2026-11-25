@@ -55,6 +55,10 @@ sequenceDiagram
 
 The client consumes `/mentors/me/participation`, `/mentors/capacity`, `/mentors/offers/:offerId/confirm`, `/mentors/me/leave`, `/mentor-participation/requests` and its `/me` and `/me/history` subroutes, `/technical-areas` and `/mentors/me/technical-areas`. Methods, authentication, idempotency and response rules are documented in [mentors](../mentors/README.md). Editing and preview semantics are documented in [mentorship](../mentorship/README.md).
 
+## Action styling
+
+Cancelling the slot preview closes it without submitting a slot selection.
+
 ## Sprint History
 
 ### Sprint 3

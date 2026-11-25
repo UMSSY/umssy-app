@@ -10,14 +10,14 @@ import { PUBLIC_NAV_LABELS, PUBLIC_NAV_LINK_CLASS, PUBLIC_NAV_LINKS, PUBLIC_SLAN
 export function PublicHeader({ showInstitutionalSeal = false }: PublicHeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-ink shadow-lg">
-      <div className="flex h-20 items-stretch gap-6 pr-6 md:pr-10 lg:h-24">
-        <Link href="/" aria-label={PUBLIC_NAV_LABELS.home} className="flex shrink-0 items-center gap-3 bg-surface pr-14 pl-6 [clip-path:polygon(0_0,100%_0,calc(100%-2.5rem)_100%,0_100%)] md:pl-10">{showInstitutionalSeal ? <><InstitutionalSeal className="h-12" /><span aria-hidden="true" className="h-10 w-px bg-border" /></> : null}<BrandLogo priority className="w-40 lg:w-56" /></Link>
+      <div className="flex h-16 items-stretch gap-2 pr-2 sm:h-20 sm:gap-6 sm:pr-6 md:pr-10 lg:h-24">
+        <Link href="/" aria-label={PUBLIC_NAV_LABELS.home} className="flex shrink-0 items-center gap-2 bg-surface pr-11 pl-3 [clip-path:polygon(0_0,100%_0,calc(100%-2.5rem)_100%,0_100%)] sm:gap-3 sm:pr-14 sm:pl-6 md:pl-10">{showInstitutionalSeal ? <><InstitutionalSeal className="h-8 sm:h-12" /><span aria-hidden="true" className="h-10 w-px bg-border" /></> : null}<BrandLogo priority className="w-28 sm:w-40 lg:w-56" /></Link>
         <nav aria-label={PUBLIC_NAV_LABELS.navigation} className="hidden flex-1 items-center justify-center gap-2 xl:flex">
           {PUBLIC_NAV_LINKS.map((link) => <Link key={link.href} className={PUBLIC_NAV_LINK_CLASS} href={link.href}>{link.label}</Link>)}
         </nav>
         <div className="ml-auto flex items-center gap-4 xl:ml-0">
           <Link href="/login" className={cn(PUBLIC_NAV_LINK_CLASS, "hidden lg:inline")}>{PUBLIC_NAV_LABELS.login}</Link>
-          <Link href="/request-access" className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "hidden bg-danger text-surface hover:bg-danger/85 lg:inline-flex")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
+          <Link href="/request-access" className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "hidden bg-surface text-ink hover:bg-surface-soft lg:inline-flex")}>{PUBLIC_NAV_LABELS.requestAccess}</Link>
           <PublicMobileMenu />
         </div>
       </div>
