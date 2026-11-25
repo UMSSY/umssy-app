@@ -144,6 +144,7 @@ Error responses reference the shared `#/components/schemas/ApiErrorResponse` sch
 | Method and path                                                            | Permission and result                                                  |
 | -------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | `GET /profile/me/radar`                                                    | Owner: current and previous radar publications                         |
+| `GET /profile/me/radar/simulation-eligibility`                             | Owner: `approved` skills (`id`, `name`) and `highRelevanceSkillIds` eligible for the simulation bonus |
 | `GET /profile/me/radar/snapshots/:id`                                      | Owner: historical snapshot and its preceding version                   |
 | `GET /profile/me/radar/notifications`                                      | Owner: compatibility list delegated to the central inbox               |
 | `POST /profile/me/radar/notifications/:id/open`                            | Owner: authorized historical response and central read acknowledgement |

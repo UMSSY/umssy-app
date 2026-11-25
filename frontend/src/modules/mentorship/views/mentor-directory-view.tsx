@@ -2,7 +2,7 @@
 import type { MentorDirectoryViewProps } from "../types/mentor-directory-view-props.types";
 import Link from "next/link";
 import { resolveRadarMentorAreas } from "../utils/radar-mentor-area";
-import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart";
 
 import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -205,9 +205,9 @@ export function MentorDirectoryView({
     <main className="min-h-full bg-background lg:-mx-12 lg:-mt-10">
       <div className="mx-auto flex w-full flex-col gap-5 lg:pr-10 lg:pl-14">
         <div role="search" aria-label="Filtros de mentores" className="flex flex-wrap gap-5">
-        <header className="w-full space-y-2 border-b border-border bg-[#edf3f6] px-4 py-6 sm:px-8 lg:-mr-10 lg:-ml-14 lg:w-[calc(100%+6rem)] lg:shrink-0 lg:px-14 lg:pt-11 lg:pb-8">
+        <header className="w-full space-y-2 border-b border-border bg-interaction px-4 py-6 sm:px-8 lg:-mr-10 lg:-ml-14 lg:w-[calc(100%+6rem)] lg:shrink-0 lg:px-14 lg:pt-11 lg:pb-8">
           <p className="text-[11px] font-bold tracking-[0.14em] text-accent uppercase">Mentorías</p>
-          <h1 className="max-w-[650px] [font-family:Georgia,serif] text-3xl leading-[1.13] font-semibold tracking-tight text-wrap text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
+          <h1 className="max-w-[650px] font-tight text-3xl leading-[1.13] font-semibold tracking-tight text-wrap text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
           <p className="max-w-[690px] text-sm leading-[22px] text-text-secondary">Conecta con profesionales titulados de nuestra comunidad y recibe orientación en el área que quieres desarrollar.</p>
           <div className="max-w-[610px] pt-4">
             <MentorSearchBar value={search} onSearchChange={(nextSearch) => navigateWithUpdates({ search: nextSearch })} />

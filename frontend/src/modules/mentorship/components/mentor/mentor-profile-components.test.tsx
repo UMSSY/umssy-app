@@ -221,7 +221,7 @@ describe("Mentor profile components", () => {
     const availability = screen.getByText("Disponible para mentoría");
     expect(availability).toHaveClass("-order-1", "border-transparent");
     expect(availability.querySelector('[aria-hidden="true"]')).toHaveClass(
-      "bg-[#3b9e70]",
+      "bg-success",
     );
     expect(availability.parentElement).toContainElement(
       screen.getByRole("heading", { name: "Ana Rojas" }),
@@ -293,6 +293,9 @@ describe("Mentor profile components", () => {
         name: "Este mentor no está recibiendo solicitudes por ahora",
       }),
     ).toBeDisabled();
+    expect(
+      screen.getByText("Este mentor no está recibiendo solicitudes por ahora"),
+    ).toHaveClass("whitespace-normal");
     expect(screen.queryByRole("button", { name: "Solicitar mentoría" })).not.toBeInTheDocument();
     expect(screen.getByText("No disponible")).toHaveClass(
       "border-transparent",
