@@ -25,9 +25,17 @@ import { MentorCapacityAdminRepository } from './repositories/mentor-capacity-ad
 import { MentorCapacityAdminService } from './services/mentor-capacity-admin.service.js';
 import { NotificationsModule } from '../notifications/notifications.module.js';
 import { MentorOfferNotificationsService } from './services/mentor-offer-notifications.service.js';
+import { WorkExperienceSourcesModule } from '../work-experience/work-experience-sources.module.js';
+import { MentorDirectorySearchService } from './services/mentor-directory-search.service.js';
 
 @Module({
-  imports: [AuthModule, ProfileModule, SkillsModule, NotificationsModule],
+  imports: [
+    AuthModule,
+    ProfileModule,
+    SkillsModule,
+    NotificationsModule,
+    WorkExperienceSourcesModule,
+  ],
   controllers: [
     MentorsController,
     MentorPhotoController,
@@ -40,6 +48,7 @@ import { MentorOfferNotificationsService } from './services/mentor-offer-notific
     MentorsService,
     MentorProfileSuggestionsService,
     MentorsRepository,
+    MentorDirectorySearchService,
     MentorMapper,
     MentorPhotoService,
     MentorAffinityService,

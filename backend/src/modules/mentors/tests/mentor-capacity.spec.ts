@@ -1,7 +1,7 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
 import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
@@ -168,7 +168,7 @@ describe('capacidad HU-7-1', () => {
         }
       },
     } as unknown as PrismaService;
-    const repository = new MentorsRepository(prisma);
+    const repository = makeMentorsRepository(prisma);
     vi.spyOn(repository, 'findMentorRole').mockResolvedValue({
       id: 'mentor-role',
     });

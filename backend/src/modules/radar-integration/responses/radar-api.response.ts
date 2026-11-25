@@ -59,6 +59,11 @@ export const radarResponseSchema = z.object({
   dictionaryVersion: z.string().nullable(),
 });
 
+export const radarSimulationEligibilitySchema = z.object({
+  approved: z.array(z.object({ id: identifier, name: z.string() })),
+  highRelevanceSkillIds: z.array(identifier),
+});
+
 export const cvRescanResponseSchema = z.object({
   cvId: identifier,
   extractionStatus: z

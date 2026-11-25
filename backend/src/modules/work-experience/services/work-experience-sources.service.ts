@@ -3,6 +3,7 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 import { WorkExperienceRepository } from '../repositories/work-experience.repository.js';
 import type { WorkExperienceAnalysisSourceResponse } from '../responses/work-experience-analysis-source.response.js';
 import type { WorkPeriodResponse } from '../responses/work-period.response.js';
+import { matchingWorkExperienceUserIds } from '../work-experience-search.js';
 
 @Injectable()
 export class WorkExperienceSourcesService {
@@ -10,6 +11,10 @@ export class WorkExperienceSourcesService {
     return this.repository.findVerificationSources(userId, context);
   }
   constructor(private readonly repository: WorkExperienceRepository) {}
+
+  matchingUserIds(term: string) {
+    return matchingWorkExperienceUserIds(term);
+  }
 
   hasByUserId(userId: string): Promise<boolean> {
     return this.repository.hasByUserId(userId);

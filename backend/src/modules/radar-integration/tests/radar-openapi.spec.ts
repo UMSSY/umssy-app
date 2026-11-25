@@ -59,10 +59,10 @@ describe('Radar OpenAPI contracts', () => {
           .filter(([method]) => ['get', 'post', 'patch'].includes(method))
           .map(([, operation]) => operation),
       );
-      expect(operations).toHaveLength(29);
+      expect(operations).toHaveLength(30);
       expect(
         new Set(operations.map((operation) => operation.operationId)).size,
-      ).toBe(29);
+      ).toBe(30);
       for (const operation of operations) {
         expect(operation.summary).toBeTruthy();
         expect(operation.description).toBeTruthy();
