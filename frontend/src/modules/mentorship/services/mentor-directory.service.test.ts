@@ -8,6 +8,18 @@ afterEach(() => {
 });
 
 describe("getMentorDirectory", () => {
+  it("envía los UUID de la selección múltiple en una sola consulta", async () => {
+    const areaIds = [
+      "06d773ee-90d1-40c0-9744-c7c3601b84ef",
+      "ee0d0fe2-bc99-4a6a-8939-2bd663c3cae1",
+    ];
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: { items: [] } } });
+    await getMentorDirectory({ page: 2, search: "Senior", area: "", areaIds, available: true, sort: "default" });
+    expect(get).toHaveBeenCalledOnce();
+    expect(get).toHaveBeenCalledWith("/mentors/directory", expect.objectContaining({
+      params: expect.objectContaining({ area: undefined, areaIds: areaIds.join(","), search: "Senior", available: "true", page: 2 }),
+    }));
+  });
   it.each([
     "http://localhost:8081/api",
     "https://dev.umssy.test/api/",

@@ -1,6 +1,6 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import {
   buildEmptyMentorProfile,
@@ -43,7 +43,7 @@ describe('read-only suggestion evaluation', () => {
           },
         },
       );
-      const repository = new MentorsRepository(
+      const repository = makeMentorsRepository(
         prisma as unknown as PrismaService,
       );
       const service = new MentorProfileSuggestionsService(repository);

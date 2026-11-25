@@ -25,6 +25,7 @@ export function RequestAppointmentForm({
   canRetry = false,
   onSubmit,
   onDirtyChange,
+  selectedAreaName,
 }: RequestAppointmentFormProps) {
   const [values, setValues] = useState<AppointmentRequestValues>({
     orientationTypeId: "",
@@ -34,7 +35,9 @@ export function RequestAppointmentForm({
   const [errors, setErrors] = useState<AppointmentRequestErrors>({});
 
   const topicItems = orientationTypes.map((type) => ({ value: type.id, label: type.name }));
-  const isMessageTooLong = values.message.trim().length > APPOINTMENT_MESSAGE_MAX_LENGTH;
+  const contextualMessage = !selectedArea && selectedAreaName ? `Área de mentoría: ${selectedAreaName}.\n${values.message.trim()}` : values.message;
+  const messageLength = contextualMessage.trim().length;
+  const isMessageTooLong = messageLength > APPOINTMENT_MESSAGE_MAX_LENGTH;
 
   const updateValues = <Key extends keyof AppointmentRequestValues>(
     field: Key,
@@ -56,10 +59,11 @@ export function RequestAppointmentForm({
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const validationErrors = validateAppointmentRequest(values);
+    const contextualValues = { ...values, message: contextualMessage };
+    const validationErrors = { ...validateAppointmentRequest(contextualValues), ...(!values.message.trim() ? { message: REQUEST_APPOINTMENT_TEXT.missingMessage } : {}) };
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
-    onSubmit(values);
+    onSubmit(contextualValues);
   };
 
   return (
@@ -120,7 +124,7 @@ export function RequestAppointmentForm({
           id="appointment-message-count"
           className={cn("text-xs", isMessageTooLong && "text-destructive")}
         >
-          {values.message.trim().length} / {APPOINTMENT_MESSAGE_MAX_LENGTH}
+          {messageLength} / {APPOINTMENT_MESSAGE_MAX_LENGTH}
         </FieldDescription>
         {errors.message && <FieldError id="appointment-message-error">{errors.message}</FieldError>}
       </Field>
