@@ -15,7 +15,7 @@ The **Audit Events Module** captures, filters, exports, inspects, and traces imm
 | `GET`  | `/audit-events/:id/timeline`  | Administrative | Returns chronological audit trail for the target entity of `:id`        |
 | `GET`  | `/audit-events/:id/document`  | Administrative | Streams the supporting document or evidence attached to the audited item|
 
-All endpoints carry full OpenAPI/Swagger documentation (`@ApiOperation`, `@ApiParam`, response schemas, and standard `400` / `401` / `403` / `404` problem contracts).
+All endpoints carry full OpenAPI/Swagger documentation (unique `operationId`, parameter/query schemas, response contracts, and standard `400` / `401` / `403` / `404` / `410` error documentation).
 
 ## Audit Inspection Flow
 
@@ -37,5 +37,5 @@ flowchart TD
 ## Sprint History
 
 ### Sprint 3
-- Added OpenAPI documentation for `GET /audit-events/:id` and `GET /audit-events/:id/timeline` routes with complete status responses and response examples.
+- Added complete OpenAPI/Swagger documentation across all six audit-events routes (`auditEvents_list`, `auditEvents_listResponsibles`, `auditEvents_exportCsv`, `auditEvents_getDetail`, `auditEvents_getTimeline`, and `auditEvents_getDocument`) with filter queries, response schemas, and `400`/`401`/`403`/`404`/`410` contracts.
 - Hardened frontend `isAuditEventDetail` runtime validation to enforce canonical action and actor role contracts.

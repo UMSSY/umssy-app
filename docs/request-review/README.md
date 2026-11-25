@@ -25,4 +25,5 @@ flowchart TD
 
 ### Sprint 3
 - Integrated company access request review workflows and audit event inspection into the backoffice review shell.
+- Modularized company request review into `CompanyRequestTable` (reusing `@/components/ui/table` + mobile cards), `useCompanyRequestDetail`, and focused subcomponents consuming `@/modules/access-requests` public exports, with independent PDF/logo loading error handling and stacked mobile resolution actions using institutional `Button` variants.
 - Updated `useBackofficeSession` and `useBackofficeUser` to recognize active `HttpOnly` cookie sessions seamlessly alongside Bearer credentials.

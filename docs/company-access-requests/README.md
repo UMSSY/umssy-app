@@ -53,9 +53,15 @@ sequenceDiagram
   API-->>Company: Account activated
 ```
 
+## Notifications & OpenAPI Contracts
+
+- **Notification Pipeline**: Administrative resolution emails (`COMPANY_ACCESS_REQUEST_APPROVED`, `COMPANY_ACCESS_REQUEST_OBSERVED`, `COMPANY_ACCESS_REQUEST_REJECTED`) are validated via Zod schemas and rendered from MJML templates under `backend/src/modules/company-access-requests/notification/`, then dispatched exclusively through `NotificationsService.notify()`.
+- **OpenAPI Specifications**: All 20 controller endpoints declare unique `operationId`s (`companyAccessRequests_*`), parameter/query/body schemas, security requirements for backoffice routes, and multipart upload limits (`2 MB` for logos; `10 MB` for supporting documents).
+
 ## Sprint History
 
 ### Sprint 3
 - Implemented full company onboarding request lifecycle (draft creation, logo and document upload, OCR verification, public tracking, administrative review, and OTP account activation).
+- Migrated approval, correction, and rejection notifications to typed `NotificationsService.notify()` workflows with Zod payload validation and MJML templates, and added complete OpenAPI decorators across all 20 endpoints.
 - Aligned `company_access_requests` schema mapping (`access_request_document_type_id`), `SetNull` foreign key rules, and indexes on `opened_by_id`, `reviewed_by_id`, and `access_request_document_type_id`.
 - Replaced duplicated frontend file size formatting helper in the company onboarding flow with the shared `formatFileSize` utility.
