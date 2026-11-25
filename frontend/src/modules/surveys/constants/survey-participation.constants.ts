@@ -15,6 +15,12 @@ export const SURVEY_RESPONSE_RATE_LEVEL_LABELS = {
   expected: "Participación esperada",
 } as const satisfies Record<SurveyResponseRateLevel, string>;
 
+export const SURVEY_RESPONSE_RATE_LEVEL_METER_CLASSES = {
+  low: "**:data-[slot=progress-indicator]:bg-danger",
+  medium: "**:data-[slot=progress-indicator]:bg-gold",
+  expected: "**:data-[slot=progress-indicator]:bg-success",
+} as const satisfies Record<SurveyResponseRateLevel, string>;
+
 const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural);
 
 export const SURVEY_PARTICIPATION_TEXT = {
