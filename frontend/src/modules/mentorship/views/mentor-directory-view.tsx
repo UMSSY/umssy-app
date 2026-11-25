@@ -202,97 +202,100 @@ export function MentorDirectoryView({
   const returnTo = resolvedQuery ? `${pathname}?${resolvedQuery}` : pathname;
 
   return (
-    <main className="min-h-full bg-background lg:-mx-12 lg:-mt-10">
-      <div className="mx-auto flex w-full flex-col gap-5 lg:pr-10 lg:pl-14">
-        <div role="search" aria-label="Filtros de mentores" className="flex flex-wrap gap-5">
-        <header className="w-full space-y-2 border-b border-border bg-interaction px-4 py-6 sm:px-8 lg:-mr-10 lg:-ml-14 lg:w-[calc(100%+6rem)] lg:shrink-0 lg:px-14 lg:pt-11 lg:pb-8">
-          <p className="text-[11px] font-bold tracking-[0.14em] text-accent uppercase">Mentorías</p>
-          <h1 className="max-w-[650px] font-tight text-3xl leading-[1.13] font-semibold tracking-tight text-wrap text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
-          <p className="max-w-[690px] text-sm leading-[22px] text-text-secondary">Conecta con profesionales titulados de nuestra comunidad y recibe orientación en el área que quieres desarrollar.</p>
-          <div className="max-w-[610px] pt-4">
-            <MentorSearchBar value={search} onSearchChange={(nextSearch) => navigateWithUpdates({ search: nextSearch })} />
-          </div>
-        </header>
-        {missingRadarArea ? <div className="rounded-lg border border-border bg-surface-soft p-4">
-          {isTechnicalAreasLoading ? <p role="status">Cargando especialidades...</p> : isTechnicalAreasError ? <div role="alert">No pudimos cargar las especialidades. <Button variant="outline" onClick={retryTechnicalAreas}>Reintentar</Button></div> : <p role="status">La especialidad {radarAxis?.name} no está registrada en el catálogo.</p>}
-        </div> : null}
+    <main className="min-h-full min-w-0 bg-background lg:-mx-8 lg:-mt-8 xl:-mx-12 xl:-mt-10">
+      <div className="mx-auto flex w-full min-w-0 flex-col gap-5 lg:pr-10 lg:pl-14">
+        <div role="search" aria-label="Filtros de mentores" className="flex min-w-0 flex-col gap-4 lg:gap-5">
+          <header className="w-full min-w-0 space-y-2 rounded-lg border-b border-border bg-interaction px-4 py-5 sm:px-8 lg:-mr-10 lg:-ml-14 lg:w-[calc(100%+6rem)] lg:shrink-0 lg:rounded-none lg:px-14 lg:pt-11 lg:pb-8">
+            <p className="text-[11px] font-bold tracking-[0.14em] text-accent uppercase">Mentorías</p>
+            <h1 className="max-w-[650px] font-tight text-2xl leading-tight font-semibold tracking-tight text-balance text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
+            <p className="max-w-[690px] text-sm leading-[22px] text-text-secondary">Conecta con profesionales titulados de nuestra comunidad y recibe orientación en el área que quieres desarrollar.</p>
+            <div className="max-w-[610px] pt-3 sm:pt-4">
+              <MentorSearchBar value={search} onSearchChange={(nextSearch) => navigateWithUpdates({ search: nextSearch })} />
+            </div>
+          </header>
+          {missingRadarArea ? <div className="rounded-lg border border-border bg-surface-soft p-4">
+            {isTechnicalAreasLoading ? <p role="status">Cargando especialidades...</p> : isTechnicalAreasError ? <div role="alert">No pudimos cargar las especialidades. <Button variant="outline" onClick={retryTechnicalAreas}>Reintentar</Button></div> : <p role="status">La especialidad {radarAxis?.name} no está registrada en el catálogo.</p>}
+          </div> : null}
 
-        <div className="flex w-full flex-wrap items-end gap-x-4 gap-y-2">
-          <MentorFiltersBar
-            areaAsChips
-            area={radarAxis?.name ?? area}
-            orientation={orientation}
-            technicalAreas={
-              isHu2Flow
-                ? [...new Set([...RADAR_AXIS_NAMES.map((item) => item.name), ...technicalAreas.map((item) => item.name)])]
-                : technicalAreas.map((item) => item.name)
-            }
-            orientationTypes={orientationTypes.map((item) => item.name)}
-            onAreaChange={(value) => navigateWithUpdates({ area: value })}
-            onOrientationChange={(value) =>
-              navigateWithUpdates({ orientation: value })
-            }
-          />
-
-          <Label
-            className={cn(
-              'flex items-center gap-2',
-              isAvailableOnly && 'text-primary',
-            )}
-          >
-            <Checkbox
-              checked={isAvailableOnly}
-              disabled={isHu2Flow}
-              onCheckedChange={(checked) =>
-                navigateWithUpdates({
-                  available: checked === true,
-                })
+          <div className="grid min-w-0 grid-cols-2 items-end gap-3 lg:flex lg:flex-wrap lg:gap-x-4 lg:gap-y-2">
+            <MentorFiltersBar
+              areaAsChips
+              area={radarAxis?.name ?? area}
+              orientation={orientation}
+              technicalAreas={
+                isHu2Flow
+                  ? [...new Set([...RADAR_AXIS_NAMES.map((item) => item.name), ...technicalAreas.map((item) => item.name)])]
+                  : technicalAreas.map((item) => item.name)
+              }
+              orientationTypes={orientationTypes.map((item) => item.name)}
+              onAreaChange={(value) => navigateWithUpdates({ area: value })}
+              onOrientationChange={(value) =>
+                navigateWithUpdates({ orientation: value })
               }
             />
-            Solo disponibles
-          </Label>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="mentor-sort">Ordenar por</Label>
-
-            <NativeSelect
-              id="mentor-sort"
-              aria-label="Ordenar mentores"
-              className={
-                sortBy === 'affinity'
-                  ? 'rounded-lg ring-2 ring-accent'
-                  : undefined
-              }
-              value={sortBy}
-              onChange={(event) =>
-                navigateWithUpdates({
-                  sort: event.target.value as MentorSort,
-                })
-              }
+            <Label
+              className={cn(
+                'flex min-h-11 min-w-0 items-center gap-2 text-sm lg:min-h-10',
+                isAvailableOnly && 'text-primary',
+              )}
             >
-              <NativeSelectOption value="default">
-                Por defecto
-              </NativeSelectOption>
+              <Checkbox
+                checked={isAvailableOnly}
+                disabled={isHu2Flow}
+                onCheckedChange={(checked) =>
+                  navigateWithUpdates({
+                    available: checked === true,
+                  })
+                }
+              />
+              Solo disponibles
+            </Label>
 
-              <NativeSelectOption value="name_asc">
-                Nombre (A–Z)
-              </NativeSelectOption>
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <Label htmlFor="mentor-sort">Ordenar por</Label>
 
-              <NativeSelectOption value="name_desc">
-                Nombre (Z–A)
-              </NativeSelectOption>
+              <NativeSelect
+                id="mentor-sort"
+                aria-label="Ordenar mentores"
+                className={cn(
+                  'w-full min-w-0 lg:w-fit [&>select]:h-11 lg:[&>select]:h-10',
+                  sortBy === 'affinity' && 'rounded-lg ring-2 ring-accent',
+                )}
+                value={sortBy}
+                onChange={(event) =>
+                  navigateWithUpdates({
+                    sort: event.target.value as MentorSort,
+                  })
+                }
+              >
+                <NativeSelectOption value="default">
+                  Por defecto
+                </NativeSelectOption>
 
-              <NativeSelectOption value="affinity">
-                Mayor afinidad
-              </NativeSelectOption>
-            </NativeSelect>
+                <NativeSelectOption value="name_asc">
+                  Nombre (A–Z)
+                </NativeSelectOption>
+
+                <NativeSelectOption value="name_desc">
+                  Nombre (Z–A)
+                </NativeSelectOption>
+
+                <NativeSelectOption value="affinity">
+                  Mayor afinidad
+                </NativeSelectOption>
+              </NativeSelect>
+            </div>
+
+            <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border pt-2 lg:contents">
+              <Button variant="ghost" onClick={handleClearFilters} className="min-h-11 px-2 lg:min-h-10 lg:px-4">
+                Limpiar
+              </Button>
+              <Link href="/profile/radar" className="inline-flex min-h-11 items-center text-sm text-accent hover:underline lg:ml-auto lg:min-h-10 lg:self-center lg:text-xs">
+                Volver al radar
+              </Link>
+            </div>
           </div>
-
-          <Button variant="ghost" onClick={handleClearFilters}>
-            Limpiar
-          </Button>
-          <Link href="/profile/radar" className="ml-auto self-center text-xs text-accent hover:underline">Volver al radar</Link>
-        </div>
         </div>
 
         {missingRadarArea ? null : isPending || (isError && isFetching) ? (
@@ -340,14 +343,14 @@ export function MentorDirectoryView({
               </p>
             ) : null}
 
-            <div className="-mt-2 flex justify-end text-xs">
-            <MentorFiltersSummary
-              search={search}
-              area={radarAreas.length > 1 ? radarAxis?.name ?? area : area}
-              orientation={orientation}
-              available={isAvailableOnly}
-              totalItems={totalItems}
-            />
+            <div className="min-w-0 wrap-anywhere lg:-mt-2 lg:text-right">
+              <MentorFiltersSummary
+                search={search}
+                area={radarAreas.length > 1 ? radarAxis?.name ?? area : area}
+                orientation={orientation}
+                available={isAvailableOnly}
+                totalItems={totalItems}
+              />
             </div>
 
             <MentorDirectoryGrid
