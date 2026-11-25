@@ -402,7 +402,7 @@ describe("ChatPanel", () => {
     const scrollIntoView = vi.fn();
     vi.stubGlobal("visualViewport", viewport);
     vi.stubGlobal("matchMedia", (query: string) => ({
-      matches: query === "(max-width: 767px)",
+      matches: query === "(width < 48rem)",
       media: query,
       onchange: null,
       addEventListener: vi.fn(),
@@ -435,6 +435,44 @@ describe("ChatPanel", () => {
       expect(document.documentElement.style.overflow).toBe("");
     } finally {
       HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("updates page scroll locking across the md breakpoint while the chat stays open", () => {
+    const mediaQuery = Object.assign(new EventTarget(), { matches: true });
+    const matchMedia = vi.fn().mockReturnValue(mediaQuery);
+    vi.stubGlobal("matchMedia", matchMedia);
+    const root = document.documentElement;
+    const originalOverflow = root.style.overflow;
+    root.style.overflow = "auto";
+
+    try {
+      const { unmount } = render(
+        <MessagingUiProvider>
+          <ChatPanel roles={["mentor"]} />
+          <ChatDock />
+        </MessagingUiProvider>,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Abrir mensajes rápidos" }));
+      expect(matchMedia).toHaveBeenCalledWith("(width < 48rem)");
+      expect(root.style.overflow).toBe("hidden");
+
+      mediaQuery.matches = false;
+      mediaQuery.dispatchEvent(new Event("change"));
+      expect(root.style.overflow).toBe("auto");
+      expect(screen.getByRole("button", { name: "Cerrar mensajes rápidos" })).toBeInTheDocument();
+
+      mediaQuery.matches = true;
+      mediaQuery.dispatchEvent(new Event("change"));
+      expect(root.style.overflow).toBe("hidden");
+
+      unmount();
+      expect(root.style.overflow).toBe("auto");
+      mediaQuery.dispatchEvent(new Event("change"));
+      expect(root.style.overflow).toBe("auto");
+    } finally {
+      root.style.overflow = originalOverflow;
       vi.unstubAllGlobals();
     }
   });

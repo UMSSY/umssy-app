@@ -16,7 +16,7 @@ import type { ChatPanelProps } from "../types/chat-panel-props.types";
 
 const TRIGGER_ID = "quick-messages-trigger";
 const DOCK_ID = "quick-messages-dock";
-const MOBILE_QUERY = "(max-width: 767px)";
+const MOBILE_QUERY = "(width < 48rem)";
 const ChatWorkspace = dynamic(() => import("./chat-workspace").then((module) => module.ChatWorkspace), { loading: () => <p role="status" className="p-6 text-sm text-text-secondary">Cargando mensajes…</p> });
 
 export function ChatPanel({ roles }: ChatPanelProps) {
@@ -54,12 +54,32 @@ export function ChatDock() {
     wasOpen.current = isOpen;
   }, [isOpen, setLauncherId]);
   useEffect(() => {
-    if (!isOpen || !window.matchMedia?.(MOBILE_QUERY).matches) return;
+    if (!isOpen) return;
+    const mobileQuery = window.matchMedia?.(MOBILE_QUERY);
+    if (!mobileQuery) return;
     const root = document.documentElement;
-    const previousOverflow = root.style.overflow;
-    root.style.overflow = "hidden";
-    return () => {
+    let previousOverflow: string | undefined;
+
+    function unlockScroll() {
+      if (previousOverflow === undefined) return;
       root.style.overflow = previousOverflow;
+      previousOverflow = undefined;
+    }
+
+    const syncScrollLock = () => {
+      if (!mobileQuery.matches) {
+        unlockScroll();
+      } else if (previousOverflow === undefined) {
+        previousOverflow = root.style.overflow;
+        root.style.overflow = "hidden";
+      }
+    };
+
+    mobileQuery.addEventListener("change", syncScrollLock);
+    syncScrollLock();
+    return () => {
+      mobileQuery.removeEventListener("change", syncScrollLock);
+      unlockScroll();
     };
   }, [isOpen]);
   useEffect(() => {
