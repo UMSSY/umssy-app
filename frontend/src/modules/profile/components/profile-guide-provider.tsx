@@ -59,6 +59,7 @@ import {
   profileGuideStorage,
 } from '../services/profile-guide-storage';
 import type { ProfileGuideProviderProps } from '../types/profile-guide-provider-props.types';
+import { requestGuardedNavigation } from '@/shared/hooks/use-unsaved-changes-guard';
 import type { ProfileGuideSession } from '../types/profile-guide-session.types';
 import type { ProfileCompletenessSectionId } from '../types/profile-completeness-section-id.types';
 import type { ProfileGuideStepDirection } from '../types/profile-guide-step-direction.types';
@@ -363,8 +364,11 @@ function ProfileGuideSessionProvider({
                 size="sm"
                 onClick={() => {
                   if (isComplete) {
-                    setBubbleOpen(false);
-                    router.push('/profile');
+                    const navigate = () => {
+                      setBubbleOpen(false);
+                      router.push('/profile');
+                    };
+                    requestGuardedNavigation(navigate);
                   } else start();
                 }}
               >
@@ -482,14 +486,14 @@ function ProfileGuideSessionProvider({
                   className={cn(
                     'grid gap-6 p-5 sm:p-7',
                     side === 'left'
-                      ? 'lg:grid-cols-[15rem_minmax(0,1fr)]'
-                      : 'lg:grid-cols-[minmax(0,1fr)_15rem]',
+                      ? 'xl:grid-cols-[15rem_minmax(0,1fr)]'
+                      : 'xl:grid-cols-[minmax(0,1fr)_15rem]',
                   )}
                 >
                   <div
                     className={cn(
                       'min-w-0 space-y-5',
-                      side === 'left' && 'lg:order-last',
+                      side === 'left' && 'xl:order-last',
                     )}
                   >
                     <ProfileCompletenessProgress showChecklist={false} />
@@ -519,8 +523,8 @@ function ProfileGuideSessionProvider({
                     data-assistant-side={side}
                     aria-label="Ayuda de la guía"
                     className={cn(
-                      'order-first flex flex-col items-center gap-4 rounded-xl p-4 text-center lg:sticky lg:top-0 lg:self-start',
-                      side === 'right' ? 'lg:order-last' : 'lg:order-first',
+                      'order-first flex flex-col items-center gap-4 rounded-xl p-4 text-center xl:sticky xl:top-0 xl:self-start',
+                      side === 'right' ? 'xl:order-last' : 'xl:order-first',
                       !isTraveling && 'bg-interaction',
                     )}
                   >
@@ -725,7 +729,7 @@ function ProfileGuideSessionProvider({
                   Seguir editando
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  variant="destructive"
+                  variant="outline"
                   onClick={() => {
                     const action = pendingActionRef.current;
                     pendingActionRef.current = null;

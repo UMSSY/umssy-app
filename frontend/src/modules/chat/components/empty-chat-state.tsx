@@ -17,7 +17,7 @@ export function EmptyChatState({
   onAction,
 }: EmptyChatStateProps) {
   return (
-    <div className="flex h-full min-h-[350px] flex-col items-center justify-center p-8 text-center">
+    <div className="flex h-full min-h-0 flex-col items-center justify-center-safe overflow-y-auto p-4 text-center sm:p-8">
       {title && (
         <h2 className="mb-3 text-lg font-semibold text-ink">
           {title}

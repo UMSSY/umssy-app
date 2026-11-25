@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "cn";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { PUBLIC_SLANT_BUTTON_CLASS } from "@/shared/constants/public-navigation.constants";
+import { PUBLIC_CTA_CLASS } from "@/shared/constants/public-navigation.constants";
 import { HOME_SECTION_INNER_CLASS, HOME_SECTION_TITLE_CLASS, HOME_SHIELD_LEFT_CLASS, HOME_SHIELD_RIGHT_CLASS, HOME_STEPS } from "../constants/home.constants";
 
 export function HomeSteps() {
@@ -25,7 +25,7 @@ export function HomeSteps() {
           ))}
         </ol>
         <div className="mt-16 flex justify-center">
-          <Link href={HOME_STEPS.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "h-14 bg-danger px-12 text-surface hover:bg-danger/85")}>{HOME_STEPS.action.label}<ArrowRight aria-hidden="true" /></Link>
+          <Link href={HOME_STEPS.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_CTA_CLASS, "h-14 bg-primary px-12 text-primary-foreground hover:bg-brand-hover")}>{HOME_STEPS.action.label}<ArrowRight aria-hidden="true" /></Link>
         </div>
       </div>
     </section>

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Companies Module** exposes company identity and asset resources used across onboarding, recruiter management, and vacancy publishing. Company profiles (`CompanyProfile`), logos (`CompanyLogo`), and onboarding approvals are provisioned upon activation through the [Company Access Requests Module](../company-access-requests/README.md).
+The **Companies Module** exposes company identity and asset resources used across onboarding, recruiter management, vacancy publishing, and local development fixtures. Company profiles (`CompanyProfile`), logos (`CompanyLogo`), and onboarding approvals are provisioned upon activation through the [Company Access Requests Module](../company-access-requests/README.md), while the company fixture seeder provides organization records for local development and seed scenarios.
 
 ## Related Flows
 
@@ -23,4 +23,4 @@ flowchart LR
 ## Sprint History
 
 ### Sprint 3
-- Added `CompanyProfile` and `CompanyLogo` provisioning during company onboarding activation and authenticated company logo retrieval endpoints.
+- Added `CompanyProfile` and `CompanyLogo` provisioning during company onboarding activation, authenticated company logo retrieval endpoints, and local development company fixture seeders.

@@ -130,6 +130,10 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 
 Reads `users` and `access_requests` for the user reports and writes to `admin_export_histories` (history). See [backend/prisma/README.md](../../backend/prisma/README.md).
 
+## Action styling
+
+The export format menu uses the institutional primary style for downloads in both registered and rejected user reports.
+
 ## Sprint History
 
 ### Sprint 3

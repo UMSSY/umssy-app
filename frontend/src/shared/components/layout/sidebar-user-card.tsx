@@ -5,7 +5,7 @@ import { getInitials } from "@/shared/utils/get-initials";
 
 export function SidebarUserCard({ user, action, onLogout }: SidebarUserCardProps) {
   const userAction = action ?? (onLogout ? (
-    <Button type="button" variant="ghost" aria-label="Cerrar sesión" title="Cerrar sesión" onClick={onLogout} className="w-full justify-start text-brand-red hover:bg-brand-soft hover:text-brand-red">
+    <Button type="button" variant="ghost" aria-label="Cerrar sesión" title="Cerrar sesión" onClick={onLogout} className="w-full justify-start">
       <LogOut strokeWidth={1.75} aria-hidden="true" />Cerrar sesión
     </Button>
   ) : null);

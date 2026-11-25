@@ -54,7 +54,7 @@ function RequestStatusLookup({ requestCode }: MyRequestViewProps) {
   }
 
   return (
-    <main data-app-shell="true" className="min-h-screen bg-background">
+    <main data-app-shell="true" className="min-h-dvh bg-background">
       <RequestAccessShell
         currentStep={3}
         header={<RequestAccessHeader />}

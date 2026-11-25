@@ -4,7 +4,7 @@ import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
 
 import { format } from "date-fns/format";
 import { parseISO } from "date-fns/parseISO";
-import { ListFilter } from "lucide-react";
+import { Funnel } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { es } from "react-day-picker/locale";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,7 @@ export function VacancyFiltersDialog({
   return (
     <Dialog>
       <DialogTrigger render={<Button type="button" variant="outline" className="max-md:min-h-11" />}>
-        <ListFilter aria-hidden="true" />
+        <Funnel aria-hidden="true" />
         Filtrar por{activeCount > 0 ? ` (${activeCount})` : ""}
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl">

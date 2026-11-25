@@ -43,6 +43,12 @@ const api = vi.hoisted(() => ({
   certification: vi.fn(),
   skills: vi.fn(),
   mySkills: vi.fn(),
+  detectedSkills: vi.fn(),
+}));
+
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock('@/shared/contexts/auth-context', () => ({
@@ -103,9 +109,7 @@ vi.mock('@/modules/skills/services/skills.service', () => ({
     getCatalog: vi.fn().mockResolvedValue([{ id: 'react', name: 'React' }]),
     getMySkills: api.mySkills,
     saveMySkills: api.skills,
-    getDetectedSkills: vi
-      .fn()
-      .mockResolvedValue({ status: 'error', skills: [] }),
+    getDetectedSkills: api.detectedSkills,
   },
 }));
 
@@ -263,6 +267,7 @@ beforeEach(() => {
   api.completeness.mockResolvedValue(createProfileCompleteness());
   api.profile.mockResolvedValue(PROFILE);
   api.mySkills.mockResolvedValue([]);
+  api.detectedSkills.mockResolvedValue({ status: 'error', skills: [] });
   for (const request of [api.contact, api.presentation])
     request.mockResolvedValue(PROFILE);
   for (const request of [api.education, api.experience, api.certification])
@@ -419,6 +424,7 @@ describe('Profile completeness after saving from the interface', () => {
 
   it('collapses at 100 percent and reopens pending sections after removing the last saved skill', async () => {
     const user = userEvent.setup();
+    api.detectedSkills.mockResolvedValue({ status: 'ready', skills: [] });
     const withoutSkills = PROFILE_COMPLETENESS_SECTION_IDS.filter(
       (id) => id !== 'skills',
     );
@@ -432,6 +438,12 @@ describe('Profile completeness after saving from the interface', () => {
       </>,
     );
     const bar = await screen.findByRole('progressbar');
+    expect(
+      await screen.findByText(
+        'Aún no encontramos habilidades técnicas en las fuentes de tu perfil.',
+      ),
+    ).toBeVisible();
+    expectProgress('skills', false, 85);
     await waitFor(() =>
       expect(
         screen.getByRole('button', { name: 'Añadir habilidad' }),
@@ -468,6 +480,16 @@ describe('Profile completeness after saving from the interface', () => {
     });
     await user.click(screen.getByRole('button', { name: 'Quitar React' }));
     await waitFor(() => expectProgress('skills', false, 85));
+    expect(
+      screen.getByText(
+        'Añade las habilidades que mejor representan tu experiencia.',
+      ),
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        'Aún no encontramos habilidades técnicas en las fuentes de tu perfil.',
+      ),
+    ).toBeVisible();
     await user.keyboard('{Escape}');
     expect(
       screen.getByRole('region', { name: 'Secciones del perfil' }),

@@ -56,7 +56,7 @@ export function SurveyEditor({
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
-  const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(state.isDirty);
+  const { pendingHref, pendingAction, clearPendingHref, clearPendingAction } = useUnsavedChangesGuard(state.isDirty);
 
   useEffect(() => {
     if (!autosaveKey) return;
@@ -182,14 +182,20 @@ export function SurveyEditor({
     if (open) return;
     setIsDiscardDialogOpen(false);
     clearPendingHref();
+    clearPendingAction();
   };
 
   const handleConfirmDiscard = () => {
     const target = pendingHref ?? SURVEYS_PATH;
     setIsDiscardDialogOpen(false);
     clearPendingHref();
+    clearPendingAction();
     clearAutosave();
     builder.markSaved();
+    if (pendingAction) {
+      pendingAction();
+      return;
+    }
     if (navigator.onLine === false) void openOfflineRoute(target);
     else router.push(target);
   };
@@ -293,7 +299,7 @@ export function SurveyEditor({
         onOpenChange={setIsPreviewOpen}
       />
       <DiscardChangesDialog
-        open={isDiscardDialogOpen || pendingHref !== null}
+        open={isDiscardDialogOpen || pendingHref !== null || pendingAction !== null}
         onOpenChange={handleDiscardOpenChange}
         onConfirm={handleConfirmDiscard}
       />

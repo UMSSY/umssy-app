@@ -175,7 +175,7 @@ export function LoginView() {
           className="object-cover"
         />
       </aside>
-      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-10 xl:px-12">
+      <div className="flex min-h-dvh flex-col px-4 py-5 sm:px-8 sm:py-9 lg:px-10 xl:px-12">
         <Link
           href="/"
           className="flex items-center gap-2 self-start text-sm font-medium text-accent"
@@ -183,7 +183,7 @@ export function LoginView() {
           <ArrowLeft className="size-4" aria-hidden="true" />
           Volver al inicio
         </Link>
-        <div className="flex flex-1 items-center justify-center py-12">
+        <div className="flex flex-1 items-center justify-center py-6 sm:py-12">
           {isAccessDenied ? (
             <div className="w-full max-w-login-form animate-in duration-300 ease-out fade-in slide-in-from-right-2">
               <Link
@@ -208,7 +208,7 @@ export function LoginView() {
                     type="button"
                     variant="institutional"
                     onClick={() => setAccessDeniedState(null)}
-                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase"
                   >
                     INICIAR SESIÓN CON CONTRASEÑA →
                   </Button>
@@ -229,7 +229,7 @@ export function LoginView() {
                     type="button"
                     variant="institutional"
                     onClick={handleGoogleLogin}
-                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase"
                   >
                     PROBAR CON OTRA CUENTA →
                   </Button>
@@ -425,7 +425,7 @@ export function LoginView() {
                 type="submit"
                 variant="institutional"
                 disabled={isLoading || isGoogleLoading || isSigningIn || Boolean(loginRestriction)}
-                className="h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
+                className="h-12 w-full text-base font-extrabold tracking-wide uppercase"
               >
                 {isLoading ? (
                   <LoaderCircle
