@@ -213,7 +213,6 @@
   clip-path: polygon(0.75rem 0, 100% 0, calc(100% - 0.75rem) 100%, 0 100%);
 }
 
-/* Toast institucional HU-20 (Sonner) */
 [data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) {
   padding: 2.25rem 1rem 1rem 1rem !important;
   position: relative !important;
