@@ -21,7 +21,7 @@ export function ForgotPasswordSuccessStep({ onGoToLogin }: ForgotPasswordSuccess
         type="button"
         variant="institutional"
         onClick={onGoToLogin}
-        className="h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
+        className="h-12 w-full text-base font-extrabold tracking-wide uppercase"
       >
         IR A INICIAR SESIÓN →
       </Button>
