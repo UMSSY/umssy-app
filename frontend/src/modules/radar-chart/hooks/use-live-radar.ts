@@ -2,7 +2,9 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCookieSession } from '@/shared/hooks/use-cookie-session';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
 import { radarIntegrationApi } from '../services/radar-integration.service';
 import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import type { IntegrationRadar } from '../types/radar-integration.types';
@@ -11,9 +13,14 @@ import type { RadarBridgeView } from '../types/radar-bridge.types';
 import { RADAR_PERSONAL_QUERY_KEY } from '../constants/radar-query-keys.constants';
 export { RADAR_PERSONAL_QUERY_KEY } from '../constants/radar-query-keys.constants';
 
+function readRadarSession(): string | null {
+  return getAccessToken() ?? (hasCookieSession() ? 'cookie' : null);
+}
+
 export function useLiveRadar() {
   const queryClient = useQueryClient();
-  const session = getAccessToken();
+  const cookieSession = useCookieSession();
+  const session = getAccessToken() ?? (cookieSession ? 'cookie' : null);
 
   const query = useQuery<IntegrationRadar>({
     queryKey: RADAR_PERSONAL_QUERY_KEY,
@@ -21,7 +28,7 @@ export function useLiveRadar() {
     retry: false,
     queryFn: async () => {
       let published = await radarIntegrationApi.me();
-      if (session !== getAccessToken())
+      if (session !== readRadarSession())
         throw new Error('La sesión cambió durante la consulta.');
 
       if (
@@ -35,7 +42,7 @@ export function useLiveRadar() {
           published = await radarIntegrationApi.me();
         }
       }
-      if (session !== getAccessToken())
+      if (session !== readRadarSession())
         throw new Error('La sesión cambió durante la consulta.');
       return published;
     },
@@ -57,7 +64,7 @@ export function useLiveRadar() {
   const recalculate = useMutation({
     mutationFn: async () => {
       const updated = await radarIntegrationApi.recalculate();
-      if (session !== getAccessToken())
+      if (session !== readRadarSession())
         throw new Error('La sesión cambió durante el recálculo.');
       return updated;
     },

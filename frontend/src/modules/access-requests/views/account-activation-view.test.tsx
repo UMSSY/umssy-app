@@ -4,13 +4,26 @@ import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { accountActivationService } from "../services/account-activation.service";
+import { googleAuthService } from "@/modules/auth/services/google-auth.service";
 import { AccountActivationView } from "./account-activation-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/modules/auth", () => ({ startSession: vi.fn(), resolvePostLoginPath: vi.fn(() => "/community") }));
+vi.mock("@/modules/auth", () => ({ startSession: vi.fn(), endSession: vi.fn(), resolvePostLoginPath: vi.fn(() => "/community") }));
 vi.mock("../services/account-activation.service", () => ({
   accountActivationService: { getStatus: vi.fn(), verifyCode: vi.fn(), activate: vi.fn(), resend: vi.fn() },
+}));
+vi.mock("@/modules/auth/services/google-auth.service", () => ({
+  googleAuthService: {
+    promptSelectAccount: vi.fn(),
+    linkGoogleAccount: vi.fn((acc, g) =>
+      Promise.resolve(
+        acc.toLowerCase() === g.toLowerCase()
+          ? { success: true }
+          : { success: false, reason: "email_mismatch" }
+      )
+    ),
+  },
 }));
 
 const service = vi.mocked(accountActivationService);
@@ -44,7 +57,7 @@ describe("AccountActivationView", () => {
     expect(await screen.findByLabelText("Correo electrónico")).toBeInTheDocument();
   });
 
-  it("recorre código, contraseña y entra a la comunidad", async () => {
+  it("recorre código, contraseña, muestra ¡Cuenta activada! y permite ir a iniciar sesión", async () => {
     service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
     service.verifyCode.mockResolvedValue({ ok: true, data: {} });
     service.activate.mockResolvedValue({ ok: true, data: { accessToken: "tok", roleTag: "titulado" } });
@@ -58,8 +71,111 @@ describe("AccountActivationView", () => {
     await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
     await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
 
-    await waitFor(() => expect(push).toHaveBeenCalled());
+    expect(await screen.findByText("¡Cuenta activada!")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /vincular con google/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ir a iniciar sesión/i })).toBeInTheDocument();
     expect(service.activate).toHaveBeenCalledWith("keyla@gmail.com", "123456", "Abcdefg1");
+
+    await user.click(screen.getByRole("button", { name: /ir a iniciar sesión/i }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/login"));
+  });
+
+  it("permite vincular con Google cuando los correos coinciden", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({
+      email: "dania@gmail.com",
+    });
+    service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
+    service.verifyCode.mockResolvedValue({ ok: true, data: {} });
+    service.activate.mockResolvedValue({ ok: true, data: { accessToken: "tok", roleTag: "titulado" } });
+    render(<AccountActivationView initialEmail="dania@gmail.com" />);
+
+    const user = await typeCode("123456");
+    await user.click(screen.getByRole("button", { name: /continuar/i }));
+    await user.type(await screen.findByLabelText("Contraseña", { selector: "input" }), "Abcdefg1");
+    await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
+    await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
+
+    await user.click(await screen.findByRole("button", { name: /vincular con google/i }));
+
+    expect(await screen.findByText("Google vinculada")).toBeInTheDocument();
+    expect(screen.getByText(/Tu cuenta de Google \(dania@gmail\.com\) quedó vinculada/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ir a iniciar sesión/i })).toBeInTheDocument();
+  });
+
+  it("muestra Acceso no permitido cuando el correo de Google no coincide", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({
+      email: "otro.usuario@gmail.com",
+    });
+    service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
+    service.verifyCode.mockResolvedValue({ ok: true, data: {} });
+    service.activate.mockResolvedValue({ ok: true, data: { accessToken: "tok", roleTag: "titulado" } });
+    render(<AccountActivationView initialEmail="dania@gmail.com" />);
+
+    const user = await typeCode("123456");
+    await user.click(screen.getByRole("button", { name: /continuar/i }));
+    await user.type(await screen.findByLabelText("Contraseña", { selector: "input" }), "Abcdefg1");
+    await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
+    await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
+
+    await user.click(await screen.findByRole("button", { name: /vincular con google/i }));
+
+    expect(await screen.findByText("Acceso no permitido")).toBeInTheDocument();
+    expect(screen.getByText(/Esta cuenta de Google no está registrada en el sistema/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /probar con otra cuenta/i })).toBeInTheDocument();
+  });
+
+  it("muestra un mensaje de error y permite reintentar si el servidor falla al vincular", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({
+      email: "dania@gmail.com",
+    });
+    vi.mocked(googleAuthService.linkGoogleAccount).mockResolvedValueOnce({
+      success: false,
+      reason: "server_error",
+      message: "No se pudo conectar con el servidor para vincular la cuenta.",
+    });
+
+    service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
+    service.verifyCode.mockResolvedValue({ ok: true, data: {} });
+    service.activate.mockResolvedValue({ ok: true, data: { accessToken: "tok", roleTag: "titulado" } });
+    render(<AccountActivationView initialEmail="dania@gmail.com" />);
+
+    const user = await typeCode("123456");
+    await user.click(screen.getByRole("button", { name: /continuar/i }));
+    await user.type(await screen.findByLabelText("Contraseña", { selector: "input" }), "Abcdefg1");
+    await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
+    await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
+
+    await user.click(await screen.findByRole("button", { name: /vincular con google/i }));
+
+    expect(
+      await screen.findByText("No se pudo conectar con el servidor para vincular la cuenta.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Google vinculada")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /vincular con google/i })).toBeInTheDocument();
+  });
+
+  it("no altera el estado si el usuario cancela o cierra el selector de Google", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockRejectedValueOnce(
+      new Error("User closed prompt")
+    );
+
+    service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
+    service.verifyCode.mockResolvedValue({ ok: true, data: {} });
+    service.activate.mockResolvedValue({ ok: true, data: { accessToken: "tok", roleTag: "titulado" } });
+    render(<AccountActivationView initialEmail="dania@gmail.com" />);
+
+    const user = await typeCode("123456");
+    await user.click(screen.getByRole("button", { name: /continuar/i }));
+    await user.type(await screen.findByLabelText("Contraseña", { selector: "input" }), "Abcdefg1");
+    await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
+    await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
+
+    await user.click(await screen.findByRole("button", { name: /vincular con google/i }));
+
+    expect(await screen.findByText("¡Cuenta activada!")).toBeInTheDocument();
+    expect(screen.queryByText("Google vinculada")).not.toBeInTheDocument();
+    expect(screen.queryByText("Acceso no permitido")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /vincular con google/i })).toBeInTheDocument();
   });
 
   it("muestra el error de un código incorrecto", async () => {
@@ -86,11 +202,13 @@ describe("AccountActivationView", () => {
     expect(await screen.findByText(/nuevo código/i)).toBeInTheDocument();
   });
 
-  it("avisa cuando la cuenta ya está activa", async () => {
+  it("muestra la pantalla ¡Cuenta activada! cuando la cuenta ya está activa", async () => {
     service.getStatus.mockResolvedValue({ ok: true, data: { ...readyStatus, state: "activated" } });
     render(<AccountActivationView initialEmail="keyla@gmail.com" />);
-    expect(await screen.findByText(/ya está activa/i)).toBeInTheDocument();
+    expect(await screen.findByText("¡Cuenta activada!")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /vincular con google/i })).toBeInTheDocument();
   });
+
   it("muestra la contraseña rechazada por el servidor", async () => {
     service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
     service.verifyCode.mockResolvedValue({ ok: true, data: {} });
@@ -102,7 +220,5 @@ describe("AccountActivationView", () => {
     await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
     await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
     expect(await screen.findByText("Contraseña rechazada")).toBeInTheDocument();
-    expect(push).not.toHaveBeenCalled();
   });
-
 });

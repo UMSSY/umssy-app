@@ -369,11 +369,30 @@ export async function seedRadar(
     });
   }
 
-  if (users.company) {
-    // `RadarCompanyAccess` está ignorado por Prisma y usa clave compuesta.
-    await tx.$executeRaw`
-      INSERT INTO radar_company_access (company_id,user_id)
-      VALUES (${techCompanyId}::uuid,${users.company.id}::uuid)
-      ON CONFLICT (company_id,user_id) DO NOTHING`;
-  }
+  const linkCompanyUser = async (user: { id: string } | undefined) => {
+    if (!user) return;
+
+    // No sobrescribe si el usuario ya tiene una empresa asignada.
+    await tx.user.updateMany({
+      where: { id: user.id, companyId: null },
+      data: { companyId: techCompanyId },
+    });
+
+    const userRecord = await tx.user.findUnique({
+      where: { id: user.id },
+      select: { companyId: true },
+    });
+
+    // Solo otorga acceso de Radar a la empresa que corresponda a la vinculada.
+    if (userRecord?.companyId) {
+      // `RadarCompanyAccess` está ignorado por Prisma y usa clave compuesta.
+      await tx.$executeRaw`
+        INSERT INTO radar_company_access (company_id,user_id)
+        VALUES (${userRecord.companyId}::uuid,${user.id}::uuid)
+        ON CONFLICT (company_id,user_id) DO NOTHING`;
+    }
+  };
+
+  await linkCompanyUser(users.company);
+  await linkCompanyUser(users.multiRole);
 }

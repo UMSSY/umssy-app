@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { hasCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { useRegistrationSession } from "./use-registration-session";
 import { registrationsService } from "../services/registrations.service";
@@ -24,8 +25,12 @@ export function useRegistrationActions(eventId: string) {
     return () => { isMountedRef.current = false; };
   }, []);
 
+  function isCurrentSession(capturedToken: string | null): boolean {
+    return getAccessToken() === capturedToken && (Boolean(capturedToken) || hasCookieSession());
+  }
+
   async function refreshQueries(variables: RegistrationMutation, includeOwn: boolean) {
-    if (!isMountedRef.current || getAccessToken() !== variables.accessToken) return;
+    if (!isMountedRef.current || !isCurrentSession(variables.accessToken)) return;
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: REGISTRATION_QUERY_KEYS.passes }),
       queryClient.invalidateQueries({ queryKey: REGISTRATION_QUERY_KEYS.list }),
@@ -35,10 +40,10 @@ export function useRegistrationActions(eventId: string) {
   }
 
   async function updateQueries(registration: RegistrationResponse, variables: RegistrationMutation) {
-    if (!isMountedRef.current || getAccessToken() !== variables.accessToken) return;
+    if (!isMountedRef.current || !isCurrentSession(variables.accessToken)) return;
     const queryKey = REGISTRATION_QUERY_KEYS.own(variables.eventId, variables.accessToken);
     await queryClient.cancelQueries({ queryKey, exact: true });
-    if (getAccessToken() !== variables.accessToken) return;
+    if (!isCurrentSession(variables.accessToken)) return;
     queryClient.setQueryData(queryKey, registration);
     await refreshQueries(variables, false);
   }
