@@ -1,3 +1,5 @@
+import type { CredentialLimit } from "./credential-limit.types";
+
 export type ForgotPasswordStep = "request" | "verify" | "reset" | "success";
 
 export interface RequestResetCodePayload {
@@ -15,4 +17,4 @@ export interface ResetPasswordPayload {
   password: string;
 }
 
-export type PasswordResetResult = { ok: true } | { ok: false; error: string };
+export type PasswordResetResult = { ok: true } | { ok: false; error: string; restriction: CredentialLimit | null };

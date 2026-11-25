@@ -43,17 +43,15 @@ export class MailDispatcherService {
           continue;
         }
 
-        const content: NotificationMailContent = renderMail
-          ? await renderMail({
-              recipientName: buildRecipientName(contact.firstName, contact.lastName),
-              actionUrl,
-            })
-          : {
-              mjml: await loadGenericTemplate(),
-              subject: genericTitle,
-              text: `${genericBody}\n\nVer en UMSSY: ${absoluteActionUrl}`,
-              values: { title: genericTitle, body: genericBody, actionUrl: absoluteActionUrl },
-            };
+        const content = await this.resolveContent(
+          buildRecipientName(contact.firstName, contact.lastName),
+          actionUrl,
+          genericTitle,
+          genericBody,
+          absoluteActionUrl,
+          loadGenericTemplate,
+          renderMail,
+        );
 
         await this.mailService.send({
           to: contact.email,
@@ -75,6 +73,75 @@ export class MailDispatcherService {
         deliveries.filter((delivery) => delivery.status === 'failed').length,
       ),
       deliveries,
+    };
+  }
+
+  async dispatchToEmails(
+    emails: string[],
+    title: string,
+    body: string,
+    actionUrl: string,
+    renderMail?: NotificationMailRenderer,
+  ): Promise<ChannelDispatchResult> {
+    const deliveries: NotificationRecipientDelivery[] = [];
+    let genericTemplate: Promise<string> | undefined;
+    const loadGenericTemplate = () =>
+      (genericTemplate ??= loadMailTemplate('notification'));
+    const genericTitle = truncateNotificationText(title);
+    const genericBody = truncateNotificationText(body);
+    const absoluteActionUrl = this.toAbsoluteActionUrl(actionUrl);
+
+    for (const email of emails) {
+      try {
+        const content = await this.resolveContent(
+          email,
+          actionUrl,
+          genericTitle,
+          genericBody,
+          absoluteActionUrl,
+          loadGenericTemplate,
+          renderMail,
+        );
+        await this.mailService.send({
+          to: email,
+          subject: content.subject,
+          text: content.text,
+          mjml: content.mjml,
+          values: content.values,
+        });
+        deliveries.push({ recipientId: email, channel: 'email', status: 'sent' });
+      } catch (error) {
+        deliveries.push({ recipientId: email, channel: 'email', status: 'failed' });
+        this.logger.error(`Error enviando correo al destinatario ${email}`, error);
+      }
+    }
+
+    return {
+      status: summarizeChannelStatus(
+        deliveries.filter((delivery) => delivery.status === 'sent').length,
+        deliveries.filter((delivery) => delivery.status === 'failed').length,
+      ),
+      deliveries,
+    };
+  }
+
+  private async resolveContent(
+    recipientName: string,
+    actionUrl: string,
+    genericTitle: string,
+    genericBody: string,
+    absoluteActionUrl: string,
+    loadGenericTemplate: () => Promise<string>,
+    renderMail?: NotificationMailRenderer,
+  ): Promise<NotificationMailContent> {
+    if (renderMail) {
+      return renderMail({ recipientName, actionUrl });
+    }
+    return {
+      mjml: await loadGenericTemplate(),
+      subject: genericTitle,
+      text: `${genericBody}\n\nVer en UMSSY: ${absoluteActionUrl}`,
+      values: { title: genericTitle, body: genericBody, actionUrl: absoluteActionUrl },
     };
   }
 

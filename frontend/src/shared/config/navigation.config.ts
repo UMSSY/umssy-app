@@ -120,6 +120,12 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
     roles: getRouteRoles('/backoffice'),
   },
   {
+    label: 'Solicitudes de empresas',
+    icon: Building2,
+    href: '/backoffice/empresas',
+    roles: getRouteRoles('/backoffice'),
+  },
+  {
     label: 'Control de cupos',
     icon: SlidersHorizontal,
     href: '/backoffice/mentor-capacity',

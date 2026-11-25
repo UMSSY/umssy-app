@@ -84,8 +84,12 @@ describe("Select", () => {
       await user.tab()
       expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveFocus()
       await user.keyboard("{ArrowDown}")
+      const firstOption = await screen.findByRole("option", {
+        name: "Cochabamba",
+      })
       const listbox = await screen.findByRole("listbox")
       await waitFor(() => expect(listbox.contains(document.activeElement)).toBe(true))
+      await waitFor(() => expect(firstOption).toHaveAttribute("data-highlighted"))
 
       await user.keyboard("{End}")
       const option = screen.getByRole("option", { name: "La Paz" })
@@ -100,7 +104,9 @@ describe("Select", () => {
       }
 
       await user.keyboard("{Enter}")
-      expect(option).toHaveAttribute("aria-selected", "true")
+      await waitFor(() => {
+        expect(option).toHaveAttribute("aria-selected", "true")
+      })
       expect(option).toHaveClass("focus:text-ink")
     },
   )

@@ -6,6 +6,7 @@ import type { NotifyChannel } from './notify-channel.type.js';
 export type NotifyRequest = {
   [K in NotificationType]: {
     recipientIds: string[];
+    recipientEmails?: string[];
     actorId?: string;
     type: K;
     payload: NotificationPayloadMap[K];
