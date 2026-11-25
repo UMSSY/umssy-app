@@ -2,7 +2,12 @@ import { CV_YEAR_MONTH_LENGTH } from "../constants/cv-record-match.constants";
 import type { CvRecordMatch } from "../types/cv-record-match.types";
 import type { CvRecordMatcher } from "../types/cv-record-matcher.types";
 
-const toYearMonth = (date: string | null | undefined): string => (date ?? "").slice(0, CV_YEAR_MONTH_LENGTH);
+const toYearMonth = (date: string | null | undefined): string => (date ?? "").trim().slice(0, CV_YEAR_MONTH_LENGTH);
+
+const isMonthPrecision = (date: string | null | undefined): boolean => {
+  const value = (date ?? "").trim();
+  return value.length > 0 && value.length <= CV_YEAR_MONTH_LENGTH;
+};
 
 export function matchCvRecords<TExtracted, TRecord extends { id: string; startDate: string }>(
   items: readonly TExtracted[] | null | undefined,
@@ -25,15 +30,27 @@ export function matchCvRecords<TExtracted, TRecord extends { id: string; startDa
     usedIds.add(record.id);
   };
 
-  const pairByStartDate = (toComparableDate: (date: string | null | undefined) => string) =>
-    extracted.forEach((item, index) => {
-      const startDate = toComparableDate(matcher.getExtractedStartDate(item));
-      if (paired[index] || !startDate) return;
-      pair(index, findCandidates(item).find((record) => toComparableDate(record.startDate) === startDate));
+  extracted.forEach((item, index) => {
+    const startDate = (matcher.getExtractedStartDate(item) ?? "").trim();
+    if (paired[index] || !startDate) return;
+    pair(index, findCandidates(item).find((record) => (record.startDate ?? "").trim() === startDate));
+  });
+
+  extracted.forEach((item, index) => {
+    if (paired[index]) return;
+    const extractedStartDate = matcher.getExtractedStartDate(item);
+    const extractedMonth = toYearMonth(extractedStartDate);
+    if (!extractedMonth) return;
+
+    const matchingCandidates = findCandidates(item).filter((record) => {
+      const isMonthCompatible = isMonthPrecision(extractedStartDate) || isMonthPrecision(record.startDate);
+      return isMonthCompatible && toYearMonth(record.startDate) === extractedMonth;
     });
 
-  pairByStartDate((date) => date ?? "");
-  pairByStartDate(toYearMonth);
+    if (matchingCandidates.length === 1) {
+      pair(index, matchingCandidates[0]);
+    }
+  });
 
   return extracted.map((item, index) => {
     const record = paired[index];

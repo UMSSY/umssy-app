@@ -36,7 +36,7 @@ The section reads and saves the preference only through `useNotificationPreferen
 
 The profile guide offers navigation to the profile. When a presentation has unsaved changes, the shared navigation guard defers that action and the presentation dialog offers to continue editing, discard, or save before leaving. A failed save keeps the user on the form.
 
-Profile completeness treats a saved manual skill as present, while an NLP-detected skill requires a valid display name and at least one valid evidence reference. This matches the visible NLP skill list. GitHub OAuth returns through `/oauth/github/callback`; the profile displays the resulting connection status.
+Profile completeness treats a saved manual skill as present, while an NLP-detected skill requires a valid display name and at least one valid evidence reference. This matches the visible NLP skill list. GitHub and GitLab OAuth return through `/oauth/github/callback` and `/oauth/gitlab/callback`; the profile displays the resulting connection status.
 
 ### Choosing push on this device
 

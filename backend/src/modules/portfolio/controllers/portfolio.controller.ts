@@ -175,7 +175,7 @@ export class PortfolioController {
   @ApiQuery({ name: 'state', required: false, type: String })
   @ApiQuery({
     name: 'challenge',
-    required: false,
+    required: true,
     type: String,
     description:
       'Required: 43-character base64url SHA-256 PKCE challenge.',

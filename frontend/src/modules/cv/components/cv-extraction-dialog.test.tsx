@@ -145,10 +145,10 @@ describe('CvExtractionDialog', () => {
         id: '22222222-2222-4222-8222-222222222222',
         companyName: 'Empresa SRL',
         position: 'Desarrollador Backend',
-        startDate: '2021-03-15',
+        startDate: '2021-03-01',
         endDate: null,
         isCurrent: true,
-        description: 'APIs REST',
+        description: 'APIs REST anteriores',
       },
     ]);
     const { user } = renderDialog();

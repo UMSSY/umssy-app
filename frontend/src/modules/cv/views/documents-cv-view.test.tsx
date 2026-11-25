@@ -673,7 +673,7 @@ describe("DocumentsCvView", () => {
     const user = userEvent.setup();
     seedCvs("CV_Valeria_Quispe.pdf");
     vi.mocked(educationsService.getEducations).mockResolvedValue([
-      { id: "edu-1", ...SAVED_EDUCATION, startDate: "2014-01-15" },
+      { id: "edu-1", ...SAVED_EDUCATION, endDate: "2018-12-01" },
     ]);
     vi.mocked(educationsService.updateEducation).mockResolvedValue({ id: "edu-1", ...SAVED_EDUCATION });
     vi.mocked(documentsService.extractCvData).mockResolvedValue({ ...REVIEW_EXTRACTION, cvId: "cv-1" });

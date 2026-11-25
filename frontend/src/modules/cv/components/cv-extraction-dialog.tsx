@@ -75,12 +75,12 @@ export function CvExtractionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => (open || isBusy ? undefined : onClose())}>
-      <DialogContent className="max-w-3xl gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-3xl">
-        <DialogHeader className="gap-1.5 border-b border-border px-6 py-5 pr-14">
+      <DialogContent className="flex max-h-[92dvh] max-w-3xl flex-col gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-3xl">
+        <DialogHeader className="shrink-0 gap-1.5 border-b border-border px-6 py-5 pr-14">
           <DialogTitle className="font-tight text-xl font-bold text-ink">{CV_REVIEW_TEXTS.title}</DialogTitle>
           <DialogDescription className="text-sm text-text-secondary">{CV_REVIEW_TEXTS.description}</DialogDescription>
         </DialogHeader>
-        <div className="max-h-[65vh] overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <div className="mb-4"><ProfileCompletenessProgress showChecklist={false} /></div>
           {isExtracting ? (
             <div aria-busy="true" className="flex flex-col gap-3">
@@ -194,7 +194,7 @@ export function CvExtractionDialog({
             </Tabs>
           ) : null}
         </div>
-        <DialogFooter className="mx-0 mb-0 flex-row justify-end gap-3 border-t border-border bg-transparent px-6 py-4">
+        <DialogFooter className="mx-0 mb-0 shrink-0 flex-row justify-end gap-3 border-t border-border bg-transparent px-6 py-4">
           <Button
             type="button"
             variant="outline"
