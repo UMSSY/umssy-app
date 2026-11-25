@@ -220,7 +220,7 @@ describe('EventChatRoomView', () => {
 
     expect(screen.getByText('Fallo de envío')).toBeInTheDocument();
   });
-  
+
   it('should report the room visibility so open rooms do not trigger notifications', () => {
     render(<EventChatRoomView registrationId="registration-1" />);
 

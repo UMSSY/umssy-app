@@ -184,8 +184,8 @@ describe("BackofficeShell", () => {
       const brand = screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" }).parentElement as HTMLElement;
       expect(brand.querySelector("svg")).toBeNull();
       expect(screen.queryByText("›")).toBeNull();
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:bg-sidebar-accent");
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:rounded-full");
+      expect(screen.getByRole("link", { name: "Solicitudes" }).className).toContain("data-active:bg-sidebar-accent");
+      expect(screen.getByRole("link", { name: "Solicitudes" }).className).toContain("data-active:before:rounded-full");
     });
   });
 });

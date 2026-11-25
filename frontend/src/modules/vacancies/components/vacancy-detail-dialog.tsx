@@ -6,13 +6,15 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, Di
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { JobApplicationAction } from "@/modules/matching";
 import { ModalityIcon } from "@/shared/components/modality-icon";
+import { useOptionalAuth } from "@/shared/contexts/auth-context";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { formatBoliviaDate } from "@/shared/utils/date-time";
 import type { VacancyDetailDialogProps } from "../types/vacancy-detail-dialog-props.types";
-import { canApplyToVacancies } from "../utils/can-apply-to-vacancies";
+import { canApplyToVacancies, canApplyWithRoles } from "../utils/can-apply-to-vacancies";
 
 export function VacancyDetailDialog({ vacancy, onClose }: VacancyDetailDialogProps) {
-  const canApply = canApplyToVacancies(getAccessToken());
+  const auth = useOptionalAuth();
+  const canApply = auth ? canApplyWithRoles(auth.roles) : canApplyToVacancies(getAccessToken());
   const locationUrl = getSafeMapsUrl(vacancy?.locationUrl);
 
   return <Dialog open onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
