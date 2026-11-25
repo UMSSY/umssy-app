@@ -78,7 +78,7 @@ export function UnpublishSurveyAction({
               {SURVEY_TEXT.cancel}
             </AlertDialogCancel>
             <AlertDialogAction
-              variant="destructive"
+              variant="outline"
               onClick={() => void handleConfirm()}
               disabled={isUnpublishing}
               aria-busy={isUnpublishing}

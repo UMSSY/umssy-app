@@ -319,7 +319,7 @@ export function OrientationConfigView() {
             <CardFooter className="mx-4 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Button
                 type="button"
-                variant="outline"
+                variant="cancel"
                 onClick={handleCancel}
                 disabled={isSaving}
                 className="h-10 gap-2 rounded-lg px-6 text-sm font-semibold"

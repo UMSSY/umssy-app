@@ -107,7 +107,7 @@ export function RecruiterRadarView() {
           onChange={selectVacancy}
         />
 
-        <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="grid flex-1 grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
           <Card className="flex min-h-[420px] flex-col lg:h-full">
             <CardHeader>
               <CardTitle className="text-sm font-medium text-muted-foreground">

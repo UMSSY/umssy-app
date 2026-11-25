@@ -271,6 +271,37 @@ describe("Chat Components", () => {
 });
   });
 
+  it("ConversationItem debe mostrar insignia de postulacion cuando contextType es POSTULACION", () => {
+    const postulationConversation: Conversation = {
+      ...mockConversationWithAvatar,
+      contextType: "POSTULACION",
+      contextId: "app-uuid-9999",
+    };
+
+    render(
+      <ConversationItem
+        conversation={postulationConversation}
+        isSelected={false}
+        onSelect={vi.fn()}
+      />,
+    );
+
+    const badge = screen.getByTestId("conversation-postulation-badge");
+    expect(badge).toHaveTextContent("Postulación");
+  });
+
+  it("ConversationItem no debe mostrar insignia de postulacion si contextType no es POSTULACION", () => {
+    render(
+      <ConversationItem
+        conversation={mockConversationWithAvatar}
+        isSelected={false}
+        onSelect={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId("conversation-postulation-badge")).toBeNull();
+  });
+
   it("ConversationList debe permitir buscar, cambiar filtros y cargar mas", () => {
     const handleSearch = vi.fn();
     const handleFilter = vi.fn();

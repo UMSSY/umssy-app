@@ -133,6 +133,10 @@ Services extract `data` from the common response contract and use the centralize
 
 Tests cover HTTP services, navigation and normalization, radar filters, query states, catalogs, profiles, and the wizard. Directory integration changes must preserve the mandatory availability filter and area mapping.
 
+## Action styling
+
+Cancelling orientation configuration uses the shared outlined style. The confirmation dialog keeps the editor open if the user dismisses it.
+
 ## Sprint History
 
 ### Sprint 3

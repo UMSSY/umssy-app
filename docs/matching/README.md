@@ -203,6 +203,10 @@ Reads `job_offers`, `job_offer_skills`, `skills`, `user_skills`, `educations` an
 - **Preview and analysis are separate endpoints** so the form can show live suggestions without writing anything.
 - **Other modules are called through their services**, never their tables (backend standard).
 
+## Action styling
+
+Discard and reject actions use neutral confirmation controls. The Cancel action dismisses the confirmation without submitting a decision.
+
 ## Sprint History
 
 ### Sprint 3
