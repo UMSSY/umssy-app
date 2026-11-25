@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { CompanyAccessRequestsService } from '../services/company-access-requests.service.js';
 import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 
 describe('CompanyAccessRequestsService', () => {
   let service: CompanyAccessRequestsService;
@@ -262,6 +262,94 @@ describe('CompanyAccessRequestsService', () => {
           type: NotificationType.COMPANY_ACCESS_REQUEST_APPROVED,
         }),
       );
+    });
+  });
+
+  describe('approve: resultado real del envío y registros', () => {
+    const pendingRequest = {
+      id: 'req-1',
+      companyName: 'Acme',
+      email: 'acme@test.com',
+      requestCode: 'EMP-2026-0001',
+      status: { title: 'PENDING' },
+    };
+    const approvedRecord = {
+      id: 'req-1',
+      requestCode: 'EMP-2026-0001',
+      approvedCompanyId: 'comp-1',
+      approvedUserId: 'usr-1',
+    };
+    const delivery = (emailStatus: string) => ({
+      inAppCount: 1,
+      pushStatus: 'skipped',
+      emailStatus,
+      deliveries: [],
+    });
+    let logged: string[];
+
+    beforeEach(() => {
+      logged = [];
+      for (const method of ['log', 'warn', 'error', 'debug', 'verbose'] as const) {
+        vi.spyOn(Logger.prototype, method).mockImplementation((message: unknown) => {
+          logged.push(String(message));
+        });
+      }
+      repository.findById.mockResolvedValue(pendingRequest);
+      repository.approveCompanyRequest.mockResolvedValue(approvedRecord);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it.each(['sent', 'partial'])('informa que el código se envió cuando el correo quedó en %s', async (emailStatus) => {
+      notificationsService.notify.mockResolvedValue(delivery(emailStatus));
+
+      const res = await service.approve('req-1', 'admin-1');
+
+      expect(res.activationCodeSent).toBe(true);
+    });
+
+    it.each(['failed', 'skipped'])('informa que el código no se envió cuando el correo quedó en %s', async (emailStatus) => {
+      notificationsService.notify.mockResolvedValue(delivery(emailStatus));
+
+      const res = await service.approve('req-1', 'admin-1');
+
+      expect(res).toMatchObject({ status: 'APPROVED', activationCodeSent: false });
+      expect(repository.approveCompanyRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('conserva la aprobación y responde que no se envió cuando notify lanza un error', async () => {
+      notificationsService.notify.mockRejectedValue(
+        new NotFoundException('NotificationType COMPANY_ACCESS_REQUEST_APPROVED no encontrado en el catálogo'),
+      );
+
+      const res = await service.approve('req-1', 'admin-1');
+
+      expect(repository.approveCompanyRequest).toHaveBeenCalledTimes(1);
+      expect(res).toEqual({
+        id: 'req-1',
+        status: 'APPROVED',
+        approvedCompanyId: 'comp-1',
+        activationCodeSent: false,
+      });
+      expect(logged.join('\n')).toContain('no encontrado en el catálogo');
+    });
+
+    it('registra el error con el identificador de la solicitud y sin el correo ni el código', async () => {
+      notificationsService.notify.mockRejectedValue(new Error('SMTP caído'));
+
+      await service.approve('req-1', 'admin-1');
+
+      const activationCode = String(
+        (notificationsService.notify.mock.calls.at(-1)?.[0] as { payload: { activationCode: string } }).payload
+          .activationCode,
+      );
+      const warning = logged.find((line) => line.includes('SMTP caído')) ?? '';
+      expect(warning).toContain('req-1');
+      expect(warning).toContain('EMP-2026-0001');
+      expect(warning).not.toContain('acme@test.com');
+      expect(warning).not.toContain(activationCode);
     });
   });
 

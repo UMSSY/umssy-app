@@ -279,7 +279,10 @@ export class CompanyAccessRequestsService {
         otp: rawCode,
       },
     );
-    await this.dispatchDecisionNotification('activación', current.email, {
+    const activationCodeSent = await this.dispatchDecisionNotification(
+      'activación',
+      { id: updated.id, requestCode: updated.requestCode },
+      {
       recipientIds: updated.approvedUserId ? [updated.approvedUserId] : [],
       recipientEmails: updated.approvedUserId ? undefined : [current.email],
       actorId: reviewerId,
@@ -292,13 +295,14 @@ export class CompanyAccessRequestsService {
       }),
       actionUrl: `/request-access/activacion-empresa?email=${encodeURIComponent(current.email)}&otp=${encodeURIComponent(rawCode)}`,
       channels: updated.approvedUserId ? ['IN_APP', 'EMAIL'] : ['EMAIL'],
-    });
+      },
+    );
 
     return {
       id: updated.id,
       status: 'APPROVED',
       approvedCompanyId: updated.approvedCompanyId,
-      activationCodeSent: true,
+      activationCodeSent,
     };
   }
 
@@ -344,7 +348,10 @@ export class CompanyAccessRequestsService {
       code: current.requestCode ?? '',
       email: current.email,
     });
-    await this.dispatchDecisionNotification('subsanación', current.email, {
+    await this.dispatchDecisionNotification(
+      'subsanación',
+      { id: current.id, requestCode: current.requestCode },
+      {
       recipientIds: [],
       recipientEmails: [current.email],
       actorId: reviewerId,
@@ -356,7 +363,8 @@ export class CompanyAccessRequestsService {
       }),
       actionUrl: `/request-access/status?code=${encodeURIComponent(current.requestCode ?? '')}&email=${encodeURIComponent(current.email)}`,
       channels: ['EMAIL'],
-    });
+      },
+    );
 
     return updated;
   }
@@ -398,7 +406,10 @@ export class CompanyAccessRequestsService {
       code: current.requestCode ?? '',
       email: current.email,
     });
-    await this.dispatchDecisionNotification('rechazo', current.email, {
+    await this.dispatchDecisionNotification(
+      'rechazo',
+      { id: current.id, requestCode: current.requestCode },
+      {
       recipientIds: [],
       recipientEmails: [current.email],
       actorId: reviewerId,
@@ -410,7 +421,8 @@ export class CompanyAccessRequestsService {
       }),
       actionUrl: `/request-access/status?code=${encodeURIComponent(current.requestCode ?? '')}&email=${encodeURIComponent(current.email)}`,
       channels: ['EMAIL'],
-    });
+      },
+    );
 
     return { id, status: 'REJECTED', rejectionReason: finalReason };
   }
@@ -633,19 +645,21 @@ export class CompanyAccessRequestsService {
 
   private async dispatchDecisionNotification(
     label: string,
-    email: string,
-    request: NotifyRequest,
-  ) {
+    request: { id: string; requestCode: string | null },
+    notification: NotifyRequest,
+  ): Promise<boolean> {
     try {
-      await this.notificationsService.notify(request);
+      const result = await this.notificationsService.notify(notification);
+      return result.emailStatus !== 'failed' && result.emailStatus !== 'skipped';
     } catch (notificationError) {
       this.logger.warn(
-        `No se pudo enviar la notificación de ${label} a ${email}: ${
+        `No se pudo enviar la notificación de ${label} de la solicitud ${request.id} (${request.requestCode ?? 'sin código'}): ${
           notificationError instanceof Error
             ? notificationError.message
             : String(notificationError)
         }`,
       );
+      return false;
     }
   }
 
