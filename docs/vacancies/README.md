@@ -16,7 +16,7 @@ This is a **frontend-only module**: there is no `backend/src/modules/vacancies`.
 | Vacancy detail with conditions, description and required technologies            | Dialog on `/vacancies/[id]` (deep link)                                                  |
 | Entry points to the detail besides the cards                                     | New-vacancy notifications and "Ver vacante" in [applications](../applications/README.md) |
 | Publication and expiry dates of every vacancy                                    | Date badges and detail                                                                   |
-| Apply from the detail                                                            | `JobApplicationAction` from [matching](../matching/README.md)                            |
+| Apply from the detail, or reach Mis postulaciones once applied                   | `JobApplicationAction` from [matching](../matching/README.md)                            |
 
 ## Architecture
 
