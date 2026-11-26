@@ -275,42 +275,46 @@ export function DocumentsCvContent({
         className="hidden"
         onChange={handleFileChange}
       />
-      <div
-        className={
-          guideCallbacks
-            ? 'flex flex-col gap-6'
-            : 'grid grid-cols-1 items-start gap-6 lg:grid-cols-2'
-        }
-      >
-        <div className="flex min-w-0 flex-col gap-6">
-          <CvUploadCard
-            selectId={
-              guideCallbacks ? 'profile-guide-cv-upload-select' : undefined
-            }
-            selectedFile={selectedFile}
-            hasSavedCv={currentCv !== null}
-            isLoading={isLoading}
-            isUploading={isUploading}
-            isBusy={isBusy}
-            uploadProgress={uploadProgress}
-            onSelectFile={openFilePicker}
-            onFileDropped={selectFile}
-            onConfirmUpload={handleConfirmUpload}
-          />
+      <div className="@container/documents">
+        <div
+          className={
+            guideCallbacks
+              ? 'flex flex-col gap-6'
+              : verification
+                ? 'grid min-w-0 items-start gap-6 @min-[56rem]/documents:grid-cols-2'
+                : 'grid grid-cols-1 items-start gap-6 lg:grid-cols-2'
+          }
+        >
+          <div className="flex min-w-0 flex-col gap-6">
+            <CvUploadCard
+              selectId={
+                guideCallbacks ? 'profile-guide-cv-upload-select' : undefined
+              }
+              selectedFile={selectedFile}
+              hasSavedCv={currentCv !== null}
+              isLoading={isLoading}
+              isUploading={isUploading}
+              isBusy={isBusy}
+              uploadProgress={uploadProgress}
+              onSelectFile={openFilePicker}
+              onFileDropped={selectFile}
+              onConfirmUpload={handleConfirmUpload}
+            />
+            {verification ? (
+              savedCvCard
+            ) : guideCallbacks ? null : (
+              <CvGenerateCard />
+            )}
+          </div>
           {verification ? (
+            <div className="flex min-w-0 flex-col gap-6">
+              <CvGenerateCard />
+              {verification}
+            </div>
+          ) : (
             savedCvCard
-          ) : guideCallbacks ? null : (
-            <CvGenerateCard />
           )}
         </div>
-        {verification ? (
-          <div className="flex min-w-0 flex-col gap-6">
-            <CvGenerateCard />
-            {verification}
-          </div>
-        ) : (
-          savedCvCard
-        )}
       </div>
       <ReplaceCvDialog
         file={pendingReplacement}

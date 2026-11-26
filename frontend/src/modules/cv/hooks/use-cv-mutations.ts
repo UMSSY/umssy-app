@@ -1,4 +1,5 @@
 'use client';
+import { DOCUMENT_VERIFICATIONS_QUERY_KEY } from '../constants/document-verification-query.constants';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CV_QUERY_KEY } from '../constants/cv-api.constants';
@@ -17,7 +18,13 @@ export function useCvMutations() {
   const reloadCvs = () =>
     queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY });
   const refreshAfterSave = async () => {
-    await Promise.allSettled([reloadCvs(), invalidateCompleteness()]);
+    await Promise.allSettled([
+      reloadCvs(),
+      invalidateCompleteness(),
+      queryClient.invalidateQueries({
+        queryKey: DOCUMENT_VERIFICATIONS_QUERY_KEY,
+      }),
+    ]);
   };
   const uploadMutation = useMutation({
     mutationFn: (file: File) =>
