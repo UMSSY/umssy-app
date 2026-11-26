@@ -88,7 +88,7 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
     expect(dialog).toHaveTextContent("DevOps Senior");
     expect(dialog).toHaveTextContent("TechBolivia");
     expect(dialog).toHaveTextContent("10/11/2026");
-    expect(dialog).toHaveTextContent("En revisión");
+    expect(dialog).not.toHaveTextContent("En revisión");
   });
 
   it('AC-02.8: replaces the button with "Ya te postulaste" after applying', async () => {
@@ -120,7 +120,30 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
       await screen.findByRole("button", { name: "Ya te postulaste" }),
     ).toBeDisabled();
     expect(screen.getByText(/Postulaste el 10\/11\/2026/)).toBeInTheDocument();
+    expect(screen.queryByText("En revisión")).not.toBeInTheDocument();
     expect(mockedService.apply).not.toHaveBeenCalled();
+  });
+
+  it("links to Mis postulaciones once the person has applied", async () => {
+    mockedService.getMine.mockResolvedValue({
+      hasApplied: true,
+      application: APPLICATION,
+    });
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    expect(
+      await screen.findByRole("link", { name: "Ver mis postulaciones" }),
+    ).toHaveAttribute("href", "/vacancies/my-applications");
+  });
+
+  it("does not link to Mis postulaciones before the person has applied", async () => {
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    await screen.findByRole("button", { name: "Enviar postulación" });
+
+    expect(
+      screen.queryByRole("link", { name: "Ver mis postulaciones" }),
+    ).not.toBeInTheDocument();
   });
 
   it('AC-02.8: shows "Ya te postulaste" when the backend answers 409', async () => {

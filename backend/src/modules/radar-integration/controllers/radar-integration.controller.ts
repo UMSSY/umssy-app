@@ -1,6 +1,7 @@
 import { documentRadarEndpoint } from '../utils/document-radar-endpoint.js';
 import {
   radarResponseSchema,
+  radarSimulationEligibilitySchema,
   cvRescanResponseSchema,
   reviewQueueResponseSchema,
   radarReviewOperationResponseSchema,
@@ -11,6 +12,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -50,6 +52,19 @@ export class RadarIntegrationController {
   me(@CurrentUserId() user: string) {
     return this.svc.myRadar(user);
   }
+  @documentRadarEndpoint({
+    operationId: 'getMyRadarSimulationEligibility',
+    summary: 'Consultar elegibilidad para simulaciones',
+    description:
+      'Devuelve habilidades aprobadas y habilidades pendientes elegibles para la bonificaci\u00f3n de relevancia.',
+    response: radarSimulationEligibilitySchema,
+  })
+  @Header('Cache-Control', 'no-store')
+  @Get('profile/me/radar/simulation-eligibility')
+  simulationEligibility(@CurrentUserId() user: string) {
+    return this.svc.simulationEligibility(user);
+  }
+
   @documentRadarEndpoint({
     operationId: 'getMyHistoricalRadar',
     summary: 'Consultar publicacion historica',

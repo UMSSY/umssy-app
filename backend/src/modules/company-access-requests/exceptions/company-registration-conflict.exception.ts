@@ -1,6 +1,10 @@
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
 
-export type CompanyConflictField = 'email' | 'companyName' | 'activeRequest';
+export type CompanyConflictField =
+  | 'email'
+  | 'companyName'
+  | 'activeRequest'
+  | 'username';
 
 export class CompanyRegistrationConflictException extends DomainException {
   constructor(

@@ -29,7 +29,7 @@ export function GoogleAccessDeniedStep({
           type="button"
           variant="institutional"
           onClick={onRetryAnotherAccount}
-          className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+          className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase"
         >
           PROBAR CON OTRA CUENTA →
         </Button>

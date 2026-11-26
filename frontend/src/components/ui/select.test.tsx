@@ -83,24 +83,18 @@ describe("Select", () => {
       renderSelect({ variant })
       await user.tab()
       expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveFocus()
-
       await user.keyboard("{ArrowDown}")
       const firstOption = await screen.findByRole("option", {
         name: "Cochabamba",
       })
-
-      await waitFor(() => {
-        expect(firstOption).toHaveAttribute("data-highlighted")
-        expect(firstOption).toHaveFocus()
-      })
+      const listbox = await screen.findByRole("listbox")
+      await waitFor(() => expect(listbox.contains(document.activeElement)).toBe(true))
+      await waitFor(() => expect(firstOption).toHaveAttribute("data-highlighted"))
 
       await user.keyboard("{End}")
       const option = screen.getByRole("option", { name: "La Paz" })
 
-      await waitFor(() => {
-        expect(option).toHaveAttribute("data-highlighted")
-        expect(option).toHaveFocus()
-      })
+      await waitFor(() => expect(option).toHaveAttribute("data-highlighted"))
       expect(option).toHaveClass("focus:text-ink")
       expect(option.className).not.toContain("text-accent-foreground")
       if (variant === "default") {

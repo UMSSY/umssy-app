@@ -72,10 +72,27 @@ sequenceDiagram
 
 Successful JSON responses use the shared API envelope. The cover endpoint returns an image stream.
 
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Events API"]
+  API --> Service["Event service"]
+  Service --> Data[("Events")]
+  Service --> Related[("Categories and sessions")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
+## Action styling
+
+Public navigation and enrollment use non-destructive action colors. Cancelling an existing registration uses the destructive treatment because it invokes the registration DELETE endpoint.
+
 ## Sprint History
 
 ### Sprint 3
 
+- The landing page and public workshop list share a card grid with one column on phones, two from the small breakpoint and three from the large breakpoint. The public list enables workshop covers. On narrow screens, the detail page stacks the date, time, location and sign-in action.
 - Proposal expiry gained a periodic five-minute backend job independent of catalogue reads.
 - Proposals gained multiple nonoverlapping sessions, while the event's original date and time columns retain the first session. Catalogue ordering gained popularity and profile recommendations.
 - The catalogue gained the `Propuestas vencidas` filter backed by `statusId`. Without a status filter it shows published workshops and, with `includeProposals=true`, proposals still in voting; expired proposals stay outside the general catalogue.

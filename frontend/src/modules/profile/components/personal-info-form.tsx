@@ -91,11 +91,11 @@ export function PersonalInfoForm({
 
   return (
     <div className="rounded-lg border border-border bg-surface">
-      <div className="border-b border-border p-6 lg:px-8">
+      <div className="border-b border-border p-4 sm:p-6 lg:px-8">
       <ProfilePhotoField {...photo} idPrefix={idPrefix} />
 
       </div>
-      <form onSubmit={handleSubmit} noValidate className="px-6 pt-6 lg:px-8">
+      <form onSubmit={handleSubmit} noValidate className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
         <FormSection title="Identidad" description="Tu nombre en la comunidad.">
           <div className="grid gap-5 md:grid-cols-2">
           <FormField id={fieldIds.firstName} label="Nombres" isRequired error={errors.firstName}>
@@ -128,7 +128,7 @@ export function PersonalInfoForm({
           </FormField>
           </div>
         </FormSection>
-        <FormSection title="Contacto" description="Dónde pueden encontrarte.">
+        <FormSection title="Contacto" description="Dónde pueden encontrarte." className="[&>div]:grid-cols-1 sm:[&>div]:grid-cols-3 [&>div>div]:col-span-1 sm:[&>div>div]:col-span-2">
           <div className="grid gap-5 md:grid-cols-2">
           <FormField id={fieldIds.cityId} label="Ciudad de residencia" isRequired error={errors.cityId}>
             <Select
@@ -174,41 +174,44 @@ export function PersonalInfoForm({
               {PHONE_HINT}
             </p>
           </FormField>
-          <FormField
-            id={fieldIds.personalEmail}
-            label="Correo personal"
-            isRequired
-            error={errors.personalEmail}
-          >
-            <Input
+          <div className="grid min-w-0 gap-3 md:col-span-2 @2xl/form-section:grid-cols-2">
+            <FormField
               id={fieldIds.personalEmail}
-              name="personalEmail"
-              type="email"
-              autoComplete="email"
-              placeholder="nombre@correo.com"
-              value={values.personalEmail}
-              disabled={isSaving}
-              onChange={handleChange}
-              className="h-11"
-              {...getFieldErrorProps(fieldIds.personalEmail, errors.personalEmail)}
-            />
-          </FormField>
-          <SocialAccountConnectButtons />
+              label="Correo personal"
+              isRequired
+              error={errors.personalEmail}
+            >
+              <Input
+                id={fieldIds.personalEmail}
+                name="personalEmail"
+                type="email"
+                autoComplete="email"
+                placeholder="nombre@correo.com"
+                value={values.personalEmail}
+                disabled={isSaving}
+                onChange={handleChange}
+                className="h-11"
+                {...getFieldErrorProps(fieldIds.personalEmail, errors.personalEmail)}
+              />
+            </FormField>
+            <SocialAccountConnectButtons className="@2xl/form-section:pt-7" />
+          </div>
           </div>
         </FormSection>
-        <div className="-mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
+        <div className="-mx-4 flex flex-col gap-4 rounded-b-lg border-t border-border bg-surface p-4 sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5 lg:-mx-8 lg:px-8">
           <p className="text-sm text-text-secondary">* Campos obligatorios</p>
-          <div className="flex gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-end">
             <Button
               type="button"
-              variant="outline"
-              className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+              variant="cancel"
+              size="lg"
+              className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
               disabled={isSaving}
               onClick={handleCancel}
             >
               Cancelar
             </Button>
-            <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+            <Button type="submit" className={cn("h-10 w-full bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover sm:w-auto sm:min-w-44")} disabled={isSaving}>
               {isSaving ? "Guardando..." : saveLabel}
             </Button>
           </div>

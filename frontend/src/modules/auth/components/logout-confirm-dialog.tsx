@@ -20,7 +20,7 @@ function LogoutConfirmAction() {
     <AlertDialogAction
       type="button"
       onClick={handleLogout}
-      className="h-11 rounded-md bg-critical-action px-5 text-sm font-semibold text-critical-action-foreground hover:bg-critical-action/90"
+      className="h-11 px-5"
     >
       Cerrar sesión
     </AlertDialogAction>

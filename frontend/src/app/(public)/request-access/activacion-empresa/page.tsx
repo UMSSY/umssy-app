@@ -11,7 +11,7 @@ export default function ActivacionEmpresaPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex min-h-dvh items-center justify-center bg-background">
           <LoaderCircle className="size-8 animate-spin text-primary" />
         </div>
       }

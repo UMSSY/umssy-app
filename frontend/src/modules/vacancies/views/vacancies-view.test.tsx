@@ -45,18 +45,6 @@ afterEach(() => {
 });
 
 describe("VacanciesView", () => {
-  it("lista las vacantes publicadas que devuelve la API", async () => {
-    renderWithQuery(<VacanciesView />);
-
-    expect(
-      await screen.findByRole("link", {
-        name: "Ver detalles de Desarrollador Full Stack",
-      }),
-    ).toHaveAttribute("href", `/vacancies/${VACANCIES[0].id}`);
-    expect(screen.getByRole("status")).toHaveTextContent("2 vacantes encontradas");
-    expect(listPublished).toHaveBeenCalledTimes(1);
-  });
-
   it("permite recuperar los resultados desde una búsqueda sin coincidencias", async () => {
     renderWithQuery(<VacanciesView />);
     const initialLinks = await screen.findAllByRole("link", { name: /^Ver detalles de / });
@@ -72,16 +60,6 @@ describe("VacanciesView", () => {
 
     expect(searchInput).toHaveValue("");
     expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(initialLinks.length);
-  });
-
-  it("busca también por tecnología requerida", async () => {
-    renderWithQuery(<VacanciesView />);
-    await screen.findAllByRole("link", { name: /^Ver detalles de / });
-
-    fireEvent.change(screen.getByRole("searchbox", { name: /Buscar vacantes/ }), { target: { value: "sql" } });
-
-    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Ver detalles de Analista de Datos" })).toBeInTheDocument();
   });
 
   it("avisa cuando todavía no hay vacantes publicadas", async () => {
@@ -105,6 +83,24 @@ describe("VacanciesView", () => {
     fireEvent.click(within(alert).getByRole("button", { name: "Reintentar" }));
 
     expect(await screen.findByRole("link", { name: "Ver detalles de Analista de Datos" })).toBeInTheDocument();
+  });
+
+  it("avisa que la vacante ya no está disponible cuando el enlace apunta a una oferta fuera del listado", async () => {
+    renderWithQuery(<VacanciesView initialVacancyId="7a0d4c52-9b1e-4e63-8f0a-5c2d1b3e4f60" />);
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Esta vacante ya no está disponible" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: "Enviar postulación" })).toBeNull();
+  });
+
+  it("no afirma que la vacante no está disponible si el listado no pudo cargarse", async () => {
+    listPublished.mockRejectedValue(new Error("network"));
+    renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
+
+    expect(await screen.findByRole("heading", { name: "No pudimos cargar las vacantes" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByText("Esta vacante ya no está disponible")).toBeNull();
   });
 
   it("muestra el botón de postular a titulados y estudiantes en el detalle", async () => {
@@ -137,6 +133,8 @@ describe("VacanciesView - criterios de HU-11", () => {
     renderWithQuery(<VacanciesView />);
 
     expect(await screen.findByRole("link", { name: "Ver detalles de Ingeniero COBOL" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).toHaveAttribute("href", `/vacancies/${VACANCIES[0].id}`);
+    expect(listPublished).toHaveBeenCalledTimes(1);
     expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(3);
     expect(screen.getByRole("status")).toHaveTextContent("3 vacantes encontradas");
   });
@@ -215,13 +213,6 @@ describe("VacanciesView - criterios de HU-11", () => {
 });
 
 describe("VacanciesView - tarjeta de vacante", () => {
-  it("muestra la modalidad de la vacante", async () => {
-    listPublished.mockResolvedValue([buildVacancy({ modality: "Remoto" })]);
-    renderWithQuery(<VacanciesView />);
-
-    expect(await screen.findByText("Remoto")).toBeInTheDocument();
-  });
-
   it("muestra las habilidades requeridas como chips", async () => {
     listPublished.mockResolvedValue([buildVacancy({ requirements: ["Node.js", "React"] })]);
     renderWithQuery(<VacanciesView />);

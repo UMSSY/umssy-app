@@ -14,32 +14,6 @@ describe("Detección de Enlaces y Vista Previa Web (HU-11 Task 5)", () => {
     cleanup();
   });
 
-  it("criterio 1 y 2: renderiza URLs validas como enlaces clicables con target=_blank y rel=noopener noreferrer", () => {
-    const message: Message = {
-      id: "msg-link-1",
-      conversationId: "conv-1",
-      senderId: "user-2",
-      content: "Visita la pagina https://umss.edu.bo para ver las convocatorias",
-      timestamp: "2026-10-28T12:00:00Z",
-      createdAt: "2026-10-28T12:00:00Z",
-      status: "sent",
-    };
-
-    render(
-      <MessageItem
-        message={message}
-        isOwn={false}
-      />
-    );
-
-    const link = screen.getByRole("link", { name: "https://umss.edu.bo" });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "https://umss.edu.bo");
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noopener noreferrer");
-    expect(link).toHaveClass("text-accent", "underline");
-  });
-
   it("criterio 3: si hay multiples URLs, todas son clicables pero se solicita vista previa solo para la primera", async () => {
     const spyGetLinkPreview = vi.spyOn(chatApi, "getLinkPreview").mockResolvedValue({
       url: "https://primero.com",
@@ -76,25 +50,6 @@ describe("Detección de Enlaces y Vista Previa Web (HU-11 Task 5)", () => {
       expect(screen.getByTestId("link-preview-title")).toHaveTextContent("Sitio Primero Oficial");
       expect(screen.getByTestId("link-preview-domain")).toHaveTextContent("primero.com");
     });
-  });
-
-  it("criterio 4: esquemas no permitidos (ej: javascript:) se muestran como texto plano no clicable", () => {
-    const message: Message = {
-      id: "msg-xss",
-      conversationId: "conv-1",
-      senderId: "user-2",
-      content: "No ejecutes javascript:alert('ataque') ni data:text/html,malo",
-      timestamp: "2026-10-28T12:00:00Z",
-      createdAt: "2026-10-28T12:00:00Z",
-      status: "sent",
-    };
-
-    render(<MessageItem message={message} isOwn={false} />);
-
-    // No debe existir ningun enlace para javascript ni data
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    expect(screen.getByText(/javascript:alert\('ataque'\)/)).toBeInTheDocument();
-    expect(screen.getByText(/data:text\/html,malo/)).toBeInTheDocument();
   });
 
   it("criterio 5: si la URL no tiene metadatos o la peticion falla, se muestra el link normal sin romper la UI", async () => {

@@ -63,6 +63,17 @@ export const jobOffersService = {
     return response.data.data;
   },
 
+    close: async (
+    companyId: string,
+    jobOfferId: string,
+    ): Promise<JobOfferDetailsResponse> => {
+      const response = await apiClient.patch<ApiResponse<JobOfferDetailsResponse>>(
+        `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}/close`,
+      );
+
+      return response.data.data;
+    },
+
   remove: async (companyId: string, jobOfferId: string): Promise<void> => {
     await apiClient.delete(`${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`);
   },

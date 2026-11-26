@@ -4,6 +4,8 @@ import { Injectable } from '@nestjs/common';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
+  JobOfferExpiryInPastException,
+  JobOfferNotClosableException,
   JobOfferNotFoundException,
   JobOfferNotReopenableException,
 } from '../exceptions/index.js';
@@ -24,6 +26,7 @@ import type {
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
+import { JobOfferNotificationsService } from './job-offer-notifications.service.js';
 import { JobOfferSkillsService } from './job-offer-skills.service.js';
 
 @Injectable()
@@ -33,6 +36,7 @@ export class JobOffersService {
     private readonly jobOfferSkillsService: JobOfferSkillsService,
     private readonly jobOfferMapper: JobOfferMapper,
     private readonly matchSource: JobOfferMatchRepository,
+    private readonly jobOfferNotifications: JobOfferNotificationsService,
   ) {}
 
   findPublishedMatchById(id: string, now: Date) {
@@ -42,10 +46,11 @@ export class JobOffersService {
     return this.matchSource.findPublished(now);
   }
 
-  async create(
+   async create(
     companyId: string,
     request: CreateJobOfferRequest,
   ): Promise<JobOfferCreatedResponse> {
+    const expiresAt = this.parseExpiresAt(request.expiresAt, new Date());
     await this.ensureCompanyExists(companyId);
     await this.jobOfferSkillsService.validateSkillIds(request.skillIds);
 
@@ -65,10 +70,28 @@ export class JobOffersService {
       modalityId,
       contractTypeId,
       statusId,
+      expiresAt,
       ...this.toOfferFields(request),
     });
 
+    void this.jobOfferNotifications.notifyPublished(record.id);
+
     return this.jobOfferMapper.toCreatedResponse(record);
+  }
+
+  async closeExpiredOffers(now: Date = new Date()): Promise<number> {
+    const [publishedStatusId, closedStatusId] = await Promise.all([
+      this.jobOffersRepository.findStatusId(JobOfferStatus.PUBLISHED),
+      this.jobOffersRepository.findStatusId(JobOfferStatus.CLOSED),
+    ]);
+    if (!publishedStatusId || !closedStatusId)
+      throw new JobOfferCatalogNotFoundException('estado');
+
+    return this.jobOffersRepository.closeExpired(
+      publishedStatusId,
+      closedStatusId,
+      now,
+    );
   }
 
   async listPublished(): Promise<PublishedJobOfferResponse[]> {
@@ -163,6 +186,42 @@ export class JobOffersService {
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
   }
 
+  async close(
+  companyId: string,
+  jobOfferId: string,
+  ): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+
+    const existing = await this.jobOffersRepository.findByCompanyAndId(
+      companyId,
+      jobOfferId,
+    );
+
+    if (!existing) {
+      throw new JobOfferNotFoundException();
+    }
+
+    if (existing.status.title !== JobOfferStatus.PUBLISHED) {
+      throw new JobOfferNotClosableException();
+    }
+
+    const closedStatusId = await this.jobOffersRepository.findStatusId(
+      JobOfferStatus.CLOSED,
+    );
+
+    if (!closedStatusId) {
+      throw new JobOfferCatalogNotFoundException('estado');
+    }
+
+    const record = await this.jobOffersRepository.closePublished(
+      companyId,
+      jobOfferId,
+      closedStatusId,
+    );
+
+    return this.jobOfferMapper.toResponse(record);
+  }
+
   async reopen(
     companyId: string,
     jobOfferId: string,
@@ -181,10 +240,16 @@ export class JobOffersService {
     );
     if (!statusId) throw new JobOfferCatalogNotFoundException('estado');
 
+    const now = new Date();
+    const hasExpired =
+      existing.expiresAt !== null &&
+      existing.expiresAt.getTime() <= now.getTime();
+
     const record = await this.jobOffersRepository.reopen(
       jobOfferId,
       statusId,
-      new Date(),
+      now,
+      hasExpired,
     );
     return this.jobOfferMapper.toResponse(record);
   }
@@ -250,6 +315,16 @@ export class JobOffersService {
       locationUrl: request.locationUrl,
       skillIds: request.skillIds,
     };
+  }
+  private parseExpiresAt(
+    expiresAt: string | null | undefined,
+    now: Date,
+  ): Date | null {
+    if (!expiresAt) return null;
+    const date = new Date(expiresAt);
+    if (date.getTime() <= now.getTime())
+      throw new JobOfferExpiryInPastException();
+    return date;
   }
 
   private async ensureCompanyExists(companyId: string): Promise<void> {

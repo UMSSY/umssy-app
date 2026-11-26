@@ -30,9 +30,12 @@ describe("VacancyDetailDialog - modalidad y ubicación", () => {
     expect(screen.getByText("Híbrido")).toBeInTheDocument();
   });
 
-  it("avisa cuando la vacante no existe", () => {
+  it("avisa cuando la vacante ya no está disponible", () => {
     render(<VacancyDetailDialog vacancy={null} onClose={vi.fn()} />);
 
-    expect(screen.getByText("Vacante no encontrada")).toBeInTheDocument();
+    expect(screen.getByText("Esta vacante ya no está disponible")).toBeInTheDocument();
+    expect(
+      screen.getByText("Pudo haber vencido, haberse cerrado o haber sido retirada por la empresa. Puedes explorar otras vacantes."),
+    ).toBeInTheDocument();
   });
 });

@@ -79,7 +79,7 @@ export function ForgotPasswordVerifyStep({
           type="submit"
           variant="institutional"
           disabled={isPending || isResending || Boolean(verificationRestriction) || otpCode.length !== 6 || countdown === 0}
-          className="mt-6 h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
+          className="mt-6 h-12 w-full text-base font-extrabold tracking-wide uppercase"
         >
           {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
           {isPending ? "Verificando..." : "VERIFICAR CÓDIGO →"}

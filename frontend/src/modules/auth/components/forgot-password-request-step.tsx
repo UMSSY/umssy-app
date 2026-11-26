@@ -70,7 +70,7 @@ export function ForgotPasswordRequestStep({
           type="submit"
           variant="institutional"
           disabled={isPending || Boolean(restriction)}
-          className="h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
+          className="h-12 w-full text-base font-extrabold tracking-wide uppercase"
         >
           {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
           {isPending ? "Enviando..." : "ENVIAR CÓDIGO →"}

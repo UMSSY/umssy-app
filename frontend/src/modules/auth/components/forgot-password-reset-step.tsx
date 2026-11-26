@@ -76,7 +76,7 @@ export function ForgotPasswordResetStep({
           type="submit"
           variant="institutional"
           disabled={isPending || Boolean(restriction) || !newPassword || !confirmPassword}
-          className="mt-8 h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
+          className="mt-8 h-12 w-full text-base font-extrabold tracking-wide uppercase"
         >
           {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
           {isPending ? "Guardando..." : "GUARDAR CONTRASEÑA →"}

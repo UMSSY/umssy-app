@@ -43,6 +43,51 @@ describe("ApplicationActions", () => {
     expect(screen.queryByRole("button", { name: "Retirar" })).not.toBeInTheDocument();
   });
 
+  it.each<ApplicationStatus>(["En revisión", "Entrevista", "Aceptada", "No seleccionado", "Retirada"])(
+    "links to the vacancy when the status is %s",
+    (status) => {
+      renderActions(status);
+
+      expect(screen.getByRole("link", { name: /^Ver vacante/ })).toHaveAttribute("href", "/vacancies/offer-1");
+    },
+  );
+
+  it("does not offer the vacancy link when the vacancy is no longer available", () => {
+    const application = buildApplication({ vacancyAvailable: false });
+    render(
+      <ApplicationActions
+        application={application}
+        withdrawingId={null}
+        contactingId={null}
+        onWithdraw={vi.fn()}
+        onContact={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("link", { name: /^Ver vacante/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Contactar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retirar" })).toBeEnabled();
+  });
+
+  it("does not offer to apply again when the vacancy of a withdrawn application is no longer available", () => {
+    const application = buildApplication({ status: "Retirada", vacancyAvailable: false });
+    render(
+      <ApplicationActions
+        application={application}
+        withdrawingId={null}
+        contactingId={null}
+        reactivatingId={null}
+        onWithdraw={vi.fn()}
+        onContact={vi.fn()}
+        onReactivate={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Volver a postular" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retirar" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Contactar" })).toBeInTheDocument();
+  });
+
   it("keeps the withdraw button of a withdrawn application when there is no way to reactivate it", () => {
     renderActions("Retirada", false);
 

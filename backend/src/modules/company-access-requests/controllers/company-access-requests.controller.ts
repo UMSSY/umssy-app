@@ -135,7 +135,8 @@ export class CompanyAccessRequestsController {
   })
   @ApiBadRequestResponse({ description: 'Datos de entrada inválidos.' })
   @ApiConflictResponse({
-    description: 'Ya existe una empresa, cuenta o solicitud activa equivalente.',
+    description:
+      'Conflicto de registro (COMPANY_REGISTRATION_CONFLICT). `data.field` indica el motivo: `companyName` (empresa ya registrada), `email` (correo ya usado), `activeRequest` (solicitud pendiente, en revisión, observada o aprobada con el mismo nombre o correo) o `username` (nombre de usuario no disponible, sin distinguir mayúsculas ni espacios sobrantes).',
   })
   create(
     @Body(new ZodValidationPipe(createCompanyAccessRequestSchema))
@@ -573,14 +574,20 @@ export class CompanyAccessRequestsController {
   })
   @ApiCompanyRequestUuidParam()
   @ApiOkResponse({
-    description: 'Solicitud aprobada y código de activación emitido.',
+    description:
+      'Solicitud aprobada y código de activación emitido. La aprobación queda guardada aunque el correo falle: activationCodeSent indica si el correo con el código se envió.',
     schema: {
       type: 'object',
       properties: {
         id: { type: 'string', format: 'uuid' },
         status: { type: 'string', example: 'APPROVED' },
         approvedCompanyId: { type: 'string', format: 'uuid', nullable: true },
-        activationCodeSent: { type: 'boolean', example: true },
+        activationCodeSent: {
+          type: 'boolean',
+          example: true,
+          description:
+            'true si el correo con el código de activación se envió; false si el envío falló o se omitió.',
+        },
       },
     },
   })

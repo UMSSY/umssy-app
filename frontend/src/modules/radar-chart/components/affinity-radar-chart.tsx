@@ -22,13 +22,6 @@ import { RadarCard } from './radar-card';
 const LEVEL_TICK_COUNT = 6;
 const SERIES_LABEL = 'Puntaje de afinidad del perfil';
 
-function getResponsiveRadius(width: number): string {
-  if (width < 320) return '42%';
-  if (width < 380) return '48%';
-  if (width < 460) return '54%';
-  return '68%';
-}
-
 export function AffinityRadarChart({
   areas,
   projectedScores,
@@ -41,6 +34,7 @@ export function AffinityRadarChart({
   average,
   onAreaClick,
   className,
+  plotClassName,
 }: AffinityRadarChartProps) {
   const titleId = useId();
   const comparisonId = useId();
@@ -63,7 +57,7 @@ export function AffinityRadarChart({
         <div className="min-w-0">
           <h2
             id={titleId}
-            className="font-heading text-lg font-semibold tracking-tight text-ink"
+            className="text-base font-medium text-accent"
           >
             Desglose vectorial de afinidad
           </h2>
@@ -71,6 +65,11 @@ export function AffinityRadarChart({
             {areas.length} áreas de competencias verificadas
           </p>
         </div>
+        {hasAreas && average === undefined && onAreaClick ? (
+          <p className="hidden shrink-0 rounded-sm bg-interaction px-2.5 py-2 text-[11px] text-text-secondary sm:block">
+            Selecciona un área del radar
+          </p>
+        ) : null}
         {hasAreas && average !== undefined && (
           <div className="shrink-0 text-right">
             <p className="font-heading text-3xl leading-none font-semibold text-accent tabular-nums">
@@ -84,8 +83,8 @@ export function AffinityRadarChart({
       </div>
 
       {hasAreas && previousScores && onComparisonChange ? (
-        <div className="mt-4 flex min-h-12 items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
-          <div className="min-w-0">
+        <div className="order-last mt-4 flex items-center justify-between gap-4 border-t border-border pt-3">
+          <div>
             <Label
               htmlFor={comparisonId}
               className="cursor-pointer text-sm font-semibold text-ink"
@@ -113,11 +112,13 @@ export function AffinityRadarChart({
 
       {hasAreas ? (
         <>
-          <div className="mt-2 h-[310px] w-full min-w-0 sm:h-[440px] [&_.recharts-surface]:outline-none">
+          <div className={cn("mt-2 h-[360px] w-full sm:h-[440px] [&_.recharts-surface]:overflow-visible [&_.recharts-surface]:outline-none", plotClassName)}>
             <ResponsiveContainer
               width="100%"
               height="100%"
-              onResize={(width) => setRadius(getResponsiveRadius(width))}
+              onResize={(width) =>
+                setRadius(width < 280 ? '30%' : width < 360 ? '50%' : width < 600 ? '68%' : '89%')
+              }
             >
               <RadarChart
                 data={areas.map((area) => ({
@@ -139,7 +140,7 @@ export function AffinityRadarChart({
                       area={areas[index]}
                       highlighted={areas[index].id === highlightedArea}
                       x={x}
-                      y={y}
+                      y={areas[index].id === 'desarrollo' ? Number(y) - 10 : y}
                       textAnchor={textAnchor}
                       verticalAnchor={verticalAnchor}
                       onAreaClick={onAreaClick}
@@ -175,7 +176,7 @@ export function AffinityRadarChart({
                   name={SERIES_LABEL}
                   dataKey="score"
                   stroke="var(--color-accent)"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   isAnimationActive={false}
                   fill="var(--color-accent)"
                   fillOpacity={0.14}
@@ -185,7 +186,7 @@ export function AffinityRadarChart({
                       area={areas[index]}
                       className={
                         areas[index].id === highlightedArea
-                          ? 'stroke-accent'
+                          ? 'stroke-gold'
                           : undefined
                       }
                       cx={cx}

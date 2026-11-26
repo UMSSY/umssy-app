@@ -157,13 +157,6 @@ export class ChatGateway
       }
 
       await client.join(body.conversationId);
-      this.chatVisibilityService?.setConversationVisibility(
-        user.id,
-        client.id,
-        body.conversationId,
-        true,
-        true,
-      );
       return { ok: true };
     } catch (error) {
       this.logger.error(

@@ -63,6 +63,24 @@ afterEach(() => {
 });
 
 describe('DocumentReviewPanel: recuperación de decisiones', () => {
+  it('devuelve el foco al cancelar la confirmación con Escape', async () => {
+    vi.spyOn(verificationApi, 'list').mockResolvedValue([row]);
+    const decide = vi.spyOn(radarIntegrationApi, 'documentDecision');
+    const user = userEvent.setup();
+    render(<DocumentReviewPanel />);
+
+    const opener = await screen.findByRole('button', { name: 'Aprobar documento' });
+    await user.click(opener);
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(opener).toHaveFocus();
+    });
+    expect(decide).not.toHaveBeenCalled();
+  });
+
   it('confirma normalmente una decisión', async () => {
     vi.spyOn(verificationApi, 'list').mockResolvedValue([row]);
 

@@ -71,6 +71,21 @@ The create (`POST /company-access-requests`) and update (`PATCH /company-access-
 | `username` | 4 to 20 characters, starts with a letter, only letters, digits and underscore |
 | Logo (`POST /:id/logo`) | PNG or JPG only, up to 2 MB; the file signature must match (a PDF renamed to `.png` is rejected) |
 
+## Name Uniqueness Checks
+
+`POST /company-access-requests` rejects a draft with `409 COMPANY_REGISTRATION_CONFLICT` when the company name or the username is already taken. Comparisons ignore letter case, leading and trailing spaces and repeated inner spaces (`normalizeRegistrationName`); accents are kept.
+
+| `data.field` | What is compared | Blocks when |
+| --- | --- | --- |
+| `companyName` | `companies.title` | any match |
+| `activeRequest` | `company_access_requests.company_name` or the request email | the other request is `PENDING`, `IN_REVIEW`, `OBSERVED` or `APPROVED` |
+| `email` | `users.email` | any match |
+| `username` | `users.first_name` of accounts with the `empresa` role (not soft-deleted), and `company_access_requests.username` | the request is `PENDING`, `IN_REVIEW`, `OBSERVED` or `APPROVED` |
+
+`DRAFT`, `REJECTED` and cancelled requests do not hold a name. The approved account stores the username in `users.first_name` and the company name in `users.last_name`; activation only sets the password and `is_active`, so the checks run when the draft is created, not at activation.
+
+**Known limit:** there is no unique index (no schema or migration change was approved), so the check is not atomic. Two simultaneous requests with the same name or username can both pass it. Reviewers should keep checking duplicates when resolving a request.
+
 ## Sprint History
 
 ### Sprint 3

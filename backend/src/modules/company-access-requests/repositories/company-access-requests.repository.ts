@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { NAME_BLOCKING_REQUEST_STATUSES, COMPANY_ROLE_NAME } from '../constants/registration-name-uniqueness.constants.js';
+import { normalizeRegistrationName } from '../utils/normalize-registration-name.js';
 import type {
   CreateCompanyAccessRequestDto,
   ListCompanyAccessRequestsQuery,
@@ -65,29 +67,52 @@ export class CompanyAccessRequestsRepository {
     });
   }
 
-  async findDuplicates(companyName: string, email: string) {
-    const [existingCompany, existingUser, activeRequest] = await Promise.all([
-      this.prisma.company.findFirst({
-        where: { title: { equals: companyName, mode: 'insensitive' } },
-        select: { id: true },
-      }),
+  async findDuplicates(companyName: string, email: string, username: string) {
+    const normalizedCompanyName = normalizeRegistrationName(companyName);
+    const normalizedUsername = normalizeRegistrationName(username);
+    const blockingStatuses = [...NAME_BLOCKING_REQUEST_STATUSES];
+
+    const [companies, existingUser, requests, usernames] = await Promise.all([
+      this.prisma.$queryRaw<Array<{ id: string }>>`
+        SELECT c.id
+        FROM companies c
+        WHERE lower(btrim(regexp_replace(c.title, '\\s+', ' ', 'g'))) = ${normalizedCompanyName}
+        LIMIT 1`,
       this.prisma.user.findUnique({
         where: { email },
         select: { id: true },
       }),
-      this.prisma.companyAccessRequest.findFirst({
-        where: {
-          status: { title: { in: ['PENDING', 'IN_REVIEW', 'APPROVED'] } },
-          OR: [
-            { companyName: { equals: companyName, mode: 'insensitive' } },
-            { email },
-          ],
-        },
-        select: { companyName: true, email: true },
-      }),
+      this.prisma.$queryRaw<Array<{ companyName: string; email: string }>>`
+        SELECT r.company_name AS "companyName", r.email
+        FROM company_access_requests r
+        JOIN access_request_statuses s ON s.id = r.status_id
+        WHERE s.title = ANY(${blockingStatuses}::text[])
+          AND (
+            lower(btrim(regexp_replace(r.company_name, '\\s+', ' ', 'g'))) = ${normalizedCompanyName}
+            OR r.email = ${email}
+          )
+        LIMIT 1`,
+      this.prisma.$queryRaw<Array<{ source: string }>>`
+        SELECT 'user' AS source
+        FROM users u
+        JOIN user_roles ur ON ur.user_id = u.id AND ur.deleted_at IS NULL
+        JOIN roles ro ON ro.id = ur.role_id AND ro.name = ${COMPANY_ROLE_NAME}
+        WHERE lower(btrim(regexp_replace(u.first_name, '\\s+', ' ', 'g'))) = ${normalizedUsername}
+        UNION ALL
+        SELECT 'request' AS source
+        FROM company_access_requests r
+        JOIN access_request_statuses s ON s.id = r.status_id
+        WHERE s.title = ANY(${blockingStatuses}::text[])
+          AND lower(btrim(regexp_replace(r.username, '\\s+', ' ', 'g'))) = ${normalizedUsername}
+        LIMIT 1`,
     ]);
 
-    return { existingCompany, existingUser, activeRequest };
+    return {
+      existingCompany: companies[0] ?? null,
+      existingUser,
+      activeRequest: requests[0] ?? null,
+      existingUsername: usernames[0] ?? null,
+    };
   }
 
   findById(id: string) {

@@ -18,6 +18,16 @@ const orientationTypes = [
 ];
 
 describe("MentorFiltersBar", () => {
+  it("conserva la selección al usar chips y permite volver a todas las áreas", async () => {
+    const onAreaChange = vi.fn();
+    const user = userEvent.setup();
+    render(<MentorFiltersBar areaAsChips area="Backend" orientation="" technicalAreas={technicalAreas} orientationTypes={orientationTypes} onAreaChange={onAreaChange} onOrientationChange={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Backend" })).toHaveAttribute("aria-pressed", "true");
+    await user.click(screen.getByRole("button", { name: "Todas las áreas" }));
+    expect(onAreaChange).toHaveBeenLastCalledWith("");
+    await user.click(screen.getByRole("button", { name: "Backend" }));
+    expect(onAreaChange).toHaveBeenLastCalledWith("Backend");
+  });
   it("permite seleccionar un área técnica", async () => {
     const onAreaChange = vi.fn();
     const user = userEvent.setup();

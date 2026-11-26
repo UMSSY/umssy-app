@@ -15,7 +15,7 @@ export type NotificationPayloadMap = {
   [NotificationType.SURVEY_CLOSING_SOON]: { surveyTitle: string; closesAtFormatted: string; responsesCount: number };
   [NotificationType.SURVEY_CLOSED]: { surveyTitle: string; closesAtFormatted: string; responsesCount: number };
   [NotificationType.SURVEY_VARIATION_ALERT]: { surveyTitle: string; threshold: number; summaryText: string };
-  [NotificationType.APPLICATION_STATUS_CHANGED]: { vacancyTitle: string; companyName: string; newStatus: string };
+  [NotificationType.JOB_OFFER_PUBLISHED]: { jobTitle: string; companyName: string };
   [NotificationType.NEW_JOB_APPLICANT]: { jobTitle: string; applicantName: string; applicantCount: number };
   [NotificationType.EVENT_STARTING_SOON]: { eventName: string; time: string };
   [NotificationType.ACCESS_REQUEST_APPROVED]: { studentName: string };
@@ -37,5 +37,10 @@ export type NotificationPayloadMap = {
     requestCode: string;
     reason: string;
     requestStatusUrl: string;
+  };
+  [NotificationType.APPLICATION_STATUS_CHANGED]: {
+    vacancyTitle: string;
+    companyName: string;
+    newStatus: string;
   };
 };

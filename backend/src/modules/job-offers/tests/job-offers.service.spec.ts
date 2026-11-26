@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
+  JobOfferExpiryInPastException,
   JobOfferNotFoundException,
   JobOfferNotReopenableException,
 } from '../exceptions/index.js';
@@ -9,6 +10,7 @@ import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
 import type { UpdateJobOfferRequest } from '../requests/update-job-offer.request.js';
+import type { JobOfferNotificationsService } from '../services/job-offer-notifications.service.js';
 import type { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
 import type { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
 import { JobOffersService } from '../services/job-offers.service.js';
@@ -77,6 +79,7 @@ function createRepository() {
     findStatusId: vi.fn().mockResolvedValue('status-deleted'),
     updateStatus: vi.fn().mockResolvedValue(RECORD),
     reopen: vi.fn().mockResolvedValue(RECORD),
+    closeExpired: vi.fn().mockResolvedValue(0),
     findOfferSummary: vi.fn(),
   };
 }
@@ -86,6 +89,9 @@ describe('JobOffersService', () => {
   let skillsService: {
     validateSkillIds: ReturnType<typeof vi.fn>;
     listCatalog: ReturnType<typeof vi.fn>;
+  };
+  let jobOfferNotifications: {
+    notifyPublished: ReturnType<typeof vi.fn>;
   };
   let service: JobOffersService;
 
@@ -97,6 +103,9 @@ describe('JobOffersService', () => {
         .fn()
         .mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
     };
+    jobOfferNotifications = {
+      notifyPublished: vi.fn().mockResolvedValue(undefined),
+    };
     service = new JobOffersService(
       repository as unknown as JobOffersRepository,
       skillsService as unknown as JobOfferSkillsService,
@@ -105,6 +114,7 @@ describe('JobOffersService', () => {
         findPublishedById: vi.fn(),
         findPublished: vi.fn(),
       } as unknown as JobOfferMatchRepository,
+      jobOfferNotifications as unknown as JobOfferNotificationsService,
     );
   });
 
@@ -132,11 +142,83 @@ describe('JobOffersService', () => {
         requiredCareers: ['Ingeniería de Sistemas'],
         minExperienceYears: 2,
         otherRequirements: ['Carta de motivación'],
+        expiresAt: null,
         skillIds: ['skill-1'],
       });
       expect(result).toEqual({
         id: 'offer-1',
         createdAt: CREATED_AT.toISOString(),
+      });
+    });
+
+    it('avisa de la nueva vacante una vez creada', async () => {
+      await service.create('company-1', REQUEST);
+
+      expect(jobOfferNotifications.notifyPublished).toHaveBeenCalledTimes(1);
+      expect(jobOfferNotifications.notifyPublished).toHaveBeenCalledWith(
+        'offer-1',
+      );
+    });
+
+    it('no avisa cuando la vacante no se llega a crear', async () => {
+      repository.create.mockRejectedValueOnce(new Error('fallo'));
+
+      await expect(service.create('company-1', REQUEST)).rejects.toThrow(
+        'fallo',
+      );
+
+      expect(jobOfferNotifications.notifyPublished).not.toHaveBeenCalled();
+    });
+
+    describe('fecha de cierre', () => {
+      const NOW = new Date('2026-11-12T15:00:00.000Z');
+
+      beforeEach(() => {
+        vi.useFakeTimers({ now: NOW });
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('guarda la fecha de cierre cuando es futura', async () => {
+        await service.create('company-1', {
+          ...REQUEST,
+          expiresAt: '2026-12-16T03:59:00.000Z',
+        });
+
+        expect(repository.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            expiresAt: new Date('2026-12-16T03:59:00.000Z'),
+          }),
+        );
+      });
+
+      it.each([undefined, null])(
+        'publica sin fecha de cierre cuando expiresAt es %s',
+        async (expiresAt) => {
+          await service.create('company-1', { ...REQUEST, expiresAt });
+
+          expect(repository.create).toHaveBeenCalledWith(
+            expect.objectContaining({ expiresAt: null }),
+          );
+        },
+      );
+
+      it.each([
+        ['una fecha pasada', '2026-11-11T03:59:00.000Z'],
+        ['este mismo instante', '2026-11-12T15:00:00.000Z'],
+      ])('responde 422 con %s', async (_label, expiresAt) => {
+        const error = await service
+          .create('company-1', { ...REQUEST, expiresAt })
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(JobOfferExpiryInPastException);
+        expect(error).toMatchObject({
+          statusCode: 422,
+          code: 'JOB_OFFER_EXPIRY_IN_PAST',
+        });
+        expect(repository.create).not.toHaveBeenCalled();
       });
     });
 
@@ -491,9 +573,46 @@ describe('JobOffersService', () => {
         'offer-1',
         'status-published',
         today,
+        false,
       );
       expect(repository.update).not.toHaveBeenCalled();
       expect(result.status).toBe('Publicada');
+    });
+
+    it('limpia la fecha de cierre si la vacante se cerró por vencimiento', async () => {
+      const today = new Date('2026-12-17T14:00:00.000Z');
+      vi.useFakeTimers({ now: today });
+      repository.findByCompanyAndId.mockResolvedValue({
+        ...CLOSED_RECORD,
+        expiresAt: new Date('2026-12-16T03:59:00.000Z'),
+      });
+
+      await service.reopen('company-1', 'offer-1');
+
+      expect(repository.reopen).toHaveBeenCalledWith(
+        'offer-1',
+        'status-published',
+        today,
+        true,
+      );
+    });
+
+    it('conserva la fecha de cierre si todavía no llegó', async () => {
+      const today = new Date('2026-12-01T14:00:00.000Z');
+      vi.useFakeTimers({ now: today });
+      repository.findByCompanyAndId.mockResolvedValue({
+        ...CLOSED_RECORD,
+        expiresAt: new Date('2026-12-16T03:59:00.000Z'),
+      });
+
+      await service.reopen('company-1', 'offer-1');
+
+      expect(repository.reopen).toHaveBeenCalledWith(
+        'offer-1',
+        'status-published',
+        today,
+        false,
+      );
     });
 
     it.each(['Publicada', 'Eliminada', 'Borrador'])(
@@ -537,6 +656,60 @@ describe('JobOffersService', () => {
       ).rejects.toBeInstanceOf(JobOfferCatalogNotFoundException);
       expect(repository.reopen).not.toHaveBeenCalled();
     });
+  });
+  describe('closeExpiredOffers', () => {
+    const NOW = new Date('2026-12-16T04:00:00.000Z');
+
+    beforeEach(() => {
+      repository.findStatusId.mockImplementation((title: string) =>
+        Promise.resolve(
+          title === 'Publicada' ? 'status-published' : 'status-closed',
+        ),
+      );
+    });
+
+    it('pasa de Publicada a Cerrada las vencidas y devuelve cuántas cerró', async () => {
+      repository.closeExpired.mockResolvedValue(3);
+
+      const closed = await service.closeExpiredOffers(NOW);
+
+      expect(closed).toBe(3);
+      expect(repository.closeExpired).toHaveBeenCalledWith(
+        'status-published',
+        'status-closed',
+        NOW,
+      );
+    });
+
+    it('usa la hora actual si no recibe una', async () => {
+      vi.useFakeTimers({ now: NOW });
+      try {
+        await service.closeExpiredOffers();
+        expect(repository.closeExpired).toHaveBeenCalledWith(
+          'status-published',
+          'status-closed',
+          NOW,
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it.each(['Publicada', 'Cerrada'])(
+      'falla sin tocar nada si el estado %s no está en el catálogo',
+      async (missing) => {
+        repository.findStatusId.mockImplementation((title: string) =>
+          Promise.resolve(
+            title === missing ? null : `status-${title.toLowerCase()}`,
+          ),
+        );
+
+        await expect(service.closeExpiredOffers(NOW)).rejects.toBeInstanceOf(
+          JobOfferCatalogNotFoundException,
+        );
+        expect(repository.closeExpired).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('findOfferSummary', () => {
