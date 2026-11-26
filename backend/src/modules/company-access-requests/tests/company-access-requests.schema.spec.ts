@@ -54,7 +54,7 @@ describe('company-access-requests schemas', () => {
         expect(parsed.success && parsed.data.companyName).toBe('Acme');
       });
 
-      it('informa el rango permitido', () => {
+      it('informa el rango permitido del nombre', () => {
         expect(issueMessages({ ...validData, companyName: 'abc' })).toContain(
           'El nombre de la empresa debe tener entre 4 y 30 caracteres',
         );
@@ -70,7 +70,7 @@ describe('company-access-requests schemas', () => {
         expect(createCompanyAccessRequestSchema.safeParse({ ...validData, description }).success).toBe(false);
       });
 
-      it('informa el rango permitido', () => {
+      it('informa el rango permitido de la descripción', () => {
         expect(issueMessages({ ...validData, description: 'corta' })).toContain(
           'La descripción debe tener entre 10 y 500 caracteres',
         );
