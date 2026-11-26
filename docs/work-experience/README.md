@@ -104,7 +104,7 @@ sequenceDiagram
 ## Business rules
 
 - All data belongs to the signed-in user; reading, editing or deleting another person's experience answers 404.
-- Required fields: company name (max 100 characters), position (max 150), start date and description (max 5000, trimmed, not empty). The backend normalizes the description with `trim()` and `toLowerCase()` before persisting it. This currently loses the original capitalization of acronyms and proper names (for example, `APIs` and `Node.js`); that behavior is implemented by `workExperienceDescriptionSchema` and is not changed by this documentation update.
+- Required fields: company name (max 100 characters), position (max 150), start date and description (max 5000, trimmed, not empty). The backend trims the description and stores it as typed, preserving the capitalization of acronyms and proper names (for example, `APIs` and `Node.js`).
 - Dates must be between 1 January 1950 and today (Bolivia time `America/La_Paz`).
 - If `isCurrent` is true the end date is cleared. If it is false, the end date is required (`WORK_EXPERIENCE_END_DATE_REQUIRED`) and cannot be earlier than the start date (`INVALID_WORK_EXPERIENCE_DATE_RANGE`). Both answer 400.
 - An update that finds the dates changed by someone else during the operation answers 409 `WORK_EXPERIENCE_UPDATE_CONFLICT`.

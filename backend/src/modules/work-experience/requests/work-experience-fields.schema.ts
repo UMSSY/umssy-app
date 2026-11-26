@@ -34,5 +34,4 @@ export const workExperienceDescriptionSchema = z
   .string(WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
   .trim()
   .min(1, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
-  .max(5000, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong)
-  .transform((value) => value.toLowerCase());
+  .max(5000, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong);
