@@ -124,6 +124,17 @@ export class JobOffersRepository {
     });
   }
 
+  countActiveByCompany(now: Date) {
+    return this.prisma.jobOffer.groupBy({
+      by: ['companyId'],
+      where: {
+        status: { title: JobOfferStatus.PUBLISHED },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      },
+      _count: { _all: true },
+    });
+  }
+
   findByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest,
