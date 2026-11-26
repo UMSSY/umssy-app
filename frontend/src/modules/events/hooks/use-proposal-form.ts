@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { profileService } from '@/modules/profile';
+import { useCookieSession } from '@/shared/hooks/use-cookie-session';
 import { getAccessToken, subscribeAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
 import { useEventCategories } from '@/modules/event-categories';
 import { EMPTY_PROPOSAL, PROPOSAL_MAX_ADDITIONAL_SESSIONS } from '../constants/proposal.constants';
 import { useCreateProposal } from './use-create-proposal';
@@ -16,8 +18,10 @@ import type { CreatedProposal, ProposalCover, ProposalValues } from '../types/pr
 
 export function useProposalForm() {
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, () => null);
+  const cookieSession = useCookieSession();
+  const hasSession = Boolean(token) || cookieSession;
   const categories = useEventCategories();
-  const profile = useQuery({ queryKey: ['session-profile', token], queryFn: () => profileService.getProfile(), enabled: Boolean(token), retry: false });
+  const profile = useQuery({ queryKey: ['session-profile', token ?? (cookieSession ? 'cookie' : null)], queryFn: () => profileService.getProfile(), enabled: hasSession, retry: false });
   const tutor = [profile.data?.firstName, profile.data?.lastName].filter(Boolean).join(' ').trim();
   const [values, setValues] = useState<ProposalValues>({ ...EMPTY_PROPOSAL });
   const [sessions, setSessions] = useState<ProposalSession[]>([]);
@@ -38,7 +42,7 @@ export function useProposalForm() {
   const draftCompleted = useRef(false);
   const [draftOwner, setDraftOwner] = useState<string | null>(null);
   const [draftWarning, setDraftWarning] = useState<string | null>(null);
-  const owner = token ? profile.data?.id ?? null : null;
+  const owner = hasSession ? profile.data?.id ?? null : null;
   useEffect(() => {
     if (!owner) return;
     let cancelled = false;
@@ -70,7 +74,7 @@ export function useProposalForm() {
   const sessionErrors = validateProposalSessions({ eventDate: values.eventDate, startTime: values.startTime, endTime: values.endTime }, sessions);
   const invalidSessions = hasProposalSessionErrors(sessionErrors);
   function touch(key: string) { if (key === 'cover') return; setTouched(previous => ({ ...previous, [key]: true })); }
-  const unavailable = !token || !tutor || profile.isError || categories.isLoading || Boolean(categories.error) || !categories.categories.length || Boolean(owner && draftOwner !== owner);
+  const unavailable = !hasSession || !tutor || profile.isError || categories.isLoading || Boolean(categories.error) || !categories.categories.length || Boolean(owner && draftOwner !== owner);
 
   function edit() { draftCompleted.current = false; operation.current = null; creation.reset(); setCreated(null); }
   function change<K extends keyof ProposalValues>(key: K, value: ProposalValues[K]) {
@@ -109,7 +113,7 @@ export function useProposalForm() {
     if (!operation.current || operation.current.token !== token) operation.current = { key: crypto.randomUUID(), token };
     try {
       const result = await creation.mutateAsync({ values, sessions, cover: cover.file, operationKey: operation.current.key, accessToken: token });
-      if (getAccessToken() !== token) return;
+      if (getAccessToken() !== token || (!token && !hasCookieSession())) return;
       draftCompleted.current = true;
       if (owner) await proposalDraftStorage.remove(owner).catch(() => setDraftWarning('La propuesta se guardó, pero no se pudo limpiar el borrador local.'));
       locations.current = { presencial: '', virtual: '' }; activeModality.current = EMPTY_PROPOSAL.modality;

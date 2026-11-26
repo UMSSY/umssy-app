@@ -43,7 +43,11 @@ function build() {
   return {
     repository,
     files,
-    service: new AuditEventsService(repository as any, files as any),
+    service: new AuditEventsService(
+      repository as any,
+      files as any,
+      {} as never,
+    ),
   };
 }
 

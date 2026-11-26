@@ -166,10 +166,14 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
   if (status === "error") {
     return (
       <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-        {text.loadError}
-        <Button type="button" variant="outline" size="sm" onClick={reload} className="max-md:min-h-11">
-          Reintentar
-        </Button>
+        {companyId === null
+          ? "Tu cuenta no tiene una empresa asociada asignada. Contacta al administrador institucional."
+          : text.loadError}
+        {companyId !== null && (
+          <Button type="button" variant="outline" size="sm" onClick={reload} className="max-md:min-h-11">
+            Reintentar
+          </Button>
+        )}
       </div>
     );
   }

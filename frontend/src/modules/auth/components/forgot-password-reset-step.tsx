@@ -1,4 +1,5 @@
-import type { FormEvent } from "react";
+import type { ForgotPasswordResetStepProps } from "../types/forgot-password-step.types";
+import { CredentialRestrictionNotice } from "./credential-restriction-notice";
 import Link from "next/link";
 import { LoaderCircle } from "lucide-react";
 import { BrandLogo } from "@/shared/components/layout/brand-logo";
@@ -6,16 +7,6 @@ import { Button } from "@/components/ui/button";
 import { PasswordField } from "@/shared/components/password-field";
 import { PasswordRequirements } from "@/shared/components/password-requirements";
 
-interface ForgotPasswordResetStepProps {
-  newPassword: string;
-  setNewPassword: (p: string) => void;
-  confirmPassword: string;
-  setConfirmPassword: (p: string) => void;
-  passwordError: string;
-  setPasswordError: (err: string) => void;
-  isPending: boolean;
-  onSubmit: (e: FormEvent) => void;
-}
 
 export function ForgotPasswordResetStep({
   newPassword,
@@ -26,6 +17,7 @@ export function ForgotPasswordResetStep({
   setPasswordError,
   isPending,
   onSubmit,
+  restriction,
 }: ForgotPasswordResetStepProps) {
   return (
     <div>
@@ -72,6 +64,8 @@ export function ForgotPasswordResetStep({
 
         <PasswordRequirements password={newPassword} id="new-password-rules" />
 
+        <CredentialRestrictionNotice restriction={restriction} />
+
         {passwordError ? (
           <p role="alert" className="mt-4 text-[13px] font-medium text-danger">
             {passwordError}
@@ -81,7 +75,7 @@ export function ForgotPasswordResetStep({
         <Button
           type="submit"
           variant="institutional"
-          disabled={isPending || !newPassword || !confirmPassword}
+          disabled={isPending || Boolean(restriction) || !newPassword || !confirmPassword}
           className="mt-8 h-12 w-full text-base font-extrabold tracking-wide uppercase"
         >
           {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}

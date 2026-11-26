@@ -357,6 +357,11 @@ export type ConnectionRequest = Prisma.ConnectionRequestModel
  */
 export type UserPresence = Prisma.UserPresenceModel
 /**
+ * Model PasswordHistory
+ * 
+ */
+export type PasswordHistory = Prisma.PasswordHistoryModel
+/**
  * Model PasswordResetOtp
  * 
  */
@@ -527,10 +532,35 @@ export type Notification = Prisma.NotificationModel
  */
 export type PushSubscription = Prisma.PushSubscriptionModel
 /**
+ * Model RefreshToken
+ * 
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
  * Model NotificationPreference
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model CompanyProfile
+ * 
+ */
+export type CompanyProfile = Prisma.CompanyProfileModel
+/**
+ * Model CompanyLogo
+ * 
+ */
+export type CompanyLogo = Prisma.CompanyLogoModel
+/**
+ * Model CompanyAccessRequest
+ * 
+ */
+export type CompanyAccessRequest = Prisma.CompanyAccessRequestModel
+/**
+ * Model CompanyActivationOtp
+ * 
+ */
+export type CompanyActivationOtp = Prisma.CompanyActivationOtpModel
 /**
  * Model JobAlertMode
  * 

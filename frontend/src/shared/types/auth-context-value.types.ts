@@ -5,5 +5,10 @@ export interface AuthContextValue {
   company?: { id: string; name: string } | null;
   roles: readonly RoleTag[];
   isLoading: boolean;
+  isAuthenticated?: boolean;
+  idleTimeoutSeconds?: number;
+  warningSeconds?: number;
+  absoluteExpiresAt?: string;
   refreshRoles: () => Promise<void>;
+  hydrateSession?: () => Promise<boolean>;
 }
