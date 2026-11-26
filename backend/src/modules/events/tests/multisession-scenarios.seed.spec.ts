@@ -23,7 +23,8 @@ const overlaps = (
   b: { start: number; end: number },
 ) => a.start < b.end && b.start < a.end;
 const supportCount = (scenario: MultisessionScenarioDefinition) =>
-  scenario.registrations.filter((registration) => !registration.cancelled).length;
+  scenario.registrations.filter((registration) => !registration.cancelled)
+    .length;
 
 describe('multisession scenario data', () => {
   it('uses valid, unique ids for events, sessions and registrations', () => {
@@ -74,10 +75,14 @@ describe('multisession scenario data', () => {
       const deadline = at(
         `${scenario.votingDeadline!.date}T${scenario.votingDeadline!.time}`,
       );
-      const created = at(`${scenario.createdAt.date}T${scenario.createdAt.time}`);
+      const created = at(
+        `${scenario.createdAt.date}T${scenario.createdAt.time}`,
+      );
       expect(deadline - created).toBe(10 * 24 * 60 * 60 * 1000);
       expect(deadline).toBeLessThan(ranges(scenario)[0].start);
-      expect(supportCount(scenario)).toBeLessThan(MULTISESSION_SUPPORT_THRESHOLD);
+      expect(supportCount(scenario)).toBeLessThan(
+        MULTISESSION_SUPPORT_THRESHOLD,
+      );
     }
     expect(supportCount(byKey('kubernetes'))).toBe(0);
     expect(supportCount(byKey('postgresql'))).toBe(5);
@@ -99,9 +104,15 @@ describe('multisession scenario data', () => {
     );
     // Para el escenario de cruces: NestJS solo choca con Scrum y Kanban, no con Pandas ni con sus pases.
     const nest = ranges(byKey('nestjs'));
-    expect(nest.some((s) => ranges(byKey('agile')).some((o) => overlaps(s, o)))).toBe(true);
-    expect(nest.some((s) => ranges(byKey('pandas')).some((o) => overlaps(s, o)))).toBe(false);
-    expect(nest.some((s) => participantSessions.some((o) => overlaps(s, o)))).toBe(false);
+    expect(
+      nest.some((s) => ranges(byKey('agile')).some((o) => overlaps(s, o))),
+    ).toBe(true);
+    expect(
+      nest.some((s) => ranges(byKey('pandas')).some((o) => overlaps(s, o))),
+    ).toBe(false);
+    expect(
+      nest.some((s) => participantSessions.some((o) => overlaps(s, o))),
+    ).toBe(false);
   });
 
   it('fits the QA day of 27/11', () => {
@@ -126,7 +137,9 @@ describe('multisession scenario data', () => {
     }
     const ux = byKey('userExperience').votingDeadline!;
     expect(at(`${ux.date}T${ux.time}`)).toBe(at('2026-11-28T07:40'));
-    expect(ranges(byKey('wireless'))[0].end).toBeLessThan(at('2026-11-28T07:30'));
+    expect(ranges(byKey('wireless'))[0].end).toBeLessThan(
+      at('2026-11-28T07:30'),
+    );
   });
 });
 
@@ -161,7 +174,7 @@ function setup() {
         Promise.resolve({ id: supporterIds(where.email) }),
       ),
     },
-    event: { upsert: vi.fn() },
+    event: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn() },
     eventSession: { deleteMany: vi.fn(), upsert: vi.fn() },
     eventRegistration: { deleteMany: vi.fn(), upsert: vi.fn() },
     eventAttendance: { deleteMany: vi.fn(), create: vi.fn() },
@@ -177,9 +190,15 @@ describe('seedMultisessionScenarios', () => {
     const summary = await seedMultisessionScenarios(tx as never, users);
 
     expect(summary.events).toBe(MULTISESSION_SCENARIOS.length);
+    expect(tx.eventSession.deleteMany).not.toHaveBeenCalled();
+    expect(tx.eventRegistration.deleteMany).not.toHaveBeenCalled();
+    expect(tx.eventAttendance.deleteMany).not.toHaveBeenCalled();
     const aws = tx.event.upsert.mock.calls
       .map(([call]) => call)
-      .find((call) => call.where.id === multisessionId('event', byKey('aws').number))!;
+      .find(
+        (call) =>
+          call.where.id === multisessionId('event', byKey('aws').number),
+      )!;
     expect(aws.create).toMatchObject({
       createdById: 'organizer',
       statusId: 'status:Publicado',
@@ -205,7 +224,7 @@ describe('seedMultisessionScenarios', () => {
 
   it('saves the sessions as Bolivia instants and removes stale ones', async () => {
     const tx = setup();
-    await seedMultisessionScenarios(tx as never, users);
+    await seedMultisessionScenarios(tx as never, users, { reset: true });
     const awsNumber = byKey('aws').number;
     expect(tx.eventSession.deleteMany).toHaveBeenCalledWith({
       where: {
@@ -231,7 +250,9 @@ describe('seedMultisessionScenarios', () => {
 
   it('resets registrations, cancellations and attendances on every run', async () => {
     const tx = setup();
-    const summary = await seedMultisessionScenarios(tx as never, users);
+    const summary = await seedMultisessionScenarios(tx as never, users, {
+      reset: true,
+    });
     const awsNumber = byKey('aws').number;
 
     expect(tx.eventRegistration.deleteMany).toHaveBeenCalledWith({
@@ -265,7 +286,26 @@ describe('seedMultisessionScenarios', () => {
         syncedAt: null,
       },
     });
-    expect(summary.attendances).toBe(tx.eventAttendance.create.mock.calls.length);
+    expect(summary.attendances).toBe(
+      tx.eventAttendance.create.mock.calls.length,
+    );
     expect(summary.registrations).toBe(registrations.length);
+  });
+
+  it('preserves existing scenarios and their registrations during the general seed', async () => {
+    const tx = setup();
+    tx.event.findUnique.mockResolvedValue({ id: 'existing' });
+    const summary = await seedMultisessionScenarios(tx as never, users);
+
+    expect(summary).toEqual({
+      events: 0,
+      sessions: 0,
+      registrations: 0,
+      attendances: 0,
+    });
+    expect(tx.event.upsert).not.toHaveBeenCalled();
+    expect(tx.eventSession.deleteMany).not.toHaveBeenCalled();
+    expect(tx.eventRegistration.deleteMany).not.toHaveBeenCalled();
+    expect(tx.eventAttendance.deleteMany).not.toHaveBeenCalled();
   });
 });

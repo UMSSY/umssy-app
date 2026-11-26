@@ -85,8 +85,6 @@ export class EventsService {
     };
   }
 
-  // Catálogo: con statusId se consulta ese estado exacto; scope=finished lista los talleres terminados;
-  // si no, solo talleres que aún no terminaron (y propuestas en votación cuando se piden).
   getCatalogVisibilityFilter(
     payload: Pick<GetEventsPayload, 'statusId' | 'includeProposals' | 'scope'>,
     now: Date = new Date(),
