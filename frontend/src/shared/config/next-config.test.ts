@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import nextConfig, { securityHeaders } from "../../../next.config";
+import nextConfig, { buildCspHeader, securityHeaders } from "../../../next.config";
 
 describe("next.config security headers", () => {
   it("exporta cabeceras de seguridad requeridas", () => {
@@ -49,12 +49,112 @@ describe("next.config security headers", () => {
     expect(value).toContain("default-src 'self'");
     expect(value).toContain("https://fonts.googleapis.com");
     expect(value).toContain("https://fonts.gstatic.com");
-    expect(value).toContain("img-src 'self' data: blob: https:");
+    expect(value).toContain("img-src 'self' data: blob:");
     expect(value).toContain("object-src 'self' blob:");
     expect(value).toContain("frame-src 'self' blob: data:");
     expect(value).toContain("connect-src");
-    expect(value).toContain("http://localhost:8080");
     expect(value).toContain("frame-ancestors 'none'");
+  });
+
+  describe("buildCspHeader", () => {
+    const directive = (csp: string, name: string) =>
+      csp.split("; ").find((part) => part.startsWith(`${name} `)) ?? "";
+
+    it("en producción quita unsafe-eval y conserva unsafe-inline", () => {
+      const csp = buildCspHeader({
+        nodeEnv: "production",
+        apiUrl: "https://epic1-api-umssy.zer4c.dev/api",
+      });
+
+      expect(directive(csp, "script-src")).toBe("script-src 'self' 'unsafe-inline'");
+    });
+
+    it("en producción limita connect-src al API y su WebSocket sin comodines", () => {
+      const csp = buildCspHeader({
+        nodeEnv: "production",
+        apiUrl: "https://epic1-api-umssy.zer4c.dev/api",
+      });
+
+      expect(directive(csp, "connect-src")).toBe(
+        "connect-src 'self' https://epic1-api-umssy.zer4c.dev wss://epic1-api-umssy.zer4c.dev",
+      );
+      expect(directive(csp, "connect-src")).not.toMatch(/\s(?:https|wss):(?:\s|$)|localhost|127\.0\.0\.1/);
+    });
+
+    it("en producción deriva ws para un API http", () => {
+      const csp = buildCspHeader({ nodeEnv: "production", apiUrl: "http://api.interna.test:3001/api" });
+
+      expect(directive(csp, "connect-src")).toBe(
+        "connect-src 'self' http://api.interna.test:3001 ws://api.interna.test:3001",
+      );
+    });
+
+    it("img-src y media-src incluyen el API y media-src no admite https genérico", () => {
+      const csp = buildCspHeader({
+        nodeEnv: "production",
+        apiUrl: "https://dev-backend-umssy-app.zer4c.dev/api",
+      });
+
+      expect(directive(csp, "img-src")).toBe(
+        "img-src 'self' data: blob: https://dev-backend-umssy-app.zer4c.dev https:",
+      );
+      expect(directive(csp, "media-src")).toBe(
+        "media-src 'self' data: blob: https://dev-backend-umssy-app.zer4c.dev",
+      );
+    });
+
+    it("en desarrollo permite unsafe-eval y los localhost", () => {
+      const csp = buildCspHeader({ nodeEnv: "development", apiUrl: "http://localhost:8080/api" });
+
+      expect(directive(csp, "script-src")).toContain("'unsafe-eval'");
+      const connect = directive(csp, "connect-src");
+      expect(connect).toContain("http://localhost:8080");
+      expect(connect).toContain("http://127.0.0.1:8080");
+      expect(connect).toContain("ws://localhost:8080");
+      expect(connect).toContain("ws://127.0.0.1:8080");
+    });
+
+    it("con un API remoto en desarrollo también habilita localhost", () => {
+      const csp = buildCspHeader({
+        nodeEnv: "development",
+        apiUrl: "https://epic1-api-umssy.zer4c.dev/api",
+      });
+
+      expect(directive(csp, "connect-src")).toContain("ws://localhost:8080");
+      expect(directive(csp, "connect-src")).toContain("wss://epic1-api-umssy.zer4c.dev");
+    });
+
+    it("en producción con API local mantiene localhost sin unsafe-eval", () => {
+      const csp = buildCspHeader({ nodeEnv: "production", apiUrl: "http://localhost:8080/api" });
+
+      expect(directive(csp, "script-src")).not.toContain("'unsafe-eval'");
+      expect(directive(csp, "connect-src")).toBe(
+        "connect-src 'self' http://localhost:8080 ws://localhost:8080 http://127.0.0.1:8080 ws://127.0.0.1:8080",
+      );
+    });
+
+    it("con una URL de API inválida en producción solo permite el propio origen", () => {
+      const csp = buildCspHeader({ nodeEnv: "production", apiUrl: "no-es-una-url" });
+
+      expect(directive(csp, "connect-src")).toBe("connect-src 'self'");
+    });
+
+    it("no habilita el SDK de Google en script-src ni frame-src", () => {
+      const csp = buildCspHeader({ nodeEnv: "production", apiUrl: "https://api.test/api" });
+
+      expect(csp).not.toContain("accounts.google.com");
+    });
+
+    it("conserva las directivas que no se endurecen", () => {
+      const csp = buildCspHeader({ nodeEnv: "production", apiUrl: "https://api.test/api" });
+
+      expect(csp).toContain("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+      expect(csp).toContain("font-src 'self' https://fonts.gstatic.com data:");
+      expect(csp).toContain("object-src 'self' blob:");
+      expect(csp).toContain("frame-src 'self' blob: data:");
+      expect(csp).toContain("base-uri 'self'");
+      expect(csp).toContain("form-action 'self'");
+    });
   });
 
   it("aplica los security headers a todas las rutas mediante nextConfig.headers()", async () => {
