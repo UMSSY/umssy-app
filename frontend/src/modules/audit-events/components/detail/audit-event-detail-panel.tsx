@@ -83,7 +83,7 @@ export function AuditEventDetailPanel({ event, onClose, children }: AuditEventDe
               <div>
                 <p className={LABEL_CLASS}>RESPONSABLE</p>
                 <div className="mt-2">
-                  <AuditResponsibleCell responsible={detail.responsible} />
+                  <AuditResponsibleCell responsible={detail.responsible} emphasizeName />
                 </div>
               </div>
 

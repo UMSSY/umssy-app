@@ -13,6 +13,7 @@ Browser clients authenticate through **HttpOnly cookies** (`umssy_access`, `umss
 | `GET`  | `/auth/session`                | JWT / Cookie     | Returns active session identity, roles, optional company info, and idle/abs limits |
 | `POST` | `/auth/login`                  | Public           | Authenticates credentials, issues session cookies (`umssy_access`, `umssy_refresh`) |
 | `POST` | `/auth/google/login`           | Public           | Verifies Google ID token and establishes an authenticated cookie session           |
+| `POST` | `/auth/google/link/confirm`    | Public           | Validates the 5-minute `linkToken` from Google login, links the account and opens the session |
 | `POST` | `/auth/google/link`            | JWT / Cookie     | Links a Google account to the authenticated user                                   |
 | `POST` | `/auth/refresh`                | Cookie / Body    | Rotates refresh token family, rejects reused tokens, sets rotated cookies & returns session credentials |
 | `POST` | `/auth/logout`                 | Public / Session | Revokes active refresh token family and clears session cookies                     |
@@ -53,6 +54,30 @@ sequenceDiagram
     end
   end
 ```
+
+## Per-Request Session Revocation
+
+Every access token issued by login, Google login, account activation and refresh rotation carries a `sid` claim: the id of its refresh-token family (`refresh_tokens.family_id`). `JwtAuthGuard` and the chat and notification socket handshakes call `SessionService.assertSessionActive(sid)` on every request, which runs one indexed query (`family_id = $1 AND revoked_at IS NOT NULL`) and answers `401` with `SESSION_REVOKED` (or `PASSWORD_CHANGED` when the family was revoked by a password reset). The frontend already turns both codes into the "Tu sesión se cerró" screen.
+
+- A family is revoked by logout, refresh-token reuse, inactive user, removed role and password reset (which revokes every family of the user; recovery is unauthenticated, so no session survives it).
+- With a `sid`, an inactive user also answers `401 SESSION_REVOKED`; tokens without `sid` keep the previous `403 USER_INACTIVE`.
+- **Transitional:** access tokens issued before this change have no `sid` and are accepted until they expire (at most `JWT_EXPIRES_IN`, 8 hours by default), so nobody is signed out on deploy. A `TODO` in `JwtAuthGuard` marks where to require it.
+- `Authorization: Bearer` keeps priority over the cookie. Revocation is shared between browser tabs of the same browser through the cookie and the existing `BroadcastChannel`; other devices find out on their next request.
+
+## Google Link Confirmation
+
+`POST /auth/google/login` no longer links an account on its own.
+
+| Account state | Response |
+| --- | --- |
+| Already linked (`user_social_accounts`) | Session cookies, as before |
+| Active user with an allowed role (`estudiante`, `titulado`, `mentor`) found by email, not linked | `200` without cookies: `{ requiresLinking: true, linkToken, email, emailVerified: true }`; nothing is linked |
+| No user, and a submitted access request that is not approved | `401` "Tu solicitud aún no fue aprobada" |
+| No user and no request | `401` "No se encontró una cuenta UMSSY asociada a este correo de Google" |
+
+`linkToken` is a JWT signed with the same secret, with `purpose: 'google-link'`, `userId`, `googleSub`, `email` and a 5-minute expiry. It has no `sub` or `roleTag`, so `JwtAuthGuard` never accepts it as a session, and `GoogleLinkTokenService.verify` rejects any token whose `purpose` differs (an access token cannot be used to confirm a link). `POST /auth/google/link/confirm { linkToken, roleTag? }` verifies it (`401 GOOGLE_LINK_TOKEN_EXPIRED` or `GOOGLE_LINK_TOKEN_INVALID`, "Vuelve a iniciar con Google"), re-checks the user, the allowed roles and that the Google subject is not linked to someone else (`409 GOOGLE_ACCOUNT_ALREADY_LINKED`), links it and starts the session with the `sid` claim and cookies. Cancelling is client-side only. `requiresLinking` is not a failed attempt for the login limiter; failed Google logins still count.
+
+The frontend keeps the `linkToken` only in component memory (never in `localStorage` or `sessionStorage`) and shows "Vincula tu cuenta de Google" in both the login view and the OAuth callback view.
 
 ## Architecture Notes
 
