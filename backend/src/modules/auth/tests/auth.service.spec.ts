@@ -8,6 +8,8 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
+  GoogleAccountAlreadyLinkedException,
+  GoogleLinkTokenInvalidException,
 } from '../exceptions/index.js';
 
 describe('AuthService', () => {
@@ -18,6 +20,8 @@ describe('AuthService', () => {
     linkGoogleAccount: vi.fn(),
     existsByEmail: vi.fn(),
     findUserByEmail: vi.fn(),
+    findUserByIdWithRoles: vi.fn(),
+    hasUnapprovedAccessRequest: vi.fn(),
     createPasswordResetOtp: vi.fn(),
     findLatestOtp: vi.fn(),
     findLatestValidOtp: vi.fn(),
@@ -516,7 +520,7 @@ describe('AuthService', () => {
       picture: 'https://photo.url',
     };
 
-    it('1. Usuario registrado, activo y con rol permitido: inicia sesión exitosamente', async () => {
+    it('1. Usuario activo con rol permitido y sin vincular: pide confirmar la vinculación sin vincular ni emitir sesión', async () => {
       authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
       authRepository.findUserByEmailWithRoles.mockResolvedValue({
         id: 'u-1',
@@ -525,36 +529,70 @@ describe('AuthService', () => {
         roles: [{ role: { name: 'titulado' } }],
       });
       authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
-      authRepository.linkGoogleAccount.mockResolvedValue({});
-      jwtService.sign.mockReturnValue('jwt-token-123');
 
       const result = await service.loginWithGoogle(verifiedGoogle);
 
-      expect(authRepository.linkGoogleAccount).toHaveBeenCalledWith(
-        'u-1',
-        'google-sub-123',
-        'dania@umss.edu',
-        'https://photo.url',
-      );
       expect(result).toEqual({
-        accessToken: 'jwt-token-123',
-        roleTag: 'titulado',
-        roles: ['titulado'],
+        requiresLinking: true,
+        claims: {
+          userId: 'u-1',
+          googleSub: 'google-sub-123',
+          email: 'dania@umss.edu',
+          picture: 'https://photo.url',
+        },
+      });
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('1b. Sin foto de Google no incluye picture en los datos de vinculación', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-1',
+        isActive: true,
+        roles: [{ role: { name: 'mentor' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+
+      await expect(
+        service.loginWithGoogle({ email: 'dania@umss.edu', sub: 'sub-1' }),
+      ).resolves.toEqual({
+        requiresLinking: true,
+        claims: { userId: 'u-1', googleSub: 'sub-1', email: 'dania@umss.edu' },
       });
     });
 
     it('2. Usuario no registrado: rechaza el acceso sin crear cuenta automáticamente', async () => {
       authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
       authRepository.findUserByEmailWithRoles.mockResolvedValue(null);
+      authRepository.hasUnapprovedAccessRequest.mockResolvedValue(false);
 
       await expect(
         service.loginWithGoogle({
           email: 'noexiste@gmail.com',
           sub: 'unknown-sub',
         }),
-      ).rejects.toBeInstanceOf(InvalidCredentialsException);
+      ).rejects.toThrow(
+        'No se encontró una cuenta UMSSY asociada a este correo de Google',
+      );
 
       expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('2b. Solicitud existente aún no aprobada: informa que la solicitud no fue aprobada', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue(null);
+      authRepository.hasUnapprovedAccessRequest.mockResolvedValue(true);
+
+      const error = await service
+        .loginWithGoogle({ email: 'pendiente@gmail.com', sub: 'pending-sub' })
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(InvalidCredentialsException);
+      expect((error as Error).message).toBe('Tu solicitud aún no fue aprobada');
+      expect(authRepository.hasUnapprovedAccessRequest).toHaveBeenCalledWith(
+        'pendiente@gmail.com',
+      );
     });
 
     it('3. Usuario inactivo: rechaza el acceso si la cuenta está deshabilitada', async () => {
@@ -831,27 +869,105 @@ describe('AuthService', () => {
         expect(jwtService.sign).not.toHaveBeenCalled();
       },
     );
+  });
 
-    it('no emite token si falla la persistencia de la vinculación', async () => {
-      authRepository.findUserByEmailWithRoles.mockResolvedValue({
-        id: 'google-regression-user',
-        isActive: true,
-        roles: [{ role: { name: 'titulado' } }],
+
+  describe('confirmGoogleLink', () => {
+    const claims = {
+      userId: 'u-1',
+      googleSub: 'google-sub-123',
+      email: 'dania@umss.edu',
+      picture: 'https://photo.url',
+    };
+    const user = (overrides: Record<string, unknown> = {}) => ({
+      id: 'u-1',
+      email: 'dania@umss.edu',
+      isActive: true,
+      roles: [{ role: { name: 'titulado' } }],
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(user());
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+      authRepository.linkGoogleAccount.mockResolvedValue({});
+      jwtService.sign.mockReturnValue('confirmed-token');
+    });
+
+    it('vincula la cuenta de Google y emite la sesión', async () => {
+      await expect(service.confirmGoogleLink(claims)).resolves.toEqual({
+        accessToken: 'confirmed-token',
+        roleTag: 'titulado',
+        roles: ['titulado'],
       });
-      authRepository.linkGoogleAccount.mockRejectedValue(
-        new Error('Fallo de persistencia'),
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledWith(
+        'u-1',
+        'google-sub-123',
+        'dania@umss.edu',
+        'https://photo.url',
       );
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: 'u-1',
+        roleTag: 'titulado',
+        roles: ['titulado'],
+      });
+    });
 
-      await expect(
-        service.loginWithGoogle({
-          email: 'regresion@umssy.test',
-          sub: 'google-regression-sub',
-        }),
-      ).rejects.toThrow('Fallo de persistencia');
+    it('respeta el rol solicitado cuando está autorizado', async () => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(
+        user({ roles: [{ role: { name: 'titulado' } }, { role: { name: 'mentor' } }] }),
+      );
+      const result = await service.confirmGoogleLink(claims, 'mentor');
+      expect(result.roleTag).toBe('mentor');
+    });
 
-      expect(authRepository.linkGoogleAccount).toHaveBeenCalledTimes(1);
+    it('es idempotente si la cuenta ya estaba vinculada al mismo usuario', async () => {
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue({ id: 'l-1', userId: 'u-1' });
+      await expect(service.confirmGoogleLink(claims)).resolves.toMatchObject({ roleTag: 'titulado' });
+    });
+
+    it('responde 409 si el sub de Google ya pertenece a otro usuario y no vincula', async () => {
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue({ id: 'l-1', userId: 'u-2' });
+      const error = await service.confirmGoogleLink(claims).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(GoogleAccountAlreadyLinkedException);
+      expect((error as GoogleAccountAlreadyLinkedException).statusCode).toBe(409);
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['rol empresa', { roles: [{ role: { name: 'empresa' } }] }, RoleNotAssignedException],
+      ['rol administrativo', { roles: [{ role: { name: 'administrativo' } }] }, RoleNotAssignedException],
+      ['cuenta inactiva', { isActive: false }, InvalidCredentialsException],
+    ])('rechaza %s sin vincular ni emitir sesión', async (_label, overrides, exception) => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(user(overrides));
+      await expect(service.confirmGoogleLink(claims)).rejects.toBeInstanceOf(exception);
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un rol solicitado que el usuario no tiene', async () => {
+      await expect(service.confirmGoogleLink(claims, 'mentor')).rejects.toBeInstanceOf(
+        RoleNotAssignedException,
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['usuario inexistente', null],
+      ['correo que ya no coincide', user({ email: 'otro@umss.edu' })],
+    ])('rechaza con token inválido si hay %s', async (_label, found) => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(found);
+      await expect(service.confirmGoogleLink(claims)).rejects.toBeInstanceOf(
+        GoogleLinkTokenInvalidException,
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('no emite sesión si falla la persistencia de la vinculación', async () => {
+      authRepository.linkGoogleAccount.mockRejectedValue(new Error('Fallo de persistencia'));
+      await expect(service.confirmGoogleLink(claims)).rejects.toThrow('Fallo de persistencia');
       expect(jwtService.sign).not.toHaveBeenCalled();
     });
   });
-
 });

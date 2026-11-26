@@ -9,7 +9,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
+import {
+  ALLOWED_LOGO_MIMES,
+  COMPANY_LOGO_FORMAT_MESSAGE,
+} from '../constants/company-registration-rules.constants.js';
+import { FILE_TYPES } from '../../files/constants/file-rules.constants.js';
 import { FilesService } from '../../files/services/files.service.js';
 import { buildFrontendUrl } from '../../mail/helpers/frontend-url.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
@@ -18,8 +22,12 @@ import {
   companyRequestObservedNotification,
   companyRequestRejectedNotification,
 } from '../notification/company-request-notifications.js';
+import { buildCompanyCorrectionUrl } from '../helpers/build-company-correction-url.js';
 import { CompanyAccessRequestsRepository } from '../repositories/company-access-requests.repository.js';
+import { COMPANY_CORRECTION_STATUSES } from '../constants/company-document-correction.constants.js';
+import { CompanyDocumentCorrectionAuthorizationService } from './company-document-correction-authorization.service.js';
 import { CompanyDocumentOcrService } from './company-document-ocr.service.js';
+import { assertNoRegistrationConflict } from '../utils/assert-no-registration-conflict.js';
 import type {
   ActivateCompanyAccountDto,
   CreateCompanyAccessRequestDto,
@@ -30,13 +38,6 @@ import type {
   UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
 
-const ALLOWED_LOGO_MIMES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/svg+xml',
-]);
-
 @Injectable()
 export class CompanyAccessRequestsService {
   private readonly logger = new Logger(CompanyAccessRequestsService.name);
@@ -46,6 +47,7 @@ export class CompanyAccessRequestsService {
     private readonly filesService: FilesService,
     private readonly companyOcr: CompanyDocumentOcrService,
     private readonly notificationsService: NotificationsService,
+    private readonly correctionAuthorization: CompanyDocumentCorrectionAuthorizationService,
   ) {}
 
   listCities() {
@@ -53,27 +55,12 @@ export class CompanyAccessRequestsService {
   }
 
   async create(dto: CreateCompanyAccessRequestDto) {
-    const { existingCompany, existingUser, activeRequest } =
-      await this.repository.findDuplicates(dto.companyName, dto.email);
-
-    if (existingCompany) {
-      throw new CompanyRegistrationConflictException(
-        `La empresa "${dto.companyName}" ya se encuentra registrada en la plataforma.`,
-        'companyName',
-      );
-    }
-    if (existingUser) {
-      throw new CompanyRegistrationConflictException(
-        `El correo electrónico "${dto.email}" ya pertenece a una cuenta registrada en la plataforma.`,
-        'email',
-      );
-    }
-    if (activeRequest) {
-      throw new CompanyRegistrationConflictException(
-        `Ya existe una solicitud activa o en revisión para "${activeRequest.companyName}" con el correo "${activeRequest.email}".`,
-        'activeRequest',
-      );
-    }
+    const duplicates = await this.repository.findDuplicates(
+      dto.companyName,
+      dto.email,
+      dto.username,
+    );
+    assertNoRegistrationConflict(duplicates, dto);
 
     const draft = await this.repository.createDraft(dto);
     return { id: draft.id };
@@ -84,10 +71,8 @@ export class CompanyAccessRequestsService {
     if (!file) {
       throw new BadRequestException('Debes adjuntar un archivo de imagen');
     }
-    if (!ALLOWED_LOGO_MIMES.has(file.mimetype)) {
-      throw new BadRequestException(
-        'El logo debe estar en formato PNG, JPG, WEBP o SVG',
-      );
+    if (!ALLOWED_LOGO_MIMES.has(file.mimetype) || !this.hasLogoSignature(file)) {
+      throw new BadRequestException(COMPANY_LOGO_FORMAT_MESSAGE);
     }
 
     const created = await this.filesService.create({
@@ -101,6 +86,13 @@ export class CompanyAccessRequestsService {
     }
 
     return { id: current.id, logoFileId: created.id };
+  }
+
+  private hasLogoSignature(file: UploadedDocumentFile): boolean {
+    const detected = FILE_TYPES.find((type) =>
+      type.signature.every((byte, index) => file.buffer[index] === byte),
+    );
+    return detected !== undefined && ALLOWED_LOGO_MIMES.has(detected.mimeType);
   }
 
   async attachDocument(id: string, file: UploadedDocumentFile | undefined) {
@@ -344,10 +336,7 @@ export class CompanyAccessRequestsService {
       composedReason,
     );
 
-    const requestStatusUrl = buildFrontendUrl('/request-access/status', {
-      code: current.requestCode ?? '',
-      email: current.email,
-    });
+    const requestStatusUrl = this.buildCorrectionUrl(current, updated, 'OBSERVED');
     await this.dispatchDecisionNotification(
       'subsanación',
       { id: current.id, requestCode: current.requestCode },
@@ -400,12 +389,13 @@ export class CompanyAccessRequestsService {
         'Solicitud no cumple con los requisitos institucionales.';
     }
 
-    await this.repository.rejectCompanyRequest(id, reviewerId, finalReason);
+    const rejected = await this.repository.rejectCompanyRequest(
+      id,
+      reviewerId,
+      finalReason,
+    );
 
-    const requestStatusUrl = buildFrontendUrl('/request-access/status', {
-      code: current.requestCode ?? '',
-      email: current.email,
-    });
+    const requestStatusUrl = this.buildCorrectionUrl(current, rejected, 'REJECTED');
     await this.dispatchDecisionNotification(
       'rechazo',
       { id: current.id, requestCode: current.requestCode },
@@ -434,6 +424,9 @@ export class CompanyAccessRequestsService {
         'No se encontró una solicitud con ese código y correo',
       );
     }
+    const isCorrectable = (
+      COMPANY_CORRECTION_STATUSES as readonly string[]
+    ).includes(found.status.title);
     return {
       requestCode: found.requestCode,
       companyName: found.companyName,
@@ -442,6 +435,8 @@ export class CompanyAccessRequestsService {
       reviewedAt: found.reviewedAt?.toISOString() ?? null,
       rejectionReason:
         found.status.title === 'REJECTED' ? found.rejectionReason : null,
+      reason: isCorrectable ? found.rejectionReason : null,
+      canResubmit: isCorrectable,
     };
   }
 
@@ -628,6 +623,29 @@ export class CompanyAccessRequestsService {
       );
       return null;
     }
+  }
+
+  private buildCorrectionUrl(
+    current: { requestCode: string | null; email: string },
+    reviewed: {
+      id: string;
+      documentFileId: string | null;
+      reviewedAt: Date | null;
+    },
+    status: string,
+  ): string {
+    const token = this.correctionAuthorization.issueFor({
+      id: reviewed.id,
+      requestCode: current.requestCode,
+      documentFileId: reviewed.documentFileId,
+      reviewedAt: reviewed.reviewedAt,
+      status: { title: status },
+    });
+    return buildCompanyCorrectionUrl(
+      current.requestCode ?? '',
+      current.email,
+      token,
+    );
   }
 
   private async findEditableDraft(id: string) {

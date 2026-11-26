@@ -6,6 +6,19 @@ import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { LoginResponse } from "../types/auth-types";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
+import {
+  GOOGLE_LINK_ALREADY_LINKED_MESSAGE,
+  GOOGLE_LINK_EXPIRED_CODES,
+  GOOGLE_LINK_EXPIRED_MESSAGE,
+  GOOGLE_LINK_ROLE_NOT_ALLOWED_MESSAGE,
+  GOOGLE_LINK_SERVER_ERROR_MESSAGE,
+  GOOGLE_NOT_REGISTERED_MESSAGE,
+} from "../constants/google-link.constants";
+import type {
+  ConfirmGoogleLinkResult,
+  GoogleLinkRequest,
+  GoogleLoginResult,
+} from "../types/google-link.types";
 
 function isLoginResponse(value: unknown): value is LoginResponse {
   if (typeof value !== "object" || value === null) return false;
@@ -51,11 +64,47 @@ export interface LinkGoogleResult {
   reason?: "email_mismatch" | "role_not_allowed" | "server_error";
 }
 
-export interface GoogleLoginResult {
-  success: boolean;
-  session?: LoginResponse;
-  message?: string;
-  reason?: "not_registered" | "role_not_allowed" | "server_error";
+type ApiErrorShape = {
+  response?: { status?: number; data?: { detail?: unknown; message?: unknown; code?: unknown } };
+};
+
+function readErrorStatus(err: unknown): number | undefined {
+  return (err as ApiErrorShape)?.response?.status;
+}
+
+function readErrorDetail(err: unknown): string | undefined {
+  const data = (err as ApiErrorShape)?.response?.data;
+  if (typeof data?.detail === "string" && data.detail) return data.detail;
+  if (typeof data?.message === "string" && data.message) return data.message;
+  return undefined;
+}
+
+function readErrorCode(err: unknown): string | undefined {
+  const code = (err as ApiErrorShape)?.response?.data?.code;
+  return typeof code === "string" ? code : undefined;
+}
+
+function extractLinkRequest(body: unknown): GoogleLinkRequest | null {
+  const wrapped =
+    typeof body === "object" && body !== null
+      ? (body as { data?: unknown }).data
+      : undefined;
+  const candidate = (typeof wrapped === "object" && wrapped !== null ? wrapped : body) as Record<string, unknown> | null;
+  if (
+    typeof candidate !== "object" ||
+    candidate === null ||
+    candidate.requiresLinking !== true ||
+    typeof candidate.linkToken !== "string" ||
+    candidate.linkToken === "" ||
+    typeof candidate.email !== "string"
+  ) {
+    return null;
+  }
+  return {
+    linkToken: candidate.linkToken,
+    email: candidate.email,
+    emailVerified: candidate.emailVerified !== false,
+  };
 }
 
 export const googleAuthService = {
@@ -198,9 +247,6 @@ export const googleAuthService = {
     }
   },
 
-  /**
-   * Logs in using the selected Google account.
-   */
   loginWithGoogle: async (
     googleEmail: string,
     credentialOrIdToken?: string,
@@ -217,35 +263,73 @@ export const googleAuthService = {
       }
 
       const response = await apiClient.post<unknown>("/auth/google/login", payload);
-      const session = extractLoginResponse(response.data);
-      return {
-        success: true,
-        session,
-      };
+      const link = extractLinkRequest(response.data);
+      if (link) return { success: true, requiresLinking: true, link };
+      return { success: true, session: extractLoginResponse(response.data) };
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
+      const status = readErrorStatus(err);
       if (status === 403) {
-        const errorDetail =
-          (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
-          (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
-          "El acceso con Google solo está permitido para estudiantes, titulados y mentores.";
         return {
           success: false,
           reason: "role_not_allowed",
-          message: errorDetail,
+          message: readErrorDetail(err) ?? GOOGLE_LINK_ROLE_NOT_ALLOWED_MESSAGE,
         };
       }
       if (status === 404 || status === 401 || status === 400) {
         return {
           success: false,
           reason: "not_registered",
-          message: "Esta cuenta de Google no está registrada en el sistema.",
+          message: readErrorDetail(err) ?? GOOGLE_NOT_REGISTERED_MESSAGE,
         };
       }
       return {
         success: false,
         reason: "server_error",
         message: "Ocurrió un error al intentar iniciar sesión con Google.",
+      };
+    }
+  },
+
+  confirmLink: async (
+    linkToken: string,
+    roleTag?: string,
+  ): Promise<ConfirmGoogleLinkResult> => {
+    try {
+      const response = await apiClient.post<unknown>("/auth/google/link/confirm", {
+        linkToken,
+        ...(roleTag ? { roleTag } : {}),
+      });
+      return { success: true, session: extractLoginResponse(response.data) };
+    } catch (err: unknown) {
+      const status = readErrorStatus(err);
+      const code = readErrorCode(err);
+      if (
+        status === 401 &&
+        GOOGLE_LINK_EXPIRED_CODES.some((expiredCode) => expiredCode === code)
+      ) {
+        return { success: false, reason: "expired", message: GOOGLE_LINK_EXPIRED_MESSAGE };
+      }
+      if (status === 409) {
+        return {
+          success: false,
+          reason: "already_linked",
+          message: GOOGLE_LINK_ALREADY_LINKED_MESSAGE,
+        };
+      }
+      if (status === 403) {
+        return {
+          success: false,
+          reason: "role_not_allowed",
+          message: readErrorDetail(err) ?? GOOGLE_LINK_ROLE_NOT_ALLOWED_MESSAGE,
+        };
+      }
+      return {
+        success: false,
+        reason: "server_error",
+        message:
+          status === 429
+            ? (readErrorDetail(err) ?? GOOGLE_LINK_SERVER_ERROR_MESSAGE)
+            : GOOGLE_LINK_SERVER_ERROR_MESSAGE,
       };
     }
   },

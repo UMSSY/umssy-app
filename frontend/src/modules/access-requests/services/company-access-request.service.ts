@@ -1,4 +1,17 @@
 import { apiClient } from '@/shared/services/api-client';
+import { validateDocumentFile } from '../utils/validate-document-file';
+import { getCompanyRequestCodeFromLink } from '../utils/get-company-request-code-from-link';
+import { isCompanyCorrectionToken } from '../utils/company-correction-token';
+import {
+  COMPANY_CORRECTION_AUTHORIZATION_MESSAGE,
+  COMPANY_CORRECTION_MISSING_FILE_MESSAGE,
+  COMPANY_CORRECTION_RETRY_MESSAGE,
+  COMPANY_RATE_LIMIT_CODE,
+  COMPANY_RATE_LIMIT_MESSAGE,
+  COMPANY_UNAUTHORIZED_CODE,
+} from '../constants/company-request-status.constants';
+import type { CompanyDocumentCorrectionResponse } from '../types/company-document-correction-response.types';
+import type { CompanyRequestStatusResponse } from '../types/company-request-status.types';
 import type { ApiResult } from '../types/api-result.types';
 import type {
   ActivateCompanyAccountPayload,
@@ -38,11 +51,17 @@ function extractErrorMessage(body: unknown, fallback: string): string {
   return fallback;
 }
 
+interface RequestOptions {
+  headers?: Record<string, string>;
+  onUploadProgress?: (event: { loaded: number; total?: number }) => void;
+}
+
 async function request<T>(
   method: 'get' | 'post' | 'patch',
   url: string,
   data?: unknown,
   params?: Record<string, string | number | undefined>,
+  options: RequestOptions = {},
 ): Promise<ApiResult<T>> {
   try {
     const response = await apiClient.request({
@@ -50,6 +69,10 @@ async function request<T>(
       url,
       data,
       params,
+      ...(options.headers && { headers: options.headers }),
+      ...(options.onUploadProgress && {
+        onUploadProgress: options.onUploadProgress,
+      }),
       validateStatus: () => true,
     });
     if (response.status >= 200 && response.status < 300) {
@@ -91,6 +114,77 @@ async function request<T>(
   }
 }
 
+function correctionFailure(
+  status: number,
+  code?: string,
+  message?: string,
+): ApiResult<never> {
+  if (status === 401 || code === COMPANY_UNAUTHORIZED_CODE) {
+    return {
+      ok: false,
+      status: 401,
+      fieldErrors: {},
+      message: COMPANY_CORRECTION_AUTHORIZATION_MESSAGE,
+      code: COMPANY_UNAUTHORIZED_CODE,
+    };
+  }
+  if (status === 429 || code === COMPANY_RATE_LIMIT_CODE) {
+    return {
+      ok: false,
+      status: 429,
+      fieldErrors: {},
+      message: COMPANY_RATE_LIMIT_MESSAGE,
+      code: COMPANY_RATE_LIMIT_CODE,
+    };
+  }
+  return {
+    ok: false,
+    status,
+    fieldErrors: {},
+    message: message ?? COMPANY_CORRECTION_RETRY_MESSAGE,
+    code,
+  };
+}
+
+async function resubmitDocument(
+  code: string,
+  token: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<ApiResult<CompanyDocumentCorrectionResponse>> {
+  const requestCode = getCompanyRequestCodeFromLink(code);
+  if (!requestCode) return correctionFailure(400);
+  if (!isCompanyCorrectionToken(token)) return correctionFailure(401);
+  if (!file) return correctionFailure(400, undefined, COMPANY_CORRECTION_MISSING_FILE_MESSAGE);
+  const invalid = validateDocumentFile(file);
+  if (invalid) return correctionFailure(400, undefined, invalid);
+
+  const form = new FormData();
+  form.append('file', file);
+  const result = await request<Record<string, unknown>>(
+    'post',
+    `/company-access-requests/${requestCode}/resubmit`,
+    form,
+    undefined,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      onUploadProgress: (event) => {
+        if (!onProgress || !event.total) return;
+        onProgress(
+          Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))),
+        );
+      },
+    },
+  );
+  if (!result.ok) {
+    return correctionFailure(result.status, result.code, result.message);
+  }
+  if (result.data.requestCode !== requestCode || result.data.status !== 'PENDING') {
+    return correctionFailure(0);
+  }
+  return { ok: true, data: { requestCode, status: 'PENDING' } };
+}
+
 async function fetchAttachmentBlob(
   url: string,
   errorMessage: string,
@@ -106,6 +200,16 @@ async function fetchAttachmentBlob(
 
 export const companyAccessRequestService = {
   getCities: () => request<CityItem[]>('get', '/cities'),
+
+  getPublicStatus: (code: string, email: string) =>
+    request<CompanyRequestStatusResponse>(
+      'get',
+      `/company-access-requests/status/${encodeURIComponent(code)}`,
+      undefined,
+      { email },
+    ),
+
+  resubmitDocument,
 
   createDraft: (payload: CreateCompanyRequestPayload) =>
     request<{ id: string }>('post', '/company-access-requests', payload),
