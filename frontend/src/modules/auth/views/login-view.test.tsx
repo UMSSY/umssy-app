@@ -23,6 +23,7 @@ vi.mock("../services/google-auth.service", () => ({
     promptSelectAccount: vi.fn(),
     loginWithGoogle: vi.fn(),
     linkGoogleAccount: vi.fn(),
+    confirmLink: vi.fn(),
   },
 }));
 
@@ -419,5 +420,96 @@ describe("LoginView", () => {
       expect(push).toHaveBeenCalledWith("/profile?tab=cv");
     });
     expect(sessionStorage.getItem("umssy_post_login_redirect")).toBeNull();
+  });
+
+  describe("vinculación de Google", () => {
+    const link = { linkToken: "link-token", email: "dania@gmail.com", emailVerified: true };
+
+    async function openLinkConfirmation() {
+      vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({ email: "dania@gmail.com", idToken: "cred" });
+      vi.mocked(googleAuthService.loginWithGoogle).mockResolvedValue({ success: true, requiresLinking: true, link });
+      vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+      render(<LoginView />);
+      fireEvent.click(screen.getByRole("button", { name: /continuar con google/i }));
+      await screen.findByRole("heading", { name: "Vincula tu cuenta de Google" });
+    }
+
+    it("una cuenta sin vincular muestra la confirmación y no abre sesión ni guarda el token", async () => {
+      await openLinkConfirmation();
+
+      expect(screen.getByText("dania@gmail.com")).toBeInTheDocument();
+      expect(screen.queryByPlaceholderText("nombre@ejemplo.com")).not.toBeInTheDocument();
+      expect(saveAccessToken).not.toHaveBeenCalled();
+      expect(googleAuthService.confirmLink).not.toHaveBeenCalled();
+      expect(JSON.stringify({ ...window.localStorage })).not.toContain("link-token");
+      expect(JSON.stringify({ ...window.sessionStorage })).not.toContain("link-token");
+    });
+
+    it("cancelar vuelve al formulario de inicio de sesión sin vincular", async () => {
+      await openLinkConfirmation();
+
+      fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+      expect(await screen.findByPlaceholderText("nombre@ejemplo.com")).toBeInTheDocument();
+      expect(googleAuthService.confirmLink).not.toHaveBeenCalled();
+      expect(saveAccessToken).not.toHaveBeenCalled();
+    });
+
+    it("elegir otra cuenta vuelve a abrir el selector de Google", async () => {
+      await openLinkConfirmation();
+
+      fireEvent.click(screen.getByRole("button", { name: "Elegir otra cuenta" }));
+
+      await waitFor(() => expect(googleAuthService.promptSelectAccount).toHaveBeenCalledTimes(2));
+    });
+
+    it("vincular y continuar abre la sesión, da la bienvenida y «Ir al inicio» respeta el destino", async () => {
+      window.history.replaceState({}, "", "/login?next=/profile");
+      vi.mocked(googleAuthService.confirmLink).mockResolvedValue({
+        success: true,
+        session: { accessToken: "linked-token", roleTag: "titulado", roles: ["titulado"] },
+      });
+      await openLinkConfirmation();
+
+      fireEvent.click(screen.getByRole("button", { name: "Vincular y continuar" }));
+
+      expect(await screen.findByRole("heading", { name: "¡Bienvenido de nuevo!" })).toBeInTheDocument();
+      expect(googleAuthService.confirmLink).toHaveBeenCalledWith("link-token");
+      expect(saveAccessToken).toHaveBeenCalledWith("linked-token");
+      expect(replace).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("button", { name: "Ir al inicio" }));
+      expect(replace).toHaveBeenCalledWith("/profile");
+    });
+
+    it("un token vencido pide iniciar con Google de nuevo", async () => {
+      vi.mocked(googleAuthService.confirmLink).mockResolvedValue({
+        success: false,
+        reason: "expired",
+        message: "Vuelve a iniciar con Google",
+      });
+      await openLinkConfirmation();
+
+      fireEvent.click(screen.getByRole("button", { name: "Vincular y continuar" }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent("Vuelve a iniciar con Google");
+      fireEvent.click(screen.getByRole("button", { name: "Iniciar con Google de nuevo" }));
+      await waitFor(() => expect(googleAuthService.promptSelectAccount).toHaveBeenCalledTimes(2));
+    });
+
+    it("la solicitud aún no aprobada se muestra en la pantalla de acceso no permitido", async () => {
+      vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({ email: "nuevo@gmail.com" });
+      vi.mocked(googleAuthService.loginWithGoogle).mockResolvedValue({
+        success: false,
+        reason: "not_registered",
+        message: "Tu solicitud aún no fue aprobada",
+      });
+      vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+      render(<LoginView />);
+
+      fireEvent.click(screen.getByRole("button", { name: /continuar con google/i }));
+
+      expect(await screen.findByText("Tu solicitud aún no fue aprobada")).toBeInTheDocument();
+    });
   });
 });

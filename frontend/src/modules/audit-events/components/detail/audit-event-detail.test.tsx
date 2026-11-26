@@ -53,6 +53,16 @@ describe("AuditEventDetailPanel", () => {
     expect(screen.getByText(/hora de Bolivia/)).toBeInTheDocument();
   });
 
+  it("muestra el nombre del responsable en negrita y su rol debajo", async () => {
+    mockDetail(DETAIL);
+    renderWithQuery(<AuditEventDetailPanel event={EVENT} onClose={vi.fn()} />);
+
+    const name = await screen.findByText("Admin Uno");
+    expect(name).toHaveClass("font-bold");
+    expect(name).not.toHaveClass("font-semibold");
+    expect(name.nextElementSibling).toHaveTextContent("Administrativo");
+  });
+
   it("enlaza a la revisión de la solicitud", async () => {
     mockDetail(DETAIL);
     renderWithQuery(<AuditEventDetailPanel event={EVENT} onClose={vi.fn()} />);
