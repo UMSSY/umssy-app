@@ -1,4 +1,5 @@
 import type { JobOfferSummary } from '../types/job-offer-summary.types.js';
+import type { CompanyActiveOffers } from '../types/company-active-offers.type.js';
 import { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
 import { Injectable } from '@nestjs/common';
 import {
@@ -44,6 +45,16 @@ export class JobOffersService {
   }
   findPublishedMatches(now: Date) {
     return this.matchSource.findPublished(now);
+  }
+
+  async countActiveOffersByCompany(
+    now: Date,
+  ): Promise<CompanyActiveOffers[]> {
+    const groups = await this.jobOffersRepository.countActiveByCompany(now);
+    return groups.map(({ companyId, _count }) => ({
+      companyId,
+      activeOffers: _count._all,
+    }));
   }
 
    async create(
