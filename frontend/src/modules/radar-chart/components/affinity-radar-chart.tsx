@@ -83,8 +83,8 @@ export function AffinityRadarChart({
       </div>
 
       {hasAreas && previousScores && onComparisonChange ? (
-        <div className="order-last mt-4 flex items-center justify-between gap-4 border-t border-border pt-3">
-          <div>
+        <div className="mt-4 flex min-h-12 items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
+          <div className="min-w-0">
             <Label
               htmlFor={comparisonId}
               className="cursor-pointer text-sm font-semibold text-ink"
