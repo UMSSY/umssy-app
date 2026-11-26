@@ -33,6 +33,7 @@ import { ChatModule } from './modules/chat/chat.module.js';
 import { ApplicationsModule } from './modules/applications/applications.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
+import { CompaniesModule } from './modules/companies/companies.module.js';
 import { NlpModule } from './modules/nlp/nlp.module.js';
 import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
 import { SurveysModule } from './modules/surveys/surveys.module.js';
@@ -71,6 +72,7 @@ import { CompanyAccessRequestsModule } from './modules/company-access-requests/c
     MatchingModule,
     ApplicationsModule,
     JobOffersModule,
+    CompaniesModule,
     NlpModule,
     RadarIntegrationModule,
     SurveysModule,

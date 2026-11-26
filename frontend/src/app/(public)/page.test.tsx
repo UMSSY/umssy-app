@@ -1,9 +1,13 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eventsService } from '@/modules/events';
+import { companiesService } from '@/modules/companies';
 import Home from './page';
 afterEach(() => vi.restoreAllMocks());
+beforeEach(() => {
+  vi.spyOn(companiesService, 'getFeaturedCompanies').mockResolvedValue([]);
+});
 describe('Public landing', () => {
   it('offers discovery before requesting an account', async () => {
     vi.spyOn(eventsService, 'getEvents').mockResolvedValue({
@@ -21,6 +25,12 @@ describe('Public landing', () => {
     expect(
       await screen.findByText('Aún no hay talleres publicados. Vuelve pronto.'),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Empresas destacadas' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Ver todas las empresas/ }),
+    ).toHaveAttribute('href', '/request-access');
   });
   it('offers a retry when published workshops cannot be loaded', async () => {
     const getEvents = vi
