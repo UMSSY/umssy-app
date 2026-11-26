@@ -11,9 +11,9 @@ export function CvGenerateCard() {
   return (
     <section
       aria-label="Generar CV con los datos del perfil"
-      className="flex flex-col justify-between gap-4 rounded-lg border border-border bg-surface p-5 sm:flex-row sm:items-center"
+      className="flex flex-col justify-between gap-4 rounded-lg border border-border bg-surface p-5 sm:flex-row sm:flex-wrap sm:items-center"
     >
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 basis-64">
         <h2 className="text-base font-semibold text-ink">
           ¿Sin CV? Crea uno con los datos de tu perfil
         </h2>

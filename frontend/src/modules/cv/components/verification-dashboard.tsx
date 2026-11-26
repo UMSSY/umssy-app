@@ -1,5 +1,5 @@
 'use client';
-import { Bell, Check, Eye, FileText, Trash2 } from 'lucide-react';
+import { Bell, Eye, FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ConfirmDeleteDialog, formatFileSize } from '@/modules/profile';
@@ -46,7 +46,7 @@ export function VerificationDashboard({
           role="status"
           className="flex flex-col items-start justify-between gap-3 rounded-lg bg-surface-soft p-3 sm:flex-row sm:items-center"
         >
-          <span className="min-w-0 break-words">
+          <span className="min-w-0 [overflow-wrap:anywhere]">
             {unread[0].filename} · {verificationLabels[unread[0].status]}
             {unread.length > 1
               ? ' · ' + unread.length + ' resultados nuevos'
@@ -69,7 +69,7 @@ export function VerificationDashboard({
               <li
                 key={d.id}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg border p-2',
+                  'grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-lg border p-2',
                   d.id === chosen?.id && 'border-accent bg-surface-soft',
                 )}
               >
@@ -79,22 +79,12 @@ export function VerificationDashboard({
                   className="block h-auto min-w-0 flex-1 text-left whitespace-normal"
                   onClick={() => setSelected(d.id)}
                 >
-                  <strong className="block break-words">{d.filename}</strong>
+                  <strong className="block [overflow-wrap:anywhere]">{d.filename}</strong>
                   <small>
                     {formatFileSize(d.sizeBytes)} ·{' '}
                     {formatUploadDate(new Date(d.createdAt))}
                   </small>
                 </Button>
-                <span className="hidden text-xs sm:block">
-                  {d.decidedAt ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-soft px-2 py-1 text-accent">
-                      <Check size={14} />
-                      Analizado automáticamente
-                    </span>
-                  ) : (
-                    verificationLabels[d.status]
-                  )}
-                </span>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -113,6 +103,9 @@ export function VerificationDashboard({
                 >
                   <Trash2 className="text-danger" />
                 </Button>
+                <span className="col-span-full min-w-0 text-xs">
+                  <VerificationBadge doc={d} />
+                </span>
               </li>
             ))}
           </ul>
@@ -125,7 +118,7 @@ export function VerificationDashboard({
         <section className="space-y-4 rounded-xl border bg-surface p-4">
           <VerificationFlow doc={chosen} />
           <div className="flex justify-center">
-            <Button className="w-full sm:w-auto" onClick={() => setHistoryOpen(true)}>
+            <Button className="h-auto w-full max-w-full whitespace-normal sm:w-auto" onClick={() => setHistoryOpen(true)}>
               <Bell size={18} /> Ver historial de verificaciones
             </Button>
           </div>
@@ -139,7 +132,7 @@ export function VerificationDashboard({
               <li key={d.id}>
                 <Button
                   variant="ghost"
-                  className="grid h-auto w-full grid-cols-[auto_1fr_auto] items-center gap-2 rounded-lg border p-3 text-left whitespace-normal sm:grid-cols-[auto_1fr_auto_auto]"
+                  className="grid h-auto w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-2 rounded-lg border p-3 text-left whitespace-normal sm:grid-cols-[auto_minmax(0,1fr)_auto]"
                   onClick={() => {
                     setHistoryOpen(false);
                     setDetailId(d.id);
@@ -147,14 +140,16 @@ export function VerificationDashboard({
                 >
                   <FileText aria-hidden="true" className="text-primary" />
                   <span className="min-w-0">
-                    <strong className="block break-words">{d.filename}</strong>
+                    <strong className="block [overflow-wrap:anywhere]">{d.filename}</strong>
                     <small>
                       {d.mime.split('/').at(-1)?.toUpperCase()} ·{' '}
                       {formatFileSize(d.sizeBytes)}
                     </small>
                   </span>
-                  <VerificationBadge doc={d} />
-                  <small className="col-span-full text-left sm:col-span-1 sm:text-right">
+                  <span className="col-span-full sm:col-span-1">
+                    <VerificationBadge doc={d} />
+                  </span>
+                  <small className="col-span-full text-right sm:col-span-1">
                     {formatUploadDate(new Date(d.decidedAt ?? d.createdAt))}
                   </small>
                 </Button>
