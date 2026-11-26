@@ -6,18 +6,17 @@ Public-facing catalog of open job vacancies for graduates and students ("Todas l
 
 This is a **frontend-only module**: there is no `backend/src/modules/vacancies`. The data comes from the published job offers of the [job-offers](../job-offers/README.md) module, and the application itself is created by [matching](../matching/README.md).
 
-Owner: group 5.
-
 ## Functionality
 
-| Feature                                                                          | Where                                                         |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| List all published, not expired vacancies as cards                               | `GET /job-offers`, `/vacancies`                               |
-| Search by title, company, description, modality, contract type or required skill | Client-side filter                                            |
-| Counter of found vacancies and empty states (no vacancies, no results)           | `VacanciesView`                                               |
-| Vacancy detail with conditions, description and required technologies            | Dialog on `/vacancies/[id]` (deep link)                       |
-| Publication and expiry dates of every vacancy                                    | Date badges and detail                                        |
-| Apply from the detail                                                            | `JobApplicationAction` from [matching](../matching/README.md) |
+| Feature                                                                          | Where                                                                                    |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| List all published, not expired vacancies as cards                               | `GET /job-offers`, `/vacancies`                                                          |
+| Search by title, company, description, modality, contract type or required skill | Client-side filter                                                                       |
+| Counter of found vacancies and empty states (no vacancies, no results)           | `VacanciesView`                                                                          |
+| Vacancy detail with conditions, description and required technologies            | Dialog on `/vacancies/[id]` (deep link)                                                  |
+| Entry points to the detail besides the cards                                     | New-vacancy notifications and "Ver vacante" in [applications](../applications/README.md) |
+| Publication and expiry dates of every vacancy                                    | Date badges and detail                                                                   |
+| Apply from the detail, or reach Mis postulaciones once applied                   | `JobApplicationAction` from [matching](../matching/README.md)                            |
 
 ## Architecture
 
@@ -61,7 +60,7 @@ sequenceDiagram
 
 - Only vacancies with status `Publicada` that have not expired are returned by the API, ordered by publication date (newest first). The frontend does not filter dates again.
 - The search is case-insensitive and looks into title, company, description, modality, contract type and the required skills.
-- A normal click on a card opens the detail as a dialog over the list without leaving the page. Each card keeps a real link to `/vacancies/<id>`: opening it directly (or in a new tab, or with a modifier key) shows the same dialog, and closing it returns to `/vacancies`. An id that is not in the list shows "Vacante no encontrada" and lets the person go back.
+- A normal click on a card opens the detail as a dialog over the list without leaving the page. Each card keeps a real link to `/vacancies/<id>`: opening it directly (or in a new tab, or with a modifier key) shows the same dialog, and closing it returns to `/vacancies`. An id that is not in the list (the vacancy expired, was closed or was withdrawn) shows "Esta vacante ya no está disponible" and lets the person go back. If the list itself cannot be loaded, only the load error with its retry button is shown, never that notice.
 - The apply button appears only for sessions whose role is `titulado` or `estudiante`. Other roles can read the catalog but cannot apply.
 - A vacancy without expiry date shows "Sin fecha de expiración". All dates are shown in Bolivia time.
 - Required skills are shown as light blue chips (availability tokens) in the card and as a list in the detail.

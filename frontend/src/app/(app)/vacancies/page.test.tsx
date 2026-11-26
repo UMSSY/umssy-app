@@ -90,7 +90,7 @@ describe("Vacancy routes", () => {
     const page = await VacancyDetailPage({ params: Promise.resolve({ id: "missing" }) });
     renderWithQuery(<AppLayout>{page}</AppLayout>);
 
-    expect(await screen.findByRole("heading", { name: "Vacante no encontrada" }, ASYNC_RENDER)).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Esta vacante ya no está disponible" }, ASYNC_RENDER)).toBeDefined();
     expect(screen.getByRole("navigation", { name: "Menú principal", hidden: true })).toBeDefined();
     expect(screen.getByRole("button", { name: "Volver al listado" })).toBeDefined();
   });

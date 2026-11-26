@@ -2,6 +2,7 @@ import { formatBoliviaDate } from "@/shared/utils/date-time";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsMobileListProps } from "../types/applications-mobile-list-props.types";
 import { ApplicationActions } from "./application-actions";
+import { VacancyClosedBadge } from "./vacancy-closed-badge";
 
 export function ApplicationsMobileList({
   applications,
@@ -21,6 +22,7 @@ export function ApplicationsMobileList({
         >
           <p className="font-semibold text-ink">{application.vacancyTitle}</p>
           <p className="text-sm text-text-secondary">{application.companyName}</p>
+          {application.vacancyAvailable ? null : <VacancyClosedBadge />}
           <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
             <span>
               {APPLICATION_MESSAGES.affinity}: {application.affinityPercentage}%
