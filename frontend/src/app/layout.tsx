@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import localFont from "next/font/local";
 import "./globals.css";
 import { RegisterServiceWorker } from "./register-service-worker";
@@ -45,7 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <Providers>
           <RegisterServiceWorker />
           {children}

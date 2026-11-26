@@ -20,8 +20,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { GoogleIcon } from '@/shared/components/icons/google-icon';
-import { googleAuthService } from '../services/google-auth.service';
+import { GoogleAccessDenied } from '../components/google-access-denied';
+import { GoogleLinkConfirmation } from '../components/google-link-confirmation';
+import { GoogleLoginButton } from '../components/google-login-button';
+import { useGoogleLogin } from '../hooks/use-google-login';
+import type { LoginResponse } from '../types/auth-types';
 import { useLogin } from '../hooks/use-login';
 import { useCredentialRestrictions } from '../hooks/use-credential-restrictions';
 import { CredentialRestrictionNotice } from '../components/credential-restriction-notice';
@@ -53,14 +56,7 @@ export function LoginView() {
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [accessDeniedState, setAccessDeniedState] = useState<{
-    reason: 'not_registered' | 'role_not_allowed';
-    message?: string;
-  } | null>(null);
-  const [googleError, setGoogleError] = useState<string | null>(null);
-
-  const isAccessDenied = accessDeniedState !== null;
+  const google = useGoogleLogin(handleGoogleSession);
 
   const [isExpiredNoticeVisible] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -75,7 +71,7 @@ export function LoginView() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    setGoogleError(null);
+    google.clearError();
     if (isLoading || isSigningIn || restrictions.isBlocked('login', email))
       return;
     const errors = validateLoginFields(email, password);
@@ -100,66 +96,11 @@ export function LoginView() {
     }
   }
 
-  async function handleGoogleLogin() {
-    setIsGoogleLoading(true);
-    setAccessDeniedState(null);
-    setGoogleError(null);
-
-    try {
-      const googleProfile = await googleAuthService.promptSelectAccount({
-        intent: 'login',
-      });
-      if (!googleProfile?.email) return;
-
-      const credential = googleProfile.idToken || googleProfile.credential;
-      const result = credential
-        ? await googleAuthService.loginWithGoogle(googleProfile.email, credential)
-        : await googleAuthService.loginWithGoogle(googleProfile.email);
-
-      if (result.success && result.session) {
-        setIsSigningIn(true);
-        await startSession(result.session.accessToken);
-        const next = new URLSearchParams(window.location.search).get(
-          NEXT_PARAM,
-        );
-        router.push(
-          resolvePostLoginPath(
-            result.session.roles ?? result.session.roleTag,
-            next,
-          ),
-        );
-      } else if (result.reason === 'role_not_allowed') {
-        setAccessDeniedState({
-          reason: 'role_not_allowed',
-          message:
-            result.message ||
-            'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
-        });
-      } else if (result.reason === 'not_registered') {
-        setAccessDeniedState({
-          reason: 'not_registered',
-          message:
-            result.message ||
-            'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.',
-        });
-      } else {
-        setGoogleError(
-          result.message ||
-            'Ocurrió un error al intentar iniciar sesión con Google.',
-        );
-      }
-    } catch (err: unknown) {
-      if (
-        err instanceof Error &&
-        err.message.includes('NEXT_PUBLIC_GOOGLE_CLIENT_ID')
-      ) {
-        setGoogleError(
-          'El servicio de inicio de sesión con Google no está disponible en este momento. Por favor, inicia sesión con tu correo y contraseña.',
-        );
-      }
-    } finally {
-      setIsGoogleLoading(false);
-    }
+  async function handleGoogleSession(session: LoginResponse) {
+    setIsSigningIn(true);
+    await startSession(session.accessToken);
+    const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
+    router.push(resolvePostLoginPath(session.roles ?? session.roleTag, next));
   }
 
   return (
@@ -183,68 +124,20 @@ export function LoginView() {
           Volver al inicio
         </Link>
         <div className="flex flex-1 items-center justify-center py-6 sm:py-12">
-          {isAccessDenied ? (
-            <div className="w-full max-w-login-form animate-in duration-300 ease-out fade-in slide-in-from-right-2">
-              <Link
-                href="/"
-                aria-label="UMSSY, volver al inicio"
-                className="mb-8 inline-block"
-              >
-                <BrandLogo priority className="w-56" />
-              </Link>
-              <h1 className="font-tight text-3xl font-extrabold text-ink md:text-4xl">
-                Acceso no permitido
-              </h1>
-              <p className="mt-3 mb-8 text-base leading-relaxed text-text-secondary">
-                {accessDeniedState?.reason === 'role_not_allowed'
-                  ? accessDeniedState.message ||
-                    'El acceso con Google solo está permitido para estudiantes, titulados y mentores. Si eres empresa o administrativo, por favor inicia sesión con tu correo electrónico y contraseña.'
-                  : 'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.'}
-              </p>
-              {accessDeniedState?.reason === 'role_not_allowed' ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="institutional"
-                    onClick={() => setAccessDeniedState(null)}
-                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase"
-                  >
-                    INICIAR SESIÓN CON CONTRASEÑA →
-                  </Button>
-                  <div className="mt-6 text-center">
-                    <Button
-                      type="button"
-                      variant="link"
-                      onClick={handleGoogleLogin}
-                      className="text-sm font-semibold text-accent hover:underline"
-                    >
-                      Probar con otra cuenta de Google
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="institutional"
-                    onClick={handleGoogleLogin}
-                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase"
-                  >
-                    PROBAR CON OTRA CUENTA →
-                  </Button>
-                  <div className="mt-6 text-center">
-                    <Button
-                      type="button"
-                      variant="link"
-                      onClick={() => setAccessDeniedState(null)}
-                      className="text-sm font-semibold text-accent hover:underline"
-                    >
-                      Volver a iniciar sesión
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
+          {google.linkRequest ? (
+            <GoogleLinkConfirmation
+              link={google.linkRequest}
+              nextPath={new URLSearchParams(window.location.search).get(NEXT_PARAM)}
+              onSessionStarted={() => setIsSigningIn(true)}
+              onCancel={google.clearLinkRequest}
+              onChooseAnother={() => void google.start()}
+            />
+          ) : google.accessDenied ? (
+            <GoogleAccessDenied
+              denied={google.accessDenied}
+              onRetryGoogle={() => void google.start()}
+              onBackToLogin={google.clearAccessDenied}
+            />
           ) : (
             <form
               onSubmit={handleSubmit}
@@ -411,11 +304,11 @@ export function LoginView() {
                 </Alert>
               ) : null}
 
-              {googleError ? (
+              {google.error ? (
                 <Alert className="mb-4 border-danger/25 bg-surface text-danger">
                   <CircleAlert aria-hidden="true" />
                   <AlertDescription className="font-medium text-danger">
-                    {googleError}
+                    {google.error}
                   </AlertDescription>
                 </Alert>
               ) : null}
@@ -423,7 +316,7 @@ export function LoginView() {
               <Button
                 type="submit"
                 variant="institutional"
-                disabled={isLoading || isGoogleLoading || isSigningIn || Boolean(loginRestriction)}
+                disabled={isLoading || google.isLoading || isSigningIn || Boolean(loginRestriction)}
                 className="h-12 w-full text-base font-extrabold tracking-wide uppercase"
               >
                 {isLoading ? (
@@ -436,32 +329,11 @@ export function LoginView() {
                 {!isLoading ? <ArrowRight aria-hidden="true" /> : null}
               </Button>
 
-              <div className="relative my-6 text-center text-xs text-text-secondary">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <span className="relative bg-surface px-3">o continúa con</span>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGoogleLogin}
-                disabled={isLoading || isGoogleLoading || isSigningIn || Boolean(loginRestriction)}
-                className="flex h-12 w-full items-center justify-center gap-3 rounded-lg border-border-strong bg-surface text-base font-semibold text-ink hover:bg-neutral-50"
-              >
-                {isGoogleLoading ? (
-                  <LoaderCircle
-                    aria-hidden="true"
-                    className="size-4 animate-spin"
-                  />
-                ) : (
-                  <GoogleIcon className="size-5" />
-                )}
-                {isGoogleLoading
-                  ? 'Conectando con Google...'
-                  : 'Continuar con Google'}
-              </Button>
+              <GoogleLoginButton
+                isLoading={google.isLoading}
+                disabled={isLoading || google.isLoading || isSigningIn || Boolean(loginRestriction)}
+                onClick={() => void google.start()}
+              />
 
               <p className="mt-8 border-t border-border pt-6 text-center text-sm text-text-secondary">
                 ¿Aún no tienes cuenta?{' '}
