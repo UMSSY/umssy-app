@@ -106,4 +106,3 @@ describe('offline passes owner', () => {
     expect(await readOwnedOfflinePasses('user-a')).toBeNull();
   });
 });
-

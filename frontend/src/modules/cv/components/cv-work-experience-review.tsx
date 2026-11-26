@@ -19,6 +19,7 @@ import { CvReviewItem } from "./cv-review-item";
 export function CvWorkExperienceReview({
   workExperiences = [],
   selected = [],
+  matchStatuses = [],
   onToggle,
   onChange,
 }: CvWorkExperienceReviewProps) {
@@ -33,6 +34,7 @@ export function CvWorkExperienceReview({
             title={`${title} · ${formatCvPeriod(experience.startDate, experience.endDate, experience.isCurrent)}`}
             isChecked={selected.includes(index)}
             isIncomplete={isCvWorkExperienceIncomplete(experience)}
+            matchStatus={matchStatuses[index]}
             onToggle={() => onToggle(index)}
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

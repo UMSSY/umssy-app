@@ -11,14 +11,20 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { getSafeMapsUrl } from "@/modules/job-offers";
+import { AppliedJobChip } from "@/modules/matching";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { PageHeading } from "@/shared/components/layout";
 import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
+import { CARD_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
 import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
+import { useOptionalAuth } from "@/shared/contexts/auth-context";
+import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { getInitials } from "@/shared/utils/get-initials";
 import { useVacancies } from "../hooks/use-vacancies";
+import { canApplyToVacancies, canApplyWithRoles } from "../utils/can-apply-to-vacancies";
 
 export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesViewProps = {}) {
+  const auth = useOptionalAuth();
   const [selectedId, setSelectedId] = useState<string | null>(initialVacancyId ?? null);
   function openVacancy(event: MouseEvent<HTMLAnchorElement>, id: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -29,6 +35,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
     setSelectedId(null);
     onInitialClose?.();
   }
+  const canApply = auth ? canApplyWithRoles(auth.roles) : canApplyToVacancies(getAccessToken());
   const { search, setSearch, vacancies, filteredVacancies, isLoading, isError, retry } = useVacancies();
 
   return (
@@ -80,10 +87,17 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
             const locationUrl = getSafeMapsUrl(vacancy.locationUrl);
 
             return (
-              <article key={vacancy.id} className={cn(VACANCY_CARD_CLASS, "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5")}>
+              <article
+                key={vacancy.id}
+                className={cn(
+                  VACANCY_CARD_CLASS,
+                  "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5",
+                  CARD_MOTION_CLASS,
+                )}
+              >
                 <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-lg bg-accent text-base font-bold text-surface">{getInitials(vacancy.companyName)}</div>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold text-ink"><Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className="underline-offset-4 hover:text-accent hover:underline">{vacancy.title}</Link></h2>
+                  <div className="flex flex-wrap items-center gap-2"><h2 className="text-lg font-semibold text-ink"><Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className="underline-offset-4 hover:text-accent hover:underline">{vacancy.title}</Link></h2>{canApply ? <AppliedJobChip jobOfferId={vacancy.id} /> : null}</div>
                   <p className="mt-1 text-sm font-medium text-ink-soft">{vacancy.companyName}</p>
                   <p className="mt-2 line-clamp-2 max-w-prose text-sm leading-relaxed text-text-secondary">{vacancy.description}</p>
                   <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
@@ -104,7 +118,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
         </div>
       )}
 
-      {selectedId !== null && !isLoading ? <VacancyDetailDialog vacancy={vacancies.find((item) => item.id === selectedId) ?? null} onClose={closeVacancy} /> : null}
+      {selectedId !== null && !isLoading && !isError ? <VacancyDetailDialog vacancy={vacancies.find((item) => item.id === selectedId) ?? null} onClose={closeVacancy} /> : null}
     </main>
   );
 }

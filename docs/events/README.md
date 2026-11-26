@@ -64,7 +64,7 @@ sequenceDiagram
 
 | Method | Path | Current use |
 | --- | --- | --- |
-| GET | `/api/events` | Catalogue with pagination, filters and `popular` or `recommended` ordering; bearer token optional. `includeProposals=true` adds voting proposals, while `statusId` selects one exact status, including expired proposals. Items include sessions and optional recommendation reasons. |
+| GET | `/api/events` | Catalogue with pagination, filters and `popular` or `recommended` ordering; bearer token optional. `includeProposals=true` adds voting proposals, while `statusId` selects one exact status, including expired proposals. `scope=finished` lists completed published workshops, newest first, when no `statusId` is supplied. Items include sessions and optional recommendation reasons. |
 | GET | `/api/events/:id` | Workshop or proposal detail. |
 | POST | `/api/event-proposals` | Submit a proposal as an authenticated `titulado`; multipart form with cover, UUID `Idempotency-Key` and optional `additionalSessions` JSON string. |
 | GET | `/api/events/:id/cover` | Retrieve a stored cover image. |
@@ -72,13 +72,31 @@ sequenceDiagram
 
 Successful JSON responses use the shared API envelope. The cover endpoint returns an image stream.
 
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Events API"]
+  API --> Service["Event service"]
+  Service --> Data[("Events")]
+  Service --> Related[("Categories and sessions")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
+## Action styling
+
+Public navigation and enrollment use non-destructive action colors. Cancelling an existing registration uses the destructive treatment because it invokes the registration DELETE endpoint.
+
 ## Sprint History
 
 ### Sprint 3
 
+- The landing page and public workshop list share a card grid with one column on phones, two from the small breakpoint and three from the large breakpoint. The public list enables workshop covers. On narrow screens, the detail page stacks the date, time, location and sign-in action.
 - Proposal expiry gained a periodic five-minute backend job independent of catalogue reads.
 - Proposals gained multiple nonoverlapping sessions, while the event's original date and time columns retain the first session. Catalogue ordering gained popularity and profile recommendations.
 - The catalogue gained the `Propuestas vencidas` filter backed by `statusId`. Without a status filter it shows published workshops and, with `includeProposals=true`, proposals still in voting; expired proposals stay outside the general catalogue.
+- A workshop with sessions moves to the finished catalogue and registration history after its last session ends. A workshop without session rows uses its original event date and end time.
 - The organizer flow gained `Mis talleres`, its published-owner lookup and a desktop QR link to the mobile attendance screen.
 - Saved passes gained the `/offline/passes` route, served by the service worker when `Mis inscripciones` cannot load, and readable only by the user who owns the offline session.
 - Attendance validation remains online and is documented with the registration module.

@@ -1,13 +1,14 @@
-import type { MentorDirectoryGridProps } from "../../types/mentor-directory-grid-props.types";
+import type { MentorDirectoryGridProps } from '../../types/mentor-directory-grid-props.types';
 
-import { MentorCard } from "./mentor-card";
+import { MentorCard } from './mentor-card';
 
 export function MentorDirectoryGrid({
   mentors,
   currentUserId,
-  returnTo = "/mentorship/mentors",
+  returnTo = '/mentorship/mentors',
   showAffinityBadge = false,
   selectedArea,
+  radarAreas,
   highlightAvailability = false,
 }: MentorDirectoryGridProps) {
   return (
@@ -23,7 +24,11 @@ export function MentorDirectoryGrid({
             isOwnProfile={currentUserId === mentor.id}
             returnTo={returnTo}
             showAffinityBadge={showAffinityBadge}
-            selectedArea={selectedArea}
+            selectedArea={
+              radarAreas?.find((area) =>
+                mentor.technicalAreas.includes(area),
+              ) ?? selectedArea
+            }
             highlightAvailability={highlightAvailability}
           />
         ))}

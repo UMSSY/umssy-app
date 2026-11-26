@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useRef, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,15 +18,14 @@ import { useRequestPasswordReset } from "../hooks/use-request-password-reset";
 import { useVerifyPasswordReset } from "../hooks/use-verify-password-reset";
 import { useResetPassword } from "../hooks/use-reset-password";
 
-const INITIAL_COUNTDOWN_SECONDS = 300;
-const RESEND_COOLDOWN_SECONDS = 120;
-const TRANSITION_DURATION_MS = 200;
-
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-}
+import { useCredentialRestrictions } from "../hooks/use-credential-restrictions";
+import { formatRemainingTime } from "../utils/format-remaining-time";
+import {
+  PASSWORD_RECOVERY_CODE_SECONDS,
+  PASSWORD_RECOVERY_RESEND_SECONDS,
+  PASSWORD_RECOVERY_TRANSITION_MS,
+  PASSWORD_RECOVERY_COOLDOWN_MESSAGE,
+} from "../constants/password-recovery.constants";
 
 export function ForgotPasswordView() {
   const router = useRouter();
@@ -39,8 +38,11 @@ export function ForgotPasswordView() {
 
   const [otpCode, setOtpCode] = useState("");
   const [otpError, setOtpError] = useState("");
-  const [countdown, setCountdown] = useState(INITIAL_COUNTDOWN_SECONDS);
-  const [resendCooldown, setResendCooldown] = useState(0);
+  const [countdown, setCountdown] = useState(PASSWORD_RECOVERY_CODE_SECONDS);
+  const [codeExpiresAt, setCodeExpiresAt] = useState<number | null>(null);
+  const [resendError, setResendError] = useState("");
+  const inFlight = useRef(false);
+  const restrictions = useCredentialRestrictions();
   const [isResent, setIsResent] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
@@ -51,6 +53,32 @@ export function ForgotPasswordView() {
   const resendHook = useRequestPasswordReset();
   const verifyHook = useVerifyPasswordReset();
   const resetHook = useResetPassword();
+  const requestRestriction = restrictions.getRestriction("request", email);
+  const verificationRestriction = restrictions.getRestriction("verify", email);
+  const confirmationRestriction = verificationRestriction ?? restrictions.getRestriction("reset", email);
+  const resendCooldown = requestRestriction?.remainingSeconds ?? 0;
+
+  async function runOperation<T>(action: () => Promise<T>): Promise<T | undefined> {
+    if (inFlight.current || isExiting) return undefined;
+    inFlight.current = true;
+    try {
+      return await action();
+    } finally {
+      inFlight.current = false;
+    }
+  }
+
+  function startCodeCountdown() {
+    const now = Date.now();
+    setCodeExpiresAt(now + PASSWORD_RECOVERY_CODE_SECONDS * 1000);
+    setCountdown(PASSWORD_RECOVERY_CODE_SECONDS);
+    restrictions.restrict(email, {
+      code: "PASSWORD_RESET_COOLDOWN",
+      operation: "request",
+      retryAt: now + PASSWORD_RECOVERY_RESEND_SECONDS * 1000,
+      retryAfterSeconds: PASSWORD_RECOVERY_RESEND_SECONDS,
+    }, PASSWORD_RECOVERY_COOLDOWN_MESSAGE);
+  }
 
   function goToStep(nextStep: ForgotPasswordStep, direction: "forward" | "backward" = "forward") {
     setTransitionDirection(direction);
@@ -58,32 +86,30 @@ export function ForgotPasswordView() {
     setTimeout(() => {
       setStep(nextStep);
       setIsExiting(false);
-    }, TRANSITION_DURATION_MS);
+    }, PASSWORD_RECOVERY_TRANSITION_MS);
   }
 
   useEffect(() => {
-    if (step !== "verify" || countdown <= 0) return;
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [step, countdown]);
-
-  useEffect(() => {
-    if (step !== "verify" || resendCooldown <= 0) return;
-
-    const cooldownTimer = setInterval(() => {
-      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(cooldownTimer);
-  }, [step, resendCooldown]);
+    if (step !== "verify" || codeExpiresAt === null) return;
+    const refreshCountdown = () => {
+      const remaining = Math.max(0, Math.ceil((codeExpiresAt - Date.now()) / 1000));
+      setCountdown(remaining);
+      if (remaining === 0) window.clearInterval(timer);
+    };
+    const timer = window.setInterval(refreshCountdown, 1000);
+    window.addEventListener("focus", refreshCountdown);
+    document.addEventListener("visibilitychange", refreshCountdown);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshCountdown);
+      document.removeEventListener("visibilitychange", refreshCountdown);
+    };
+  }, [step, codeExpiresAt]);
 
   async function handleRequestCode(event: FormEvent) {
     event.preventDefault();
     const trimmedEmail = email.trim();
+    if (restrictions.isBlocked("request", trimmedEmail)) return;
     if (!trimmedEmail) {
       setEmailError("Ingresa tu correo electrónico");
       return;
@@ -95,21 +121,23 @@ export function ForgotPasswordView() {
     }
 
     setEmailError("");
-    const res = await requestHook.requestResetCode({ email: trimmedEmail });
+    const res = await runOperation(() => requestHook.requestResetCode({ email: trimmedEmail }));
+    if (!res) return;
     if (res.ok) {
-      setCountdown(INITIAL_COUNTDOWN_SECONDS);
-      setResendCooldown(0);
+      startCodeCountdown();
+      setResendError("");
       setOtpCode("");
       setOtpError("");
       setIsResent(false);
       goToStep("verify", "forward");
     } else {
-      setEmailError(res.error);
+      if (!restrictions.restrict(trimmedEmail, res.restriction, res.error)) setEmailError(res.error);
     }
   }
 
   async function handleVerifyCode(event: FormEvent) {
     event.preventDefault();
+    if (restrictions.isBlocked("verify", email)) return;
     if (otpCode.length < 6) {
       setOtpError("Ingresa el código completo de 6 dígitos");
       return;
@@ -120,33 +148,37 @@ export function ForgotPasswordView() {
     }
 
     setOtpError("");
-    const res = await verifyHook.verifyResetCode({ email: email.trim(), code: otpCode });
+    const res = await runOperation(() => verifyHook.verifyResetCode({ email: email.trim(), code: otpCode }));
+    if (!res) return;
     if (res.ok) {
       setPasswordError("");
       setNewPassword("");
       setConfirmPassword("");
       goToStep("reset", "forward");
     } else {
-      setOtpError(res.error);
+      if (!restrictions.restrict(email, res.restriction, res.error)) setOtpError(res.error);
     }
   }
 
   async function handleResend() {
-    if (resendCooldown > 0 || resendHook.isLoading) return;
-    const res = await resendHook.requestResetCode({ email: email.trim() });
+    if (restrictions.isBlocked("request", email)) return;
+    setResendError("");
+    const res = await runOperation(() => resendHook.requestResetCode({ email: email.trim() }));
+    if (!res) return;
     if (res.ok) {
-      setCountdown(INITIAL_COUNTDOWN_SECONDS);
-      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      startCodeCountdown();
       setOtpCode("");
       setOtpError("");
       setIsResent(true);
     } else {
-      setOtpError(res.error);
+      setIsResent(false);
+      if (!restrictions.restrict(email, res.restriction, res.error)) setResendError(res.error);
     }
   }
 
   async function handleResetPassword(event: FormEvent) {
     event.preventDefault();
+    if (restrictions.isBlocked("reset", email) || restrictions.isBlocked("verify", email)) return;
 
     if (getPasswordRules(newPassword).some((rule) => !rule.met)) {
       setPasswordError("La contraseña no cumple con los requisitos de seguridad.");
@@ -158,15 +190,16 @@ export function ForgotPasswordView() {
     }
 
     setPasswordError("");
-    const res = await resetHook.resetPassword({
+    const res = await runOperation(() => resetHook.resetPassword({
       email: email.trim(),
       code: otpCode,
       password: newPassword,
-    });
+    }));
+    if (!res) return;
     if (res.ok) {
       goToStep("success", "forward");
     } else {
-      setPasswordError(res.error);
+      if (!restrictions.restrict(email, res.restriction, res.error)) setPasswordError(res.error);
     }
   }
 
@@ -183,7 +216,7 @@ export function ForgotPasswordView() {
         />
       </aside>
 
-      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-10 xl:px-12">
+      <div className="flex min-h-dvh flex-col px-4 py-5 sm:px-8 sm:py-9 lg:px-10 xl:px-12">
         <div className="mb-2 flex h-8 items-center transition-opacity duration-200">
           {step === "request" && (
             <Link
@@ -199,9 +232,13 @@ export function ForgotPasswordView() {
             <Button
               type="button"
               variant="link"
+              disabled={verifyHook.isLoading || resendHook.isLoading || isExiting}
               onClick={() => {
                 goToStep("request", "backward");
                 setOtpError("");
+                setOtpCode("");
+                setEmailError("");
+                setResendError("");
               }}
               className="flex h-auto items-center gap-2 p-0 text-sm font-medium text-accent hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
             >
@@ -231,7 +268,8 @@ export function ForgotPasswordView() {
                 emailError={emailError}
                 setEmailError={setEmailError}
                 onSubmit={handleRequestCode}
-                isPending={requestHook.isLoading}
+                restriction={requestRestriction}
+                isPending={requestHook.isLoading || isExiting}
               />
             )}
 
@@ -244,11 +282,14 @@ export function ForgotPasswordView() {
                 otpError={otpError}
                 setOtpError={setOtpError}
                 countdown={countdown}
-                formattedCountdown={formatTime(countdown)}
+                formattedCountdown={formatRemainingTime(countdown)}
                 resendCooldown={resendCooldown}
-                formattedCooldown={formatTime(resendCooldown)}
+                formattedCooldown={formatRemainingTime(resendCooldown)}
+                verificationRestriction={verificationRestriction}
+                requestRestriction={requestRestriction}
+                resendError={resendError}
                 isResent={isResent}
-                isPending={verifyHook.isLoading}
+                isPending={verifyHook.isLoading || isExiting}
                 isResending={resendHook.isLoading}
                 onSubmit={handleVerifyCode}
                 onResend={handleResend}
@@ -263,7 +304,8 @@ export function ForgotPasswordView() {
                 setConfirmPassword={setConfirmPassword}
                 passwordError={passwordError}
                 setPasswordError={setPasswordError}
-                isPending={resetHook.isLoading}
+                restriction={confirmationRestriction}
+                isPending={resetHook.isLoading || isExiting}
                 onSubmit={handleResetPassword}
               />
             )}

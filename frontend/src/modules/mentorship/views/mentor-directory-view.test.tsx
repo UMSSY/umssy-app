@@ -73,6 +73,8 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
         name: "Cloud",
         description: null,
       },
+      { id: "area-web", name: "Desarrollo Web", description: null },
+      { id: "area-qa", name: "QA", description: null },
     ],
     isTechnicalAreasLoading: false,
     isTechnicalAreasError: false,
@@ -105,6 +107,83 @@ beforeEach(() => {
   navigationMocks.prefetch.mockReset();
   navigationMocks.pathname = "/mentorship/mentors";
   navigationMocks.search = "";
+});
+
+it("limpia solo la búsqueda y mantiene la especialidad activa", async () => {
+  navigationMocks.search = "?area=Cloud&areaId=area-cloud&search=Ana";
+  vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  render(<MentorDirectoryView />);
+  fireEvent.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
+  await waitFor(() => expect(navigationMocks.replace).toHaveBeenCalled());
+  const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
+  expect(destination.searchParams.get("area")).toBe("Cloud");
+  expect(destination.searchParams.get("areaId")).toBe("area-cloud");
+  expect(destination.searchParams.has("search")).toBe(false);
+});
+
+it("preselecciona el catálogo real desde el radar y conserva el contexto", async () => {
+  navigationMocks.search = "?radarArea=cloud-devops";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  render(<MentorDirectoryView />);
+  await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({ area: "area-cloud", available: true }), expect.anything()));
+  expect(await screen.findByRole("heading", { name: "No hay mentores disponibles en Cloud/DevOps" })).toBeInTheDocument();
+  expect(navigationMocks.replace).toHaveBeenCalledWith(expect.stringContaining("areaId=area-cloud"), { scroll: false });
+  expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
+});
+
+it("no presenta otra especialidad cuando falta el área del radar en el catálogo", () => {
+  navigationMocks.search = "?radarArea=ciberseguridad";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage(mentors));
+  render(<MentorDirectoryView />);
+  expect(screen.getByRole("status")).toHaveTextContent("La especialidad Ciberseguridad no está registrada en el catálogo");
+  expect(get).not.toHaveBeenCalled();
+  expect(screen.queryByText(mentors[0].fullName)).not.toBeInTheDocument();
+});
+
+it.each([
+  ["Ciberseguridad", "ciberseguridad"],
+  ["Gobernanza TI", "gobernanza-ti"],
+])("distingue %s ausente al cambiar el filtro desde un eje registrado", async (name, id) => {
+  navigationMocks.search = "?radarArea=cloud-devops";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  const view = render(<MentorDirectoryView />);
+  await screen.findByRole("heading", { name: "No hay mentores disponibles en Cloud/DevOps" });
+  get.mockClear();
+
+  await userEvent.click(screen.getByRole("combobox", { name: "Área técnica" }));
+  await userEvent.click(await screen.findByRole("option", { name }));
+  const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
+  expect(destination.searchParams.get("radarArea")).toBe(id);
+  expect(destination.searchParams.has("areaId")).toBe(false);
+  applyNavigation(view.rerender);
+
+  expect(screen.getByRole("status")).toHaveTextContent(`La especialidad ${name} no está registrada en el catálogo`);
+  expect(get).not.toHaveBeenCalled();
+});
+
+it("exige disponibilidad desde el radar aunque la URL solicite lo contrario", async () => {
+  navigationMocks.search = "?radarArea=cloud-devops&available=false";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  render(<MentorDirectoryView />);
+  await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({ available: true }), expect.anything()));
+  expect(screen.getByRole("checkbox")).toHaveAttribute("aria-disabled", "true");
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(screen.getByRole("checkbox")).toBeChecked();
+});
+
+it("conserva disponibilidad obligatoria al limpiar filtros y elegir todas las áreas en HU2", async () => {
+  navigationMocks.search = "?hu2=radar&area=Cloud&areaId=area-cloud&available=false";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  const { rerender } = render(<MentorDirectoryView />);
+  fireEvent.click(screen.getByRole("button", { name: /^Limpiar$/ }));
+  const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
+  expect(destination.searchParams.get("hu2")).toBe("radar");
+  expect(destination.searchParams.has("area")).toBe(false);
+  expect(destination.searchParams.has("areaId")).toBe(false);
+  expect(destination.searchParams.has("available")).toBe(false);
+  applyNavigation(rerender);
+  await waitFor(() => expect(get).toHaveBeenLastCalledWith(expect.objectContaining({ area: "", available: true }), expect.anything()));
+  expect(screen.getByRole("checkbox")).toHaveAttribute("aria-disabled", "true");
 });
 
 const ownId = "0424f370-00f0-43cf-9b8a-997af81840b9";
@@ -147,6 +226,40 @@ function makeDirectoryPage(
     ...overrides,
   };
 }
+
+it("muestra mentores exclusivos de Backend y Desarrollo Web desde Desarrollo", async () => {
+  navigationMocks.search = "?radarArea=desarrollo&search=Senior";
+  const candidates = [
+    mentors[0],
+    { ...mentors[1], isAvailable: true, technicalAreas: ["Desarrollo Web"] },
+    { ...mentors[1], id: "qa", fullName: "Mentor QA", isAvailable: true, technicalAreas: ["QA"] },
+    { ...mentors[1], id: "unavailable", fullName: "Mentor sin disponibilidad", technicalAreas: ["Backend"] },
+  ];
+  const areaIds = new Map([["Backend", "area-backend"], ["Desarrollo Web", "area-web"], ["QA", "area-qa"]]);
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockImplementation(async params =>
+    makeDirectoryPage(candidates.filter(mentor =>
+      (!params.available || mentor.isAvailable) &&
+      mentor.technicalAreas.some(area => params.areaIds?.includes(areaIds.get(area) ?? "")),
+    )),
+  );
+
+  render(<MentorDirectoryView />);
+
+  for (const mentor of candidates.slice(0, 2)) {
+    const link = await screen.findByRole("link", { name: `Ver perfil de ${mentor.fullName}` });
+    const destination = new URL(link.getAttribute("href")!, "http://localhost");
+    expect(destination.searchParams.get("returnTo")).toContain("radarArea=desarrollo");
+    expect(destination.searchParams.get("returnTo")).toContain("search=Senior");
+  }
+  expect(get).toHaveBeenCalledWith(expect.objectContaining({
+    area: "",
+    areaIds: ["area-web", "area-backend"],
+    available: true,
+    search: "Senior",
+  }), expect.any(AbortSignal));
+  expect(screen.queryByText("Mentor QA")).not.toBeInTheDocument();
+  expect(screen.queryByText("Mentor sin disponibilidad")).not.toBeInTheDocument();
+});
 
 /**
  * Simula la respuesta paginada de la API.
@@ -331,7 +444,9 @@ describe("MentorDirectoryView", () => {
       name: "Filtros de mentores",
     });
 
-    expect(filters).toHaveClass("flex", "flex-wrap");
+    const orientation = within(filters).getByRole("combobox", { name: "Orientación" });
+    expect(filters).toHaveClass("border", "rounded-lg", "flex-col", "lg:flex-row");
+    expect(within(filters).queryByRole("button", { name: "Todas las áreas" })).not.toBeInTheDocument();
 
     expect(
       within(filters).getByRole("searchbox", {
@@ -345,11 +460,7 @@ describe("MentorDirectoryView", () => {
       }),
     ).toBeVisible();
 
-    expect(
-      within(filters).getByRole("combobox", {
-        name: "Orientación",
-      }),
-    ).toBeVisible();
+    expect(orientation).toBeVisible();
 
     const checkbox = within(filters).getByRole("checkbox", {
       name: "Solo disponibles",
@@ -1050,13 +1161,61 @@ it("recibe el área del radar, mantiene disponibles y permite cambiar de compete
   navigationMocks.search = "?area=Desarrollo&from=radar&available=false";
   const query = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
   const view = render(<MentorDirectoryView />);
-  await waitFor(() => expect(query).toHaveBeenCalledWith(expect.objectContaining({ area: "Desarrollo", available: true }), expect.anything()));
+  await waitFor(() => expect(query).toHaveBeenCalledWith(expect.objectContaining({
+    area: "",
+    areaIds: ["area-web", "area-backend"],
+    available: true,
+  }), expect.anything()));
   expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
   expect(screen.getByRole("checkbox", { name: "Solo disponibles" })).toHaveAttribute("aria-disabled", "true");
-  fireEvent.click(screen.getByRole("button", { name: "QA" }));
+  await userEvent.click(screen.getByRole("combobox", { name: "Área técnica" }));
+  await userEvent.click(await screen.findByRole("option", { name: "QA" }));
   applyNavigation(view.rerender);
-  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "QA", available: true }), expect.anything()));
-  fireEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "area-qa", available: true }), expect.anything()));
+  await userEvent.click(screen.getByRole("combobox", { name: "Área técnica" }));
+  await userEvent.click(await screen.findByRole("option", { name: "Todas" }));
   applyNavigation(view.rerender);
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "", available: true }), expect.anything()));
+});
+
+
+it("pagina ocho mentores de seis en seis y conserva filtros al navegar", async () => {
+  navigationMocks.search = "?search=Mentor&orientation=Orientación+técnica&sort=name_asc";
+  const candidates = Array.from({ length: 8 }, (_, index) => ({
+    ...mentors[0],
+    id: `mentor-${index + 1}`,
+    fullName: `Mentor ${index + 1}`,
+  }));
+  const query = vi.spyOn(directoryService, "getMentorDirectory").mockImplementation(async (params) =>
+    makeDirectoryPage(candidates.slice((params.page - 1) * 6, params.page * 6), {
+      page: params.page,
+      pageSize: 6,
+      totalItems: 8,
+      totalPages: 2,
+      effectiveSort: params.sort,
+    }),
+  );
+  const view = render(<MentorDirectoryView />);
+  expect(await screen.findAllByRole("link", { name: /Ver perfil de Mentor/ })).toHaveLength(6);
+  expect(screen.getByText("Mostrando 1–6 de 8 mentores")).toBeVisible();
+  await userEvent.click(screen.getByRole("button", { name: "Página siguiente" }));
+  applyNavigation(view.rerender);
+  await screen.findByText("Mostrando 7–8 de 8 mentores");
+  expect(screen.getAllByRole("link", { name: /Ver perfil de Mentor/ })).toHaveLength(2);
+  expect(query).toHaveBeenLastCalledWith(expect.objectContaining({
+    page: 2, search: "Mentor", orientation: "Orientación técnica", sort: "name_asc",
+  }), expect.any(AbortSignal));
+  await userEvent.click(screen.getByRole("button", { name: "Página anterior" }));
+  applyNavigation(view.rerender);
+  await screen.findByText("Mostrando 1–6 de 8 mentores");
+  await userEvent.click(screen.getByRole("button", { name: "Página siguiente" }));
+  applyNavigation(view.rerender);
+  await screen.findByText("Mostrando 7–8 de 8 mentores");
+  fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), {
+    target: { value: "name_desc" },
+  });
+  applyNavigation(view.rerender);
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({
+    page: 1, search: "Mentor", orientation: "Orientación técnica", sort: "name_desc",
+  }), expect.any(AbortSignal)));
 });

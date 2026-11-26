@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AUDIT_PAGE_SIZE, EMPTY_VALUE } from "../../constants/audit-log.constants";
@@ -18,6 +19,7 @@ export function AuditEventTable({
   isLoading = false,
   loadingEvidenceId,
   onOpenEvidence,
+  onSelectEvent,
 }: AuditEventListProps) {
   return (
     <Table>
@@ -44,14 +46,27 @@ export function AuditEventTable({
               </TableRow>
             ))
           : items.map((event) => (
-              <TableRow key={event.id} className="border-border">
+              <TableRow
+                key={event.id}
+                className="cursor-pointer border-border"
+                onClick={() => onSelectEvent(event)}
+              >
                 <TableCell className={CELL_CLASS}>
                   <AuditEventDate occurredAt={event.occurredAt} />
                 </TableCell>
                 <TableCell className={CELL_CLASS}>
-                  <span className="font-bold text-ink">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={(clickEvent) => {
+                      clickEvent.stopPropagation();
+                      onSelectEvent(event);
+                    }}
+                    className="h-auto px-0 text-sm font-bold text-ink"
+                  >
                     {event.request.code || EMPTY_VALUE}
-                  </span>
+                    <span className="sr-only"> · ver detalle del evento</span>
+                  </Button>
                 </TableCell>
                 <TableCell className={CELL_CLASS}>
                   <AuditActionBadge action={event.action} />
@@ -66,7 +81,10 @@ export function AuditEventTable({
                 >
                   {event.detail || EMPTY_VALUE}
                 </TableCell>
-                <TableCell className={CELL_CLASS}>
+                <TableCell
+                  className={CELL_CLASS}
+                  onClick={(clickEvent) => clickEvent.stopPropagation()}
+                >
                   <EvidenceButton
                     event={event}
                     isLoading={loadingEvidenceId === event.id}

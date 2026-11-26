@@ -104,7 +104,8 @@ export function VacancyCard({
               type="button"
               size="sm"
               aria-label={`Cerrar vacante ${offer.title}`}
-              className="cursor-pointer bg-blue-600 text-white hover:bg-blue-700 hover:text-white max-md:h-11"
+              variant="default"
+              className="max-md:h-11"
               onClick={() => onClose(offer)}
             >
               Cerrar

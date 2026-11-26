@@ -15,7 +15,7 @@ import type { RequestTableProps } from "../../types/request-table-props.types";
 
 const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[11.5px] font-semibold text-ink-soft";
 const CELL_CLASS =
-  "px-5 lg:px-4 text-sm text-ink max-md:block max-md:p-0 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:font-semibold max-md:before:text-text-secondary max-md:before:content-[attr(data-label)]";
+  "px-5 lg:px-4 text-sm text-ink @max-[65rem]/requests:block @max-[65rem]/requests:p-0 @max-[65rem]/requests:before:mb-0.5 @max-[65rem]/requests:before:block @max-[65rem]/requests:before:text-xs @max-[65rem]/requests:before:font-semibold @max-[65rem]/requests:before:text-text-secondary @max-[65rem]/requests:before:content-[attr(data-label)]";
 const WRAP_CLASS = "whitespace-normal break-words";
 const TABLE_COLUMN_COUNT = 8;
 // Estado, Enviada y Coincidencia se desbordaban sobre la columna vecina con sus textos más largos
@@ -23,83 +23,85 @@ const COLUMN_WIDTHS = ["w-[19%]", "w-[9%]", "w-[13%]", "w-[11%]", "w-[10%]", "w-
 
 export function RequestTable({ items = [], isLoading = false }: RequestTableProps) {
   return (
-    <Table className="min-w-[1040px] table-fixed max-md:block max-md:min-w-0">
-      <TableHeader className="bg-surface-soft max-md:hidden">
-        <TableRow className="hover:bg-transparent">
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[0])}>Solicitante</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[1])}>Código SIS</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[2])}>Carrera</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[3])}>Documento</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[4])}>Enviada</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[5])}>Estado</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[6])}>Coincidencia</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[7], "text-right")}>Acción</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody className="max-md:block">
-        {isLoading
-          ? Array.from({ length: REVIEW_PAGE_SIZE / 2 }, (_, index) => (
-              <TableRow key={index} data-testid="request-skeleton-row" className="h-[60px] border-border max-md:block max-md:h-auto max-md:space-y-2 max-md:p-4">
-                {Array.from({ length: TABLE_COLUMN_COUNT }, (_, cell) => (
-                  <TableCell key={cell} className={CELL_CLASS}>
-                    <Skeleton className="h-5 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          : items.map((item) => (
-              <TableRow key={item.id} className="h-[60px] border-border max-md:grid max-md:h-auto max-md:grid-cols-2 max-md:gap-x-4 max-md:gap-y-3 max-md:p-4">
-                <TableCell className={cn(CELL_CLASS, WRAP_CLASS, "max-md:col-span-2 max-md:before:hidden")}>
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-soft text-sm font-bold text-ink"
-                      aria-hidden="true"
-                    >
-                      {getInitials(item.fullName)}
-                    </span>
-                    <div className="flex min-w-0 flex-col">
-                      <span className="font-semibold text-ink">{item.fullName}</span>
-                      <span className="truncate text-sm text-text-secondary" title={item.email}>
-                        {item.email}
+    <div className="@container/requests min-w-0">
+      <Table className="min-w-[1040px] table-fixed @max-[65rem]/requests:block @max-[65rem]/requests:min-w-0">
+        <TableHeader className="bg-surface-soft @max-[65rem]/requests:hidden">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[0])}>Solicitante</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[1])}>Código SIS</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[2])}>Carrera</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[3])}>Documento</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[4])}>Enviada</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[5])}>Estado</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[6])}>Coincidencia</TableHead>
+            <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[7], "text-right")}>Acción</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="@max-[65rem]/requests:block">
+          {isLoading
+            ? Array.from({ length: REVIEW_PAGE_SIZE / 2 }, (_, index) => (
+                <TableRow key={index} data-testid="request-skeleton-row" className="h-[60px] border-border @max-[65rem]/requests:block @max-[65rem]/requests:h-auto @max-[65rem]/requests:space-y-2 @max-[65rem]/requests:p-4">
+                  {Array.from({ length: TABLE_COLUMN_COUNT }, (_, cell) => (
+                    <TableCell key={cell} className={CELL_CLASS}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            : items.map((item) => (
+                <TableRow key={item.id} className="h-[60px] border-border @max-[65rem]/requests:grid @max-[65rem]/requests:h-auto @max-[65rem]/requests:grid-cols-2 @max-[65rem]/requests:gap-x-4 @max-[65rem]/requests:gap-y-3 @max-[65rem]/requests:p-4">
+                  <TableCell className={cn(CELL_CLASS, WRAP_CLASS, "@max-[65rem]/requests:col-span-2 @max-[65rem]/requests:before:hidden")}>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-soft text-sm font-bold text-ink"
+                        aria-hidden="true"
+                      >
+                        {getInitials(item.fullName)}
                       </span>
+                      <div className="flex min-w-0 flex-col">
+                        <span className="font-semibold text-ink">{item.fullName}</span>
+                        <span className="truncate text-sm text-text-secondary" title={item.email}>
+                          {item.email}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell data-label="Código SIS" className={CELL_CLASS}>
-                  {item.sisCode}
-                </TableCell>
-                <TableCell data-label="Carrera" className={cn(CELL_CLASS, WRAP_CLASS, "max-md:col-span-2 max-md:row-start-3")}>
-                  {item.career}
-                </TableCell>
-                <TableCell data-label="Documento" className={cn(CELL_CLASS, WRAP_CLASS, "max-md:col-span-2")}>
-                  <span className="inline-flex items-center gap-1.5">
-                    <FileText className="size-4 shrink-0 text-text-secondary" strokeWidth={1.75} aria-hidden="true" />
-                    {item.documentType ? (DOCUMENT_TYPE_LABELS[item.documentType] ?? item.documentType) : "Sin documento"}
-                  </span>
-                </TableCell>
-                <TableCell data-label="Enviada" className={cn(CELL_CLASS, WRAP_CLASS, "text-text-secondary max-md:col-start-2 max-md:row-start-2")}>
-                  {formatRelativeTime(item.submittedAt)}
-                </TableCell>
-                <TableCell data-label="Estado" className={cn(CELL_CLASS, WRAP_CLASS)}>
-                  <AutomationStatus status={item.status} validation={item.validation} />
-                </TableCell>
-                <TableCell data-label="Coincidencia" className={CELL_CLASS}>
-                  <MatchScoreBar validation={item.validation} />
-                </TableCell>
-                <TableCell className={cn(CELL_CLASS, "text-right max-md:col-span-2 max-md:before:hidden")}>
-                  <Link
-                    href={`${INBOX_PATH}/${item.id}`}
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "h-[34px] rounded-lg border-border bg-surface px-4 text-sm font-semibold text-ink max-md:h-10 max-md:w-full",
-                    )}
-                  >
-                    Revisar
-                  </Link>
-                </TableCell>
-              </TableRow>
-            ))}
-      </TableBody>
-    </Table>
+                  </TableCell>
+                  <TableCell data-label="Código SIS" className={CELL_CLASS}>
+                    {item.sisCode}
+                  </TableCell>
+                  <TableCell data-label="Carrera" className={cn(CELL_CLASS, WRAP_CLASS, "@max-[65rem]/requests:col-span-2 @max-[65rem]/requests:row-start-3")}>
+                    {item.career}
+                  </TableCell>
+                  <TableCell data-label="Documento" className={cn(CELL_CLASS, WRAP_CLASS, "@max-[65rem]/requests:col-span-2")}>
+                    <span className="inline-flex items-center gap-1.5">
+                      <FileText className="size-4 shrink-0 text-text-secondary" strokeWidth={1.75} aria-hidden="true" />
+                      {item.documentType ? (DOCUMENT_TYPE_LABELS[item.documentType] ?? item.documentType) : "Sin documento"}
+                    </span>
+                  </TableCell>
+                  <TableCell data-label="Enviada" className={cn(CELL_CLASS, WRAP_CLASS, "text-text-secondary @max-[65rem]/requests:col-start-2 @max-[65rem]/requests:row-start-2")}>
+                    {formatRelativeTime(item.submittedAt)}
+                  </TableCell>
+                  <TableCell data-label="Estado" className={cn(CELL_CLASS, WRAP_CLASS)}>
+                    <AutomationStatus status={item.status} validation={item.validation} />
+                  </TableCell>
+                  <TableCell data-label="Coincidencia" className={CELL_CLASS}>
+                    <MatchScoreBar validation={item.validation} />
+                  </TableCell>
+                  <TableCell className={cn(CELL_CLASS, "text-right @max-[65rem]/requests:col-span-2 @max-[65rem]/requests:before:hidden")}>
+                    <Link
+                      href={`${INBOX_PATH}/${item.id}`}
+                      className={cn(
+                        buttonVariants({ variant: "outline" }),
+                        "h-[34px] rounded-lg border-border bg-surface px-4 text-sm font-semibold text-ink @max-[65rem]/requests:h-10 @max-[65rem]/requests:w-full",
+                      )}
+                    >
+                      Revisar
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

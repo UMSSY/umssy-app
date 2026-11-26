@@ -20,7 +20,11 @@ flowchart LR
 
 The module uses TanStack Query and the centralized HTTP client. It integrates profile, certifications, and radar through their `index.ts` files. Mutations update CV data and profile completeness; the dashboard also refreshes verification history and radar data. It does not open IndexedDB directly.
 
+On the documents page, the left column contains CV upload and saved CVs. The right column contains profile-based CV generation, the selected document analysis, and the automatic verification flow with its history dialog. CV upload has a single entry point in the upload card.
+
 ## Flows and rules
+
+CV changes can trigger profile skill analysis and completeness updates. NLP-detected skills count toward the profile's skills section only when their name and evidence are valid; historical rows without evidence remain excluded from the visible skill list. See [Skills](../skills/README.md).
 
 ```mermaid
 sequenceDiagram
@@ -44,7 +48,7 @@ sequenceDiagram
 - Uploading or deleting cancels in-flight queries to prevent stale data from being reintroduced.
 - Deletion requires confirmation, removes the cached file, and updates completeness.
 - File previews release their temporary URLs when closed or unmounted.
-- Extraction lets the user review data before applying it to the profile; export uses the selected data.
+- Extraction lets the user review data before applying it to the profile; export uses the selected data. Extracted education and work experience items match existing profile records only when their institution/degree or company/position and start dates align (exact date or month-precision date matching with a single candidate). Items with different full dates, multiple candidates, or unaligned dates are treated as new records to prevent overwriting existing profile entries.
 - The dashboard shows active versions and history, confidence, reasons, and skills. It does not approve documents in the browser.
 - Queries are scoped to the owner: polling runs every 1.5 seconds during processing, every 15 seconds while idle, and on reconnection.
 - Replacing or deleting a file may change NLP analysis and the radar; mentorship simulation does not change persisted data.
@@ -117,6 +121,10 @@ JSON responses use `{ statusCode, data, detail, ok }`; files are binary response
 ## Validation
 
 Tests verify mutations, cancellation and refresh, previews, extraction, export, history, and synchronization. TypeScript checks contracts, while ESLint checks naming and UI rules. CI validates builds and coverage.
+
+## Action styling
+
+The export dialog uses the shared outlined Cancel button. Cancelling closes the export dialog without generating a file.
 
 ## Sprint History
 

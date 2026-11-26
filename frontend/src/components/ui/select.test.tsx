@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it } from "vitest"
 import {
@@ -81,11 +81,20 @@ describe("Select", () => {
     async (variant) => {
       const user = userEvent.setup()
       renderSelect({ variant })
-      await user.click(screen.getByRole("combobox", { name: "Ciudad" }))
+      await user.tab()
+      expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveFocus()
+      await user.keyboard("{ArrowDown}")
+      const firstOption = await screen.findByRole("option", {
+        name: "Cochabamba",
+      })
+      const listbox = await screen.findByRole("listbox")
+      await waitFor(() => expect(listbox.contains(document.activeElement)).toBe(true))
+      await waitFor(() => expect(firstOption).toHaveAttribute("data-highlighted"))
+
       await user.keyboard("{End}")
       const option = screen.getByRole("option", { name: "La Paz" })
 
-      expect(option).toHaveAttribute("data-highlighted")
+      await waitFor(() => expect(option).toHaveAttribute("data-highlighted"))
       expect(option).toHaveClass("focus:text-ink")
       expect(option.className).not.toContain("text-accent-foreground")
       if (variant === "default") {
@@ -95,7 +104,9 @@ describe("Select", () => {
       }
 
       await user.keyboard("{Enter}")
-      expect(option).toHaveAttribute("aria-selected", "true")
+      await waitFor(() => {
+        expect(option).toHaveAttribute("aria-selected", "true")
+      })
       expect(option).toHaveClass("focus:text-ink")
     },
   )

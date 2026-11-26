@@ -32,6 +32,7 @@ interface MockPushDispatcher {
 
 interface MockMailDispatcher {
   dispatchToUsers: ReturnType<typeof vi.fn>;
+  dispatchToEmails: ReturnType<typeof vi.fn>;
 }
 
 interface MockGateway {
@@ -87,6 +88,9 @@ describe('NotificationsService', () => {
     };
     mockMailDispatcher = {
       dispatchToUsers: vi
+        .fn()
+        .mockResolvedValue({ status: 'sent', deliveries: [] }),
+      dispatchToEmails: vi
         .fn()
         .mockResolvedValue({ status: 'sent', deliveries: [] }),
     };
@@ -487,6 +491,29 @@ describe('NotificationsService', () => {
     expect(notificationIds.get('user-2')).toBe('notification-9');
   });
 
+  it('guarda un aviso central con la fecha local de publicación del radar', async () => {
+    const link = '/profile/radar?snapshot=snapshot-2';
+    await expect(
+      service.notify({
+        recipientIds: ['user-2'],
+        type: NotificationType.RADAR_PUBLISHED,
+        payload: { radarVersion: '2', publishedAt: '2026-11-17T02:30:00Z' },
+        actionUrl: link,
+        groupKey: 'radar:snapshot-2',
+      }),
+    ).resolves.toMatchObject({ inAppCount: 1 });
+
+    expect(mockNotificationsRepo.createMany).toHaveBeenCalledWith([
+      expect.objectContaining({
+        recipientId: 'user-2',
+        title: 'Nueva versión del Radar publicada',
+        body: 'La versión 2 de tu radar se publicó el 16/11/2026 22:30 (hora de Bolivia).',
+        link,
+        groupKey: 'radar:snapshot-2',
+      }),
+    ]);
+  });
+
   it('no vuelve a enviar por canales externos un aviso de radar ya creado', async () => {
     mockNotificationsRepo.createMany.mockResolvedValue([]);
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
@@ -636,6 +663,44 @@ describe('NotificationsService', () => {
       expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
       expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
       expect(result.inAppCount).toBe(1);
+    });
+
+    it('envía correo a destinatarios externos vía recipientEmails aunque no existan recipientIds', async () => {
+      const renderMail = vi.fn().mockReturnValue({
+        subject: 'Observaciones en tu solicitud',
+        html: '<p>Corrige el documento</p>',
+        text: 'Corrige el documento',
+      });
+
+      const result = await service.notify({
+        recipientIds: [],
+        recipientEmails: ['empresa@ejemplo.com'],
+        actorId: 'reviewer-1',
+        type: NotificationType.COMPANY_ACCESS_REQUEST_OBSERVED,
+        payload: {
+          companyName: 'Empresa Demo',
+          requestCode: 'EMP-2026-0001',
+          reason: '[DOCUMENTO] Falta sello',
+          requestStatusUrl: 'https://umssy.local/request-access/status',
+        },
+        channels: ['EMAIL'],
+        renderMail,
+      });
+
+      expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
+      expect(mockMailDispatcher.dispatchToEmails).toHaveBeenCalledWith(
+        ['empresa@ejemplo.com'],
+        'Observaciones en solicitud de empresa',
+        'La solicitud de Empresa Demo (EMP-2026-0001) requiere subsanación: [DOCUMENTO] Falta sello',
+        undefined,
+        renderMail,
+      );
+      expect(result).toEqual({
+        inAppCount: 0,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+        deliveries: [],
+      });
     });
   });
 });

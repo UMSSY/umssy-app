@@ -179,6 +179,7 @@ export const REOPEN_JOB_OFFER_TEXT = {
 
 export const CLOSE_JOB_OFFER_TEXT = {
   title: "¿Estás seguro de cerrar esta vacante?",
+  description: "dejará de recibir postulaciones.",
   cancel: "Cancelar",
   confirm: "Cerrar",
   busy: "Cerrando...",

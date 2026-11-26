@@ -1,7 +1,14 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { useAppliedJobOfferIds } from "../hooks/use-applied-job-offer-ids";
 import { JobRecommendationCard } from "./job-recommendation-card";
 import type { RecommendedJob } from "../types/recommended-job.types";
+
+vi.mock("../hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
+
+const mockedUseAppliedJobOfferIds = vi.mocked(useAppliedJobOfferIds);
 
 const job: RecommendedJob = {
   jobOfferId: "123",
@@ -17,7 +24,10 @@ const job: RecommendedJob = {
 };
 
 describe("HU-02A T2.4 - JobRecommendationCard", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    mockedUseAppliedJobOfferIds.mockReturnValue(new Set<string>());
+  });
 
   it("shows the job title, company and modality", () => {
     render(<JobRecommendationCard job={job} />);
@@ -131,4 +141,17 @@ describe("HU-02A T2.4 - JobRecommendationCard", () => {
     expect(screen.getByText("TypeScript")).toBeInTheDocument();
     expect(screen.getByText("0% de afinidad")).toBeInTheDocument();
 });
+
+  it("shows the «Ya te postulaste» chip next to the title when the user applied", () => {
+    mockedUseAppliedJobOfferIds.mockReturnValue(new Set(["123"]));
+    render(<JobRecommendationCard job={job} />);
+
+    expect(screen.getByText("Ya te postulaste")).toBeInTheDocument();
+  });
+
+  it("hides the «Ya te postulaste» chip when the user has not applied", () => {
+    render(<JobRecommendationCard job={job} />);
+
+    expect(screen.queryByText("Ya te postulaste")).not.toBeInTheDocument();
+  });
 });

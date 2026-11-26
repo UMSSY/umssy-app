@@ -59,7 +59,6 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [hasTriedToPublish, setHasTriedToPublish] = useState(false);
 
-  // El error desaparece solo cuando se confirma la fecha o se desmarca el checkbox.
   const expirationError: PublishError | null =
     hasTriedToPublish && !expiration.isExpirationValid
       ? { kind: "validation", message: PUBLISH_MESSAGES.expirationNotConfirmed, details: [] }

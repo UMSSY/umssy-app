@@ -34,7 +34,7 @@ export function WithdrawApplicationDialog({ application, onCancel, onConfirm }: 
           <AlertDialogCancel type="button">{APPLICATION_MESSAGES.cancel}</AlertDialogCancel>
           <AlertDialogAction
             type="button"
-            className="bg-critical-action text-critical-action-foreground hover:bg-critical-action/90"
+            variant="outline"
             onClick={() => {
               if (application) onConfirm(application.id);
             }}

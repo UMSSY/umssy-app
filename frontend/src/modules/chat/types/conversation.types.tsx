@@ -13,6 +13,7 @@ export interface UserSummary {
   email?: string | null;
   isEmailVisible?: boolean;
   academicTitle?: string | null;
+  headline?: string | null;
   isAcademicTitleVisible?: boolean;
   skills?: string[];
   areSkillsVisible?: boolean;
@@ -57,6 +58,7 @@ export interface DirectConversation {
   isBlockedByMe?: boolean;
   contextType?: string | null;
   contextId?: string | null;
+  contextTitle?: string | null;
 }
 
 export interface EventConversation extends Omit<DirectConversation, 'contact' | 'eventId'> {
@@ -67,6 +69,7 @@ export interface EventConversation extends Omit<DirectConversation, 'contact' | 
   contact?: never;
   contextType?: string | null;
   contextId?: string | null;
+  contextTitle?: string | null;
 }
 
 export type Conversation = DirectConversation | EventConversation;

@@ -6,7 +6,8 @@ export interface PresentationFormProps {
   saveLabel?: string;
   initialValues: PresentationValues;
   isSaving?: boolean;
+  guardProfileReview?: boolean;
   serverErrors?: PresentationErrors;
   onEdit?: (field?: keyof PresentationValues) => void;
-  onSubmit: (values: PresentationValues) => void;
+  onSubmit: (values: PresentationValues) => void | Promise<boolean>;
 }

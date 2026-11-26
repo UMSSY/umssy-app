@@ -22,6 +22,7 @@ export function ConfirmDialog({
   cancelLabel,
   busyLabel,
   isBusy = false,
+  closeOnOverlayClick = false,
   confirmVariant = "default",
   onConfirm,
   onCancel,
@@ -32,7 +33,10 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
-      <AlertDialogContent onKeyDown={trapTabFocus}>
+      <AlertDialogContent
+        onKeyDown={trapTabFocus}
+        overlayProps={closeOnOverlayClick ? { onClick: () => handleOpenChange(false) } : undefined}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

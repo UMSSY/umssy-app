@@ -1,6 +1,7 @@
 import "@/shared/testing/indexed-db.mock";
 import { waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as accessTokenStorage from "@/shared/services/storage/access-token-storage";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
@@ -25,6 +26,8 @@ function setup({ online = true, liveState = {} }: { online?: boolean; liveState?
   vi.mocked(useMyPasses).mockReturnValue({ ...live, ...liveState });
   return renderHookWithQuery(() => usePassesViewState());
 }
+
+afterEach(() => vi.restoreAllMocks());
 
 beforeEach(async () => {
   vi.useRealTimers();
@@ -99,7 +102,7 @@ describe("usePassesViewState", () => {
   });
 
   it("shows the saved copy without a session even when the browser reports a connection", async () => {
-    clearAccessToken();
+    vi.spyOn(accessTokenStorage, "getAccessToken").mockReturnValue(null);
     await writeIndexedDb("offline-passes:owner", "user-a");
     await writeIndexedDb("offline-passes:user-a", { userId: "user-a", savedAt: "2026-11-18T12:00:00.000Z", passes: [saved] });
     const { result } = setup();
@@ -113,4 +116,3 @@ describe("usePassesViewState", () => {
     await waitFor(() => expect(result.current.status).toBe("no-offline-copy"));
   });
 });
-

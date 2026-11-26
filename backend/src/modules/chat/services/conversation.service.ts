@@ -15,6 +15,7 @@ import { ConnectionRequestService } from './connection-request.service.js';
 
 import { EducationsService } from '../../educations/services/educations.service.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
+import { ApplicationsService } from '../../applications/services/applications.service.js';
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
@@ -47,6 +48,9 @@ export class ConversationService {
     @Optional()
     @Inject(forwardRef(() => ConnectionRequestService))
     private readonly connectionRequestService?: ConnectionRequestService,
+    @Optional()
+    @Inject(forwardRef(() => ApplicationsService))
+    private readonly applicationsService?: ApplicationsService,
   ) {}
 
   async getOrCreate(
@@ -258,7 +262,7 @@ export class ConversationService {
       throw new UserNotFoundException();
     }
 
-    const [onlineMap, participant, educations, userSkills] = await Promise.all([
+    const [onlineMap, participant, educations, userSkills, contextTitle] = await Promise.all([
       this.userPresenceService.mapOnlineStatus([contact.id]),
       this.participantRepository.findByConversationAndUser(
         conversation.id,
@@ -266,6 +270,13 @@ export class ConversationService {
       ),
       this.educationsService.findAll(contact.id),
       this.userSkillService.getUserSkills(contact.id),
+      conversation.contextType === 'POSTULACION' &&
+      conversation.contextId &&
+      this.applicationsService
+        ? this.applicationsService
+            .findVacancyTitleForChat(conversation.contextId)
+            .catch(() => null)
+        : Promise.resolve(null),
     ]);
 
     const unreadCount = participant
@@ -295,6 +306,7 @@ export class ConversationService {
       isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
       academicTitle,
       skills,
+      contextTitle,
     });
   }
 }

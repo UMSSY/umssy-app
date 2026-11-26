@@ -77,7 +77,7 @@ describe("VacancyList en modo historial", () => {
 
     await user.click(closeButton);
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
 
     expect(dialog).toHaveTextContent("Ingeniero Backend");
 
@@ -90,7 +90,7 @@ describe("VacancyList en modo historial", () => {
     expect(close).toHaveBeenCalledWith(COMPANY_ID, "active");
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
 
     await waitFor(() => {

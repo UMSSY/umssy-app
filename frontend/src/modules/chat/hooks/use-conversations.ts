@@ -18,9 +18,11 @@ import {
 
 import { setStoredConversationUnreadCount } from "../services/message-storage";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+import { CONVERSATIONS_QUERY_KEY } from "../constants/conversations-query-key";
+import { upsertConversation } from "../utils/upsert-conversation";
+import { useResolveContextualConversation } from "./use-resolve-contextual-conversation";
 
 const PAGE_SIZE = 10;
-const CONVERSATIONS_QUERY_KEY = ["chat", "conversations"] as const;
 
 export function useConversations() {
   const ui = useMessagingUi();
@@ -57,8 +59,10 @@ export function useConversations() {
     [query.data],
   );
 
-  const isLoading = query.isFetching;
+  const isLoading = query.isFetching && query.data === undefined;
   const isError = query.isError && !query.isFetching;
+
+  const resolveContextualConversation = useResolveContextualConversation();
 
   const setConversationsData = useCallback(
     (update: (current: Conversation[]) => Conversation[]) => {
@@ -341,15 +345,9 @@ export function useConversations() {
       const conversation =
         await startMutation.mutateAsync({ id: contactUser.id, context });
 
-      setConversationsData((prev) => {
-        const exists = prev.some(
-          (item) => item.id === conversation.id,
-        );
-
-        return exists
-          ? prev
-          : [conversation, ...prev];
-      });
+      setConversationsData((prev) =>
+        upsertConversation(prev, conversation),
+      );
 
       setSelectedId(conversation.id);
     } finally {
@@ -361,19 +359,8 @@ export function useConversations() {
     contactId: string,
     context: { contextType: string; contextId: string },
   ) => {
-    const existing = conversationsData.find(
-      (c) => c.contextId === context.contextId,
-    );
-    if (existing) {
-      handleSelectConversation(existing);
-      return existing;
-    }
-    const conversation = await getOrCreateConversation(contactId, context);
-    setConversationsData((prev) => {
-      const exists = prev.some((item) => item.id === conversation.id);
-      return exists ? prev : [conversation, ...prev];
-    });
-    setSelectedId(conversation.id);
+    const conversation = await resolveContextualConversation({ contactId, context });
+    handleSelectConversation(conversation);
     return conversation;
   };
 

@@ -1,14 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
-import { ConfigService } from '@nestjs/config';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { ApplicationsService } from '../services/applications.service.js';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
-import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { UsersService } from '../../users/services/users.service.js';
-import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
@@ -16,7 +13,7 @@ import { ApplicationNotWithdrawableException } from '../exceptions/application-n
 import { ApplicationNotReactivableException } from '../exceptions/application-not-reactivable.exception.js';
 import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
 
-describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
+describe('ApplicationsService (T5.1 & T5.2)', () => {
   let service: ApplicationsService;
   let repositoryMock: {
     findByUserId: ReturnType<typeof vi.fn>;
@@ -27,8 +24,6 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
   };
   let jobOffersMock: { findOfferSummary: ReturnType<typeof vi.fn> };
   let usersMock: { findActiveRecruitersByCompany: ReturnType<typeof vi.fn> };
-  let notificationsMock: { notify: ReturnType<typeof vi.fn> };
-  let configMock: { getOrThrow: ReturnType<typeof vi.fn> };
   const matching = { scoresForOffers: vi.fn() };
 
   beforeEach(async () => {
@@ -45,26 +40,12 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
 
     usersMock = { findActiveRecruitersByCompany: vi.fn() };
 
-    notificationsMock = {
-      notify: vi.fn().mockResolvedValue({
-        inAppCount: 1,
-        pushStatus: 'skipped',
-        emailStatus: 'sent',
-      }),
-    };
-
-    configMock = {
-      getOrThrow: vi.fn().mockReturnValue('https://umssy.edu.bo'),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApplicationsService,
         ApplicationMapper,
         { provide: JobRecommendationsService, useValue: matching },
         { provide: ApplicationsRepository, useValue: repositoryMock },
-        { provide: NotificationsService, useValue: notificationsMock },
-        { provide: ConfigService, useValue: configMock },
         { provide: JobOffersService, useValue: jobOffersMock },
         { provide: UsersService, useValue: usersMock },
       ],
@@ -89,9 +70,12 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       repositoryMock.findByUserId.mockResolvedValue([
         { id: 'app-1', jobOfferId: 'offer-1' },
       ]);
-      matching.scoresForOffers.mockRejectedValue(new Error('fallo en el calculo'));
-      await expect(service.findMyApplications('user-1', { sortOrder: 'desc' }))
-        .rejects.toThrow('fallo en el calculo');
+      matching.scoresForOffers.mockRejectedValue(
+        new Error('fallo en el calculo'),
+      );
+      await expect(
+        service.findMyApplications('user-1', { sortOrder: 'desc' }),
+      ).rejects.toThrow('fallo en el calculo');
     });
 
     it('debe devolver el contrato del cliente con fechas ISO y afinidad calculada', async () => {
@@ -101,14 +85,24 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
           jobOfferId: 'offer-1',
           status: { title: ApplicationStatus.IN_REVIEW },
           appliedAt: new Date('2026-10-29T12:00:00.000Z'),
-          jobOffer: { title: 'Dev', company: { title: 'Empresa A' } },
+          jobOffer: {
+            title: 'Dev',
+            expiresAt: null,
+            status: { title: 'Publicada' },
+            company: { title: 'Empresa A' },
+          },
         },
         {
           id: 'app-2',
           jobOfferId: 'offer-2',
           status: { title: ApplicationStatus.ACCEPTED },
           appliedAt: new Date('2026-10-29T12:00:00.000Z'),
-          jobOffer: { title: 'Dev 2', company: { title: 'Empresa B' } },
+          jobOffer: {
+            title: 'Dev 2',
+            expiresAt: null,
+            status: { title: 'Cerrada' },
+            company: { title: 'Empresa B' },
+          },
         },
       ];
 
@@ -138,6 +132,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
           status: ApplicationStatus.IN_REVIEW,
           affinityPercentage: 85,
           appliedDate: '2026-10-29T12:00:00.000Z',
+          vacancyAvailable: true,
         },
         {
           id: 'app-2',
@@ -147,6 +142,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
           status: ApplicationStatus.ACCEPTED,
           affinityPercentage: 40,
           appliedDate: '2026-10-29T12:00:00.000Z',
+          vacancyAvailable: false,
         },
       ]);
 
@@ -283,100 +279,6 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
         'message',
         'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
       );
-    });
-  });
-
-  describe('notifyStateChanged (HU-15)', () => {
-    const base = {
-      recipientId: 'user-1',
-      applicationId: 'app-1',
-      jobTitle: 'Dev',
-      companyName: 'Empresa A',
-    };
-
-    it('AC-15.1: debe enviar la notificación APPLICATION_STATUS_CHANGED cuando el reclutador cambia el estado', async () => {
-      await service.notifyStateChanged({
-        ...base,
-        previousStatus: ApplicationStatus.IN_REVIEW,
-        newStatus: ApplicationStatus.INTERVIEW,
-      });
-
-      expect(notificationsMock.notify).toHaveBeenCalledTimes(1);
-      expect(notificationsMock.notify).toHaveBeenCalledWith({
-        recipientIds: ['user-1'],
-        type: NotificationType.APPLICATION_STATUS_CHANGED,
-        payload: {
-          vacancyTitle: 'Dev',
-          companyName: 'Empresa A',
-          newStatus: 'INTERVIEW',
-        },
-        actionUrl: 'https://umssy.edu.bo/vacancies/my-applications',
-      });
-    });
-
-    it.each([
-      [ApplicationStatus.ACCEPTED, 'ACCEPTED'],
-      [ApplicationStatus.REJECTED, 'REJECTED'],
-    ])(
-      'mapea el estado de BD "%s" al código del enum %s',
-      async (newStatus, code) => {
-        await service.notifyStateChanged({
-          ...base,
-          previousStatus: ApplicationStatus.INTERVIEW,
-          newStatus,
-        });
-
-        expect(notificationsMock.notify).toHaveBeenCalledWith(
-          expect.objectContaining({
-            payload: expect.objectContaining({ newStatus: code }),
-          }),
-        );
-      },
-    );
-
-    it('AC-15.4: withdrawApplication NO genera ninguna notificación de cambio de estado', async () => {
-      repositoryMock.findById.mockResolvedValue({
-        id: 'app-1',
-        userId: 'user-1',
-        status: { title: ApplicationStatus.IN_REVIEW },
-      });
-
-      await service.withdrawApplication('app-1', 'user-1');
-
-      expect(repositoryMock.withdraw).toHaveBeenCalled();
-      expect(notificationsMock.notify).not.toHaveBeenCalled();
-    });
-
-    it('AC-15.4: no notifica cuando el nuevo estado es Retirada', async () => {
-      await service.notifyStateChanged({
-        ...base,
-        previousStatus: ApplicationStatus.IN_REVIEW,
-        newStatus: ApplicationStatus.WITHDRAWN,
-      });
-
-      expect(notificationsMock.notify).not.toHaveBeenCalled();
-    });
-
-    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
-      await service.notifyStateChanged({
-        ...base,
-        previousStatus: ApplicationStatus.IN_REVIEW,
-        newStatus: ApplicationStatus.IN_REVIEW,
-      });
-
-      expect(notificationsMock.notify).not.toHaveBeenCalled();
-    });
-
-    it('no propaga el error si el envío de la notificación falla', async () => {
-      notificationsMock.notify.mockRejectedValueOnce(new Error('push down'));
-
-      await expect(
-        service.notifyStateChanged({
-          ...base,
-          previousStatus: ApplicationStatus.IN_REVIEW,
-          newStatus: ApplicationStatus.ACCEPTED,
-        }),
-      ).resolves.toBeUndefined();
     });
   });
 

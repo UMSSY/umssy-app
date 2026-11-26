@@ -8,10 +8,10 @@ The backend manages workshop registrations, cancellation, proposal support, priv
 
 - A `titulado` can register for an eligible published workshop. Cancellation is logical, not deletion. Reactivation keeps the registration ID and issues a new QR token, invalidating the old one.
 - Cancellation from the workshop detail or My Passes uses the same registration mutation. After a successful server response, the client removes the saved QR from the current account's IndexedDB snapshot before reporting success and invalidates the related queries.
-- The default `GET /event-registrations/me` scope lists current confirmed registrations. `scope=finished` returns finished registrations as a paginated history. Finished workshops leave the current-pass view at closing time; history does not claim the participant attended.
+- The default `GET /event-registrations/me` scope lists current confirmed registrations. `scope=finished` returns finished registrations as a paginated history. Workshops with sessions leave the current-pass view after the last session ends; workshops without session rows use the original end time. History does not claim the participant attended.
 - A pass can be viewed offline only after it was loaded and saved online. Registration, cancellation and attendance check-in require a network connection.
 - The authenticated `titulado` who created a published workshop may check in participants. The backend validates role, ownership, workshop, confirmed registration, cancellation state and server-side time window. It accepts a `v1:` QR token, the 64-character token or a registration UUID as a manual reference. A short manual code is not implemented.
-- Each session opens at its start time inclusive and closes at its end time exclusive, using Bolivia time (UTC−4). The scanner selects a session for multi-session workshops; if omitted, the server resolves the session in progress. Legacy workshops without session rows use their event date and time. The server stores `sessionId`, `checkedInById` and `checkedInAt`. Repeated check-in for the same registration and session returns `duplicate` without adding an attendance row.
+- Attendance opens 30 minutes before each session starts and closes at its end time exclusive, using Bolivia time (UTC−4). The scanner selects a session for multi-session workshops; if `sessionId` is omitted, the server selects a session in progress first, then the next eligible session within its early window. Legacy workshops without session rows use their event date and time with the same 30-minute early opening. The server stores `sessionId`, `checkedInById` and `checkedInAt`. Repeated check-in for the same registration and session returns `duplicate` without adding an attendance row.
 - Registration conflict checks compare every session of both workshops. Workshops without session rows use their original date and time columns.
 
 ```mermaid
@@ -61,6 +61,18 @@ A local benchmark used PostgreSQL 18.6, Node 22.23.3, Nest HTTP and real reposit
 The current-list query now filters published, unfinished workshops in the database before materializing registrations. This reduced materialized current-list rows by 90.9% and JSON bytes by 90.6% in the local fixture. History behavior was retained; its timing variation is not evidence of an improvement. The benchmark is `backend/test/registrations-performance.e2e-spec.ts` and requires an explicitly enabled fresh temporary database. It does not run by default.
 
 Local acceptance checks covered exact current and history IDs, ordering and pagination, a workshop reaching its closing instant, QR stability, cancellation, another user's data, and frontend loading, empty and error states. The recorded run passed 594 frontend tests, 318 backend tests and 3 PostgreSQL-backed tests. No staging deployment or staging measurement was performed for that run.
+
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Registration API"]
+  API --> Service["Registration service"]
+  Service --> Data[("Event registrations")]
+  Service --> Related[("Events and users")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
 
 ## Sprint History
 

@@ -9,7 +9,6 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/shared/contexts/auth-context';
@@ -18,6 +17,10 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import {
+  hasCookieSession,
+  subscribeCookieSession,
+} from '@/shared/services/storage/cookie-session-state';
 import { mentorParticipationService } from '../services/mentor-participation.service';
 import { PARTICIPATION_BREADCRUMB_ITEMS } from '../constants/participation-breadcrumb.constants';
 import { ParticipationEmptyState } from '../components/participation/participation-empty-state';
@@ -30,16 +33,18 @@ import { ActivateParticipationModal } from '../components/participation/activate
 import { DeactivateParticipationModal } from '../components/participation/deactivate-participation-modal';
 import { MentorRequestHistoryDetails } from '../components/participation/mentor-request-history-details';
 import { MentorRequestHistoryEmptyState } from '../components/participation/mentor-request-history-empty-state';
+import { MentorRequestStatusBadge } from '../components/participation/mentor-request-status-badge';
+import { MentorRequestHistoryPagination } from '../components/participation/mentor-request-history-pagination';
 import { useParticipation } from '../hooks/use-participation';
 import {
   participationErrorCode,
   participationErrorMessage,
 } from '../utils/participation-error';
-import { getMentorRequestStatusLabel } from '../utils/mentor-request-status';
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
   useMentorProfileDraft,
+  useMentorshipCatalogs,
 } from '@/modules/mentorship';
 import { useCurrentUserId } from '@/modules/mentorship';
 import { MentorProfilePreview } from '@/modules/mentorship';
@@ -67,7 +72,7 @@ const notifySuccess = (message: string) => {
   });
 };
 
-const formatRequestDate = (date: string) => {
+const formatRequestDateTime = (date: string) => {
   const parsedDate = new Date(date);
 
   if (Number.isNaN(parsedDate.getTime())) {
@@ -75,13 +80,31 @@ const formatRequestDate = (date: string) => {
   }
 
   return new Intl.DateTimeFormat('es-BO', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
+    dateStyle: 'medium',
+    timeStyle: 'short',
   }).format(parsedDate);
 };
 
-const REQUEST_STATUS_STYLE = 'border-border bg-surface-soft text-ink';
+const formatRequestDateParts = (date: string) => {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return {
+      day: '--',
+      monthYear: 'Fecha no disponible',
+    };
+  }
+
+  return {
+    day: new Intl.DateTimeFormat('es-BO', {
+      day: '2-digit',
+    }).format(parsedDate),
+    monthYear: new Intl.DateTimeFormat('es-BO', {
+      month: 'short',
+      year: 'numeric',
+    }).format(parsedDate),
+  };
+};
 
 const getHistoryErrorMessage = (error: unknown) => {
   if (isAxiosError(error)) {
@@ -111,14 +134,21 @@ export function ParticipationView({
   const { currentUserId: authUserId, refreshRoles } = useAuth();
   const { currentUserId } = useCurrentUserId();
   const { clearAllDrafts } = useMentorProfileDraft();
+  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const token = useSyncExternalStore(
+  const bearerToken = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
     getServerToken,
   );
+  const cookieSession = useSyncExternalStore(
+    subscribeCookieSession,
+    hasCookieSession,
+    () => false,
+  );
+  const token = bearerToken ?? (cookieSession ? 'cookie' : null);
 
   const participation = useParticipation(token);
 
@@ -263,12 +293,30 @@ export function ParticipationView({
   const totalHistoryRequests = history.data?.total ?? 0;
   const totalHistoryPages = Math.max(1, history.data?.totalPages ?? 1);
   const currentHistoryPage = history.data?.page ?? historyPage;
-  const historyStartIndex = (currentHistoryPage - 1) * HISTORY_PAGE_SIZE;
   const isChangingHistoryPage =
     history.isFetching && history.data !== undefined;
 
   const selectedHistoryRequest =
     historyItems.find((item) => item.id === selectedHistoryId) ?? null;
+
+  const technicalAreaNamesById = new Map(
+    technicalAreas.map((area) => [area.id, area.name]),
+  );
+
+  const resolveTechnicalAreaNames = (ids: string[]) =>
+    ids.map(
+      (id) => technicalAreaNamesById.get(id) ?? 'Área no disponible',
+    );
+
+  const orientationNamesById = new Map(
+    orientationTypes.map((orientation) => [orientation.id, orientation.name]),
+  );
+
+  const resolveOrientationNames = (ids: string[]) =>
+    ids.map(
+      (id) =>
+        orientationNamesById.get(id) ?? 'Orientación no disponible',
+    );
 
   // Vista previa del perfil desde Mi participación.
   if (isPreviewOpen && isActive && state && currentUserId) {
@@ -553,12 +601,15 @@ export function ParticipationView({
             </div>
 
             <div
+              role="region"
+              aria-label="Historial de solicitudes de cupo como mentor"
               aria-busy={history.isFetching}
+              tabIndex={0}
               className={`overflow-x-auto rounded-lg border transition-opacity ${
                 isChangingHistoryPage ? 'opacity-60' : 'opacity-100'
               }`}
             >
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
                 <caption className="sr-only">
                   Historial de solicitudes de cupo como mentor
                 </caption>
@@ -566,124 +617,112 @@ export function ParticipationView({
                 <thead className="border-b bg-muted/50">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Fecha de solicitud
+                      Fecha
                     </th>
+
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Solicitud
+                    </th>
+
                     <th scope="col" className="px-4 py-3 font-medium">
                       Estado
                     </th>
+
                     <th scope="col" className="px-4 py-3 font-medium">
-                      Áreas técnicas
+                      Fecha y hora de registro
                     </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Orientaciones
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      Acciones
+
+                    <th
+                      scope="col"
+                      className="px-4 py-3 text-right font-medium"
+                    >
+                      Acción
                     </th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y">
-                  {historyItems.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3">
-                        {formatRequestDate(item.createdAt)}
-                      </td>
+                  {historyItems.map((item) => {
+                    const dateParts = formatRequestDateParts(item.createdAt);
 
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${REQUEST_STATUS_STYLE}`}
-                        >
-                          {getMentorRequestStatusLabel(item.status)}
-                        </span>
-                      </td>
+                    return (
+                      <tr
+                        key={item.id}
+                        className="align-middle transition-colors hover:bg-muted/30"
+                      >
+                        <td className="p-4">
+                          <div className="min-w-[88px]">
+                            <span className="block text-lg leading-none font-semibold">
+                              {dateParts.day}
+                            </span>
 
-                      <td className="px-4 py-3">
-                        {item.technicalAreaIds.length}
-                      </td>
+                            <span className="mt-1 block text-xs text-muted-foreground capitalize">
+                              {dateParts.monthYear}
+                            </span>
+                          </div>
+                        </td>
 
-                      <td className="px-4 py-3">
-                        {item.orientationTypeIds.length}
-                      </td>
+                        <td className="p-4">
+                          <p className="min-w-[190px] font-medium">
+                            Solicitud de cupo como mentor
+                          </p>
+                        </td>
 
-                      <td className="px-4 py-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          disabled={isChangingHistoryPage}
-                          aria-expanded={selectedHistoryId === item.id}
-                          aria-controls="mentor-request-history-details"
-                          onClick={() =>
-                            setSelectedHistoryId((current) =>
-                              current === item.id ? null : item.id,
-                            )
-                          }
-                        >
-                          {selectedHistoryId === item.id
-                            ? 'Ocultar detalles'
-                            : 'Ver detalles'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="p-4">
+                          <MentorRequestStatusBadge status={item.status} />
+                        </td>
+
+                        <td className="p-4 text-muted-foreground">
+                          <span className="whitespace-nowrap">
+                            {formatRequestDateTime(item.createdAt)}
+                          </span>
+                        </td>
+
+                        <td className="p-4 text-right">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            disabled={isChangingHistoryPage}
+                            aria-expanded={selectedHistoryId === item.id}
+                            aria-controls="mentor-request-history-details"
+                            onClick={() =>
+                              setSelectedHistoryId((current) =>
+                                current === item.id ? null : item.id,
+                              )
+                            }
+                          >
+                            {selectedHistoryId === item.id
+                              ? 'Ocultar detalle'
+                              : 'Ver detalle'}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              Las columnas de áreas técnicas y orientaciones muestran la
-              cantidad seleccionada en cada solicitud.
-            </p>
-
-            {totalHistoryPages > 1 && (
-              <nav
-                aria-label="Paginación del historial de solicitudes"
-                className="flex flex-wrap items-center justify-between gap-3 border-t pt-4"
-              >
-                <p role="status" className="text-sm text-muted-foreground">
-                  Mostrando {historyStartIndex + 1}–
-                  {Math.min(
-                    historyStartIndex + historyItems.length,
-                    totalHistoryRequests,
-                  )}{' '}
-                  de {totalHistoryRequests} solicitudes.
-                </p>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={currentHistoryPage === 1 || history.isFetching}
-                    onClick={() => changeHistoryPage(currentHistoryPage - 1)}
-                  >
-                    <ChevronLeft aria-hidden="true" className="size-4" />
-                    Anterior
-                  </Button>
-
-                  <span className="px-2 text-sm font-medium" aria-live="polite">
-                    Página {currentHistoryPage} de {totalHistoryPages}
-                  </span>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={
-                      currentHistoryPage >= totalHistoryPages ||
-                      history.isFetching
-                    }
-                    onClick={() => changeHistoryPage(currentHistoryPage + 1)}
-                  >
-                    Siguiente
-                    <ChevronRight aria-hidden="true" className="size-4" />
-                  </Button>
-                </div>
-              </nav>
-            )}
+            <MentorRequestHistoryPagination
+              currentPage={currentHistoryPage}
+              totalPages={totalHistoryPages}
+              totalRequests={totalHistoryRequests}
+              pageSize={HISTORY_PAGE_SIZE}
+              visibleItems={historyItems.length}
+              isLoading={history.isFetching}
+              onPageChange={changeHistoryPage}
+            />
 
             {selectedHistoryRequest && !isChangingHistoryPage && (
               <div id="mentor-request-history-details">
                 <MentorRequestHistoryDetails
                   request={selectedHistoryRequest}
+                  technicalAreaNames={resolveTechnicalAreaNames(
+                    selectedHistoryRequest.technicalAreaIds,
+                  )}
+                  orientationNames={resolveOrientationNames(
+                    selectedHistoryRequest.orientationTypeIds,
+                  )}
                   onClose={() => setSelectedHistoryId(null)}
                 />
               </div>

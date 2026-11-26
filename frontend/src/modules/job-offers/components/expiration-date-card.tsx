@@ -4,16 +4,10 @@ import { CalendarCheck, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import type { ExpirationDate } from "../hooks/use-expiration-date";
+import type { ExpirationDateCardProps } from "../types/expiration-date-card-props.types";
 import { formatDaysLeft, formatExpirationDate } from "../utils/format-expiration-date";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ExpirationCalendar } from "./expiration-calendar";
-
-interface ExpirationDateCardProps {
-  expiration: ExpirationDate;
-  /** Se puede pasar en los tests para fijar el "hoy". */
-  today?: Date;
-}
 
 export function ExpirationDateCard({ expiration, today = new Date() }: ExpirationDateCardProps) {
   const {
@@ -32,7 +26,7 @@ export function ExpirationDateCard({ expiration, today = new Date() }: Expiratio
   return (
     <section
       aria-labelledby="expiration-title"
-      className="mx-auto mt-6 max-w-3xl rounded-lg border border-border bg-surface p-8"
+      className="mx-auto mt-6 max-w-3xl rounded-lg border border-border bg-surface p-4 sm:p-8"
     >
       <h4 id="expiration-title" className="text-base font-semibold text-ink">
         Fecha de cierre
@@ -55,7 +49,7 @@ export function ExpirationDateCard({ expiration, today = new Date() }: Expiratio
 
       {showCalendar && (
         <div className="mt-4 space-y-2">
-          <div className="w-fit rounded-lg border border-border">
+          <div className="w-full rounded-lg border border-border sm:w-fit">
             <ExpirationCalendar
               selected={selectedDate ?? undefined}
               onSelect={selectDate}

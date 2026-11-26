@@ -2,6 +2,7 @@ import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { readRecord, readArray } from '@/shared/utils/response-validation';
 import { apiClient } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { hasCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { removeOfflinePassOrDefer } from '@/shared/services/storage/remove-offline-pass';
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { parseRegistrationResponse } from "../utils/registration-contract-response";
@@ -48,24 +49,26 @@ export const registrationsService = {
 
   async getMine(signal?: AbortSignal, accessToken = getAccessToken()): Promise<Registration[]> {
     const token = accessToken;
-    if (!token) {
+    if (!token && !hasCookieSession()) {
       throw new Error("Debes iniciar sesión para ver tus inscripciones.");
     }
     if (!apiClient.defaults.baseURL) {
       throw new Error("La URL del backend no está configurada.");
     }
     const response = await apiClient.get<{ data: Registration[] }>("/event-registrations/me", {
-      headers: { Authorization: `${BEARER_PREFIX}${token}` },
+      ...(token ? { headers: { Authorization: `${BEARER_PREFIX}${token}` } } : {}),
       signal,
       timeout: REQUEST_TIMEOUT_MS,
     });
     return readArray(readRecord(response.data).data).map(parseRegistration);
   },
   async getFinished(page: number, limit = 10, signal?: AbortSignal, accessToken = getAccessToken()): Promise<FinishedRegistrationsPage> {
-    if (!accessToken) throw new Error("Debes iniciar sesión para ver tus inscripciones.");
+    if (!accessToken && !hasCookieSession()) {
+      throw new Error("Debes iniciar sesión para ver tus inscripciones.");
+    }
     if (!apiClient.defaults.baseURL) throw new Error("La URL del backend no está configurada.");
     const response = await apiClient.get<unknown>("/event-registrations/me", {
-      headers: { Authorization: `${BEARER_PREFIX}${accessToken}` },
+      ...(accessToken ? { headers: { Authorization: `${BEARER_PREFIX}${accessToken}` } } : {}),
       params: { scope: "finished", page, limit },
       signal,
       timeout: REQUEST_TIMEOUT_MS,

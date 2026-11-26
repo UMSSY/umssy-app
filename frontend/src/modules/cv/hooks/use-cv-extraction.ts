@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
+import { CV_CONTACT_FIELDS, CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
 import { documentsService } from "../services/documents.service";
 import type { CvApplyResult } from "../types/cv-apply-result.types";
 import type { CvExtractedContact } from "../types/cv-extracted-contact.types";
@@ -16,22 +16,24 @@ import type { UseCvExtractionOptions } from "../types/use-cv-extraction-options.
 import { buildDefaultCvSelection } from "../utils/build-default-cv-selection";
 import { getCvExtractionError } from "../utils/get-cv-extraction-error";
 import { removeAppliedCvSelection } from "../utils/remove-applied-cv-selection";
+import { selectCvSelectionItem } from "../utils/select-cv-selection-item";
 import { toggleCvSection } from "../utils/toggle-cv-section";
 import { toggleCvSelectionItem } from "../utils/toggle-cv-selection-item";
 import { updateListItem } from "../utils/update-list-item";
+import { useCvRecordMatcher } from "./use-cv-record-matcher";
 
 export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptions = {}) {
   const [extraction, setExtraction] = useState<CvExtraction | null>(null);
   const [available, setAvailable] = useState<CvExtractionSelection>(CV_EMPTY_EXTRACTION_SELECTION);
   const [selection, setSelection] = useState<CvExtractionSelection>(CV_EMPTY_EXTRACTION_SELECTION);
+  const matchRecords = useCvRecordMatcher();
   const mutation = useMutation({
     mutationFn: (cvId: string) => documentsService.extractCvData(cvId),
     onSuccess: (result) => {
-      const defaults = buildDefaultCvSelection(result);
       const headline = (currentHeadline ?? "").trim();
       setExtraction({ ...result, presentation: { ...result.presentation, headline: headline || null } });
-      setAvailable(defaults);
-      setSelection(defaults);
+      setAvailable(buildDefaultCvSelection(result));
+      setSelection(buildDefaultCvSelection(result, matchRecords(result)));
     },
   });
 
@@ -66,17 +68,28 @@ export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptio
       setSelection((current) => toggleCvSelectionItem(current, section, item)),
     toggleSection: (section: CvExtractionSection) =>
       setSelection((current) => toggleCvSection(current, available, section)),
-    updateContact: (changes: Partial<CvExtractedContact>) =>
-      updateExtraction((current) => ({ ...current, contact: { ...current.contact, ...changes } })),
+    updateContact: (changes: Partial<CvExtractedContact>) => {
+      updateExtraction((current) => ({ ...current, contact: { ...current.contact, ...changes } }));
+      setSelection((current) =>
+        CV_CONTACT_FIELDS.filter((field) => field in changes).reduce(
+          (selected, field) => selectCvSelectionItem(selected, "contact", field),
+          current,
+        ),
+      );
+    },
     updatePresentation: (changes: Partial<CvExtractedPresentation>) =>
       updateExtraction((current) => ({ ...current, presentation: { ...current.presentation, ...changes } })),
-    updateEducation: (index: number, changes: Partial<CvExtractedEducation>) =>
-      updateExtraction((current) => ({ ...current, educations: updateListItem(current.educations, index, changes) })),
-    updateWorkExperience: (index: number, changes: Partial<CvExtractedWorkExperience>) =>
+    updateEducation: (index: number, changes: Partial<CvExtractedEducation>) => {
+      updateExtraction((current) => ({ ...current, educations: updateListItem(current.educations, index, changes) }));
+      setSelection((current) => selectCvSelectionItem(current, "education", index));
+    },
+    updateWorkExperience: (index: number, changes: Partial<CvExtractedWorkExperience>) => {
       updateExtraction((current) => ({
         ...current,
         workExperiences: updateListItem(current.workExperiences, index, changes),
-      })),
+      }));
+      setSelection((current) => selectCvSelectionItem(current, "experience", index));
+    },
     removeApplied: (results: readonly CvApplyResult[]) =>
       setSelection((current) => removeAppliedCvSelection(current, results)),
     close,

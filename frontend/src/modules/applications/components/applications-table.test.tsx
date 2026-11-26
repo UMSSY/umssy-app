@@ -6,7 +6,7 @@ import { ApplicationsTable } from "./applications-table";
 afterEach(cleanup);
 
 describe("ApplicationsTable", () => {
-  it("shows the vacancy, the company, the affinity and the status of every application", () => {
+  it("shows the vacancy, company and affinity without displaying application status", () => {
     render(
       <ApplicationsTable
         applications={[buildApplication()]}
@@ -18,10 +18,48 @@ describe("ApplicationsTable", () => {
     );
 
     expect(screen.getByRole("columnheader", { name: "Vacante y empresa" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Estado" })).not.toBeInTheDocument();
     expect(screen.getByText("Desarrollador Backend Python / FastAPI")).toBeInTheDocument();
     expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
     expect(screen.getByText("92%")).toBeInTheDocument();
-    expect(screen.getByText("En revisión")).toBeInTheDocument();
+    expect(screen.queryByText("En revisión")).not.toBeInTheDocument();
+  });
+
+  it("links each application to the detail of its own vacancy", () => {
+    render(
+      <ApplicationsTable
+        applications={[
+          buildApplication({ id: "application-1", jobOfferId: "offer-1", vacancyTitle: "Analista de Datos" }),
+          buildApplication({ id: "application-2", jobOfferId: "offer-2", vacancyTitle: "Diseñador UX" }),
+        ]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Ver vacante: Analista de Datos" })).toHaveAttribute("href", "/vacancies/offer-1");
+    expect(screen.getByRole("link", { name: "Ver vacante: Diseñador UX" })).toHaveAttribute("href", "/vacancies/offer-2");
+  });
+
+  it("marks only the applications whose vacancy is no longer available", () => {
+    render(
+      <ApplicationsTable
+        applications={[
+          buildApplication({ id: "application-1", vacancyTitle: "Analista de Datos" }),
+          buildApplication({ id: "application-2", vacancyTitle: "Diseñador UX", vacancyAvailable: false }),
+        ]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText("Vacante cerrada")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Ver vacante: Analista de Datos" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Ver vacante: Diseñador UX" })).not.toBeInTheDocument();
   });
 
   it("lets the person withdraw an application that is still open", () => {
@@ -89,7 +127,7 @@ describe("ApplicationsTable", () => {
     expect(screen.getByRole("button", { name: "Retirar" })).toBeEnabled();
   });
 
-  it("disables the withdraw button of an application that already has a decision", () => {
+  it("allows withdrawing an application regardless of previous decision", () => {
     render(
       <ApplicationsTable
         applications={[
@@ -106,7 +144,7 @@ describe("ApplicationsTable", () => {
     const buttons = screen.getAllByRole("button", { name: "Retirar" });
 
     expect(buttons).toHaveLength(2);
-    buttons.forEach((button) => expect(button).toBeDisabled());
+    buttons.forEach((button) => expect(button).toBeEnabled());
     expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
   });
 

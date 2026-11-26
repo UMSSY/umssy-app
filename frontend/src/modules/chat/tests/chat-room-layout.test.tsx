@@ -1,6 +1,6 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { screen, fireEvent, cleanup } from "@testing-library/react";
+import { screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { ChatRoom } from '../components/chat-room';
 import { MessageInputBar } from '../components/message-input-bar';
 import { Conversation, Message } from '../types/conversation.types';
@@ -240,9 +240,10 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
   });
 
   it('abre la informacion lateral del grupo en el panel compacto de mensajes', async () => {
+    const groupName = 'Taller de orientación y herramientas para toda la comunidad universitaria';
     render(
       <ChatRoom
-        conversation={mockEventConversation}
+        conversation={{ ...mockEventConversation, eventTitle: groupName }}
         messages={[]}
         currentUserId="user-1"
         onBack={vi.fn()}
@@ -255,9 +256,15 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
       '2 participantes',
     );
 
+    const heading = screen.getByTestId('chat-contact-name');
+    expect(heading).toHaveClass('line-clamp-2');
+    expect(heading).toHaveTextContent(groupName);
+
     fireEvent.click(screen.getByTestId('chat-contact-profile-trigger'));
 
-    expect(await screen.findByText('Info del grupo')).toBeInTheDocument();
+    const info = await screen.findByRole('dialog', { name: 'Información del grupo' });
+    expect(within(info).getByText('Info del grupo')).toBeInTheDocument();
+    expect(within(info).getByText(groupName)).toBeInTheDocument();
     expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
   });
 
@@ -306,7 +313,28 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
 
     const viewButton = screen.getByTestId('chat-room-view-postulation-button');
     expect(viewButton).toBeInTheDocument();
-    expect(viewButton).toHaveAttribute('href', '/vacancies/my-applications');
+    expect(viewButton).toHaveAttribute('href', '/vacancies/my-applications?applicationId=app-uuid-1234');
+  });
+
+  it('muestra el nombre de la vacante en el banner cuando contextTitle esta presente', () => {
+    const postulationConversation: Conversation = {
+      ...mockConversation,
+      contextType: 'POSTULACION',
+      contextId: 'app-uuid-1234',
+      contextTitle: 'Control de calidad',
+    };
+
+    render(
+      <ChatRoom
+        conversation={postulationConversation}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('chat-room-postulation-vacancy')).toHaveTextContent('Control de calidad');
   });
 
   it('debe dirigir el enlace de ver postulacion a /recruiters cuando el usuario tiene rol empresa', () => {
@@ -346,6 +374,38 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(screen.queryByTestId('chat-room-postulation-badge')).not.toBeInTheDocument();
     expect(screen.queryByTestId('chat-room-postulation-banner')).not.toBeInTheDocument();
     expect(screen.queryByTestId('chat-room-view-postulation-button')).not.toBeInTheDocument();
+  });
+
+  it('muestra el subtítulo del postulante, Inicio de la conversación y el separador de fecha actual cuando no hay historial previo', () => {
+    const onSendMessage = vi.fn();
+    render(
+      <ChatRoom
+        conversation={{
+          ...mockConversation,
+          contact: {
+            ...mockConversation.contact,
+            academicTitle: 'Senior Software Engineer',
+          },
+          contextType: 'POSTULACION',
+          contextId: 'app-uuid-1234',
+        }}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={onSendMessage}
+      />
+    );
+
+    expect(screen.getByTestId('chat-contact-subtitle')).toHaveTextContent(
+      'Senior Software Engineer',
+    );
+    expect(screen.getByTestId('start-of-conversation')).toHaveTextContent(
+      'Inicio de la conversación',
+    );
+    expect(screen.getByTestId('date-separator-initial')).toBeInTheDocument();
+    expect(screen.getByTestId('message-textarea')).toHaveValue('');
+    expect(screen.getByTestId('send-button')).toBeDisabled();
+    expect(onSendMessage).not.toHaveBeenCalled();
   });
 });
 

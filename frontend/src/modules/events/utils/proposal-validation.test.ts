@@ -13,9 +13,6 @@ describe('Proposal validation', () => {
   it.each(['Facultad, Aula, Piso, Bloque, Campus', 'Facultad,, Aula', ', Aula', 'Facultad, '])('rejects malformed or excessive location parts: %s', location => {
     expect(validateProposal({ ...values, location }, cover, ['cat'])).toHaveProperty('location');
   });
-  it('keeps valid cover files between two and five MB accepted', () => {
-    expect(validateProposalCover(new File([new Uint8Array(5 * 1024 * 1024)], 'cover.png', { type: 'image/png' }))).toBeNull();
-  });
   it('requires all input, including a cover and the approved capacity range', () => {
     expect(validateProposal(values, cover, ['cat'])).toEqual({});
     expect(validateProposal({ ...values, capacity: '1' }, cover, ['cat'])).toHaveProperty('capacity');

@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +17,10 @@ import { ContactProfileModal } from "./contact-profile-modal";
 import { EventRoomEmptyState } from "./event-room-empty-state";
 import { EventRoomInfoPanel } from "./event-room-info-panel";
 import { ChatErrorState } from "./chat-error-state";
-import { getInitials } from "../utils/date-formatter";
+import {
+  formatMessageDateSeparator,
+  getInitials,
+} from "../utils/date-formatter";
 import { getEventRoomSenderName } from "../utils/get-event-room-sender-name";
 import { isContentValidForSend } from "../utils/unicode-counter";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
@@ -129,12 +132,21 @@ function ChatRoomContent({
   const isCompany = roles.includes("empresa");
   const postulationHref = isCompany
     ? "/recruiters"
-    : "/vacancies/my-applications";
+    : conversation.contextId
+      ? `/vacancies/my-applications?applicationId=${encodeURIComponent(conversation.contextId)}`
+      : "/vacancies/my-applications";
   const eventConversation = conversation.eventId ? conversation : null;
   const isEventConversation = Boolean(eventConversation);
   const conversationName = eventConversation
     ? eventConversation.eventTitle ?? 'Chat del evento'
     : conversation.contact?.fullName ?? '';
+  const contactSubtitle = !isEventConversation
+    ? (conversation.contact?.headline ??
+      conversation.contact?.academicTitle ??
+      conversation.contact?.roleName ??
+      conversation.contact?.role ??
+      null)
+    : null;
   const eventParticipantCount = eventConversation?.participants?.length ?? 0;
   const eventParticipantLabel =
     eventParticipantCount === 1
@@ -311,8 +323,33 @@ function ChatRoomContent({
     hasMoreMessages,
     getMessageElement,
   ]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const viewport = window.visualViewport;
+    const handleViewportResize = () => {
+      if (containerRef.current && nearBottomRef.current) {
+        scrollToBottom(containerRef.current, "auto");
+      }
+    };
+    viewport.addEventListener("resize", handleViewportResize);
+    return () => {
+      viewport.removeEventListener("resize", handleViewportResize);
+    };
+  }, []);
+  const handleInputFocus = useCallback(() => {
+    if (containerRef.current && nearBottomRef.current) {
+      scrollToBottom(containerRef.current, "smooth");
+    }
+  }, []);
   const handleSend = async () => {
-    if (connectionStatus !== "connected") return;
+    if (connectionStatus !== "connected") {
+      setSendError(
+        connectionStatus === "offline"
+          ? "No hay conexión a internet. Revisa tu conexión e intenta nuevamente."
+          : "El chat se está reconectando. Intenta enviar el mensaje nuevamente en unos segundos.",
+      );
+      return;
+    }
     if (isBlockedByMe) return;
     const hasText = isContentValidForSend(inputText);
     const hasAttachment = Boolean(selectedAttachment);
@@ -350,6 +387,13 @@ function ChatRoomContent({
     } catch (error) {
       if (getChatHttpStatus(error) === 403) {
         setBlockedSendError(true);
+      } else if (
+        error instanceof Error &&
+        /socket|timeout|connect|reconect|disconnect/i.test(error.message)
+      ) {
+        setSendError(
+          "No se pudo enviar el mensaje porque el chat se está reconectando. Intenta nuevamente en unos segundos.",
+        );
       } else {
         setSendError(
           getChatActionErrorMessage(
@@ -405,9 +449,9 @@ function ChatRoomContent({
     >
       <header
         data-testid="chat-room-header"
-        className="z-10 flex w-full min-w-0 shrink-0 items-center justify-between border-b border-border bg-surface p-3 md:p-4"
+        className="z-10 flex w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-border bg-surface p-3 md:p-4"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <Button
             type="button"
             variant="ghost"
@@ -416,7 +460,7 @@ function ChatRoomContent({
             onClick={onBack}
             aria-label="Volver a la lista de chats"
             className={cn(
-              "-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink",
+              "size-11 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink md:size-10",
               !isCompact && "md:hidden",
             )}
           >
@@ -447,7 +491,7 @@ function ChatRoomContent({
 
               setIsProfileModalOpen(true);
             }}
-            className="flex h-auto items-center gap-3 p-1 transition-colors hover:bg-surface-soft"
+            className="flex h-auto min-w-0 shrink items-center justify-start gap-2 p-1 whitespace-normal transition-colors hover:bg-surface-soft sm:gap-3"
           >
             <div className="relative shrink-0">
               {conversation.contact?.avatarUrl ? (
@@ -481,11 +525,14 @@ function ChatRoomContent({
                 />
               )}
             </div>
-            <div className="text-left">
-              <div className="flex items-center gap-1.5">
+            <div className="min-w-0 text-left">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <h3
                   data-testid="chat-contact-name"
-                  className="text-sm leading-tight font-bold text-ink md:text-base"
+                  className={cn(
+                    "min-w-0 text-sm leading-tight font-bold wrap-anywhere text-ink max-md:line-clamp-2 md:text-base",
+                    isCompact && "line-clamp-2",
+                  )}
                 >
                   {conversationName}
                 </h3>
@@ -498,6 +545,14 @@ function ChatRoomContent({
                   </span>
                 )}
               </div>
+              {contactSubtitle && (
+                <p
+                  data-testid="chat-contact-subtitle"
+                  className="truncate text-xs text-text-secondary"
+                >
+                  {contactSubtitle}
+                </p>
+              )}
               {isBlockedByMe ? (
                 <span
                   data-testid="chat-blocked-status"
@@ -537,13 +592,23 @@ function ChatRoomContent({
       {conversation.contextType === "POSTULACION" && (
         <div
           data-testid="chat-room-postulation-banner"
-          className="flex items-center justify-between border-b border-blue-100 bg-blue-50/70 px-4 py-2 text-xs text-blue-900"
+          className="flex flex-wrap items-center justify-between gap-2 border-b border-blue-100 bg-blue-50/70 px-4 py-2 text-xs text-blue-900"
         >
-          <span className="font-semibold">Conversación vinculada a una postulación laboral</span>
+          <div className="min-w-0 truncate">
+            <span className="font-semibold">Conversación vinculada a una postulación laboral</span>
+            {conversation.contextTitle && (
+              <span
+                data-testid="chat-room-postulation-vacancy"
+                className="ml-1.5 font-medium text-blue-800"
+              >
+                — {conversation.contextTitle}
+              </span>
+            )}
+          </div>
           <Link
             href={postulationHref}
             data-testid="chat-room-view-postulation-button"
-            className="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-xs hover:bg-blue-100/50"
+            className="inline-flex shrink-0 items-center gap-1 rounded bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-xs hover:bg-blue-100/50"
           >
             Ver postulación
           </Link>
@@ -613,8 +678,9 @@ function ChatRoomContent({
             </div>
           )}
         {!hasMoreMessages &&
-          messages.length > 0 &&
-          !showInitialLoading && (
+          !showInitialLoading &&
+          !isMessagesError &&
+          (!isEventConversation || messages.length > 0) && (
             <div
               data-testid="start-of-conversation"
               className="flex justify-center py-2"
@@ -622,6 +688,22 @@ function ChatRoomContent({
               <span className="text-xs text-text-secondary">
                 Inicio de la conversación
               </span>
+            </div>
+          )}
+        {!hasMoreMessages &&
+          messages.length === 0 &&
+          !showInitialLoading &&
+          !isMessagesError &&
+          !isEventConversation && (
+            <div
+              data-testid="date-separator-initial"
+              className="my-4 flex items-center gap-3"
+            >
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-center text-xs font-semibold whitespace-nowrap text-text-secondary">
+                {formatMessageDateSeparator(new Date().toISOString())}
+              </span>
+              <div className="h-px flex-1 bg-border" />
             </div>
           )}
         {showInitialLoading ? (
@@ -713,6 +795,7 @@ function ChatRoomContent({
             onChange={setInputText}
             onSend={() => void handleSend()}
             onKeyDown={handleInputKeyDown}
+            onFocus={handleInputFocus}
             placeholder={
               isEventConversation
                 ? "Escribe un mensaje al grupo..."

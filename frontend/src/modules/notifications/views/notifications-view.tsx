@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bell, CheckCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import {
   NOTIFICATION_INBOX_FILTER_LABELS,
   NOTIFICATION_INBOX_FILTERS,
 } from "../constants/notification-inbox-filters.constants";
+import { NOTIFICATION_INBOX_EMPTY_MESSAGES } from "../constants/notification-inbox-empty-messages.constants";
 import {
   useNotificationsInbox,
   useUnreadNotificationsCount,
@@ -31,13 +32,18 @@ function isValidInboxFilter(value: string | null): value is NotificationInboxFil
   return value !== null && (NOTIFICATION_INBOX_FILTERS as readonly string[]).includes(value);
 }
 
-export function NotificationsView({ filterSections }: NotificationsViewProps = {}) {
+export function NotificationsView({ filter, filterSections }: NotificationsViewProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const activeFilter: NotificationInboxFilter = isValidInboxFilter(filterParam)
-    ? filterParam
-    : "ALL";
+  const legacyFilter = isValidInboxFilter(filterParam) ? filterParam : null;
+  const activeFilter: NotificationInboxFilter = filter ?? legacyFilter ?? "ALL";
+
+  useEffect(() => {
+    if (!filter && legacyFilter && legacyFilter !== "ALL") {
+      router.replace(getNotificationInboxPath(legacyFilter));
+    }
+  }, [filter, legacyFilter, router]);
 
   const [page, setPage] = useState(1);
 
@@ -190,8 +196,8 @@ export function NotificationsView({ filterSections }: NotificationsViewProps = {
       ) : groupedNotifications.length === 0 ? (
         <NotificationsInboxEmpty
           icon={Bell}
-          title="No tienes notificaciones"
-          description="Cuando recibas nuevos avisos sobre encuestas, recordatorios o actividad de tu cuenta, aparecerán aquí."
+          title={NOTIFICATION_INBOX_EMPTY_MESSAGES[activeFilter].title}
+          description={NOTIFICATION_INBOX_EMPTY_MESSAGES[activeFilter].description}
         />
       ) : (
         <div className="flex flex-col gap-6">

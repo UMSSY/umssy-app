@@ -34,6 +34,10 @@ The section reads and saves the preference only through `useNotificationPreferen
 
 ## Key flows
 
+The profile guide offers navigation to the profile. When a presentation has unsaved changes, the shared navigation guard defers that action and the presentation dialog offers to continue editing, discard, or save before leaving. A failed save keeps the user on the form.
+
+Profile completeness treats a saved manual skill as present, while an NLP-detected skill requires a valid display name and at least one valid evidence reference. This matches the visible NLP skill list. GitHub and GitLab OAuth return through `/oauth/github/callback` and `/oauth/gitlab/callback`; the profile displays the resulting connection status.
+
 ### Choosing push on this device
 
 ```mermaid
@@ -111,10 +115,15 @@ Signing out tries to delete the current device subscription (`DELETE /push/subsc
 | Uses      | [notifications](../notifications/README.md)   | `useNotificationPreferences` and the preference endpoints       |
 | Uses      | shared                                        | `usePushNotifications`, push prompt and guide dialogs, `sw.js`  |
 
+## Profile editor
+
+The profile client reads `GET /profile/me`, updates personal information and presentation through their `PATCH /profile/me` subroutes, and loads supported cities through `GET /profile/cities`. Photo retrieval, replacement and deletion use `GET`, `PUT` and `DELETE /profile/me/photo`. The completeness guide reads `GET /profile/completeness` to show remaining requirements.
+
 ## Sprint History
 
 ### Sprint 3
 
+- The profile guide welcome screen stacks the illustration and text on small screens. The mascot scales with the available width, and the dialog scrolls to reveal its actions.
 - Selecting push opens the UMSSY prompt first and the native permission only after "Continuar".
 - Guides for blocked permission, iPhone below iOS 16.4 and app not installed on iPhone.
 - "Activar en este dispositivo" registers push on a new device without changing the saved preference.

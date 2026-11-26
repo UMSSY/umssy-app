@@ -62,7 +62,7 @@ export function DocumentCorrectionForm(props: DocumentCorrectionFormProps) {
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-        <Button type="button" variant="ghost" disabled={correction.isSubmitting} onClick={correction.cancel}>
+        <Button type="button" variant="cancel" size="lg" disabled={correction.isSubmitting} onClick={correction.cancel}>
           Cancelar
         </Button>
         <Button type="submit" disabled={correction.isSubmitting} className="h-11 rounded-md px-5 font-semibold">

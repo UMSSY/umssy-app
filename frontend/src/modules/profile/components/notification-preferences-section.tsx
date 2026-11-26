@@ -29,8 +29,8 @@ import { SectionCard } from "./section-card";
 const PUSH_DESCRIPTION_BY_ENVIRONMENT = {
   supported: "Te pediremos permiso para activar las alertas.",
   desktop: "Disponible en tu celular.",
-  "ios-old": "Requiere iOS 16.4 o superior.",
-  "ios-not-installed": "Instala UMSSY en tu pantalla de inicio.",
+  "ios-old": "No disponible en tu versión de iOS.",
+  "ios-not-installed": "Primero agrega UMSSY a tu pantalla.",
   unsupported: "Disponible en tu celular.",
 } as const;
 
@@ -307,7 +307,8 @@ export function NotificationPreferencesSection() {
           <div className="mt-5 flex flex-col gap-3 md:flex-row md:justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="cancel"
+              size="lg"
               className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft md:w-auto"
               disabled={!hasChanges || isBusy}
               onClick={handleCancel}

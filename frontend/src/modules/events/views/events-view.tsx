@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { buildLoginUrl } from "@/modules/auth";
 import { useRegistrationSession } from '@/modules/event-registrations';
 import { useAuth } from '@/shared/contexts/auth-context';
+import { useCookieSession } from '@/shared/hooks/use-cookie-session';
 import { parseApiError } from '@/shared/utils/parse-api-error';
 import { useEffect, useRef, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
@@ -31,11 +32,14 @@ import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 import type { EventDetail } from '../types/event-detail.types';
 import { getProposalSupportErrorMessage } from '../utils/proposal-support-error';
+import { formatCatalogCount } from '../utils/format-catalog-count';
 
 export function EventsView({ initialProposalId = null }: EventsViewProps) {
   const router = useRouter();
   const session = useRegistrationSession();
+  const cookieSession = useCookieSession();
   const { roles, isLoading: rolesLoading } = useAuth();
+  const hasSession = Boolean(session) || cookieSession;
   const {
     searchInput,
     setSearchInput,
@@ -45,6 +49,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
     setIsPopular,
     isExpired,
     setIsExpired,
+    isFinished,
+    setIsFinished,
     filters,
   } = useEventsFilters();
   const {
@@ -80,7 +86,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
     'ALREADY_SUPPORTED', 'PROPOSAL_EXPIRED', 'EVENT_NOT_SUPPORTABLE',
     'FORBIDDEN_ROLE', 'USER_INACTIVE',
   ].includes(support.errorCode ?? '');
-  const supportNotice = !session
+  const supportNotice = !hasSession
     ? 'Inicia sesión para apoyar esta propuesta.'
     : rolesLoading
       ? 'Verificando permisos para apoyar...'
@@ -91,7 +97,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
 
   async function handleSupport(event: EventDetail) {
     const returnToProposal = `/events?proposal=${encodeURIComponent(event.id)}`;
-    if (!session) {
+    if (!hasSession) {
       router.push(buildLoginUrl(returnToProposal));
       return;
     }
@@ -169,7 +175,10 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
         description={
           isLoading && !events.length
             ? "Cargando actividades de la comunidad…"
-            : `${events.length} talleres disponibles`
+            : formatCatalogCount(
+                events.length,
+                isExpired ? 'expired' : isFinished ? 'finished' : 'available',
+              )
         }
         actions={
           <Link
@@ -209,6 +218,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
                 onClick={() => {
                   setSelectedEventId(null);
                   setIsExpired(!isExpired);
+                  setIsFinished(false);
                   setCategoryId(null);
                   setIsPopular(false);
                 }}
@@ -216,22 +226,39 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               >
                 Propuestas vencidas
               </Button>
+              <Button
+                type="button"
+                variant={isFinished ? "default" : "outline"}
+                aria-pressed={isFinished}
+                onClick={() => {
+                  setSelectedEventId(null);
+                  setIsFinished(!isFinished);
+                  setIsExpired(false);
+                  setCategoryId(null);
+                  setIsPopular(false);
+                }}
+                className="rounded-full text-xs"
+              >
+                Finalizados
+              </Button>
               <PopularFilterChip
                 isSelected={isPopular}
                 onToggle={() => {
                   setSelectedEventId(null);
                   setIsPopular(!isPopular);
                   setIsExpired(false);
+                  setIsFinished(false);
                 }}
               />
               <CategoryFilterChips
                 categories={categories}
                 selectedId={categoryId}
-                isAllActive={!isExpired && !isPopular}
+                isAllActive={!isExpired && !isFinished && !isPopular}
                 onSelect={(id) => {
                   setSelectedEventId(null);
                   setCategoryId(id);
                   setIsExpired(false);
+                  setIsFinished(false);
                   setIsPopular(false);
                 }}
               />
@@ -275,6 +302,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               <p className="py-10 text-center text-text-secondary">
                 {isExpired
                   ? "No hay propuestas vencidas por el momento."
+                  : isFinished
+                  ? "No hay talleres finalizados por el momento."
                   : filters.search.trim() || filters.categoryId
                     ? "No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría."
                     : "No hay talleres disponibles."}

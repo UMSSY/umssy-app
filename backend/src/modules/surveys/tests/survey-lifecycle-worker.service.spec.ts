@@ -240,9 +240,7 @@ describe('SurveyLifecycleWorkerService', () => {
         closesAtFormatted: '18/11/2026 06:00.',
         responsesCount: 42,
       },
-      actionUrl: expect.stringMatching(
-        /\/backoffice\/surveys\/statistics\/survey-closing-1$/,
-      ),
+      actionUrl: '/backoffice/surveys/statistics/survey-closing-1',
       groupKey: 'survey-lifecycle:closing-soon:survey-closing-1',
       renderMail: expect.any(Function),
     });
@@ -308,6 +306,7 @@ describe('SurveyLifecycleWorkerService', () => {
           closesAtFormatted: '14/11/2026 19:59.',
           responsesCount: 85,
         },
+        actionUrl: '/backoffice/surveys/statistics/survey-closed-1',
       }),
     );
     expect(notificationsService.notify).toHaveBeenNthCalledWith(
@@ -320,6 +319,7 @@ describe('SurveyLifecycleWorkerService', () => {
           threshold: 10,
           summaryText: 'Variación detectada: Opción 1 +20 pp',
         },
+        actionUrl: '/backoffice/surveys/statistics/survey-closed-1',
       }),
     );
 

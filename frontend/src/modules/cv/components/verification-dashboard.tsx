@@ -1,16 +1,8 @@
 'use client';
-import { useId, useRef } from 'react';
-import { Label } from '@/components/ui/label';
-import { Bell, Check, Eye, FileText, Trash2, Upload } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
+import { Bell, Check, Eye, FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ConfirmDeleteDialog, formatFileSize } from '@/modules/profile';
-import { CertificationForm } from '@/modules/certifications';
 import { formatUploadDate } from '../utils/format-upload-date';
 import { CvViewerDialog } from './cv-viewer-dialog';
 import {
@@ -28,21 +20,12 @@ export function VerificationDashboard({
   rows,
   refresh,
 }: VerificationDashboardProps) {
-  const fileInput = useRef<HTMLInputElement>(null);
-  const documentTypeId = useId();
-  const certificationId = useId();
   const {
     setSelected,
     historyOpen,
     setHistoryOpen,
     detailId,
     setDetailId,
-    upload,
-    setUpload,
-    mode,
-    setMode,
-    target,
-    setTarget,
     remove,
     setRemove,
     preview,
@@ -51,13 +34,9 @@ export function VerificationDashboard({
     error,
     unread,
     active,
-    certs,
     chosen,
     view,
-    saveFile,
     erase,
-    openUpload,
-    createCertification,
     acknowledge,
   } = useVerificationDashboard({ rows, refresh });
   return (
@@ -65,15 +44,15 @@ export function VerificationDashboard({
       {unread.length > 0 && (
         <div
           role="status"
-          className="flex items-center justify-between gap-3 rounded-lg bg-surface-soft p-3"
+          className="flex flex-col items-start justify-between gap-3 rounded-lg bg-surface-soft p-3 sm:flex-row sm:items-center"
         >
-          <span>
+          <span className="min-w-0 break-words">
             {unread[0].filename} · {verificationLabels[unread[0].status]}
             {unread.length > 1
               ? ' · ' + unread.length + ' resultados nuevos'
               : ''}
           </span>
-          <Button variant="outline" onClick={() => void acknowledge(unread[0])}>
+          <Button variant="outline" className="w-full shrink-0 sm:w-auto" onClick={() => void acknowledge(unread[0])}>
             Entendido
           </Button>
         </div>
@@ -83,14 +62,8 @@ export function VerificationDashboard({
           {error}
         </p>
       )}
-      <div className="grid items-start gap-5 lg:grid-cols-[1.2fr_1fr]">
+      <div className="flex flex-col gap-5">
         <section className="space-y-4 rounded-xl border bg-surface p-4">
-          <header className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-bold">Subir documento o nueva versión</h2>
-            <Button onClick={openUpload} disabled={busy}>
-              <Upload size={16} /> Subir nueva versión
-            </Button>
-          </header>
           <ul className="max-h-80 space-y-2 overflow-auto">
             {active.map((d) => (
               <li
@@ -152,7 +125,7 @@ export function VerificationDashboard({
         <section className="space-y-4 rounded-xl border bg-surface p-4">
           <VerificationFlow doc={chosen} />
           <div className="flex justify-center">
-            <Button onClick={() => setHistoryOpen(true)}>
+            <Button className="w-full sm:w-auto" onClick={() => setHistoryOpen(true)}>
               <Bell size={18} /> Ver historial de verificaciones
             </Button>
           </div>
@@ -181,7 +154,7 @@ export function VerificationDashboard({
                     </small>
                   </span>
                   <VerificationBadge doc={d} />
-                  <small className="col-span-full text-right sm:col-span-1">
+                  <small className="col-span-full text-left sm:col-span-1 sm:text-right">
                     {formatUploadDate(new Date(d.decidedAt ?? d.createdAt))}
                   </small>
                 </Button>
@@ -215,88 +188,6 @@ export function VerificationDashboard({
         onCancel={() => setRemove(null)}
         onConfirm={() => void erase()}
       />
-      <Dialog
-        open={upload}
-        onOpenChange={(v) => {
-          if (!busy) setUpload(v);
-        }}
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-          <DialogTitle>Subir nueva versión</DialogTitle>
-          <div className="space-y-2">
-            <Label htmlFor={documentTypeId}>Tipo de documento</Label>
-            <NativeSelect
-              id={documentTypeId}
-              className="rounded border p-2"
-              aria-label="Tipo de documento"
-              value={mode}
-              onChange={(e) => setMode(e.target.value)}
-            >
-              <NativeSelectOption value="cv">Currículum</NativeSelectOption>
-              <NativeSelectOption value="certification">
-                Certificación
-              </NativeSelectOption>
-            </NativeSelect>
-          </div>
-          {mode === 'certification' && (
-            <div className="space-y-2">
-              <Label htmlFor={certificationId}>Certificación</Label>
-              <NativeSelect
-                id={certificationId}
-                className="rounded border p-2"
-                aria-label="Certificación"
-                value={target}
-                onChange={(e) => setTarget(e.target.value)}
-              >
-                <NativeSelectOption value="">
-                  Nueva certificación
-                </NativeSelectOption>
-                {certs.map((d) => (
-                  <NativeSelectOption key={d.id} value={d.id}>
-                    {d.filename}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </div>
-          )}
-          {mode === 'certification' && !target ? (
-            <CertificationForm
-              onCancel={() => setUpload(false)}
-              onSubmit={createCertification}
-            />
-          ) : (
-            <>
-              <p>
-                {mode === 'cv'
-                  ? 'El PDF más reciente será tu CV vigente. Las versiones anteriores se conservan.'
-                  : 'Adjunta un PDF, JPG o PNG de hasta 5 MB.'}
-              </p>
-              <Input
-                hidden
-                type="file"
-                ref={fileInput}
-                accept={mode === 'cv' ? '.pdf' : '.pdf,.jpg,.jpeg,.png'}
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  e.target.value = '';
-                  if (f) void saveFile(f);
-                }}
-              />
-              <Button
-                disabled={busy}
-                onClick={() => fileInput.current?.click()}
-              >
-                {busy ? 'Subiendo…' : 'Seleccionar archivo'}
-              </Button>
-            </>
-          )}
-          {error && (
-            <p role="alert" className="text-danger">
-              {error}
-            </p>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

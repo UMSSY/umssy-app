@@ -35,7 +35,9 @@ async function ensureBackendSubscription(
 ): Promise<void> {
   const requestConfig = session
     ? {
-        headers: { Authorization: `${BEARER_PREFIX}${session.token}` },
+        ...(session.token
+          ? { headers: { Authorization: `${BEARER_PREFIX}${session.token}` } }
+          : {}),
         signal: session.signal,
       }
     : undefined;

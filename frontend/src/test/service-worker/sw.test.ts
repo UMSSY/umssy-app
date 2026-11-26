@@ -9,8 +9,8 @@ type Listener = (event: Record<string, unknown>) => void;
 type Route = () => Response;
 
 const ORIGIN = "https://umssy.test";
-const SHELL = "umssy-shell-v5";
-const ASSETS = "umssy-assets-v5";
+const SHELL = "umssy-shell-v6";
+const ASSETS = "umssy-assets-v6";
 const source = readFileSync(path.resolve(import.meta.dirname, "../../../public/sw.js"), "utf8");
 
 const keyOf = (input: RequestLike) =>
@@ -473,7 +473,7 @@ it('keeps push delivery and offline asset caching in the same worker', async () 
   );
 });
 
-it('groups pushes by groupKey and re-alerts the user (HU-17)', async () => {
+it('groups pushes by groupKey and re-alerts the user', async () => {
   const worker = loadWorker({});
   await worker.push({ title: 'Mensaje nuevo de: Ana', body: 'Hola', groupKey: 'chat:1' });
   await worker.push({ title: 'Sin grupo', body: 'Aviso' });
@@ -482,4 +482,13 @@ it('groups pushes by groupKey and re-alerts the user (HU-17)', async () => {
   expect(calls[0][1]).toEqual(expect.objectContaining({ tag: 'chat:1', renotify: true }));
   expect(calls[1][1]).not.toHaveProperty('tag');
   expect(calls[1][1]).not.toHaveProperty('renotify');
+});
+
+it('uses a monochrome badge separate from the colored icon', async () => {
+  const worker = loadWorker({});
+  await worker.push({ title: 'Mensaje nuevo de: Ana', body: 'Hola' });
+
+  const [, options] = worker.self.registration.showNotification.mock.calls[0];
+  expect(options.icon).toBe('/icons/icon-192x192.png');
+  expect(options.badge).toBe('/icons/notification-badge-96x96.png');
 });

@@ -65,6 +65,8 @@ describe('registration fixture QR tokens', () => {
       'history-accessibility-2026-11-23',
       'history-visualization-2026-11-23',
       'history-projects-2026-11-26',
+      'advanced-architecture-2026-11-29',
+      'advanced-deployment-2026-11-30',
     ]) {
       const workshopSupports = createMany.mock.calls[0]![0].data.filter(
         (row: { eventId: string }) => row.eventId === context.getId(key),

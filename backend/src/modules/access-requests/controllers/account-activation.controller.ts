@@ -1,5 +1,17 @@
-import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  Optional,
+  Post,
+  Query,
+  Res,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
+import { AuthSessionCookieService } from '../../auth/services/auth-session-cookie.service.js';
 import {
   activateAccountSchema,
   activationStatusQuerySchema,
@@ -17,6 +29,8 @@ import { AccountActivationService } from '../services/account-activation.service
 export class AccountActivationController {
   constructor(
     private readonly accountActivationService: AccountActivationService,
+    @Optional()
+    private readonly sessionCookies?: AuthSessionCookieService,
   ) {}
 
   @Get('status')
@@ -38,15 +52,25 @@ export class AccountActivationController {
 
   @Post()
   @HttpCode(200)
-  activate(
+  async activate(
     @Body(new ZodValidationPipe(activateAccountSchema))
     body: ActivateAccountDto,
+    @Res({ passthrough: true }) response?: Response,
+    @Headers('user-agent') userAgent?: string,
   ) {
-    return this.accountActivationService.activate(
+    const result = await this.accountActivationService.activate(
       body.email,
       body.code,
       body.password,
     );
+    if (response && this.sessionCookies) {
+      await this.sessionCookies.issueLoginCookies(
+        response,
+        result.accessToken,
+        userAgent,
+      );
+    }
+    return result;
   }
 
   @Post('resend')

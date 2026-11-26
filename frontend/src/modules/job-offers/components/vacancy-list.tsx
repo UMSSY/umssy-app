@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { DELETE_JOB_OFFER_TEXT, NO_COMPANY_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
+import { CLOSE_JOB_OFFER_TEXT, DELETE_JOB_OFFER_TEXT, NO_COMPANY_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
 import { useDeleteJobOffer } from "../hooks/use-delete-job-offer";
 import { useReopenJobOffer } from "../hooks/use-reopen-job-offer";
@@ -23,7 +23,6 @@ import { JobOfferDetailsDialog } from "./job-offer-details-dialog";
 import { JobOffersPagination } from "./job-offers-pagination";
 import { VacancyCard } from "./vacancy-card";
 import { VacancyFiltersDialog } from "./vacancy-filters-dialog";
-import { CloseVacancyDialog } from "./close-vacancy-dialog";
 
 const CREATE_LINK_CLASSES = "max-md:min-h-11";
 
@@ -167,10 +166,14 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
   if (status === "error") {
     return (
       <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-        {text.loadError}
-        <Button type="button" variant="outline" size="sm" onClick={reload} className="max-md:min-h-11">
-          Reintentar
-        </Button>
+        {companyId === null
+          ? "Tu cuenta no tiene una empresa asociada asignada. Contacta al administrador institucional."
+          : text.loadError}
+        {companyId !== null && (
+          <Button type="button" variant="outline" size="sm" onClick={reload} className="max-md:min-h-11">
+            Reintentar
+          </Button>
+        )}
       </div>
     );
   }
@@ -271,9 +274,20 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
         />
       ) : null}
 
-      <CloseVacancyDialog
-        offer={offerToClose}
+      <ConfirmDialog
+        isOpen={offerToClose !== null}
+        title={CLOSE_JOB_OFFER_TEXT.title}
+        description={
+          <>
+            <span className="font-semibold text-ink">{offerToClose?.title}</span>{" "}
+            {CLOSE_JOB_OFFER_TEXT.description}
+          </>
+        }
+        cancelLabel={CLOSE_JOB_OFFER_TEXT.cancel}
+        confirmLabel={CLOSE_JOB_OFFER_TEXT.confirm}
+        busyLabel={CLOSE_JOB_OFFER_TEXT.busy}
         isBusy={closing.isPending}
+        closeOnOverlayClick
         onConfirm={confirmClose}
         onCancel={cancelCloseDialog}
       />

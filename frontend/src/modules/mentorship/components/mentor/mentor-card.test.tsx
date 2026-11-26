@@ -84,15 +84,15 @@ describe("MentorCard", () => {
     expect(screen.getByText("Ingeniería · UMSS")).toBeVisible();
     const availability = screen.getByText("Disponible para mentoría");
     expect(availability).toBeVisible();
-    expect(availability).toHaveClass("border-border", "text-ink");
+    expect(availability).toHaveClass("border-border", "bg-surface-soft");
     const indicators = availability.parentElement;
-    expect(indicators).toHaveClass("ml-auto", "flex-col", "items-end");
+    expect(indicators).toHaveClass("flex-col", "items-end");
     const header = indicators?.parentElement;
     expect(header).toHaveClass("flex-wrap");
     expect(header?.firstElementChild).toContainElement(
       screen.getByRole("heading", { name: mentor.fullName }),
     );
-    expect(header?.firstElementChild).toHaveClass("basis-56", "min-w-0");
+    expect(header?.firstElementChild).toHaveClass("flex-1", "min-w-0");
     expect(header?.lastElementChild).toBe(indicators);
   });
 
@@ -163,6 +163,8 @@ describe("MentorCard", () => {
     expect(screen.getByText(mentor.fullName)).toBeDefined();
     expect(screen.getByText("Desarrolladora Backend Senior")).toBeDefined();
     expect(screen.getByText("Backend")).toBeDefined();
+    expect(screen.getByText("Áreas técnicas")).not.toHaveClass("sr-only");
+    expect(screen.getByText("Tipos de orientación")).not.toHaveClass("sr-only");
     expect(screen.getByText("APIs")).toBeDefined();
     expect(screen.getByText("Bases de datos")).toBeDefined();
     expect(screen.queryByText("Disponible")).toBeNull();
@@ -203,7 +205,7 @@ describe("MentorCard", () => {
     expect(profileLink.getAttribute("href")).toBe(
       "/mentors/0424f370-00f0-43cf-9b8a-997af81840b9",
     );
-    expect(profileLink).not.toHaveClass("w-full");
+    expect(profileLink).toHaveClass("max-w-full");
     expect(profileLink.parentElement).toHaveClass("justify-end", "mt-auto");
   });
 

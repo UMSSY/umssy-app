@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
 import type { ApplicationRecord } from '../types/application-record.types.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
@@ -14,19 +14,9 @@ import { ApplicationContactRestrictedException } from '../exceptions/application
 import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
-import { StateChangedDto } from '../notification/state-changed.dto.js';
-import { toApplicationStatusCode } from '../notification/state-changed.mapper.js';
-import {
-  NOTIFY_TIMEOUT_MS,
-  STATE_CHANGED_ACTION_PATH,
-} from '../notification/state-changed.constants.js';
-import type { NotifyStateChangedParams } from '../notification/notify-state-changed-params.types.js';
 import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
-import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { UsersService } from '../../users/services/users.service.js';
-import { ConfigService } from '@nestjs/config';
-import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 
 const CONTACTABLE_STATUSES: readonly string[] = [
   ApplicationStatus.IN_REVIEW,
@@ -36,14 +26,10 @@ const CONTACTABLE_STATUSES: readonly string[] = [
 
 @Injectable()
 export class ApplicationsService {
-  private readonly logger = new Logger(ApplicationsService.name);
-
   constructor(
     private readonly repository: ApplicationsRepository,
     private readonly mapper: ApplicationMapper,
     private readonly matching: JobRecommendationsService,
-    private readonly notifications: NotificationsService,
-    private readonly config: ConfigService,
     private readonly jobOffers: JobOffersService,
     private readonly users: UsersService,
   ) {}
@@ -55,13 +41,18 @@ export class ApplicationsService {
     const records = await this.repository.findByUserId(userId, query);
     if (!records || !records.length) return [];
 
-    const offerIds = records.map((record: ApplicationRecord) => record.jobOfferId);
+    const offerIds = records.map(
+      (record: ApplicationRecord) => record.jobOfferId,
+    );
     const scoresMap = await this.matching.scoresForOffers(userId, offerIds);
+    const now = new Date();
 
-    const responses: ApplicationItemResponse[] = records.map((record: ApplicationRecord) => {
-      const score = scoresMap.get(record.jobOfferId) ?? 0;
-      return this.mapper.toResponse(record, score);
-    });
+    const responses: ApplicationItemResponse[] = records.map(
+      (record: ApplicationRecord) => {
+        const score = scoresMap.get(record.jobOfferId) ?? 0;
+        return this.mapper.toResponse(record, score, now);
+      },
+    );
 
     const statuses = [
       ApplicationStatus.IN_REVIEW,
@@ -101,12 +92,10 @@ export class ApplicationsService {
         }
         case 'date':
           comparison =
-            (Date.parse(a.appliedDate) - Date.parse(b.appliedDate)) *
-            direction;
+            (Date.parse(a.appliedDate) - Date.parse(b.appliedDate)) * direction;
           break;
         default:
-          comparison =
-            Date.parse(b.appliedDate) - Date.parse(a.appliedDate);
+          comparison = Date.parse(b.appliedDate) - Date.parse(a.appliedDate);
       }
 
       if (comparison !== 0) return comparison;
@@ -116,10 +105,7 @@ export class ApplicationsService {
 
       if (dateDifference !== 0) return dateDifference;
 
-      const titleDifference = collator.compare(
-        a.vacancyTitle,
-        b.vacancyTitle,
-      );
+      const titleDifference = collator.compare(a.vacancyTitle, b.vacancyTitle);
 
       return titleDifference || a.id.localeCompare(b.id);
     });
@@ -172,48 +158,6 @@ export class ApplicationsService {
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
 
-  public async notifyStateChanged(p: NotifyStateChangedParams): Promise<void> {
-    if (p.previousStatus === p.newStatus) return;
-    if (p.newStatus === ApplicationStatus.WITHDRAWN) return;
-
-    try {
-      const context = StateChangedDto.parse({
-        jobTitle: p.jobTitle,
-        companyName: p.companyName,
-        newStatus: toApplicationStatusCode(p.newStatus),
-        previousStatus: toApplicationStatusCode(p.previousStatus),
-        actionUrl: `${this.config.getOrThrow('APP_URL')}${STATE_CHANGED_ACTION_PATH}`,
-      });
-
-      await this.withTimeout(
-        this.notifications.notify({
-          recipientIds: [p.recipientId],
-          type: NotificationType.APPLICATION_STATUS_CHANGED,
-          payload: {
-            vacancyTitle: context.jobTitle,
-            companyName: context.companyName,
-            newStatus: context.newStatus,
-          },
-          actionUrl: context.actionUrl,
-        }),
-        NOTIFY_TIMEOUT_MS,
-      );
-    } catch (error) {
-      this.logger.error(
-        `No se pudo notificar el cambio de estado (application=${p.applicationId}, recipient=${p.recipientId})`,
-        error instanceof Error ? error.stack : String(error),
-      );
-    }
-  }
-
-  private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-    let timer: NodeJS.Timeout;
-    const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error(`notify() timeout (${ms}ms)`)), ms);
-    });
-    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-  }
-
   async validateApplicationForChat(
     applicationId: string,
     studentUserId: string,
@@ -252,6 +196,11 @@ export class ApplicationsService {
     };
   }
 
+  async findVacancyTitleForChat(applicationId: string): Promise<string | null> {
+    const record = await this.repository.findApplicationForChat(applicationId);
+    return record?.jobOffer?.title ?? null;
+  }
+
   findRecruitmentApplicationsByUser(userId: string) {
     return this.repository.findRecruitmentApplicationsByUser(userId);
   }
@@ -267,7 +216,8 @@ export class ApplicationsService {
   async findApplicationDecisionContext(
     id: string,
   ): Promise<ApplicationDecisionContext | null> {
-    const application = await this.repository.findApplicationDecisionContext(id);
+    const application =
+      await this.repository.findApplicationDecisionContext(id);
     if (!application) return null;
 
     const offer = await this.jobOffers.findOfferSummary(application.jobOfferId);

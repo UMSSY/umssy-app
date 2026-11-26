@@ -3,9 +3,9 @@
 import { Label } from '@/components/ui/label';
 
 import { CircleCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { MY_APPLICATIONS_ROUTE } from '@/modules/applications';
 import { formatBoliviaDate } from '@/shared/utils/date-time';
 import { JOB_APPLICATION_MESSAGES } from '../constants/job-application.constants';
 import { useJobApplication } from '../hooks/use-job-application';
@@ -43,19 +44,23 @@ export function JobApplicationAction({
     <div className="flex flex-col items-end gap-1">
       {application ? (
         <>
-          <Button size="sm" variant="secondary" disabled>
+          <Button variant="secondary" disabled>
             <CircleCheck className="size-4" aria-hidden="true" />
             {JOB_APPLICATION_MESSAGES.alreadyApplied}
           </Button>
-          <p className="flex items-center gap-2 text-xs text-text-secondary">
+          <p className="text-xs text-text-secondary">
             {JOB_APPLICATION_MESSAGES.appliedOn}{' '}
-            {formatBoliviaDate(application.appliedAt)} ·
-            <Badge variant="outline">{application.status}</Badge>
+            {formatBoliviaDate(application.appliedAt)}
           </p>
+          <Link
+            href={MY_APPLICATIONS_ROUTE}
+            className="text-xs font-medium text-accent underline-offset-4 hover:underline"
+          >
+            {JOB_APPLICATION_MESSAGES.viewMyApplications}
+          </Link>
         </>
       ) : (
         <Button
-          size="sm"
           onClick={() => {
             setConsentCv(false);
             setConsentRadar(false);
@@ -124,7 +129,8 @@ export function JobApplicationAction({
           )}
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="cancel"
+              size="lg"
               disabled={isApplying}
               onClick={() => setConsentJobId(null)}
             >
@@ -178,12 +184,6 @@ export function JobApplicationAction({
               </dt>
               <dd className="font-semibold text-ink">
                 {formatBoliviaDate(submittedApplication.appliedAt)}
-              </dd>
-              <dt className="text-text-secondary">
-                {JOB_APPLICATION_MESSAGES.summaryStatus}
-              </dt>
-              <dd>
-                <Badge variant="outline">{submittedApplication.status}</Badge>
               </dd>
             </dl>
           )}

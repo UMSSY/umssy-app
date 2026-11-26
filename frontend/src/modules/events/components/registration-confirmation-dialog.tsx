@@ -23,7 +23,7 @@ export function RegistrationConfirmationDialog({ event, open, pending, onClose, 
           <p>Horario: {event.startTime} - {event.endTime}</p>
         </div>
         <div className="flex justify-end gap-3 border-t border-border pt-4">
-          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar</Button>
+          <Button type="button" variant="cancel" size="lg" disabled={pending} onClick={onClose}>Cancelar</Button>
           <Button type="button" disabled={pending} onClick={onConfirm}>
             {pending && <Loader2 className="animate-spin" aria-hidden="true" />}
             {pending ? "Inscribiendo..." : "Confirmar"}

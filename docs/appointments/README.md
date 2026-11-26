@@ -1,6 +1,6 @@
 # Appointments
 
-Backend module `backend/src/modules/appointments` (Epic 7, group 7). It books mentoring sessions on a mentor's availability blocks, lists and shows a person's appointments, cancels them, shares the video call link and sends the booked and cancelled notices. The tables it uses are described in [backend/prisma/README.md, section Appointments](../../backend/prisma/README.md#appointments).
+Backend module `backend/src/modules/appointments`. It books mentoring sessions on a mentor's availability blocks, lists and shows a person's appointments, cancels them, shares the video call link and sends the booked and cancelled notices. The tables it uses are described in [backend/prisma/README.md, section Appointments](../../backend/prisma/README.md#appointments).
 
 ## Endpoints
 
@@ -74,7 +74,7 @@ The response and the detail include `cancellation: { cancelledBy: 'MENTOR' | 'ST
 
 ## Notifications
 
-`AppointmentNotificationsService` sends the notices through the `notifications` module (Epic 9) and records each delivery in `appointment_notifications`, one row per appointment, recipient, event and channel.
+`AppointmentNotificationsService` sends the notices through the `notifications` module and records each delivery in `appointment_notifications`, one row per appointment, recipient, event and channel.
 
 | Event       | Recipients                 | Notification type       | Content                                                                                        |
 | ----------- | -------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------- |
@@ -134,14 +134,30 @@ sequenceDiagram
   C-->>U: response
 ```
 
+## Appointment screens
+
+The appointments client lists appointments, opens a detail dialog and shows the join action when a confirmed meeting can be joined. Booking starts from available mentor slots. Cancellation opens a confirmation form and sends `PATCH /appointments/:id/cancel` with the reason when supplied. The list reloads after a successful change so the cancelled status is reflected.
+
+## Architecture and data
+
+```mermaid
+flowchart LR
+  Client["Web client"] --> API["Appointments API"]
+  API --> Service["Appointment service"]
+  Service --> Data[("Appointments")]
+  Service --> Related[("Availability blocks")]
+```
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
+
 ## Sprint History
 
 ### Sprint 3
 
-- HU-10: `PATCH /appointments/:id/cancel` with the 24-hour rule and a reason of up to 300 characters; new columns `cancellation_reason` and `cancelled_at`.
-- HU-11: `cancellation` block (who cancelled, whether it was the caller, reason, date) in `GET /appointments/me` and `GET /appointments/:id`; cancelled appointments appear in both tabs.
-- HU-12: private Jitsi link saved when booking and shared in the detail while the appointment is confirmed and not finished.
-- HU-13 and HU-14: booked and cancelled notices by in-app, email and push, with per-channel retries recorded in `appointment_notifications`.
-- HU-15: `COMPLETED` status computed from the end time, without writing it.
-- HU-16 and HU-17: pagination (10 per page, up to 50) and search by name (`q`, up to 100 characters, ignoring accents) in `GET /appointments/me`.
-- HU-18, HU-19 and HU-23: booking rejects overlaps, rechecks that the mentor is still available and allows one booking per day.
+- `PATCH /appointments/:id/cancel` with the 24-hour rule and a reason of up to 300 characters; new columns `cancellation_reason` and `cancelled_at`.
+- `cancellation` block (who cancelled, whether it was the caller, reason, date) in `GET /appointments/me` and `GET /appointments/:id`; cancelled appointments appear in both tabs.
+- private Jitsi link saved when booking and shared in the detail while the appointment is confirmed and not finished.
+- booked and cancelled notices by in-app, email and push, with per-channel retries recorded in `appointment_notifications`.
+- `COMPLETED` status computed from the end time, without writing it.
+- pagination (10 per page, up to 50) and search by name (`q`, up to 100 characters, ignoring accents) in `GET /appointments/me`.
+- booking rejects overlaps, rechecks that the mentor is still available and allows one booking per day.
