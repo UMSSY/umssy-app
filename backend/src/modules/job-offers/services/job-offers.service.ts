@@ -26,6 +26,7 @@ import type {
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
+import { JobOfferNotificationsService } from './job-offer-notifications.service.js';
 import { JobOfferSkillsService } from './job-offer-skills.service.js';
 
 @Injectable()
@@ -35,6 +36,7 @@ export class JobOffersService {
     private readonly jobOfferSkillsService: JobOfferSkillsService,
     private readonly jobOfferMapper: JobOfferMapper,
     private readonly matchSource: JobOfferMatchRepository,
+    private readonly jobOfferNotifications: JobOfferNotificationsService,
   ) {}
 
   findPublishedMatchById(id: string, now: Date) {
@@ -72,9 +74,11 @@ export class JobOffersService {
       ...this.toOfferFields(request),
     });
 
+    void this.jobOfferNotifications.notifyPublished(record.id);
+
     return this.jobOfferMapper.toCreatedResponse(record);
   }
-  
+
   async closeExpiredOffers(now: Date = new Date()): Promise<number> {
     const [publishedStatusId, closedStatusId] = await Promise.all([
       this.jobOffersRepository.findStatusId(JobOfferStatus.PUBLISHED),

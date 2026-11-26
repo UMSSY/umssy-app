@@ -36,7 +36,12 @@ export class ApplicationsRepository {
         appliedAt: true,
         status: { select: { title: true } },
         jobOffer: {
-          select: { title: true, company: { select: { title: true } } },
+          select: {
+            title: true,
+            expiresAt: true,
+            status: { select: { title: true } },
+            company: { select: { title: true } },
+          },
         },
       },
     });
