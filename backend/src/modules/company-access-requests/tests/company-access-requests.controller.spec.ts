@@ -67,7 +67,7 @@ describe('CompanyAccessRequestsController', () => {
 
   it('delega getStatus al servicio', async () => {
     service.getStatus.mockResolvedValue({ code: 'EMP-2026-0001', status: 'PENDING' });
-    await expect(controller.getStatus('EMP-2026-0001', 'test@test.com')).resolves.toEqual({
+    await expect(controller.getStatus({ code: 'EMP-2026-0001' }, 'test@test.com')).resolves.toEqual({
       code: 'EMP-2026-0001',
       status: 'PENDING',
     });

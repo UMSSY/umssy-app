@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
-import { MyRequestView } from "@/modules/access-requests";
+import { CompanyMyRequestView, MyRequestView } from "@/modules/access-requests";
 import type { RequestStatusPageProps } from "@/modules/access-requests/types/request-status-page-props.types";
-import { getRequestCodeFromLink } from "@/modules/access-requests/utils/get-request-code-from-link";
+import { getRequestLinkTarget } from "@/modules/access-requests/utils/get-request-link-target";
 
 export const metadata: Metadata = {
-  title: "Revisión de la carrera",
+  title: "Revisión de la solicitud",
 };
 
 export default async function MyRequestPage({
   searchParams,
 }: RequestStatusPageProps) {
   const params = await searchParams;
-  const requestCode = getRequestCodeFromLink(params.code);
+  const target = getRequestLinkTarget(params.code);
 
-  return <MyRequestView requestCode={requestCode} />;
+  if (target?.kind === "company") {
+    const email = typeof params.email === "string" ? params.email : null;
+    return <CompanyMyRequestView requestCode={target.code} email={email} />;
+  }
+
+  return <MyRequestView requestCode={target?.code ?? null} />;
 }

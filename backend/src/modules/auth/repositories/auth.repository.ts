@@ -5,6 +5,7 @@ import { MAX_OTP_ATTEMPTS } from '../constants/password-reset.constants.js';
 import { InvalidResetCodeException } from '../exceptions/invalid-reset-code.exception.js';
 import { GoogleAccountAlreadyLinkedException } from '../exceptions/google-account-already-linked.exception.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ACCESS_REQUEST_STATUS } from '../../access-requests/types/access-request.enum.js';
 
 @Injectable()
 export class AuthRepository {
@@ -34,6 +35,33 @@ export class AuthRepository {
         },
       },
     });
+  }
+
+  findUserByIdWithRoles(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        isActive: true,
+        roles: {
+          where: { deletedAt: null, startAt: { lte: new Date() } },
+          select: { role: { select: { name: true } } },
+        },
+      },
+    });
+  }
+
+  async hasUnapprovedAccessRequest(email: string) {
+    const found = await this.prisma.accessRequest.findFirst({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        submittedAt: { not: null },
+        status: { title: { not: ACCESS_REQUEST_STATUS.APPROVED } },
+      },
+      select: { id: true },
+    });
+    return found !== null;
   }
 
   findUserByEmail(email: string) {

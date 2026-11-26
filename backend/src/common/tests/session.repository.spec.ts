@@ -45,4 +45,19 @@ describe('SessionRepository', () => {
       },
     });
   });
+
+  it('looks for any revoked refresh token of the session family', async () => {
+    const findFirst = vi.fn().mockResolvedValue({ revokedReason: 'logout' });
+    const repository = new SessionRepository({
+      refreshToken: { findFirst },
+    } as unknown as PrismaService);
+
+    await expect(repository.findRevokedSession('family-1')).resolves.toEqual({
+      revokedReason: 'logout',
+    });
+    expect(findFirst).toHaveBeenCalledExactlyOnceWith({
+      where: { familyId: 'family-1', revokedAt: { not: null } },
+      select: { revokedReason: true },
+    });
+  });
 });
