@@ -614,6 +614,25 @@ export async function seedEventsFixtures(
       createdById: owner.id,
     },
     {
+      id: context.getId('project-management-2026-11-29'),
+      title: 'Organizacion y gestion de proyectos',
+      description:
+        'Taller práctico sobre organización, planificación y seguimiento de proyectos.',
+      categoryId: context.getReference('event_categories', 'Emprendimiento'),
+      instructorName: 'Equipo de gestión de proyectos',
+      eventDate: new Date('2026-11-29T00:00:00.000Z'),
+      startTime: new Date('1970-01-01T05:00:00.000Z'),
+      endTime: new Date('1970-01-01T20:00:00.000Z'),
+      modalityId: context.getReference('event_modalities', 'Presencial'),
+      location: 'Aula 203, Facultad de Ciencias y Tecnología',
+      capacity: 20,
+      originId: context.getReference('event_origins', 'Comunidad'),
+      statusId: context.getReference('event_statuses', 'Publicado'),
+      supportThreshold: 10,
+      votingDeadline: new Date('2026-11-30T04:00:00.000Z'),
+      createdById: owner.id,
+    },
+    {
       id: context.getId('advanced-deployment-2026-11-30'),
       title: 'Estrategias de despliegue continuo',
       description:
@@ -634,6 +653,10 @@ export async function seedEventsFixtures(
     },
   ];
   await tx.event.createMany({ data, skipDuplicates: true });
+  await tx.event.updateMany({
+    where: { id: context.getId('project-management-2026-11-29') },
+    data: { statusId: context.getReference('event_statuses', 'Publicado') },
+  });
   for (const scenario of Object.values(WORKSHOP_CAPACITY_SCENARIOS)) {
     await tx.event.updateMany({
       where: { id: context.getId(scenario.key) },

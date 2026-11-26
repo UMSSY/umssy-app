@@ -6,6 +6,8 @@ import {
   HISTORY_EVENT_IDS,
 } from '../../events/constants/history-scenarios.constants.js';
 
+const futureRegistrationId = 'a1b2c3d4-e5f6-4a78-9b0c-d1e2f3a4b5c6';
+
 function registrationId(index: number): string {
   return `77777777-7777-7777-7777-${String(index + 1).padStart(12, '0')}`;
 }
@@ -46,7 +48,10 @@ export async function seedHistoryScenarioRegistrations(
       qrToken: randomBytes(32).toString('hex'),
     },
     ...[scenarios.boundary, scenarios.future].map((event, index) => ({
-      id: registrationId(index + 13),
+      id:
+        event.id === HISTORY_EVENT_IDS.future
+          ? futureRegistrationId
+          : registrationId(index + 13),
       eventId: event.id,
       userId: primaryUserId,
       statusId: confirmed.id,
@@ -78,6 +83,13 @@ export async function seedHistoryScenarioRegistrations(
   await tx.eventRegistration.createMany({
     data: registrationData,
     skipDuplicates: true,
+  });
+  await tx.eventRegistration.updateMany({
+    where: {
+      eventId: HISTORY_EVENT_IDS.future,
+      userId: primaryUserId,
+    },
+    data: { id: futureRegistrationId },
   });
   await tx.eventAttendance.createMany({
     data: [

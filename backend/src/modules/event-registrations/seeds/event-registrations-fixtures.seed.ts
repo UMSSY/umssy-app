@@ -1738,6 +1738,10 @@ export async function seedEventRegistrationsFixtures(
   context: FixtureContext,
 ): Promise<number> {
   await repairSeededQrTokens(tx);
+  const qaAccount = await tx.user.findUniqueOrThrow({
+    where: { email: 'prueba@umss.edu.bo' },
+    select: { id: true },
+  });
   const data: Prisma.EventRegistrationCreateManyInput[] =
     REGISTRATION_PLANS.flatMap((plan) =>
       plan.registrations.map((registration, index) => {
@@ -1765,6 +1769,17 @@ export async function seedEventRegistrationsFixtures(
         };
       }),
     );
+  data.push({
+    id: context.getId('project-management-2026-11-29-registration'),
+    eventId: context.getId('project-management-2026-11-29'),
+    userId: qaAccount.id,
+    statusId: context.getReference('registration_statuses', 'Confirmada'),
+    qrToken: randomBytes(32).toString('hex'),
+    registeredAt: context.anchor,
+    cancelledAt: null,
+    createdAt: context.anchor,
+    updatedAt: context.anchor,
+  });
   await tx.eventRegistration.createMany({ data, skipDuplicates: true });
   return data.length;
 }

@@ -6,6 +6,7 @@ import { seedHistoryScenarioRegistrations } from '../seeds/history-scenarios-reg
 describe('history scenario registrations', () => {
   it('seeds twelve active historical registrations, two private accounts, and attendance only for one workshop', async () => {
     const createMany = vi.fn().mockResolvedValue({ count: 18 });
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const attendanceCreateMany = vi.fn().mockResolvedValue({ count: 1 });
     const findUniqueOrThrow = vi
       .fn()
@@ -13,7 +14,7 @@ describe('history scenario registrations', () => {
       .mockResolvedValueOnce({ id: 'cancelled' });
     const tx = {
       registrationStatus: { findUniqueOrThrow },
-      eventRegistration: { createMany },
+      eventRegistration: { createMany, updateMany },
       eventAttendance: { createMany: attendanceCreateMany },
     };
     await seedHistoryScenarioRegistrations(
@@ -36,7 +37,11 @@ describe('history scenario registrations', () => {
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.historical[0])?.id).not.toBe(secondary[0].id);
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.cancelledRegistration)).toMatchObject({ statusId: 'cancelled', cancelledAt: expect.any(Date) });
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.boundary)).toMatchObject({ statusId: 'confirmed', cancelledAt: null });
-    expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.future)).toMatchObject({ statusId: 'confirmed', cancelledAt: null });
+    expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.future)).toMatchObject({
+      id: 'a1b2c3d4-e5f6-4a78-9b0c-d1e2f3a4b5c6',
+      statusId: 'confirmed',
+      cancelledAt: null,
+    });
     expect(primary.find((item) => item.eventId === HISTORY_EVENT_IDS.fixedBoundary)).toMatchObject({
       statusId: 'confirmed',
       cancelledAt: null,
@@ -44,6 +49,10 @@ describe('history scenario registrations', () => {
     });
     expect(new Set(registrations.map((item) => item.id)).size).toBe(18);
     expect(createMany).toHaveBeenCalledWith({ data: registrations, skipDuplicates: true });
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { eventId: HISTORY_EVENT_IDS.future, userId: 'primary' },
+      data: { id: 'a1b2c3d4-e5f6-4a78-9b0c-d1e2f3a4b5c6' },
+    });
     expect(attendanceCreateMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ registrationId: primary[4].id, checkedInAt: expect.any(Date) })],
       skipDuplicates: true,

@@ -13,6 +13,9 @@ describe('registration fixture QR tokens', () => {
     const createMany = vi.fn().mockResolvedValue({ count: 0 });
     const count = await seedEventRegistrationsFixtures(
       {
+        user: {
+          findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'qa-account' }),
+        },
         eventRegistration: {
           createMany,
           findMany: vi.fn().mockResolvedValue([]),
@@ -39,6 +42,9 @@ describe('registration fixture QR tokens', () => {
     const createMany = vi.fn().mockResolvedValue({ count: 0 });
     await seedEventRegistrationsFixtures(
       {
+        user: {
+          findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'qa-account' }),
+        },
         eventRegistration: {
           createMany,
           findMany: vi.fn().mockResolvedValue([]),
@@ -50,7 +56,22 @@ describe('registration fixture QR tokens', () => {
       (row: { eventId: string }) =>
         row.eventId === context.getId('qa-workshop-2026-11-19'),
     );
+    const projectManagementRegistration = createMany.mock.calls[0]![0].data.find(
+      (row: { eventId: string; userId: string }) =>
+        row.eventId === context.getId('project-management-2026-11-29') &&
+        row.userId === 'qa-account',
+    );
     expect(supports).toHaveLength(9);
+    expect(projectManagementRegistration).toMatchObject({
+      id: context.getId('project-management-2026-11-29-registration'),
+      statusId: 'confirmed',
+      cancelledAt: null,
+    });
+    expect(projectManagementRegistration.id).toMatch(
+      /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/,
+    );
+    expect(projectManagementRegistration.id).toMatch(/[a-f]/);
+    expect(projectManagementRegistration.id).toMatch(/[0-9]/);
     expect(
       new Set(supports.map((row: { userId: string }) => row.userId)).size,
     ).toBe(9);

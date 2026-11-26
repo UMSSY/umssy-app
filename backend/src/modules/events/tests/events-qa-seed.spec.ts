@@ -161,6 +161,7 @@ describe('Development event fixtures', () => {
         findUnique: vi
           .fn()
           .mockResolvedValue({ id: 'qa-owner', isActive: true }),
+        findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'qa-owner' }),
       },
       event: { createMany, updateMany },
     };
@@ -196,6 +197,29 @@ describe('Development event fixtures', () => {
       expect(workshop.startTime.toISOString().slice(11, 16)).toBe(start);
       expect(workshop.endTime.toISOString().slice(11, 16)).toBe(end);
     }
+    const projectManagement = data.find(
+      (event: { id: string }) =>
+        event.id === context.getId('project-management-2026-11-29'),
+    );
+    expect(projectManagement).toMatchObject({
+      title: 'Organizacion y gestion de proyectos',
+      statusId: 'event_statuses:Publicado',
+      capacity: 20,
+      supportThreshold: 10,
+    });
+    expect(projectManagement.eventDate.toISOString()).toBe(
+      '2026-11-29T00:00:00.000Z',
+    );
+    expect(projectManagement.startTime.toISOString()).toBe(
+      '1970-01-01T05:00:00.000Z',
+    );
+    expect(projectManagement.endTime.toISOString()).toBe(
+      '1970-01-01T20:00:00.000Z',
+    );
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: context.getId('project-management-2026-11-29') },
+      data: { statusId: 'event_statuses:Publicado' },
+    });
     for (const category of [
       'Empleabilidad',
       'Investigación',
@@ -275,6 +299,6 @@ describe('Development event fixtures', () => {
         data: { capacity: scenario.capacity },
       });
     }
-    expect(updateMany).toHaveBeenCalledTimes(scenarios.length);
+    expect(updateMany).toHaveBeenCalledTimes(scenarios.length + 1);
   });
 });
