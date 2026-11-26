@@ -7,13 +7,17 @@ import { AuthController } from '../controllers/auth.controller.js';
 import {
   SessionExpiredException,
   GoogleEmailMismatchException,
+  GoogleLinkTokenExpiredException,
 } from '../exceptions/index.js';
 
 function buildRefreshTokens() {
   return {
-    startFromLogin: vi
-      .fn()
-      .mockResolvedValue({ refreshToken: 'refresh', refreshMaxAgeMs: 900_000 }),
+    startFromLogin: vi.fn().mockResolvedValue({
+      accessToken: 'token',
+      accessMaxAgeMs: 60_000,
+      refreshToken: 'refresh',
+      refreshMaxAgeMs: 900_000,
+    }),
     rotate: vi.fn(),
     revokeByToken: vi.fn().mockResolvedValue(undefined),
     getAbsoluteExpiry: vi.fn().mockResolvedValue(null),
@@ -24,6 +28,7 @@ function buildController(
   auth: unknown,
   refresh: unknown,
   googleAuth: unknown = { verifyCredential: vi.fn() },
+  linkTokens: unknown = { sign: vi.fn(), verify: vi.fn() },
 ) {
   const limits = {
     run<T>(
@@ -39,6 +44,7 @@ function buildController(
     refresh as RefreshTokenService,
     limits as unknown as CredentialLimitsService,
     googleAuth as any,
+    linkTokens as any,
   );
 }
 
@@ -80,7 +86,6 @@ describe('AuthController', () => {
 
     await controller.login({} as any, response as any);
 
-    expect(authService.getAccessTokenMaxAgeMs).toHaveBeenCalledWith('token');
     expect(response.cookie).toHaveBeenCalledWith(
       'umssy_access',
       'token',
@@ -315,6 +320,12 @@ describe('AuthController', () => {
         getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(900_000),
       };
       const refresh = buildRefreshTokens();
+      refresh.startFromLogin.mockResolvedValue({
+        accessToken: 'google-access-token',
+        accessMaxAgeMs: 900_000,
+        refreshToken: 'refresh',
+        refreshMaxAgeMs: 900_000,
+      });
       const controller = buildController(authService, refresh, googleAuth);
       const response = { cookie: vi.fn() };
 
@@ -336,6 +347,81 @@ describe('AuthController', () => {
         roleTag: 'titulado',
         roles: ['titulado'],
       });
+    });
+
+    it('cuenta sin vincular: responde 200 con requiresLinking y linkToken, sin cookies ni sesión', async () => {
+      const claims = { userId: 'u-1', googleSub: 'sub-1', email: 'dania@gmail.com' };
+      const googleAuth = {
+        verifyCredential: vi.fn().mockResolvedValue({ email: 'dania@gmail.com', sub: 'sub-1' }),
+      };
+      const authService = {
+        loginWithGoogle: vi.fn().mockResolvedValue({ requiresLinking: true, claims }),
+      };
+      const linkTokens = { sign: vi.fn().mockReturnValue('link-token'), verify: vi.fn() };
+      const refresh = buildRefreshTokens();
+      const controller = buildController(authService, refresh, googleAuth, linkTokens);
+      const response = { cookie: vi.fn(), status: vi.fn() };
+
+      const result = await controller.googleLogin({ credential: 'g' } as any, response as any);
+
+      expect(result).toEqual({
+        requiresLinking: true,
+        linkToken: 'link-token',
+        email: 'dania@gmail.com',
+        emailVerified: true,
+      });
+      expect(linkTokens.sign).toHaveBeenCalledWith(claims);
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.cookie).not.toHaveBeenCalled();
+      expect(refresh.startFromLogin).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('googleLinkConfirm', () => {
+    const claims = { userId: 'u-1', googleSub: 'sub-1', email: 'dania@gmail.com' };
+
+    it('verifica el token, vincula y abre la sesión con cookies', async () => {
+      const authService = {
+        confirmGoogleLink: vi.fn().mockResolvedValue({
+          accessToken: 'raw',
+          roleTag: 'titulado',
+          roles: ['titulado'],
+        }),
+      };
+      const linkTokens = { sign: vi.fn(), verify: vi.fn().mockReturnValue(claims) };
+      const refresh = buildRefreshTokens();
+      const controller = buildController(authService, refresh, undefined, linkTokens);
+      const response = { cookie: vi.fn() };
+
+      const result = await controller.googleLinkConfirm(
+        { linkToken: 'link-token', roleTag: 'titulado' } as any,
+        response as any,
+        'jest-agent',
+      );
+
+      expect(linkTokens.verify).toHaveBeenCalledWith('link-token');
+      expect(authService.confirmGoogleLink).toHaveBeenCalledWith(claims, 'titulado');
+      expect(refresh.startFromLogin).toHaveBeenCalledWith('raw', 'jest-agent');
+      expect(response.cookie).toHaveBeenCalled();
+      expect(result).toEqual({ accessToken: 'token', roleTag: 'titulado', roles: ['titulado'] });
+    });
+
+    it('un token vencido o inválido corta antes de vincular o abrir sesión', async () => {
+      const authService = { confirmGoogleLink: vi.fn() };
+      const linkTokens = {
+        sign: vi.fn(),
+        verify: vi.fn(() => {
+          throw new GoogleLinkTokenExpiredException();
+        }),
+      };
+      const refresh = buildRefreshTokens();
+      const controller = buildController(authService, refresh, undefined, linkTokens);
+
+      await expect(
+        controller.googleLinkConfirm({ linkToken: 'viejo' } as any, { cookie: vi.fn() } as any),
+      ).rejects.toThrow('Vuelve a iniciar con Google');
+      expect(authService.confirmGoogleLink).not.toHaveBeenCalled();
+      expect(refresh.startFromLogin).not.toHaveBeenCalled();
     });
   });
 
@@ -411,7 +497,7 @@ describe('AuthController', () => {
       return meta?.operationId;
     });
 
-    expect(methods).toHaveLength(9);
+    expect(methods).toHaveLength(10);
     expect(operationIds.every((id) => typeof id === 'string' && id.length > 0)).toBe(true);
     expect(new Set(operationIds).size).toBe(methods.length);
   });

@@ -1,8 +1,6 @@
-import type { IssuedRefreshToken } from './issued-refresh-token.types.js';
+import type { StartedSession } from './started-session.types.js';
 
-export interface RotatedSession extends IssuedRefreshToken {
-  accessToken: string;
-  accessMaxAgeMs: number;
+export interface RotatedSession extends StartedSession {
   roleTag: string;
   roles: string[];
 }

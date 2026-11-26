@@ -18,6 +18,7 @@ import { useAuditEvents } from "../hooks/use-audit-events";
 import { useAuditFilters } from "../hooks/use-audit-filters";
 import { useAuditResponsibles } from "../hooks/use-audit-responsibles";
 import { useEvidenceViewer } from "../hooks/use-evidence-viewer";
+import { useScrollRestoration } from "../hooks/use-scroll-restoration";
 import type { AuditEvent } from "../types/audit-event.types";
 
 export function AuditLogView() {
@@ -27,6 +28,17 @@ export function AuditLogView() {
   const evidence = useEvidenceViewer();
   const csv = useAuditCsvExport();
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
+  const { anchorRef, save: saveScroll, restore: restoreScroll } = useScrollRestoration<HTMLDivElement>();
+
+  function selectEvent(event: AuditEvent) {
+    saveScroll();
+    setSelectedEvent(event);
+  }
+
+  function closeDetail() {
+    setSelectedEvent(null);
+    restoreScroll();
+  }
 
   const isEmpty = !list.isLoading && !list.error && list.items.length === 0;
   const listProps = {
@@ -34,7 +46,7 @@ export function AuditLogView() {
     isLoading: list.isLoading,
     loadingEvidenceId: evidence.loadingId,
     onOpenEvidence: evidence.open,
-    onSelectEvent: setSelectedEvent,
+    onSelectEvent: selectEvent,
   };
 
   return (
@@ -68,7 +80,7 @@ export function AuditLogView() {
         </p>
       ) : null}
 
-      <div className="w-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface">
+      <div ref={anchorRef} className="w-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface">
         {list.error || isEmpty ? (
           <AuditLogStatus
             error={list.error}
@@ -103,7 +115,7 @@ export function AuditLogView() {
           </>
         )}
       </div>
-      <AuditEventDetailPanel event={selectedEvent} onClose={() => setSelectedEvent(null)}>
+      <AuditEventDetailPanel event={selectedEvent} onClose={closeDetail}>
         {selectedEvent ? <AuditEventTimeline eventId={selectedEvent.id} /> : null}
       </AuditEventDetailPanel>
       <EvidenceViewerDialog event={evidence.opened?.event ?? null} url={evidence.opened?.url ?? null} finalFocus={evidence.triggerRef} onClose={evidence.close} />

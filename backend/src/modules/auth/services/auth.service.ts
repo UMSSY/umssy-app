@@ -10,6 +10,8 @@ import {
   ExpiredResetCodeException,
   TooManyAttemptsException,
   GoogleEmailMismatchException,
+  GoogleAccountAlreadyLinkedException,
+  GoogleLinkTokenInvalidException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
 import type { RoleName } from '../../../common/enums/roles.enum.js';
@@ -30,6 +32,12 @@ import { RefreshTokenService } from './refresh-token.service.js';
 import { PasswordHistoryService } from './password-history.service.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
+import type { GoogleLinkClaims } from '../types/google-link-claims.types.js';
+import type { GoogleLoginResult } from '../types/google-login-result.types.js';
+import {
+  GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
+  GOOGLE_REQUEST_NOT_APPROVED_MESSAGE,
+} from '../constants/google-link.constants.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import type { LoginDto } from '../requests/login.schema.js';
 import type { RequestPasswordResetDto } from '../requests/request-password-reset.schema.js';
@@ -109,7 +117,7 @@ export class AuthService {
   async loginWithGoogle(
     verifiedGoogle: { email: string; sub: string; picture?: string },
     requestedRoleTag?: RoleName,
-  ): Promise<LoginResponse> {
+  ): Promise<GoogleLoginResult> {
     let user = await this.authRepository.findUserByGoogleSubWithRoles(
       verifiedGoogle.sub,
     );
@@ -134,11 +142,74 @@ export class AuthService {
     }
 
     if (!user) {
+      const pendingRequest =
+        await this.authRepository.hasUnapprovedAccessRequest(
+          verifiedGoogle.email,
+        );
       throw new InvalidCredentialsException(
-        'Esta cuenta de Google no está registrada en el sistema.',
+        pendingRequest
+          ? GOOGLE_REQUEST_NOT_APPROVED_MESSAGE
+          : GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
       );
     }
 
+    const { roleTag, roles } = this.resolveGoogleRole(user, requestedRoleTag);
+
+    if (needsGoogleLink) {
+      return {
+        requiresLinking: true,
+        claims: {
+          userId: user.id,
+          googleSub: verifiedGoogle.sub,
+          email: verifiedGoogle.email,
+          ...(verifiedGoogle.picture && { picture: verifiedGoogle.picture }),
+        },
+      };
+    }
+
+    const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
+    return { accessToken, roleTag, roles };
+  }
+
+  async confirmGoogleLink(
+    claims: GoogleLinkClaims,
+    requestedRoleTag?: RoleName,
+  ): Promise<LoginResponse> {
+    const user = await this.authRepository.findUserByIdWithRoles(claims.userId);
+    if (
+      !user ||
+      user.email.trim().toLowerCase() !== claims.email.trim().toLowerCase()
+    ) {
+      throw new GoogleLinkTokenInvalidException();
+    }
+
+    const { roleTag, roles } = this.resolveGoogleRole(user, requestedRoleTag);
+
+    const existingSub = await this.authRepository.findGoogleSocialAccountBySub(
+      claims.googleSub,
+    );
+    if (existingSub && existingSub.userId !== user.id) {
+      throw new GoogleAccountAlreadyLinkedException();
+    }
+
+    await this.authRepository.linkGoogleAccount(
+      user.id,
+      claims.googleSub,
+      claims.email,
+      claims.picture,
+    );
+
+    const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
+    return { accessToken, roleTag, roles };
+  }
+
+  private resolveGoogleRole(
+    user: {
+      isActive: boolean | null;
+      roles: Array<{ role: { name: string } }>;
+    },
+    requestedRoleTag?: RoleName,
+  ): { roleTag: RoleName; roles: RoleName[] } {
     if (user.isActive === false) {
       throw new InvalidCredentialsException(
         'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
@@ -166,21 +237,7 @@ export class AuthService {
       );
     }
 
-    if (needsGoogleLink) {
-      await this.authRepository.linkGoogleAccount(
-        user.id,
-        verifiedGoogle.sub,
-        verifiedGoogle.email,
-        verifiedGoogle.picture,
-      );
-    }
-
-    const accessToken = this.jwtService.sign({
-      sub: user.id,
-      roleTag,
-      roles: authorizedRoles,
-    });
-    return { accessToken, roleTag, roles: authorizedRoles };
+    return { roleTag, roles: authorizedRoles };
   }
 
   async linkGoogle(

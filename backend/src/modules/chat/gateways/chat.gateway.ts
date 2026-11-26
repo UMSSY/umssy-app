@@ -60,6 +60,9 @@ export class ChatGateway
         }
 
         const payload = await this.jwtService.verifyAsync(token);
+        if (payload.sid !== undefined) {
+          await this.sessionService.assertSessionActive(payload.sid);
+        }
         const user = await this.sessionService.getAuthenticatedUser(
           payload.sub,
         );

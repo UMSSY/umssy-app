@@ -31,8 +31,9 @@ import {
 } from '../utils/refresh-token.util.js';
 import type { IssuedRefreshToken } from '../types/issued-refresh-token.types.js';
 import type { RotatedSession } from '../types/rotated-session.types.js';
+import type { StartedSession } from '../types/started-session.types.js';
 
-export type { IssuedRefreshToken, RotatedSession };
+export type { IssuedRefreshToken, RotatedSession, StartedSession };
 
 @Injectable()
 export class RefreshTokenService {
@@ -45,10 +46,12 @@ export class RefreshTokenService {
   async startFromLogin(
     accessToken: string,
     userAgent?: string,
-  ): Promise<IssuedRefreshToken> {
+  ): Promise<StartedSession> {
     const payload = this.jwtService.decode<{
       sub?: unknown;
       roleTag?: unknown;
+      roles?: unknown;
+      exp?: unknown;
     } | null>(accessToken);
     if (
       typeof payload?.sub !== 'string' ||
@@ -58,16 +61,37 @@ export class RefreshTokenService {
     }
 
     const now = new Date();
-    return this.persist(
+    const familyId = randomUUID();
+    const refresh = await this.persist(
       {
         userId: payload.sub,
-        familyId: randomUUID(),
+        familyId,
         roleTag: payload.roleTag,
         absoluteExpiresAt: new Date(now.getTime() + SESSION_MAX_MS),
         userAgent,
       },
       now,
     );
+
+    const remainingSeconds =
+      typeof payload.exp === 'number'
+        ? Math.max(1, Math.floor(payload.exp - now.getTime() / 1000))
+        : Math.floor(SESSION_MAX_MS / 1000);
+    const sessionAccessToken = this.jwtService.sign(
+      {
+        sub: payload.sub,
+        roleTag: payload.roleTag,
+        roles: payload.roles,
+        sid: familyId,
+      },
+      { expiresIn: remainingSeconds },
+    );
+
+    return {
+      ...refresh,
+      accessToken: sessionAccessToken,
+      accessMaxAgeMs: remainingSeconds * 1000,
+    };
   }
 
   async rotate(
@@ -138,7 +162,12 @@ export class RefreshTokenService {
       ),
     );
     const accessToken = this.jwtService.sign(
-      { sub: user.id, roleTag: current.roleTag, roles: user.roles },
+      {
+        sub: user.id,
+        roleTag: current.roleTag,
+        roles: user.roles,
+        sid: current.familyId,
+      },
       { expiresIn: accessTtlSeconds },
     );
 
