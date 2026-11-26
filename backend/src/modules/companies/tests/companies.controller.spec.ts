@@ -35,4 +35,20 @@ describe('CompaniesController', () => {
     ]);
     expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
   });
+
+  it('delega las empresas destacadas en el servicio sin pedir sesión', async () => {
+    const service = { listFeatured: vi.fn().mockResolvedValue([]) };
+    const controller = new CompaniesController(
+      service as unknown as CompaniesService,
+    );
+    const handler = Object.getOwnPropertyDescriptor(
+      CompaniesController.prototype,
+      'listFeatured',
+    )?.value;
+    if (!handler) throw new Error('No se encontró el handler de destacadas');
+
+    await expect(controller.listFeatured()).resolves.toEqual([]);
+    expect(service.listFeatured).toHaveBeenCalled();
+    expect(Reflect.getMetadata('__guards__', handler)).toBeUndefined();
+  });
 });

@@ -1,11 +1,7 @@
-import { ENV_CONFIG } from "@/shared/config/env.config";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
+import { resolveApiUrl } from "@/shared/utils/resolve-api-url";
 import type { CompanyProfile } from "../types/company-profile.types";
-
-function toApiUrl(path: string | null): string | null {
-  return path ? `${(ENV_CONFIG.apiUrl ?? "").replace(/\/$/, "")}${path}` : null;
-}
 
 export const companyProfileService = {
   getProfile: async (companyId: string): Promise<CompanyProfile> => {
@@ -13,6 +9,6 @@ export const companyProfileService = {
       `/companies/${companyId}/profile`,
     );
     const profile = response.data.data;
-    return { ...profile, logoUrl: toApiUrl(profile.logoUrl) };
+    return { ...profile, logoUrl: resolveApiUrl(profile.logoUrl) };
   },
 };

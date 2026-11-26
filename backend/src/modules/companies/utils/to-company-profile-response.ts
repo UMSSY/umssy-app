@@ -1,10 +1,7 @@
 import type { CompanyProfileResponse } from '../responses/company-profile.response.js';
 import type { CompanyProfileRecord } from '../types/company-profile-record.type.js';
-
-function emptyToNull(value: string | null | undefined): string | null {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-}
+import { buildCompanyLogoPath } from './build-company-logo-path.js';
+import { emptyToNull } from './empty-to-null.js';
 
 export function toCompanyProfileResponse(
   record: CompanyProfileRecord,
@@ -19,6 +16,6 @@ export function toCompanyProfileResponse(
     phone: emptyToNull(profile?.phone),
     email: emptyToNull(profile?.email),
     website: emptyToNull(profile?.websiteUrl),
-    logoUrl: record.logo ? `/companies/${record.id}/logo` : null,
+    logoUrl: buildCompanyLogoPath(record.id, record.logo),
   };
 }
