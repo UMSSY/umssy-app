@@ -9,6 +9,7 @@ export function buildApplication(overrides: Partial<Application> = {}): Applicat
     affinityPercentage: 92,
     status: "En revisión",
     appliedDate: "2026-10-20",
+    vacancyAvailable: true,
     ...overrides,
   };
 }
