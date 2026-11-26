@@ -196,6 +196,11 @@ export class ApplicationsService {
     };
   }
 
+  async findVacancyTitleForChat(applicationId: string): Promise<string | null> {
+    const record = await this.repository.findApplicationForChat(applicationId);
+    return record?.jobOffer?.title ?? null;
+  }
+
   findRecruitmentApplicationsByUser(userId: string) {
     return this.repository.findRecruitmentApplicationsByUser(userId);
   }
