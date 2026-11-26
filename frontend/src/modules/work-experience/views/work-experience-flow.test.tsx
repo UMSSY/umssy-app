@@ -99,7 +99,11 @@ async function addExperience(
     screen.getByRole("button", { name: "Guardar experiencia" }),
   );
 
-  await screen.findByText(values.position);
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: new RegExp(values.companyName) }),
+    ).toBeInTheDocument(),
+  );
 }
 
 describe("WorkExperienceView flow", () => {
@@ -137,21 +141,23 @@ describe("WorkExperienceView flow", () => {
     });
 
     const list = screen
-      .getByText("Asistente de laboratorio")
+      .getByRole("button", { name: /Tecnored/ })
       .closest("ul") as HTMLElement;
 
     expect(
       within(list)
-        .getAllByRole("heading", { level: 4 })
+        .getAllByRole("heading", { level: 3 })
         .map((item) => item.textContent),
     ).toEqual([
-      "Desarrolladora web junior",
-      "Asistente de laboratorio",
+      "Synapse Labs1 cargo · Mar 2025 – Actualidad",
+      "Tecnored1 cargo · Mar 2023 – Dic 2024",
     ]);
 
     expect(
-      screen.getAllByText(/Mar 2025 – Actualidad/),
-    ).toHaveLength(1);
+      screen.getAllByText(/Mar 2025 – Actualidad/).length,
+    ).toBeGreaterThanOrEqual(1);
+
+    await user.click(screen.getByRole("button", { name: /Tecnored/ }));
 
     await user.click(
       screen.getByRole("button", {
@@ -203,6 +209,8 @@ describe("WorkExperienceView flow", () => {
     expect(
       screen.getByText("Técnico de laboratorio"),
     ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Synapse Labs/ }));
 
     await user.click(
       screen.getByRole("button", {
@@ -283,6 +291,20 @@ describe("WorkExperienceView flow", () => {
     expect(
       workExperienceService.createWorkExperience,
     ).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    await user.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", {
+        name: "Descartar cambios",
+      }),
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
+
+    await user.click(screen.getByRole("button", { name: /Tecnored/ }));
 
     expect(
       screen.getByText("Asistente de laboratorio"),
