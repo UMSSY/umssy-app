@@ -1,6 +1,9 @@
 import { AttendanceOutsideWindowException } from '../exceptions/attendance-outside-window.exception.js';
 import { AttendanceSessionInvalidException } from '../exceptions/attendance-session-invalid.exception.js';
-import { assertAttendanceWindow } from './assert-attendance-window.js';
+import {
+  assertAttendanceWindow,
+  isAttendanceWindowOpen,
+} from './assert-attendance-window.js';
 
 type AttendanceWorkshop = {
   eventDate: Date;
@@ -9,7 +12,7 @@ type AttendanceWorkshop = {
   sessions?: { id: string; startsAt: Date; endsAt: Date }[];
 };
 
-// Sin sessionId se usa la sesión en curso; un taller sin sesiones conserva la ventana original.
+// Sin sessionId se prioriza la sesión en curso y luego la próxima con apertura anticipada.
 export function resolveAttendanceSession(
   workshop: AttendanceWorkshop,
   sessionId: string | undefined,
@@ -22,11 +25,21 @@ export function resolveAttendanceSession(
     return null;
   }
   const isOpen = (session: (typeof sessions)[number]) =>
-    now.getTime() >= session.startsAt.getTime() &&
-    now.getTime() < session.endsAt.getTime();
+    isAttendanceWindowOpen(
+      session.startsAt.getTime(),
+      session.endsAt.getTime(),
+      now.getTime(),
+    );
   const session = sessionId
     ? sessions.find((candidate) => candidate.id === sessionId)
-    : sessions.find(isOpen);
+    : (sessions.find(
+        (candidate) =>
+          now.getTime() >= candidate.startsAt.getTime() &&
+          now.getTime() < candidate.endsAt.getTime(),
+      ) ??
+      [...sessions]
+        .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+        .find(isOpen));
   if (!session) {
     if (sessionId) throw new AttendanceSessionInvalidException();
     throw new AttendanceOutsideWindowException();
