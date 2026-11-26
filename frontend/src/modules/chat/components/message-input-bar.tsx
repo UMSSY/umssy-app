@@ -80,6 +80,7 @@ export function MessageInputBar({
     const newHeight = Math.min(textarea.scrollHeight, 120);
     textarea.style.height = `${Math.max(newHeight, 40)}px`;
   }, [value]);
+  const isBusy = isSending || isUploading;
   const characterCount = countCharacters(value);
   const hasText = !isWhitespaceOnly(value);
   const hasAttachment = Boolean(currentAttachment);
@@ -137,6 +138,7 @@ export function MessageInputBar({
     event.preventDefault();
     if (!isSendDisabled) {
       onSend();
+      textareaRef.current?.focus();
     }
   };
   const isImageAttachment = currentAttachment
@@ -217,8 +219,10 @@ export function MessageInputBar({
             value={value}
             onChange={handleChange}
             onKeyDown={onKeyDown}
+            disabled={disabled}
+            readOnly={isBusy}
+            aria-busy={isBusy}
             onFocus={onFocus}
-            disabled={disabled || isSending || isUploading}
             placeholder={placeholder}
             rows={1}
             className="max-h-[clamp(2.5rem,25dvh,7.5rem)] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-ink placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring"
