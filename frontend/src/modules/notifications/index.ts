@@ -44,6 +44,7 @@ export { getNotificationCatalogDefinition } from "./utils/get-notification-catal
 export { getNotificationCategory } from "./utils/get-notification-category";
 export { getNotificationIcon } from "./utils/get-notification-icon";
 export { getNotificationInboxPath } from "./utils/get-notification-inbox-path";
+export { getNotificationInboxFilterFromSlug } from "./utils/get-notification-inbox-filter-from-slug";
 export { groupNotificationsByDate } from "./utils/group-notifications-by-date";
 export { isInboxNotification } from "./utils/is-inbox-notification";
 export { isInternalNotificationLink } from "./utils/is-internal-notification-link";
