@@ -119,6 +119,8 @@ beforeEach(() => {
     setIsPopular: vi.fn(),
     isExpired: false,
     setIsExpired: vi.fn(),
+    isFinished: false,
+    setIsFinished: vi.fn(),
     filters: { search: "", categoryId: null, sort: "recommended" },
   });
   mockUseEventCategories.mockReturnValue({
@@ -226,7 +228,7 @@ describe("EventsView", () => {
     expect(
       screen.getByRole("heading", { name: /talleres y eventos/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/1 talleres disponibles/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 taller disponible$/i)).toBeInTheDocument();
     expect(
       screen.getByRole("search", { name: /filtros de talleres/i }),
     ).toBeInTheDocument();
@@ -400,6 +402,8 @@ describe("EventsView", () => {
       setIsPopular,
       isExpired: false,
       setIsExpired: vi.fn(),
+      isFinished: false,
+      setIsFinished: vi.fn(),
       filters: { search: "", categoryId: "cat-1", sort: "popular" },
     });
     render(<EventsView />);
@@ -466,6 +470,8 @@ describe("EventsView", () => {
       setIsPopular: vi.fn(),
       isExpired: false,
       setIsExpired: vi.fn(),
+      isFinished: false,
+      setIsFinished: vi.fn(),
       filters: { search: "Marketing", categoryId: null },
     });
     mockUseEvents.mockReturnValue({
@@ -720,5 +726,48 @@ describe("EventsView proposal support", () => {
       );
       expect(toast.error).toHaveBeenCalledWith("No encontramos la propuesta solicitada.");
     }
+  });
+
+  it("switches to finished workshops and clears the other filters", () => {
+    render(<EventsView />);
+    const finished = screen.getByRole("button", { name: "Finalizados" });
+    expect(finished).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(finished);
+
+    const filterState = mockUseEventsFilters.mock.results[0].value;
+    expect(filterState.setIsFinished).toHaveBeenCalledWith(true);
+    expect(filterState.setIsExpired).toHaveBeenCalledWith(false);
+    expect(filterState.setIsPopular).toHaveBeenCalledWith(false);
+    expect(filterState.setCategoryId).toHaveBeenCalledWith(null);
+  });
+
+  it("counts finished workshops and explains an empty finished list", () => {
+    mockUseEventsFilters.mockReturnValue({
+      searchInput: "",
+      setSearchInput: vi.fn(),
+      categoryId: null,
+      setCategoryId: vi.fn(),
+      isPopular: false,
+      setIsPopular: vi.fn(),
+      isExpired: false,
+      setIsExpired: vi.fn(),
+      isFinished: true,
+      setIsFinished: vi.fn(),
+      filters: { search: "", categoryId: null, sort: "recommended", scope: "finished" },
+    });
+    mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
+      events: [],
+      error: null,
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+      loadMore: vi.fn(),
+      retry: vi.fn(),
+    });
+    render(<EventsView />);
+    expect(screen.getByText("0 talleres finalizados")).toBeInTheDocument();
+    expect(screen.getByText("No hay talleres finalizados por el momento.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Finalizados" })).toHaveAttribute("aria-pressed", "true");
   });
 });

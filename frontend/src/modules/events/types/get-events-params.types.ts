@@ -1,4 +1,5 @@
 import type { EventSort } from './event-sort.types';
+import type { EventCatalogScope } from './event-catalog-scope.types';
 
 export interface GetEventsParams {
   includeProposals?: boolean;
@@ -8,4 +9,5 @@ export interface GetEventsParams {
   categoryId?: string;
   sort?: EventSort;
   statusId?: string;
+  scope?: EventCatalogScope;
 }

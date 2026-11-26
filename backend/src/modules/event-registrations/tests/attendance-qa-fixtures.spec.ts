@@ -115,32 +115,32 @@ describe('HU-08-12 attendance QA fixtures', () => {
     expect(() =>
       assertAttendanceWindow(
         sundayPrimary!,
-        new Date('2026-11-22T22:00:00.000Z'), // 18:00 in Bolivia, two hours early.
+        new Date('2026-11-22T23:30:00.000Z'), // 19:30 in Bolivia, 30 minutes early.
       ),
     ).not.toThrow();
     expect(() =>
       assertAttendanceWindow(
         sundayPrimary!,
-        new Date('2026-11-22T21:59:59.999Z'),
+        new Date('2026-11-22T23:29:59.999Z'),
       ),
     ).toThrowError(expect.objectContaining({ statusCode: 409 }));
     expect(() =>
       assertAttendanceWindow(
         sundaySecond!,
-        new Date('2026-11-22T23:00:00.000Z'), // 19:00 in Bolivia, two hours early.
+        new Date('2026-11-23T00:30:00.000Z'), // 20:30 in Bolivia, 30 minutes early.
       ),
     ).not.toThrow();
     expect(() =>
       assertAttendanceWindow(
         sundaySecond!,
-        new Date('2026-11-22T22:59:59.999Z'),
+        new Date('2026-11-23T00:29:59.999Z'),
       ),
     ).toThrowError(expect.objectContaining({ statusCode: 409 }));
     expect(() =>
-      assertAttendanceWindow(monday!, new Date('2026-11-23T12:00:00.000Z')),
+      assertAttendanceWindow(monday!, new Date('2026-11-23T13:30:00.000Z')),
     ).not.toThrow();
     expect(() =>
-      assertAttendanceWindow(monday!, new Date('2026-11-23T11:59:59.999Z')),
+      assertAttendanceWindow(monday!, new Date('2026-11-23T13:29:59.999Z')),
     ).toThrowError(expect.objectContaining({ statusCode: 409 }));
     expect(() =>
       assertAttendanceWindow(saturday!, new Date('2026-11-21T16:00:00.000Z')),

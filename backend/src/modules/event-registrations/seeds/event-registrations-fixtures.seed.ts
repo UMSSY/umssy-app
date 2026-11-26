@@ -5,6 +5,110 @@ import type { FixtureContext } from '../../../common/database/fixture-context.js
 
 const REGISTRATION_PLANS = [
   {
+    eventKey: 'advanced-architecture-2026-11-29',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'advanced-architecture-2026-11-29-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'advanced-architecture-2026-11-29-token-1',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'advanced-architecture-2026-11-29-token-2',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'advanced-architecture-2026-11-29-token-3',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'advanced-architecture-2026-11-29-token-4',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'advanced-architecture-2026-11-29-token-5',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'advanced-architecture-2026-11-29-token-6',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'advanced-architecture-2026-11-29-token-7',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'advanced-architecture-2026-11-29-token-8',
+      },
+      {
+        key: 'advanced-architecture-2026-11-29-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'advanced-architecture-2026-11-29-token-9',
+      },
+    ],
+  },
+  {
+    eventKey: 'advanced-deployment-2026-11-30',
+    base: 'anchor',
+    startMinute: 0,
+    registrations: [
+      {
+        key: 'advanced-deployment-2026-11-30-support-1',
+        userKey: 'record-00242',
+        tokenKey: 'advanced-deployment-2026-11-30-token-1',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-2',
+        userKey: 'record-02874',
+        tokenKey: 'advanced-deployment-2026-11-30-token-2',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-3',
+        userKey: 'record-02069',
+        tokenKey: 'advanced-deployment-2026-11-30-token-3',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-4',
+        userKey: 'record-00715',
+        tokenKey: 'advanced-deployment-2026-11-30-token-4',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-5',
+        userKey: 'record-01645',
+        tokenKey: 'advanced-deployment-2026-11-30-token-5',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-6',
+        userKey: 'record-00357',
+        tokenKey: 'advanced-deployment-2026-11-30-token-6',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-7',
+        userKey: 'record-00979',
+        tokenKey: 'advanced-deployment-2026-11-30-token-7',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-8',
+        userKey: 'record-03051',
+        tokenKey: 'advanced-deployment-2026-11-30-token-8',
+      },
+      {
+        key: 'advanced-deployment-2026-11-30-support-9',
+        userKey: 'record-01197',
+        tokenKey: 'advanced-deployment-2026-11-30-token-9',
+      },
+    ],
+  },
+  {
     eventKey: 'history-interviews-2026-11-23',
     base: 'anchor',
     startMinute: 0,

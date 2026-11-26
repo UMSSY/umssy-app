@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Resvg } from '@resvg/resvg-js';
 import jsQR from 'jsqr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -6,6 +6,7 @@ import { useManagedWorkshops } from '../hooks/use-managed-workshops';
 import { AttendanceHandoffView } from './attendance-handoff-view';
 
 vi.mock('../hooks/use-managed-workshops', () => ({ useManagedWorkshops: vi.fn() }));
+vi.mock('../components/attendance-mobile-scanner', () => ({ AttendanceMobileScanner: () => <div data-testid="scanner" /> }));
 const workshop = { id: 'workshop-1', title: 'Taller de QR', eventDate: '2027-06-24', startTime: '14:00', endTime: '17:00', location: 'Aula 101' };
 
 beforeEach(() => {
@@ -23,6 +24,9 @@ describe('continuar en celular', () => {
     const decoded = jsQR(new Uint8ClampedArray(rendered.pixels), rendered.width, rendered.height);
     expect(decoded?.data).toBe(url);
     expect(screen.getByRole('link', { name: url })).toHaveAttribute('href', url);
+    expect(document.querySelector('img')?.getAttribute('src')).toContain('icon-qr-register.webp');
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir escáner en este dispositivo' }));
+    expect(screen.getByTestId('scanner')).toBeInTheDocument();
     expect(screen.getAllByText('Taller de QR')).toHaveLength(2);
   });
 
