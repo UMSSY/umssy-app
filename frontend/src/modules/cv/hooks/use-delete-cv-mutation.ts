@@ -1,4 +1,5 @@
 'use client';
+import { DOCUMENT_VERIFICATIONS_QUERY_KEY } from '../constants/document-verification-query.constants';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInvalidateProfileCompleteness } from '@/modules/profile';
@@ -17,6 +18,9 @@ export function useDeleteCvMutation() {
       await Promise.allSettled([
         queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY }),
         invalidateCompleteness(),
+        queryClient.invalidateQueries({
+          queryKey: DOCUMENT_VERIFICATIONS_QUERY_KEY,
+        }),
       ]);
     },
   });
