@@ -8,6 +8,7 @@ import type { NotificationMailContent } from '../types/notification-mail-content
 import type { NotificationMailRenderer } from '../types/notification-mail-renderer.type.js';
 import type { NotificationRecipientDelivery } from '../types/notification-recipient-delivery.type.js';
 import { buildRecipientName } from '../utils/build-recipient-name.js';
+import { isDeliverableEmail } from '../utils/is-deliverable-email.js';
 import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
 import { truncateNotificationText } from '../utils/truncate-notification-text.js';
 
@@ -34,12 +35,27 @@ export class MailDispatcherService {
     const genericTitle = truncateNotificationText(title);
     const genericBody = truncateNotificationText(body);
     const absoluteActionUrl = this.toAbsoluteActionUrl(actionUrl);
+    let reservedDomainSkips = 0;
 
     for (const userId of userIds) {
       try {
-        const contact = await this.userLookupRepository.findContactByUserId(userId);
+        const contact =
+          await this.userLookupRepository.findContactByUserId(userId);
         if (!contact?.email) {
-          deliveries.push({ recipientId: userId, channel: 'email', status: 'skipped' });
+          deliveries.push({
+            recipientId: userId,
+            channel: 'email',
+            status: 'skipped',
+          });
+          continue;
+        }
+        if (!isDeliverableEmail(contact.email)) {
+          reservedDomainSkips += 1;
+          deliveries.push({
+            recipientId: userId,
+            channel: 'email',
+            status: 'skipped',
+          });
           continue;
         }
 
@@ -60,11 +76,25 @@ export class MailDispatcherService {
           mjml: content.mjml,
           values: content.values,
         });
-        deliveries.push({ recipientId: userId, channel: 'email', status: 'sent' });
+        deliveries.push({
+          recipientId: userId,
+          channel: 'email',
+          status: 'sent',
+        });
       } catch (error) {
-        deliveries.push({ recipientId: userId, channel: 'email', status: 'failed' });
+        deliveries.push({
+          recipientId: userId,
+          channel: 'email',
+          status: 'failed',
+        });
         this.logger.error(`Error enviando correo al usuario ${userId}`, error);
       }
+    }
+
+    if (reservedDomainSkips > 0) {
+      this.logger.log(
+        `Correos omitidos por dominio de prueba: ${reservedDomainSkips} de ${userIds.length}`,
+      );
     }
 
     return {
@@ -149,7 +179,9 @@ export class MailDispatcherService {
     const base = new URL(`${frontendBaseUrl()}/`);
     try {
       const resolved = new URL(actionUrl || '/', base);
-      return resolved.origin === base.origin ? resolved.toString() : base.toString();
+      return resolved.origin === base.origin
+        ? resolved.toString()
+        : base.toString();
     } catch {
       return base.toString();
     }

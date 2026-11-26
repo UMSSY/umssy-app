@@ -59,6 +59,7 @@ function renderRoom(
   overrides: Partial<{
     onUnblockUser: () => Promise<void>;
     onSendMessage: (content: string) => Promise<void>;
+    connectionStatus: "connected" | "reconnecting" | "offline";
   }> = {},
 ) {
   const props = {
@@ -67,6 +68,7 @@ function renderRoom(
       overrides.onUnblockUser ?? vi.fn().mockResolvedValue(undefined),
     onSendMessage:
       overrides.onSendMessage ?? vi.fn().mockResolvedValue(undefined),
+    connectionStatus: overrides.connectionStatus,
   };
 
   const utils = render(
@@ -267,5 +269,22 @@ describe("ChatRoom · conversación bloqueada", () => {
     expect(
       screen.queryByTestId("blocked-send-error"),
     ).not.toBeInTheDocument();
+  });
+
+  it("muestra aviso de reconexión en lugar de restricción cuando connectionStatus es reconnecting", async () => {
+    const user = userEvent.setup();
+    const onSendMessage = vi.fn();
+
+    renderRoom(
+      { ...conversation, isBlockedByMe: false },
+      { onSendMessage, connectionStatus: "reconnecting" },
+    );
+
+    await user.type(screen.getByRole("textbox"), "Hola{Enter}");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "El chat se está reconectando. Intenta enviar el mensaje nuevamente en unos segundos.",
+    );
+    expect(onSendMessage).not.toHaveBeenCalled();
   });
 });

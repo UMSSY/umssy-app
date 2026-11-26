@@ -132,7 +132,9 @@ function ChatRoomContent({
   const isCompany = roles.includes("empresa");
   const postulationHref = isCompany
     ? "/recruiters"
-    : "/vacancies/my-applications";
+    : conversation.contextId
+      ? `/vacancies/my-applications?applicationId=${encodeURIComponent(conversation.contextId)}`
+      : "/vacancies/my-applications";
   const eventConversation = conversation.eventId ? conversation : null;
   const isEventConversation = Boolean(eventConversation);
   const conversationName = eventConversation
@@ -340,7 +342,14 @@ function ChatRoomContent({
     }
   }, []);
   const handleSend = async () => {
-    if (connectionStatus !== "connected") return;
+    if (connectionStatus !== "connected") {
+      setSendError(
+        connectionStatus === "offline"
+          ? "No hay conexión a internet. Revisa tu conexión e intenta nuevamente."
+          : "El chat se está reconectando. Intenta enviar el mensaje nuevamente en unos segundos.",
+      );
+      return;
+    }
     if (isBlockedByMe) return;
     const hasText = isContentValidForSend(inputText);
     const hasAttachment = Boolean(selectedAttachment);
@@ -378,6 +387,13 @@ function ChatRoomContent({
     } catch (error) {
       if (getChatHttpStatus(error) === 403) {
         setBlockedSendError(true);
+      } else if (
+        error instanceof Error &&
+        /socket|timeout|connect|reconect|disconnect/i.test(error.message)
+      ) {
+        setSendError(
+          "No se pudo enviar el mensaje porque el chat se está reconectando. Intenta nuevamente en unos segundos.",
+        );
       } else {
         setSendError(
           getChatActionErrorMessage(
@@ -578,11 +594,21 @@ function ChatRoomContent({
           data-testid="chat-room-postulation-banner"
           className="flex flex-wrap items-center justify-between gap-2 border-b border-blue-100 bg-blue-50/70 px-4 py-2 text-xs text-blue-900"
         >
-          <span className="font-semibold">Conversación vinculada a una postulación laboral</span>
+          <div className="min-w-0 truncate">
+            <span className="font-semibold">Conversación vinculada a una postulación laboral</span>
+            {conversation.contextTitle && (
+              <span
+                data-testid="chat-room-postulation-vacancy"
+                className="ml-1.5 font-medium text-blue-800"
+              >
+                — {conversation.contextTitle}
+              </span>
+            )}
+          </div>
           <Link
             href={postulationHref}
             data-testid="chat-room-view-postulation-button"
-            className="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-xs hover:bg-blue-100/50"
+            className="inline-flex shrink-0 items-center gap-1 rounded bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-xs hover:bg-blue-100/50"
           >
             Ver postulación
           </Link>
