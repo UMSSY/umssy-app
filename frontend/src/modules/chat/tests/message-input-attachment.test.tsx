@@ -200,7 +200,8 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     expect(attachButton.disabled).toBe(true);
 
     const textarea = screen.getByTestId('message-textarea') as HTMLTextAreaElement;
-    expect(textarea.disabled).toBe(true);
+    expect(textarea.disabled).toBe(false);
+    expect(textarea.readOnly).toBe(true);
   });
 
   it('dispara onSend correctamente con texto y archivo adjunto', () => {
