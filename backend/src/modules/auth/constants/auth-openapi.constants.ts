@@ -61,6 +61,39 @@ export const AUTH_GOOGLE_BODY = {
   },
 };
 
+export const AUTH_GOOGLE_LOGIN_RESPONSE = {
+  description:
+    'Cuenta ya vinculada: sesión iniciada con cookies HttpOnly (201). Cuenta activa sin vincular: 200 sin cookies, con requiresLinking y un linkToken de 5 minutos que solo sirve en POST /auth/google/link/confirm.',
+  schema: {
+    oneOf: [
+      AUTH_TOKEN_RESPONSE_SCHEMA,
+      {
+        type: 'object',
+        required: ['requiresLinking', 'linkToken', 'email', 'emailVerified'],
+        properties: {
+          requiresLinking: { type: 'boolean', example: true },
+          linkToken: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          emailVerified: { type: 'boolean', example: true },
+        },
+      },
+    ],
+  },
+};
+
+export const AUTH_GOOGLE_LINK_CONFIRM_BODY = {
+  description:
+    'Token de vinculación recibido en POST /auth/google/login y rol opcional con el que continuar.',
+  schema: {
+    type: 'object',
+    required: ['linkToken'],
+    properties: {
+      linkToken: { type: 'string' },
+      roleTag: { type: 'string', example: 'titulado' },
+    },
+  },
+};
+
 export const AUTH_TOKEN_CREATED_RESPONSE = {
   description:
     'Sesión iniciada correctamente; establece cookies HttpOnly y devuelve credenciales de sesión.',

@@ -10,6 +10,7 @@ import { AuthController } from '../controllers/auth.controller.js';
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { GoogleLinkTokenService } from '../services/google-link-token.service.js';
 import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception.js';
 import { InvalidResetCodeException } from '../exceptions/invalid-reset-code.exception.js';
 
@@ -47,6 +48,7 @@ describe('Límites por HTTP con servicios de negocio simulados', () => {
         { provide: AuthService, useValue: auth },
         { provide: RefreshTokenService, useValue: refresh },
         { provide: GoogleAuthService, useValue: { verifyCredential: vi.fn() } },
+        { provide: GoogleLinkTokenService, useValue: { sign: vi.fn(), verify: vi.fn() } },
       ],
     })
       .overrideGuard(JwtAuthGuard)
