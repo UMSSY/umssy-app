@@ -6,6 +6,7 @@ import {
 import type { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import type { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
 import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
+import type { JobOfferNotificationsService } from '../services/job-offer-notifications.service.js';
 import type { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
@@ -36,6 +37,7 @@ function setup() {
     {} as JobOfferSkillsService,
     mapper as unknown as JobOfferMapper,
     {} as JobOfferMatchRepository,
+    {} as JobOfferNotificationsService,
   );
 
   return { repository, service };
