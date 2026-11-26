@@ -8,10 +8,12 @@ import {
 } from "../hooks/use-notifications";
 
 const pushMock = vi.fn();
+const replaceMock = vi.fn();
+let searchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: pushMock }),
-  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ push: pushMock, replace: replaceMock }),
+  useSearchParams: () => searchParams,
 }));
 
 vi.mock("../hooks/use-notifications", () => ({
@@ -29,6 +31,7 @@ describe("NotificationsView", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    searchParams = new URLSearchParams();
     vi.mocked(useUnreadNotificationsCount).mockReturnValue({
       data: { count: 2 },
     } as ReturnType<typeof useUnreadNotificationsCount>);
@@ -92,7 +95,39 @@ describe("NotificationsView", () => {
 
     await user.click(screen.getByRole("tab", { name: /Notificaciones de Encuestas/i }));
 
-    expect(pushMock).toHaveBeenCalledWith("/notifications?filter=SURVEYS");
+    expect(pushMock).toHaveBeenCalledWith("/notifications/surveys");
+  });
+
+  it("marca como activa la pestaña del filtro recibido por la ruta", () => {
+    render(<NotificationsView filter="REMINDERS" />);
+
+    expect(screen.getByRole("tab", { name: /Recordatorios/i })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: /Todas/i })).toHaveAttribute("aria-selected", "false");
+    expect(vi.mocked(useNotificationsInbox)).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: "REMINDERS" }),
+    );
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it("lleva un enlace antiguo con ?filter= a la ruta propia del filtro", () => {
+    searchParams = new URLSearchParams("filter=SURVEYS");
+
+    render(<NotificationsView />);
+
+    expect(screen.getByRole("tab", { name: /Notificaciones de Encuestas/i })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(replaceMock).toHaveBeenCalledWith("/notifications/surveys");
+  });
+
+  it("ignora un ?filter= inválido y muestra todas", () => {
+    searchParams = new URLSearchParams("filter=CHAT");
+
+    render(<NotificationsView />);
+
+    expect(screen.getByRole("tab", { name: /Todas/i })).toHaveAttribute("aria-selected", "true");
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 
   it("ejecuta marcar todas como leídas al presionar el botón superior", async () => {

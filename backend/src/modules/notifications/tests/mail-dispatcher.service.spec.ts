@@ -125,4 +125,40 @@ describe('MailDispatcherService', () => {
 
     expect(result.status).toBe('partial');
   });
+
+    it('omite los correos de dominios de prueba y envía solo a los reales', async () => {
+    mockUserLookup.findContactByUserId
+      .mockResolvedValueOnce(contact('titulado.1@umssy.test'))
+      .mockResolvedValueOnce(contact('persona@gmail.com'))
+      .mockResolvedValueOnce(contact('seed.personal01@example.invalid'));
+
+    const result = await service.dispatchToUsers(
+      ['user-1', 'user-2', 'user-3'],
+      'Title',
+      'Body',
+      '/url',
+    );
+
+    expect(mockMailService.send).toHaveBeenCalledTimes(1);
+    expect(mockMailService.send).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'persona@gmail.com' }),
+    );
+    expect(result).toEqual({
+      status: 'sent',
+      deliveries: [
+        { recipientId: 'user-1', channel: 'email', status: 'skipped' },
+        { recipientId: 'user-2', channel: 'email', status: 'sent' },
+        { recipientId: 'user-3', channel: 'email', status: 'skipped' },
+      ],
+    });
+  });
+
+  it('no llama al servidor SMTP si todos los destinatarios son de prueba', async () => {
+    mockUserLookup.findContactByUserId.mockResolvedValue(contact('seed.user01@umssy.test'));
+
+    const result = await service.dispatchToUsers(['user-1', 'user-2'], 'Title', 'Body', '/url');
+
+    expect(mockMailService.send).not.toHaveBeenCalled();
+    expect(result.status).toBe('skipped');
+  });
 });

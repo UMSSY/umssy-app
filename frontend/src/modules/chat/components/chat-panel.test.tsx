@@ -341,7 +341,8 @@ describe("ChatPanel", () => {
         name: "Campo de redacción de mensaje",
       });
 
-      expect(fullInput).toBeDisabled();
+      expect(fullInput).toHaveAttribute("readonly");
+      expect(fullInput).toHaveAttribute("aria-busy", "true");
       expect(fullInput).toHaveValue("Primer mensaje");
 
       await act(async () => {
@@ -349,7 +350,7 @@ describe("ChatPanel", () => {
       });
 
       await waitFor(() => {
-        expect(fullInput).toBeEnabled();
+        expect(fullInput).not.toHaveAttribute("readonly");
       });
 
       await waitFor(() => {
