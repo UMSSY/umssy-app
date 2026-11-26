@@ -130,7 +130,9 @@ describe('Radar personal integrado con Épica 2', () => {
   });
 
   it('cambia de área sin volver al resaltado de Desarrollo al presionar otra opción', () => {
+    const data = mockHook().data!;
     setRadar({
+      data: { ...data, version: 2 },
       previous: {
         version: 1,
         updatedAt: '2026-10-20T08:00:00Z',
@@ -258,11 +260,41 @@ describe('Radar personal integrado con Épica 2', () => {
   );
 
   it('avisa que la comparación estará disponible tras la próxima publicación', () => {
+    sessionStorage.setItem(`radar:comparison:${source.userId}`, 'true');
     renderWithQuery(<RadarProfileView />);
     expect(screen.getByText(/Tienes una publicación/)).toBeInTheDocument();
     expect(
       screen.queryByRole('switch', { name: 'Comparar con la anterior' }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByText('Detalle de los cambios')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [1, 0],
+    [2, Number.NaN],
+  ])('oculta la comparación de una versión %s con puntaje %s inválida', (currentVersion, previousQaScore) => {
+    const data = mockHook().data!;
+    setRadar({
+      data: { ...data, version: currentVersion },
+      previous: {
+        version: 1,
+        updatedAt: '2026-10-20T08:00:00Z',
+        scores: {
+          desarrollo: 0,
+          'cloud-devops': 0,
+          'data-ai': 0,
+          qa: previousQaScore,
+          ciberseguridad: 0,
+          'gobernanza-ti': 0,
+        },
+      },
+    });
+    sessionStorage.setItem(`radar:comparison:${source.userId}`, 'true');
+    renderWithQuery(<RadarProfileView />);
+
+    expect(screen.queryByRole('switch', { name: 'Comparar con la anterior' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Detalle de los cambios')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('.recharts-radar')).toHaveLength(1);
   });
 
   it('muestra el estado sin publicaciones', () => {
