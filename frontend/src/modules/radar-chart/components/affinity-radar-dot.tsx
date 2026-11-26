@@ -1,5 +1,6 @@
 'use client';
 
+import { RADAR_TOUCH_TARGET_SIZE } from '../constants/radar-interaction.constants';
 import { cn } from '@/lib/utils';
 import type { AffinityRadarDotProps } from '../types/affinity-radar-dot-props.types';
 import { formatDecimal } from '../utils/format-decimal';
@@ -11,6 +12,8 @@ export function AffinityRadarDot({
   onAreaClick,
   className,
 }: AffinityRadarDotProps) {
+  if (cx === undefined || cy === undefined) return null;
+
   return (
     <g
       data-testid={`radar-dot-${area.id}`}
@@ -31,7 +34,17 @@ export function AffinityRadarDot({
       className={onAreaClick ? 'group cursor-pointer outline-none' : undefined}
     >
       <title>{`${area.name}: ${formatDecimal(area.score, 1)}`}</title>
-      <circle cx={cx} cy={cy} r={16} fill="transparent" pointerEvents="all" />
+      {onAreaClick && (
+        <rect
+          data-testid={`radar-hit-${area.id}`}
+          x={cx - RADAR_TOUCH_TARGET_SIZE / 2}
+          y={cy - RADAR_TOUCH_TARGET_SIZE / 2}
+          width={RADAR_TOUCH_TARGET_SIZE}
+          height={RADAR_TOUCH_TARGET_SIZE}
+          fill="transparent"
+          pointerEvents="all"
+        />
+      )}
       <circle
         cx={cx}
         cy={cy}
