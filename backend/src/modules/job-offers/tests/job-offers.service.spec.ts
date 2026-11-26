@@ -10,6 +10,7 @@ import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
 import type { UpdateJobOfferRequest } from '../requests/update-job-offer.request.js';
+import type { JobOfferNotificationsService } from '../services/job-offer-notifications.service.js';
 import type { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
 import type { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
 import { JobOffersService } from '../services/job-offers.service.js';
@@ -89,6 +90,9 @@ describe('JobOffersService', () => {
     validateSkillIds: ReturnType<typeof vi.fn>;
     listCatalog: ReturnType<typeof vi.fn>;
   };
+  let jobOfferNotifications: {
+    notifyPublished: ReturnType<typeof vi.fn>;
+  };
   let service: JobOffersService;
 
   beforeEach(() => {
@@ -99,6 +103,9 @@ describe('JobOffersService', () => {
         .fn()
         .mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
     };
+    jobOfferNotifications = {
+      notifyPublished: vi.fn().mockResolvedValue(undefined),
+    };
     service = new JobOffersService(
       repository as unknown as JobOffersRepository,
       skillsService as unknown as JobOfferSkillsService,
@@ -107,6 +114,7 @@ describe('JobOffersService', () => {
         findPublishedById: vi.fn(),
         findPublished: vi.fn(),
       } as unknown as JobOfferMatchRepository,
+      jobOfferNotifications as unknown as JobOfferNotificationsService,
     );
   });
 
@@ -141,6 +149,25 @@ describe('JobOffersService', () => {
         id: 'offer-1',
         createdAt: CREATED_AT.toISOString(),
       });
+    });
+
+    it('avisa de la nueva vacante una vez creada', async () => {
+      await service.create('company-1', REQUEST);
+
+      expect(jobOfferNotifications.notifyPublished).toHaveBeenCalledTimes(1);
+      expect(jobOfferNotifications.notifyPublished).toHaveBeenCalledWith(
+        'offer-1',
+      );
+    });
+
+    it('no avisa cuando la vacante no se llega a crear', async () => {
+      repository.create.mockRejectedValueOnce(new Error('fallo'));
+
+      await expect(service.create('company-1', REQUEST)).rejects.toThrow(
+        'fallo',
+      );
+
+      expect(jobOfferNotifications.notifyPublished).not.toHaveBeenCalled();
     });
 
     describe('fecha de cierre', () => {
