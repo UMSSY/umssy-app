@@ -49,6 +49,9 @@ describe("CompanyProfileView", () => {
     renderWithQuery(<CompanyProfileView />);
 
     expect(await screen.findByRole("heading", { name: PROFILE.name })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Mi perfil" })).toBeInTheDocument();
+    expect(screen.getByText("Ciudad de residencia")).toBeInTheDocument();
+    expect(screen.getByText("Correo personal")).toBeInTheDocument();
     expect(companyProfileService.getProfile).toHaveBeenCalledWith("company-1");
     expect(screen.getByText("Software")).toBeInTheDocument();
     expect(screen.getByText("Desarrollo de software a medida.")).toBeInTheDocument();
@@ -84,7 +87,7 @@ describe("CompanyProfileView", () => {
 
     renderWithQuery(<CompanyProfileView />);
 
-    expect(await screen.findByText(/No se pudo cargar la información del perfil/)).toBeInTheDocument();
+    expect(await screen.findByText("No se pudo cargar la información del perfil. Inténtelo más tarde")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
 
     expect(await screen.findByRole("heading", { name: PROFILE.name })).toBeInTheDocument();

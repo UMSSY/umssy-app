@@ -26,8 +26,10 @@ import { COMPANY_VALIDATION_MESSAGES } from '../constants/company-profile.consta
 import {
   GET_COMPANY_PROFILE_ERROR_RESPONSES,
   GET_COMPANY_PROFILE_OK_RESPONSE,
+  LIST_FEATURED_COMPANIES_OK_RESPONSE,
 } from '../constants/company-swagger.constants.js';
 import type { CompanyProfileResponse } from '../responses/company-profile.response.js';
+import type { FeaturedCompanyResponse } from '../responses/featured-company.response.js';
 import { CompaniesService } from '../services/companies.service.js';
 
 const companyIdPipe = new ParseUUIDPipe({
@@ -44,6 +46,19 @@ const companyIdPipe = new ParseUUIDPipe({
 @Controller()
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
+
+  @Get('companies/featured')
+  @ApiOperation({
+    operationId: 'listFeaturedCompanies',
+    summary: 'Lista las empresas destacadas de la página pública',
+    description:
+      'Endpoint público, sin sesión. Solo incluye empresas con vacantes publicadas y vigentes.',
+  })
+  @ApiResponse(LIST_FEATURED_COMPANIES_OK_RESPONSE)
+  @ApiResponse(INTERNAL_ERROR_RESPONSE)
+  listFeatured(): Promise<FeaturedCompanyResponse[]> {
+    return this.companiesService.listFeatured();
+  }
 
   @Get('companies/:companyId/profile')
   @UseGuards(JwtAuthGuard, RolesGuard, CompanyOwnershipGuard)

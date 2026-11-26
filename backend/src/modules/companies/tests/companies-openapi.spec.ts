@@ -50,4 +50,17 @@ describe('companies OpenAPI contracts', () => {
       'COMPANY_NOT_FOUND',
     );
   });
+
+  it('documents the public featured companies endpoint', async () => {
+    const document = await buildDocument();
+    const featured = document.paths['/api/companies/featured']?.get;
+
+    expect(featured?.operationId).toBe('listFeaturedCompanies');
+    expect(featured?.security).toBeUndefined();
+    const ok = JSON.stringify(featured?.responses['200']);
+    expect(ok).toContain('activeVacanciesCount');
+    expect(ok).toContain('sector');
+    expect(featured?.responses['500']).toBeDefined();
+    expect(featured?.responses['401']).toBeUndefined();
+  });
 });
