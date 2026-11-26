@@ -175,6 +175,8 @@ sequenceDiagram
 | Used by   | [matching](../matching/README.md)              | `findPublishedMatches`, `findPublishedMatchById`, `findScoringOffers`, `findCompanyOffer` |
 | Used by   | [applications](../applications/README.md)      | Vacancy data of an application                                                            |
 | Used by   | [vacancies](../vacancies/README.md) (frontend) | `GET /job-offers` and `getSafeMapsUrl`                                                    |
+| Used by   | [companies](../companies/README.md)            | `countActiveOffersByCompany` for the featured companies of the landing page               |
+| Used by   | [company-profile](../company-profile/README.md) (frontend) | `useCurrentCompany` to read the company of the session                    |
 
 ## Data
 
@@ -209,3 +211,4 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - Company vacancy list in the company portal: cards with time open and expiry date, title search, and a message for accounts that are not linked to a company.
 - Closing date when publishing, automatic close every 5 minutes and manual close with confirmation.
 - Alert to the applicants who accept it when a vacancy is published, following each person's alert preference.
+- Active offer counts per company (`JobOffersService.countActiveOffersByCompany`) for the featured companies of the landing page.
