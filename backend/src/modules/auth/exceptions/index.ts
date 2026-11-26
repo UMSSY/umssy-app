@@ -13,3 +13,5 @@ export * from './google-account-already-linked.exception.js';
 export * from './missing-google-credential.exception.js';
 export { PasswordReusedException } from './password-reused.exception.js';
 export { PasswordResetConflictException } from './password-reset-conflict.exception.js';
+export * from './google-link-token-expired.exception.js';
+export * from './google-link-token-invalid.exception.js';
