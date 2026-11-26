@@ -16,14 +16,10 @@ import {
   multisessionId,
 } from '../constants/multisession-scenarios.constants.js';
 import type { MultisessionScenarioDefinition } from '../constants/multisession-scenarios.constants.js';
+import { toBoliviaInstant } from '../utils/event-session-schedule.js';
 
 const HOUR_MS = 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
-
-// Las fechas del escenario están en hora de Bolivia (UTC−4, sin horario de verano).
-function boliviaInstant(date: string, time: string): Date {
-  return new Date(`${date}T${time}:00.000-04:00`);
-}
 
 function calendarDate(date: string): Date {
   return new Date(`${date}T00:00:00.000Z`);
@@ -119,10 +115,16 @@ function buildEventData(
           : catalogs.statuses.proposal,
     supportThreshold: isPublished ? null : MULTISESSION_SUPPORT_THRESHOLD,
     votingDeadline: scenario.votingDeadline
-      ? boliviaInstant(scenario.votingDeadline.date, scenario.votingDeadline.time)
+      ? toBoliviaInstant(
+          scenario.votingDeadline.date,
+          scenario.votingDeadline.time,
+        )
       : null,
     createdById: organizerId,
-    createdAt: boliviaInstant(scenario.createdAt.date, scenario.createdAt.time),
+    createdAt: toBoliviaInstant(
+      scenario.createdAt.date,
+      scenario.createdAt.time,
+    ),
   };
 }
 
@@ -130,18 +132,20 @@ async function seedScenarioSessions(
   tx: Prisma.TransactionClient,
   scenario: MultisessionScenarioDefinition,
   eventId: string,
+  reset: boolean,
 ): Promise<string[]> {
   const ids = scenario.sessions.map((_, index) =>
     multisessionId('session', scenario.number, index),
   );
-  await tx.eventSession.deleteMany({
-    where: { eventId, id: { notIn: ids } },
-  });
+  if (reset)
+    await tx.eventSession.deleteMany({
+      where: { eventId, id: { notIn: ids } },
+    });
   for (const [index, session] of scenario.sessions.entries()) {
     const data = {
       eventId,
-      startsAt: boliviaInstant(session.date, session.start),
-      endsAt: boliviaInstant(session.date, session.end),
+      startsAt: toBoliviaInstant(session.date, session.start),
+      endsAt: toBoliviaInstant(session.date, session.end),
       location: scenario.location,
     };
     await tx.eventSession.upsert({
@@ -160,19 +164,21 @@ async function seedScenarioRegistrations(
   sessionIds: string[],
   catalogs: Catalogs,
   users: MultisessionScenarioUsers,
+  reset: boolean,
 ): Promise<{ registrations: number; attendances: number }> {
   const ids = scenario.registrations.map((_, index) =>
     multisessionId('registration', scenario.number, index),
   );
-  // Reinicia el escenario: quita inscripciones y apoyos creados durante las pruebas.
-  await tx.eventRegistration.deleteMany({
-    where: { eventId, id: { notIn: ids } },
-  });
-  await tx.eventAttendance.deleteMany({
-    where: { registrationId: { in: ids } },
-  });
+  if (reset) {
+    await tx.eventRegistration.deleteMany({
+      where: { eventId, id: { notIn: ids } },
+    });
+    await tx.eventAttendance.deleteMany({
+      where: { registrationId: { in: ids } },
+    });
+  }
 
-  const createdAt = boliviaInstant(
+  const createdAt = toBoliviaInstant(
     scenario.createdAt.date,
     scenario.createdAt.time,
   );
@@ -207,7 +213,7 @@ async function seedScenarioRegistrations(
     for (const attendance of registration.attendances ?? []) {
       const session = scenario.sessions[attendance.session];
       const checkedInAt = new Date(
-        boliviaInstant(session.date, session.start).getTime() +
+        toBoliviaInstant(session.date, session.start).getTime() +
           attendance.minutesAfterStart * MINUTE_MS,
       );
       await tx.eventAttendance.create({
@@ -226,23 +232,36 @@ async function seedScenarioRegistrations(
   return { registrations: ids.length, attendances };
 }
 
-// Carga (o reinicia) los talleres multisesión de QA y de la sprint review.
 export async function seedMultisessionScenarios(
   tx: Prisma.TransactionClient,
   users: MultisessionScenarioUsers,
+  options: { reset?: boolean } = {},
 ) {
   const catalogs = await loadCatalogs(tx);
   const summary = { events: 0, sessions: 0, registrations: 0, attendances: 0 };
 
   for (const scenario of MULTISESSION_SCENARIOS) {
     const eventId = multisessionId('event', scenario.number);
+    if (
+      !options.reset &&
+      (await tx.event.findUnique({
+        where: { id: eventId },
+        select: { id: true },
+      }))
+    )
+      continue;
     const data = buildEventData(scenario, catalogs, users.organizerId);
     await tx.event.upsert({
       where: { id: eventId },
       update: data,
       create: { id: eventId, ...data },
     });
-    const sessionIds = await seedScenarioSessions(tx, scenario, eventId);
+    const sessionIds = await seedScenarioSessions(
+      tx,
+      scenario,
+      eventId,
+      options.reset === true,
+    );
     const counts = await seedScenarioRegistrations(
       tx,
       scenario,
@@ -250,6 +269,7 @@ export async function seedMultisessionScenarios(
       sessionIds,
       catalogs,
       users,
+      options.reset === true,
     );
     summary.events += 1;
     summary.sessions += sessionIds.length;
@@ -262,7 +282,9 @@ export async function seedMultisessionScenarios(
 // Comando para reiniciar solo estos escenarios (por ejemplo, antes de la review).
 export async function runMultisessionScenarios(client?: PrismaClient) {
   if (process.env.NODE_ENV === 'production')
-    throw new Error('Los escenarios de demostración no se pueden cargar en producción');
+    throw new Error(
+      'Los escenarios de demostración no se pueden cargar en producción',
+    );
   const prisma = client ?? createSeedClient();
   try {
     return await prisma.$transaction(async (tx) => {
@@ -274,10 +296,14 @@ export async function runMultisessionScenarios(client?: PrismaClient) {
           where: { email: 'diego.fernandez@umss.edu.bo' },
         }),
       ]);
-      return seedMultisessionScenarios(tx, {
-        organizerId: organizer.id,
-        participantId: participant.id,
-      });
+      return seedMultisessionScenarios(
+        tx,
+        {
+          organizerId: organizer.id,
+          participantId: participant.id,
+        },
+        { reset: true },
+      );
     });
   } finally {
     if (!client) await prisma.$disconnect();

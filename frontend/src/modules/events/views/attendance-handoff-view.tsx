@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { Card } from '@/components/ui/card';
 import { PageHeading } from '@/shared/components/layout';
@@ -51,6 +52,7 @@ export function AttendanceHandoffView({
       ).toString()
     : '';
   const [now, setNow] = useState(Date.now);
+  const [showScanner, setShowScanner] = useState(false);
   const workshop = workshops.find((item) => item.id === workshopId);
   const sessions = workshop ? getSortedSessions(workshop) : [];
   const isMultiSession = sessions.length > 1;
@@ -127,9 +129,17 @@ export function AttendanceHandoffView({
                 aria-label="Código QR para continuar en el celular"
               />
             )}
+            {scanUrl && (
+              <a href={scanUrl} className="max-w-full text-sm break-all text-accent underline">
+                {scanUrl}
+              </a>
+            )}
+            <Button type="button" variant="outline" onClick={() => setShowScanner(true)}>
+              Abrir escáner en este dispositivo
+            </Button>
           </Card>
-          {isMobile && (
-            <div className="lg:hidden">
+          {(isMobile || showScanner) && (
+            <div className={isMobile ? 'lg:hidden' : ''}>
               <AttendanceMobileScanner workshopId={workshopId} sessions={sessions} />
             </div>
           )}
