@@ -63,7 +63,7 @@ sequenceDiagram
   opt there are email recipients
     N->>M: dispatchToUsers(ids, title, body, actionUrl, renderMail)
     loop per recipient
-      M->>M: Contact (no email = skipped)
+      M->>M: Contact (no email or reserved test domain = skipped)
       M->>M: await renderMail(context) or generic notification.mjml template
       M->>ML: send({ to, subject, text, mjml, values })
     end
@@ -82,6 +82,7 @@ sequenceDiagram
 - **Push.** Only if the type allows it, the user enabled it, and the app is not visible for that user (`visibility:changed` over WebSocket). Subscriptions with a desktop user agent are skipped (mobile or no user agent only). Title and body are truncated to 100 characters. Notifications are sent with a 24-hour TTL and `urgency: high` so they arrive with the app closed; `groupKey` becomes the notification tag on the device. Subscriptions that respond 404/410 are deleted.
 - **Push subscriptions.** `POST /push/subscriptions` upserts by endpoint and always assigns the endpoint to the authenticated user, so a device used by a new account stops delivering to the previous one.
 - **Email.** The domain can pass `renderMail(context)` in the request itself (`NotifyRequest.renderMail`, type `NotificationMailRenderer`); the `NOTIFICATION_TEMPLATES` catalog only defines the in-app title and body. `renderMail` receives `recipientName` and `actionUrl` and returns a promise with `mjml`, `subject`, `text` and `values`, so the domain can read its own `.mjml` template with `loadMailTemplate`. Without `renderMail`, the generic `mail/mjml/notification.mjml` template is used, loaded only once per send; title and body are truncated and the "Ver en UMSSY" button gets an absolute link built with the shared `frontendBaseUrl()` from the mail module (`FRONTEND_URL`, otherwise the first `CORS_ORIGIN`). Links to another origin are replaced by the frontend home.
+- **Test email domains.** Recipients whose address uses a domain reserved for testing and documentation (RFC 2606 and RFC 6761: `.test`, `.example`, `.invalid`, `.localhost`, `.local`, `example.com`, `example.net`, `example.org`) are marked `skipped` and never reach the SMTP provider, because those mailboxes cannot exist and every attempt consumes the provider's daily quota and produces a bounce. The check lives in `isDeliverableEmail` and applies in every environment; each dispatch logs how many recipients were skipped this way.
 - **Result.** Each channel is summarized as `sent` (everything sent), `partial`, `failed` or `skipped`. `deliveries` contains `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. A critical failure in one dispatcher marks its channel as `failed` without cancelling the others.
 - **Survey notifications.** `SURVEY_PUBLISHED` and `SURVEY_REMINDER` (push and email), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (email only). Their payloads are validated with Zod and their emails are rendered in `backend/src/modules/surveys/notification/`; `notifications` only defines the in-app title and body.
 - **Job offer notifications.** `JOB_OFFER_PUBLISHED` (push only) is emitted by the [job-offers](../job-offers/README.md) module when a vacancy is created, to the applicants selected by the matching module; the payload contains `jobTitle` and `companyName`. The notification is always stored in the in-app inbox, and push is sent only to users who have it enabled as their channel. Emails are not sent for this type (`sends_email = false` in the catalog). It is sent once per vacancy creation, never on edits, closure, or reopening, and the `actionUrl` points to `/vacancies/:jobOfferId`. `APPLICATION_STATUS_CHANGED` remains a separate registered type that notifies the applicant of an application status change (push only, `sends_email = false`), kept for compatibility with the existing application status flow. Both types describe different events and neither replaces the other.
@@ -124,7 +125,7 @@ Tables `notifications`, `notification_types`, `notification_preferences` and `pu
 
 ## Frontend integration
 
-The frontend does not call `notify()`: the domain that owns the event does. Users choose their channel in **Perfil → Configuración** (see [profile](../profile/README.md)); `PushSubscriptionSync` registers the device subscription again after sign in when the saved channel is push. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/notifications?filter=SURVEYS` for the publication notice, `/surveys/:id` for reminders and `/backoffice/surveys/statistics/:id` for the creator.
+The frontend does not call `notify()`: the domain that owns the event does. Users choose their channel in **Perfil → Configuración** (see [profile](../profile/README.md)); `PushSubscriptionSync` registers the device subscription again after sign in when the saved channel is push. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/notifications?filter=SURVEYS` for the publication notice (a legacy link that the inbox redirects to `/notifications/surveys`), `/surveys/:id` for reminders and `/backoffice/surveys/statistics/:id` for the creator.
 
 ### Inbox extension points
 
@@ -146,7 +147,8 @@ The module exposes in `index.ts` the visual pieces of the inbox and the route of
 | `NotificationCard` | Card presentation: unread/pending dot, icon, title, description (`line-clamp-2`), date and an `action` slot. `NotificationItem` uses it with the "open and mark as read" button; surveys uses it with "Responder encuesta" |
 | `NotificationsInboxLoading` | Loading rows built with the shared `Skeleton` (`rows`, 4 by default) |
 | `NotificationsInboxEmpty` | Empty state with the `icon`, `title` and `description` of each section |
-| `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications?filter=SURVEYS`...), used by the sidebar, the filter tabs and surveys |
+| `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications/surveys`...), used by the sidebar, the filter tabs and surveys |
+| `getNotificationInboxFilterFromSlug(slug)` | Filter of a route segment (`reminders` → `REMINDERS`), `null` when the segment is not a filter; used by the `/notifications/[filter]` page |
 | `NOTIFICATION_INBOX_FILTER_LABELS` | Filter labels; surveys keys its sidebar badge with `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`, so renaming the menu entry does not disconnect the counter |
 
 ### Inbox categories and filters
@@ -173,9 +175,11 @@ The inbox filters are defined in `notification-inbox-filters.constants.ts`. `NOT
 | Filter | Label | Route |
 | --- | --- | --- |
 | `ALL` | Todas | `/notifications` |
-| `SURVEYS` | Notificaciones de Encuestas | `/notifications?filter=SURVEYS` |
-| `REMINDERS` | Recordatorios | `/notifications?filter=REMINDERS` |
-| `SYSTEM` | Sistema | `/notifications?filter=SYSTEM` |
+| `SURVEYS` | Notificaciones de Encuestas | `/notifications/surveys` |
+| `REMINDERS` | Recordatorios | `/notifications/reminders` |
+| `SYSTEM` | Sistema | `/notifications/system` |
+
+Each filter except `ALL` has its own route segment (`NOTIFICATION_INBOX_FILTER_SLUGS`), served by `app/(app)/notifications/[filter]/page.tsx`; an unknown segment returns 404. Because the filter is part of the pathname, the sidebar highlights the active category with its usual nested-route rule. Legacy links with `?filter=` (for example the stored survey publication notices) open the same filter and are replaced with its route.
 
 The `CHAT` category has no filter of its own. `SURVEY_REMINDER` belongs to `REMINDERS`, so it is listed under the Recordatorios filter and not under the surveys one.
 
@@ -203,9 +207,12 @@ The general description that mentions surveys, reminders and account activity is
 - One external channel per recipient, with push taking precedence for older rows that enable both channels.
 - Chat messages are excluded from email; the generic email shows a "Ver en UMSSY" button with an absolute link from the shared mail resolver.
 - Optional `channels` in `notify()` to deliver or retry specific channels.
+- Email dispatch skips recipients with reserved test domains (for example the seeded `@umssy.test` accounts), so bulk notices such as a survey publication only reach real mailboxes and do not exhaust the daily SMTP quota.
 - Push is sent with TTL and high urgency; push subscriptions are reassigned to the account that registers them.
 - Optional `filterSections` slot in `NotificationsView` and sub-item badges in the sidebar, so surveys shows its list and pending count inside the "Notificaciones de Encuestas" filter (single inbox).
 - Shared inbox components (`NotificationCard`, `NotificationsInboxLoading`, `NotificationsInboxEmpty`) and filter routes (`getNotificationInboxPath`) exported for the sections of other domains.
+- Inbox filters moved from `?filter=` to their own routes (`/notifications/surveys`, `/notifications/reminders`, `/notifications/system`), so the sidebar highlights the selected category; legacy `?filter=` links redirect to the new routes.
+- Chat message toasts (`CHAT_MESSAGE`, `CHAT_GROUP_MESSAGE`) use `ChatMessageToast`: UMSSY header with logo and site, "Ahora", close button, chat icon, sender or group name, message preview, "Nuevo mensaje de chat" and the "Ver mensaje" action. Other notification types keep the standard toast.
 
 - Central publication notices retain the exact Radar snapshot reference and support historical navigation.
 - Concurrent duplicate prevention per recipient and snapshot, with central ownership of listing and read state.
