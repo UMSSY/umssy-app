@@ -11,7 +11,10 @@ import {
 import { EventsService } from '../services/events.service.js';
 import { EventsCatalogService } from '../services/events-catalog.service.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
-import { EVENT_SORT_OPTIONS } from '../constants/events.constants.js';
+import {
+  EVENT_CATALOG_SCOPES,
+  EVENT_SORT_OPTIONS,
+} from '../constants/events.constants.js';
 import { EVENTS_LIST_RESPONSE } from '../constants/events-catalog-swagger.constants.js';
 import {
   GetEventsSchema,
@@ -35,7 +38,7 @@ export class EventsController {
     operationId: 'listEvents',
     summary: 'Listar eventos',
     description:
-      'Autenticación opcional. Retorna eventos paginados con sesiones y conteo de inscritos activos. Con sort=recommended sin sesión usa el orden por fecha; con sesión y perfil incompleto usa popular. startTime y endTime representan horas locales de Bolivia.',
+      'Autenticación opcional. Retorna eventos paginados con sesiones y conteo de inscritos activos. Sin statusId solo incluye talleres que aún no terminaron (con sesiones, hasta el fin de la última). Con sort=recommended sin sesión usa el orden por fecha; con sesión y perfil incompleto usa popular. startTime y endTime representan horas locales de Bolivia.',
     security: [{}, { bearer: [] }],
   })
   @ApiQuery({
@@ -69,7 +72,7 @@ export class EventsController {
     name: 'includeProposals',
     required: false,
     type: Boolean,
-    description: 'Sin statusId, incluye talleres publicados y propuestas en votación. Las propuestas vencidas se consultan mediante statusId.',
+    description: 'Sin statusId, incluye talleres publicados que aún no terminaron y propuestas en votación. Las propuestas vencidas se consultan mediante statusId.',
     example: true,
   })
   @ApiQuery({
@@ -77,6 +80,13 @@ export class EventsController {
     required: false,
     type: String,
     description: 'UUID del estado exacto a consultar. Si se envía, este filtro prevalece sobre includeProposals; permite consultar Propuestas vencidas.',
+  })
+  @ApiQuery({
+    name: 'scope',
+    required: false,
+    enum: EVENT_CATALOG_SCOPES,
+    description:
+      'finished lista solo los talleres que ya terminaron (con sesiones, al finalizar la última), del más reciente al más antiguo. statusId prevalece sobre scope.',
   })
   @ApiQuery({
     name: 'sort',
