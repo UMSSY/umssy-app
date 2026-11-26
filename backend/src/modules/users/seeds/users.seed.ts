@@ -2,19 +2,14 @@ import bcrypt from 'bcrypt';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 import type { RoleName } from '../../../common/enums/roles.enum.js';
 import type { Prisma } from '../../../prisma/client.js';
-import {
-  BCRYPT_ROUNDS,
-  LEGACY_ROLES,
-  SEED_PASSWORD,
-  SEED_USERS,
-} from '../constants/seed-users.constants.js';
+import { LEGACY_ROLES, SEED_USERS } from '../constants/seed-users.constants.js';
 import type { SeedUserDefinition } from '../types/seed-user-definition.types.js';
 import type { SeedUserResponse } from '../types/seed-user-response.types.js';
 import type { SeedUsers } from '../types/seed-users.types.js';
 import type { UsersSeedResult } from '../types/users-seed-result.types.js';
 
 export const hashSeedPassword = (): Promise<string> =>
-  bcrypt.hash(SEED_PASSWORD, BCRYPT_ROUNDS);
+  bcrypt.hash('Prueba123', 10);
 
 async function seedRoles(
   tx: Prisma.TransactionClient,
@@ -99,7 +94,9 @@ export async function seedUsers(
     const assignedRoleIds = [...new Set(definition.roles.map(roleIdOf))];
     const user = await upsertSeedUser(tx, definition, password);
     users[definition.key] = user;
-    assignments.push(...assignedRoleIds.map((roleId) => ({ userId: user.id, roleId })));
+    assignments.push(
+      ...assignedRoleIds.map((roleId) => ({ userId: user.id, roleId })),
+    );
   }
 
   const existing = await tx.userRole.findMany({
@@ -110,8 +107,12 @@ export async function seedUsers(
     },
     select: { userId: true, roleId: true },
   });
-  const activeAssignments = new Set(existing.map(({ userId, roleId }) => `${userId}:${roleId}`));
-  const missing = assignments.filter(({ userId, roleId }) => !activeAssignments.has(`${userId}:${roleId}`));
+  const activeAssignments = new Set(
+    existing.map(({ userId, roleId }) => `${userId}:${roleId}`),
+  );
+  const missing = assignments.filter(
+    ({ userId, roleId }) => !activeAssignments.has(`${userId}:${roleId}`),
+  );
   let userRoles = 0;
   if (missing.length > 0) {
     const result = await tx.userRole.createMany({ data: missing });

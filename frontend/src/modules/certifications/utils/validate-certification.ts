@@ -1,15 +1,17 @@
+import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
 import {
   CERTIFICATION_NAME_MAX_LENGTH,
   CERTIFICATION_VALIDATION_MESSAGES,
   ISSUING_ORGANIZATION_MAX_LENGTH,
 } from "../config/certification-validation.config";
 import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.constants";
-import { BUSINESS_TIMEZONE, ISO_DATE_PATTERN } from "@/modules/profile";
+
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 import type { CertificationErrors } from "../types/certification-errors.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 
 function isValidIsoDate(value: string): boolean {
-  if (!ISO_DATE_PATTERN.test(value)) {
+  if (!DATE_PATTERN.test(value)) {
     return false;
   }
   const date = new Date(`${value}T00:00:00Z`);
@@ -18,7 +20,7 @@ function isValidIsoDate(value: string): boolean {
 
 export function getTodayIsoDate(): string {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: BUSINESS_TIMEZONE,
+    timeZone: BOLIVIA_TIME_ZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

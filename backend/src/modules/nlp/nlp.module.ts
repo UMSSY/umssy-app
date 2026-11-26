@@ -17,7 +17,17 @@ import { SkillDetectionService } from './services/skill-detection.service.js';
 import { SkillValidationService } from './services/skill-validation.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, EducationSourcesModule, WorkExperienceSourcesModule, SkillAnalysisModule, ProfileModule, ProfileSkillsEventsModule, CertificationSourcesModule, RadarEvidenceSourcesModule,],
+  imports: [
+    PrismaModule,
+    JwtAuthModule,
+    EducationSourcesModule,
+    WorkExperienceSourcesModule,
+    SkillAnalysisModule,
+    ProfileModule,
+    ProfileSkillsEventsModule,
+    CertificationSourcesModule,
+    RadarEvidenceSourcesModule,
+  ],
   controllers: [ProfileSkillsAnalysisController],
   providers: [
     ProfileSkillsAnalysisService,
@@ -27,6 +37,10 @@ import { SkillValidationService } from './services/skill-validation.service.js';
     ProfileSkillResultsRepository,
     ProfileSkillsRadarMapper,
   ],
-  exports: [ProfileSkillsAnalysisService],
+  exports: [
+    ProfileSkillsAnalysisService,
+    SkillDetectionService,
+    SkillValidationService,
+  ],
 })
 export class NlpModule {}

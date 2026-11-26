@@ -1,5 +1,5 @@
-import type { AreaTagsProps } from "../types/area-detail-components.types";
-import { AreaEmptyState } from "./area-empty-state";
+import type { AreaTagsProps } from '../types/area-tags-props.types';
+import { AreaEmptyState } from './area-empty-state';
 
 export function AreaTags({ tags }: AreaTagsProps) {
   if (tags.length === 0) {

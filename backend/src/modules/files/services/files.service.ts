@@ -1,10 +1,20 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { FilesRepository } from '../repositories/files.repository.js';
-import { EmptyFileException, FileNotFoundException, FileTooLargeException, InvalidFileTypeException } from '../exceptions/index.js';
+import {
+  EmptyFileException,
+  FileNotFoundException,
+  FileTooLargeException,
+  InvalidFileTypeException,
+} from '../exceptions/index.js';
 import { type FileTypeRule } from '../types/file-rules.js';
-import { FILE_TYPES, MAX_FILE_NAME_LENGTH, MAX_FILE_SIZE_BYTES } from '../constants/file-rules.constants.js';
-import type { CreateFileInput, FileContent, FileMetadata } from '../types/file.types.js';
+import { FILE_TYPES } from '../constants/file-rules.constants.js';
+import type {
+  CreateFileInput,
+  FileContent,
+  FileMetadata,
+} from '../types/file.types.js';
 import { EDGE_DOTS_AND_SPACES_REGEX } from '../constants/file-name.constants.js';
 
 function removeControlChars(value: string): string {
@@ -20,12 +30,15 @@ function removeControlChars(value: string): string {
 export class FilesService {
   constructor(private readonly filesRepository: FilesRepository) {}
 
-  async create(input: CreateFileInput, tx?: Prisma.TransactionClient): Promise<FileMetadata> {
+  async create(
+    input: CreateFileInput,
+    tx?: Prisma.TransactionClient,
+  ): Promise<FileMetadata> {
     const { content } = input;
     if (content.length === 0) {
       throw new EmptyFileException();
     }
-    if (content.length > MAX_FILE_SIZE_BYTES) {
+    if (content.length > MAX_FILE_UPLOAD_SIZE_BYTES) {
       throw new FileTooLargeException();
     }
 
@@ -41,7 +54,9 @@ export class FilesService {
       size: content.length,
       content,
     };
-    return tx ? this.filesRepository.create(data, tx) : this.filesRepository.create(data);
+    return tx
+      ? this.filesRepository.create(data, tx)
+      : this.filesRepository.create(data);
   }
 
   async getMetadata(id: string): Promise<FileMetadata> {
@@ -65,7 +80,9 @@ export class FilesService {
   }
 
   private detectType(content: Buffer): FileTypeRule | undefined {
-    return FILE_TYPES.find((type) => type.signature.every((byte, index) => content[index] === byte));
+    return FILE_TYPES.find((type) =>
+      type.signature.every((byte, index) => content[index] === byte),
+    );
   }
 
   private sanitizeName(rawName: string | undefined): string {
@@ -74,7 +91,7 @@ export class FilesService {
       .replace(/\.(pdf|png|jpe?g)$/i, '')
       .replace(/[\\/:*?"<>|]/g, '')
       .replace(EDGE_DOTS_AND_SPACES_REGEX, '')
-      .slice(0, MAX_FILE_NAME_LENGTH)
+      .slice(0, 200)
       .replace(EDGE_DOTS_AND_SPACES_REGEX, '');
 
     return name.length > 0 ? name : 'documento';

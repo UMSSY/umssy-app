@@ -1,3 +1,4 @@
+import { MIN_SEARCH_CHARS } from '@/modules/chat/constants/contact-search.constants';
 import {
   AttachmentType,
   Conversation,
@@ -24,6 +25,7 @@ import {
 } from './conversation-read-storage';
 import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { getCurrentSessionUserId as getStoredSessionUserId } from '@/shared/services/storage/session-user-id-storage';
 import type { UserRole } from '../types/user.types';
 import type {
   ChatUserResponse,
@@ -32,10 +34,13 @@ import type {
   RawBackendAttachmentItem,
   RawBackendMessageItem,
 } from '../types/chat-api.types';
-const MIN_SEARCH_CHARS = 2;
+
 const DEFAULT_MESSAGE_PAGE_SIZE = 10;
 
 export function getCurrentSessionUserId(): string {
+  const storedId = getStoredSessionUserId();
+  if (storedId) return storedId;
+
   const token = getAccessToken();
   if (!token) return '';
 
@@ -54,8 +59,7 @@ export function getCurrentSessionUserId(): string {
         return parsed.sub;
       }
     }
-  } catch {
-  }
+  } catch {}
 
   return '';
 }
@@ -74,13 +78,9 @@ export async function getConversations(): Promise<Conversation[]> {
       : [];
 
   return applyStoredReadState(items.map(withBlockState)).sort((a, b) => {
-    const dateA = new Date(
-      a.lastMessage?.createdAt || a.updatedAt,
-    ).getTime();
+    const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
 
-    const dateB = new Date(
-      b.lastMessage?.createdAt || b.updatedAt,
-    ).getTime();
+    const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
 
     return dateB - dateA;
   });
@@ -103,9 +103,7 @@ export async function searchUsers(rawQuery: string): Promise<User[]> {
 
   const items: ChatUserResponse[] = Array.isArray(body)
     ? body
-    : Array.isArray(
-          (body as { data?: ChatUserResponse[] })?.data,
-        )
+    : Array.isArray((body as { data?: ChatUserResponse[] })?.data)
       ? (body as { data: ChatUserResponse[] }).data
       : [];
 
@@ -120,9 +118,7 @@ export async function searchUsers(rawQuery: string): Promise<User[]> {
   }));
 }
 
-export async function getMessages(
-  conversationId: string,
-): Promise<Message[]> {
+export async function getMessages(conversationId: string): Promise<Message[]> {
   try {
     const res = await getPaginatedMessages({
       conversationId,
@@ -130,10 +126,9 @@ export async function getMessages(
     });
     return res.data;
   } catch {
-    return getMessagesByConversation(conversationId);
+    return await getMessagesByConversation(conversationId);
   }
 }
-
 
 export async function getPaginatedMessages({
   conversationId,
@@ -143,22 +138,17 @@ export async function getPaginatedMessages({
   requireServer = false,
 }: GetPaginatedMessagesParams): Promise<PaginatedMessagesResponse> {
   if (!conversationId) {
-    throw new Error(
-      'El identificador de conversacion es requerido',
-    );
+    throw new Error('El identificador de conversacion es requerido');
   }
 
   if (!Number.isInteger(limit) || limit <= 0) {
-    throw new Error(
-      'El limite debe ser un numero entero mayor a 0',
-    );
+    throw new Error('El limite debe ser un numero entero mayor a 0');
   }
 
   try {
     const response = await apiClient.get<
-      | StandardApiResponse<PaginatedMessagesResponse>
-      | PaginatedMessagesResponse
-    >(`/conversations/${conversationId}/messages`, {
+      StandardApiResponse<PaginatedMessagesResponse> | PaginatedMessagesResponse
+    >(`/chat/conversations/${conversationId}/messages`, {
       ...(signal ? { signal } : {}),
       ...(requireServer ? { timeout: 15000 } : {}),
       params: {
@@ -180,7 +170,15 @@ export async function getPaginatedMessages({
           ? (body.data as PaginatedMessagesResponse)
           : (body as PaginatedMessagesResponse);
 
-      if (requireServer && (!Array.isArray(payload.data) || typeof payload.hasMore !== 'boolean' || !(payload.nextCursor === null || typeof payload.nextCursor === 'string'))) {
+      if (
+        requireServer &&
+        (!Array.isArray(payload.data) ||
+          typeof payload.hasMore !== 'boolean' ||
+          !(
+            payload.nextCursor === null ||
+            typeof payload.nextCursor === 'string'
+          ))
+      ) {
         throw new Error('Respuesta de sincronización inválida');
       }
 
@@ -201,21 +199,24 @@ export async function getPaginatedMessages({
       ) {
         const mappedMessages: Message[] = combined.map(
           (m: RawBackendMessageItem) => {
-            const rawAttachments = m.attachments || (m.attachment ? [m.attachment] : []);
-            const mappedAttachments: MessageAttachment[] = rawAttachments.map((att: RawBackendAttachmentItem) => ({
-              id: att.id,
-              messageId: att.messageId || m.id,
-              fileName: att.fileName,
-              mimeType: att.mimeType || 'application/octet-stream',
-              fileSize: att.fileSize || 0,
-              url: att.url || `/api/chat/attachments/${att.id}/download`,
-              thumbnailUrl: att.thumbnailUrl ?? null,
-              type:
-                typeof att.type === 'object' && att.type !== null
-                  ? att.type.title
-                  : (att.type ?? null),
-              createdAt: att.createdAt,
-            }));
+            const rawAttachments =
+              m.attachments || (m.attachment ? [m.attachment] : []);
+            const mappedAttachments: MessageAttachment[] = rawAttachments.map(
+              (att: RawBackendAttachmentItem) => ({
+                id: att.id,
+                messageId: att.messageId || m.id,
+                fileName: att.fileName,
+                mimeType: att.mimeType || 'application/octet-stream',
+                fileSize: att.fileSize || 0,
+                url: att.url || `/api/chat/attachments/${att.id}/file`,
+                thumbnailUrl: att.thumbnailUrl ?? null,
+                type:
+                  typeof att.type === 'object' && att.type !== null
+                    ? att.type.title
+                    : (att.type ?? null),
+                createdAt: att.createdAt,
+              }),
+            );
 
             const firstAtt = mappedAttachments[0] ?? null;
             const isAttachment = Boolean(
@@ -224,9 +225,10 @@ export async function getPaginatedMessages({
             const attachmentType: AttachmentType | null =
               m.attachmentType ??
               (firstAtt
-                ? (firstAtt.type?.toLowerCase() === 'image' || firstAtt.mimeType.startsWith('image/')
-                    ? 'image'
-                    : 'file')
+                ? firstAtt.type?.toLowerCase() === 'image' ||
+                  firstAtt.mimeType.startsWith('image/')
+                  ? 'image'
+                  : 'file'
                 : m.content?.startsWith('[Archivo]')
                   ? 'file'
                   : null);
@@ -237,9 +239,15 @@ export async function getPaginatedMessages({
               senderId: m.senderId || '',
               content: m.content || '',
               timestamp:
-                m.timestamp || m.createdAt || m.sentAt || new Date().toISOString(),
+                m.timestamp ||
+                m.createdAt ||
+                m.sentAt ||
+                new Date().toISOString(),
               createdAt:
-                m.createdAt || m.sentAt || m.timestamp || new Date().toISOString(),
+                m.createdAt ||
+                m.sentAt ||
+                m.timestamp ||
+                new Date().toISOString(),
               status: (m.status as MessageStatus) || 'sent',
               isAttachment,
               attachmentType,
@@ -256,13 +264,13 @@ export async function getPaginatedMessages({
         };
       }
     }
-  } catch (error){
+  } catch (error) {
     throw error;
   }
 
   if (requireServer) throw new Error('Respuesta de sincronización inválida');
 
-  const messages = getMessagesByConversation(conversationId);
+  const messages = await getMessagesByConversation(conversationId);
 
   if (messages.length === 0) {
     return {
@@ -294,17 +302,12 @@ export async function getPaginatedMessages({
 
   const startIndex = Math.max(0, endIndex - limit);
 
-  const pageMessages = chronologicalMessages.slice(
-    startIndex,
-    endIndex,
-  );
+  const pageMessages = chronologicalMessages.slice(startIndex, endIndex);
 
   const hasMore = startIndex > 0;
 
   const nextCursor =
-    hasMore && pageMessages.length > 0
-      ? pageMessages[0].id
-      : null;
+    hasMore && pageMessages.length > 0 ? pageMessages[0].id : null;
 
   return {
     data: pageMessages,
@@ -313,19 +316,27 @@ export async function getPaginatedMessages({
   };
 }
 
-
-/**
- * HU-2: obtiene o crea la conversación con un contacto.
- * Llama a POST /chat/conversations.
- * El backend usa el JWT para saber quién es el usuario de la sesión,
- * y aplica la regla del par ordenado (no duplica conversaciones).
- */
 export async function getOrCreateConversation(
   contactId: string,
+  context?: {
+    contextType?: string;
+    contextId?: string;
+  },
 ): Promise<Conversation> {
+  const payload: {
+    contactId: string;
+    contextType?: string;
+    contextId?: string;
+  } = {
+    contactId,
+  };
+  if (context?.contextType && context?.contextId) {
+    payload.contextType = context.contextType;
+    payload.contextId = context.contextId;
+  }
   const { data } = await apiClient.post<
     Conversation | StandardApiResponse<Conversation>
-  >('/chat/conversations', { contactId });
+  >('/chat/conversations', payload);
 
   if (
     typeof data === 'object' &&
@@ -341,17 +352,17 @@ export async function getOrCreateConversation(
   return data as Conversation;
 }
 
-/** HU-13: asegura que isBlockedByMe siempre sea booleano (false si el backend no lo envía). */
 function withBlockState(conversation: Conversation): Conversation {
-  return { ...conversation, isBlockedByMe: Boolean(conversation.isBlockedByMe) };
+  return {
+    ...conversation,
+    isBlockedByMe: Boolean(conversation.isBlockedByMe),
+  };
 }
 
-/** HU-13: POST /chat/blocks. Sin catch: la interfaz muestra el error. */
 export async function blockUser(contactId: string): Promise<void> {
   await apiClient.post('/chat/blocks', { userId: contactId });
 }
 
-/** HU-13: DELETE /chat/blocks/:userId. Sin catch: la interfaz muestra el error. */
 export async function unblockUser(contactId: string): Promise<void> {
   await apiClient.delete(`/chat/blocks/${encodeURIComponent(contactId)}`);
 }
@@ -364,9 +375,7 @@ export async function sendMessage(
     typeof navigator !== 'undefined' && !navigator.onLine;
 
   if (options?.forceOffline || isBrowserOffline) {
-    throw new Error(
-      'Error de red: Sin conexion a internet',
-    );
+    throw new Error('Error de red: Sin conexion a internet');
   }
 
   if (options?.forceError) {
@@ -376,23 +385,18 @@ export async function sendMessage(
   }
 
   if (!payload.conversationId) {
-    throw new Error(
-      'El identificador de conversacion es requerido',
-    );
+    throw new Error('El identificador de conversacion es requerido');
   }
 
   const trimmedContent = payload.content.trim();
 
   if (trimmedContent.length === 0) {
-    throw new Error(
-      'El contenido del mensaje no puede estar vacio',
-    );
+    throw new Error('El contenido del mensaje no puede estar vacio');
   }
 
   try {
     const response = await apiClient.post<
-      | StandardApiResponse<Message>
-      | Message
+      StandardApiResponse<Message> | Message
     >('/chat/messages', {
       conversationId: payload.conversationId,
       content: trimmedContent,
@@ -418,20 +422,17 @@ export async function sendMessage(
     const createdMessage: Message = {
       id: msg.id,
       conversationId: msg.conversationId || payload.conversationId,
-      senderId:
-        msg.senderId || payload.senderId || getCurrentSessionUserId(),
+      senderId: msg.senderId || payload.senderId || getCurrentSessionUserId(),
       content: msg.content || trimmedContent,
-      timestamp:
-        msg.timestamp || msg.createdAt || new Date().toISOString(),
+      timestamp: msg.timestamp || msg.createdAt || new Date().toISOString(),
       status: (msg.status as MessageStatus) || 'sent',
-      createdAt:
-        msg.createdAt || msg.timestamp || new Date().toISOString(),
+      createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
       isAttachment: Boolean(msg.isAttachment),
       attachmentType: msg.attachmentType || null,
     };
 
-    saveStoredMessage(createdMessage);
-    markStoredConversationAsRead(payload.conversationId);
+    await saveStoredMessage(createdMessage).catch(() => {});
+    await markStoredConversationAsRead(payload.conversationId).catch(() => {});
 
     return {
       statusCode: 201,
@@ -452,13 +453,11 @@ export async function sendMessage(
 export async function markConversationAsRead(
   conversationId: string,
 ): Promise<void> {
-  markStoredConversationAsRead(conversationId);
- saveConversationReadAt(conversationId);
+  await markStoredConversationAsRead(conversationId).catch(() => {});
+  saveConversationReadAt(conversationId);
   try {
-    await apiClient.patch(`/chat/messages/${conversationId}/read`);
-  } catch {
-    
-  }
+    await apiClient.patch(`/chat/conversations/${conversationId}/read-state`);
+  } catch {}
 }
 
 export async function downloadAttachment(
@@ -471,7 +470,7 @@ export async function downloadAttachment(
 
   try {
     const response = await apiClient.get(
-      `/chat/attachments/${attachmentId}/download`,
+      `/chat/attachments/${attachmentId}/file`,
       { responseType: 'blob' },
     );
 
@@ -526,9 +525,8 @@ export async function sendAttachmentMessage(
 
   try {
     const response = await apiClient.post<
-      | StandardApiResponse<Message>
-      | Message
-    >('/chat/messages/attachment', formData);
+      StandardApiResponse<Message> | Message
+    >('/chat/attachments', formData);
 
     const body = response?.data;
     const msg =
@@ -547,18 +545,16 @@ export async function sendAttachmentMessage(
       );
     }
 
-    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(file.name);
+    const isImage =
+      file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(file.name);
     const createdMessage: Message = {
       id: msg.id,
       conversationId: msg.conversationId || conversationId,
-      senderId:
-        msg.senderId || getCurrentSessionUserId(),
+      senderId: msg.senderId || getCurrentSessionUserId(),
       content: msg.content || trimmedContent || file.name,
-      timestamp:
-        msg.timestamp || msg.createdAt || new Date().toISOString(),
+      timestamp: msg.timestamp || msg.createdAt || new Date().toISOString(),
       status: (msg.status as MessageStatus) || 'sent',
-      createdAt:
-        msg.createdAt || msg.timestamp || new Date().toISOString(),
+      createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
       isAttachment: true,
       attachmentType: msg.attachmentType || (isImage ? 'image' : 'file'),
       attachment: msg.attachment ?? {
@@ -566,14 +562,14 @@ export async function sendAttachmentMessage(
         fileName: file.name,
         fileSize: file.size,
         mimeType: file.type,
-        url: `/api/chat/attachments/att-${msg.id}/download`,
+        url: `/api/chat/attachments/att-${msg.id}/file`,
         type: isImage ? 'IMAGE' : 'PDF',
       },
       attachments: msg.attachments,
     };
 
-    saveStoredMessage(createdMessage);
-    markStoredConversationAsRead(conversationId);
+    await saveStoredMessage(createdMessage).catch(() => {});
+    await markStoredConversationAsRead(conversationId).catch(() => {});
 
     return {
       statusCode: 201,

@@ -8,4 +8,5 @@ export interface Application {
   affinityPercentage: number;
   status: ApplicationStatus;
   appliedDate: string;
+  vacancyAvailable: boolean;
 }

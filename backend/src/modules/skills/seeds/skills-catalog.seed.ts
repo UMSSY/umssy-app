@@ -1,7 +1,10 @@
 import type { Prisma } from '../../../prisma/client.js';
 import type { RadarAreaId } from '../../profile/types/radar-area-id.type.js';
 
-export const SEED_SKILLS_CATALOG: readonly { name: string; areaId: RadarAreaId }[] = [
+export const SEED_SKILLS_CATALOG: readonly {
+  name: string;
+  areaId: RadarAreaId;
+}[] = [
   { name: 'JavaScript', areaId: 'desarrollo' },
   { name: 'TypeScript', areaId: 'desarrollo' },
   { name: 'Java', areaId: 'desarrollo' },

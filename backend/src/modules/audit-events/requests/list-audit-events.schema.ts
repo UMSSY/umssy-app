@@ -1,6 +1,10 @@
 import { z } from 'zod';
-import { DEFAULT_AUDIT_PAGE_SIZE, MAX_AUDIT_PAGE_SIZE } from '../constants/audit-events.constants.js';
-import { auditEventsFiltersShape, hasValidPeriod, INVALID_PERIOD_ISSUE } from './audit-events-filters.schema.js';
+
+import {
+  auditEventsFiltersShape,
+  hasValidPeriod,
+  INVALID_PERIOD_ISSUE,
+} from './audit-events-filters.schema.js';
 
 export const listAuditEventsQuerySchema = z
   .object({
@@ -14,8 +18,8 @@ export const listAuditEventsQuerySchema = z
       .number({ error: 'El límite debe ser un número' })
       .int('El límite debe ser un número entero')
       .min(1, 'El límite debe ser mayor o igual a 1')
-      .max(MAX_AUDIT_PAGE_SIZE, `El límite no puede superar ${MAX_AUDIT_PAGE_SIZE}`)
-      .default(DEFAULT_AUDIT_PAGE_SIZE),
+      .max(50, `El límite no puede superar 50`)
+      .default(10),
   })
   .refine(hasValidPeriod, INVALID_PERIOD_ISSUE);
 

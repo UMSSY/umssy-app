@@ -42,6 +42,8 @@ export type AppointmentDocumentMinAggregateOutputType = {
   sizeBytes: number | null
   data: runtime.Bytes | null
   uploadedAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type AppointmentDocumentMaxAggregateOutputType = {
@@ -52,6 +54,8 @@ export type AppointmentDocumentMaxAggregateOutputType = {
   sizeBytes: number | null
   data: runtime.Bytes | null
   uploadedAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type AppointmentDocumentCountAggregateOutputType = {
@@ -62,6 +66,8 @@ export type AppointmentDocumentCountAggregateOutputType = {
   sizeBytes: number
   data: number
   uploadedAt: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -82,6 +88,8 @@ export type AppointmentDocumentMinAggregateInputType = {
   sizeBytes?: true
   data?: true
   uploadedAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type AppointmentDocumentMaxAggregateInputType = {
@@ -92,6 +100,8 @@ export type AppointmentDocumentMaxAggregateInputType = {
   sizeBytes?: true
   data?: true
   uploadedAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type AppointmentDocumentCountAggregateInputType = {
@@ -102,6 +112,8 @@ export type AppointmentDocumentCountAggregateInputType = {
   sizeBytes?: true
   data?: true
   uploadedAt?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -199,6 +211,8 @@ export type AppointmentDocumentGroupByOutputType = {
   sizeBytes: number
   data: runtime.Bytes
   uploadedAt: Date
+  createdAt: Date
+  updatedAt: Date
   _count: AppointmentDocumentCountAggregateOutputType | null
   _avg: AppointmentDocumentAvgAggregateOutputType | null
   _sum: AppointmentDocumentSumAggregateOutputType | null
@@ -232,6 +246,8 @@ export type AppointmentDocumentWhereInput = {
   sizeBytes?: Prisma.IntFilter<"AppointmentDocument"> | number
   data?: Prisma.BytesFilter<"AppointmentDocument"> | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFilter<"AppointmentDocument"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"AppointmentDocument"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"AppointmentDocument"> | Date | string
   appointment?: Prisma.XOR<Prisma.AppointmentScalarRelationFilter, Prisma.AppointmentWhereInput>
 }
 
@@ -243,6 +259,8 @@ export type AppointmentDocumentOrderByWithRelationInput = {
   sizeBytes?: Prisma.SortOrder
   data?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   appointment?: Prisma.AppointmentOrderByWithRelationInput
 }
 
@@ -257,6 +275,8 @@ export type AppointmentDocumentWhereUniqueInput = Prisma.AtLeast<{
   sizeBytes?: Prisma.IntFilter<"AppointmentDocument"> | number
   data?: Prisma.BytesFilter<"AppointmentDocument"> | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFilter<"AppointmentDocument"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"AppointmentDocument"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"AppointmentDocument"> | Date | string
   appointment?: Prisma.XOR<Prisma.AppointmentScalarRelationFilter, Prisma.AppointmentWhereInput>
 }, "id" | "appointmentId">
 
@@ -268,6 +288,8 @@ export type AppointmentDocumentOrderByWithAggregationInput = {
   sizeBytes?: Prisma.SortOrder
   data?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.AppointmentDocumentCountOrderByAggregateInput
   _avg?: Prisma.AppointmentDocumentAvgOrderByAggregateInput
   _max?: Prisma.AppointmentDocumentMaxOrderByAggregateInput
@@ -286,6 +308,8 @@ export type AppointmentDocumentScalarWhereWithAggregatesInput = {
   sizeBytes?: Prisma.IntWithAggregatesFilter<"AppointmentDocument"> | number
   data?: Prisma.BytesWithAggregatesFilter<"AppointmentDocument"> | runtime.Bytes
   uploadedAt?: Prisma.DateTimeWithAggregatesFilter<"AppointmentDocument"> | Date | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"AppointmentDocument"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AppointmentDocument"> | Date | string
 }
 
 export type AppointmentDocumentCreateInput = {
@@ -295,6 +319,8 @@ export type AppointmentDocumentCreateInput = {
   sizeBytes: number
   data: runtime.Bytes
   uploadedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   appointment: Prisma.AppointmentCreateNestedOneWithoutDocumentInput
 }
 
@@ -306,6 +332,8 @@ export type AppointmentDocumentUncheckedCreateInput = {
   sizeBytes: number
   data: runtime.Bytes
   uploadedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentDocumentUpdateInput = {
@@ -315,6 +343,8 @@ export type AppointmentDocumentUpdateInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   appointment?: Prisma.AppointmentUpdateOneRequiredWithoutDocumentNestedInput
 }
 
@@ -326,6 +356,8 @@ export type AppointmentDocumentUncheckedUpdateInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentDocumentCreateManyInput = {
@@ -336,6 +368,8 @@ export type AppointmentDocumentCreateManyInput = {
   sizeBytes: number
   data: runtime.Bytes
   uploadedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentDocumentUpdateManyMutationInput = {
@@ -345,6 +379,8 @@ export type AppointmentDocumentUpdateManyMutationInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentDocumentUncheckedUpdateManyInput = {
@@ -355,6 +391,8 @@ export type AppointmentDocumentUncheckedUpdateManyInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentDocumentNullableScalarRelationFilter = {
@@ -370,6 +408,8 @@ export type AppointmentDocumentCountOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   data?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentDocumentAvgOrderByAggregateInput = {
@@ -384,6 +424,8 @@ export type AppointmentDocumentMaxOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   data?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentDocumentMinOrderByAggregateInput = {
@@ -394,6 +436,8 @@ export type AppointmentDocumentMinOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   data?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AppointmentDocumentSumOrderByAggregateInput = {
@@ -443,6 +487,8 @@ export type AppointmentDocumentCreateWithoutAppointmentInput = {
   sizeBytes: number
   data: runtime.Bytes
   uploadedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentDocumentUncheckedCreateWithoutAppointmentInput = {
@@ -452,6 +498,8 @@ export type AppointmentDocumentUncheckedCreateWithoutAppointmentInput = {
   sizeBytes: number
   data: runtime.Bytes
   uploadedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AppointmentDocumentCreateOrConnectWithoutAppointmentInput = {
@@ -477,6 +525,8 @@ export type AppointmentDocumentUpdateWithoutAppointmentInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AppointmentDocumentUncheckedUpdateWithoutAppointmentInput = {
@@ -486,6 +536,8 @@ export type AppointmentDocumentUncheckedUpdateWithoutAppointmentInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -498,6 +550,8 @@ export type AppointmentDocumentSelect<ExtArgs extends runtime.Types.Extensions.I
   sizeBytes?: boolean
   data?: boolean
   uploadedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   appointment?: boolean | Prisma.AppointmentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["appointmentDocument"]>
 
@@ -509,6 +563,8 @@ export type AppointmentDocumentSelectCreateManyAndReturn<ExtArgs extends runtime
   sizeBytes?: boolean
   data?: boolean
   uploadedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   appointment?: boolean | Prisma.AppointmentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["appointmentDocument"]>
 
@@ -520,6 +576,8 @@ export type AppointmentDocumentSelectUpdateManyAndReturn<ExtArgs extends runtime
   sizeBytes?: boolean
   data?: boolean
   uploadedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   appointment?: boolean | Prisma.AppointmentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["appointmentDocument"]>
 
@@ -531,9 +589,11 @@ export type AppointmentDocumentSelectScalar = {
   sizeBytes?: boolean
   data?: boolean
   uploadedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type AppointmentDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "appointmentId" | "fileName" | "mimeType" | "sizeBytes" | "data" | "uploadedAt", ExtArgs["result"]["appointmentDocument"]>
+export type AppointmentDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "appointmentId" | "fileName" | "mimeType" | "sizeBytes" | "data" | "uploadedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["appointmentDocument"]>
 export type AppointmentDocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   appointment?: boolean | Prisma.AppointmentDefaultArgs<ExtArgs>
 }
@@ -557,6 +617,8 @@ export type $AppointmentDocumentPayload<ExtArgs extends runtime.Types.Extensions
     sizeBytes: number
     data: runtime.Bytes
     uploadedAt: Date
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["appointmentDocument"]>
   composites: {}
 }
@@ -988,6 +1050,8 @@ export interface AppointmentDocumentFieldRefs {
   readonly sizeBytes: Prisma.FieldRef<"AppointmentDocument", 'Int'>
   readonly data: Prisma.FieldRef<"AppointmentDocument", 'Bytes'>
   readonly uploadedAt: Prisma.FieldRef<"AppointmentDocument", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"AppointmentDocument", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"AppointmentDocument", 'DateTime'>
 }
     
 

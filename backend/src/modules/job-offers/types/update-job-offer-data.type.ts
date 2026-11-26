@@ -1,9 +1,10 @@
 import type { CreateJobOfferData } from './create-job-offer-data.type.js';
 
-type OptionalRequirementFields = 'requiredCareers' | 'minExperienceYears' | 'otherRequirements';
+type OptionalRequirementFields =
+  'requiredCareers' | 'minExperienceYears' | 'otherRequirements';
 
 export type UpdateJobOfferData = Omit<
   CreateJobOfferData,
-  'companyId' | 'statusId' | OptionalRequirementFields
+  'companyId' | 'statusId' | 'expiresAt' | OptionalRequirementFields
 > &
   Partial<Pick<CreateJobOfferData, OptionalRequirementFields>>;

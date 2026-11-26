@@ -38,6 +38,18 @@ async function chooseTopic(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("RequestAppointmentForm", () => {
+  it("incluye el área real en la solicitud y valida el límite completo", async () => {
+    const { onSubmit, user } = renderForm({ selectedAreaName: "Cloud" });
+    await chooseTopic(user);
+    await user.type(screen.getByLabelText(messageLabel), "Necesito orientación");
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }));
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ message: "Área de mentoría: Cloud.\nNecesito orientación" }));
+    onSubmit.mockClear();
+    fireEvent.change(screen.getByLabelText(messageLabel), { target: { value: "a".repeat(290) } });
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.messageTooLong)).toBeInTheDocument();
+  });
   afterEach(() => {
     cleanup()
   })
@@ -216,3 +228,9 @@ describe("RequestAppointmentForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 })
+
+it("muestra el área del radar y prepara el contexto en el mensaje", () => {
+  render(<RequestAppointmentForm selectedArea="QA" orientationTypes={[]} isLoadingTopics={false} isSubmitting={false} onSubmit={vi.fn()} onDirtyChange={vi.fn()} />);
+  expect(screen.getByRole("note")).toHaveTextContent("QA");
+  expect(screen.getByRole("textbox", { name: messageLabel })).toHaveValue("Busco orientación en QA. ");
+});

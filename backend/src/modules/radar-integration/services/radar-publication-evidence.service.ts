@@ -20,13 +20,37 @@ export class RadarPublicationEvidenceService {
     return this.skills.countPendingPublicationSkills(userId);
   }
 
-  read(userId: string, context: TransactionContext) {
-    return Promise.all([
+  async read(userId: string, context: TransactionContext) {
+    const [skills, sources] = await Promise.all([
       this.skills.findApprovedPublicationSkills(userId, context),
-      this.cv.findPublicationCvStates(userId, context),
-      this.workExperience.findPublicationEvidenceIds(userId, context),
-      this.educations.findPublicationEvidenceIds(userId, context),
-      this.certifications.findPublicationEvidenceIds(userId, context),
+      this.readSources(userId, context),
     ]);
+    return [skills, ...sources] as const;
+  }
+
+  async readSimulation(userId: string, context: TransactionContext) {
+    const [skills, sources] = await Promise.all([
+      this.skills.findProfileSkillRows(userId, context),
+      this.readSources(userId, context),
+    ]);
+    return [skills, ...sources] as const;
+  }
+
+  private async readSources(userId: string, context: TransactionContext) {
+    const [cvs, experiences, educations, certificates, blocked] =
+      await Promise.all([
+        this.cv.findPublicationCvStates(userId, context),
+        this.workExperience.findPublicationEvidenceIds(userId, context),
+        this.educations.findPublicationEvidenceIds(userId, context),
+        this.certifications.findPublicationEvidenceIds(userId, context),
+        this.cv.findUnapprovedCertificateIds(userId, context),
+      ]);
+    const excluded = new Set(blocked.map((row) => row.sourceId));
+    return [
+      cvs,
+      experiences,
+      educations,
+      certificates.filter((row) => !excluded.has(row.id)),
+    ] as const;
   }
 }

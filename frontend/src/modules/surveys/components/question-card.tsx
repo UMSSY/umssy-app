@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { SURVEY_ARIA, SURVEY_LIMITS, SURVEY_TEXT } from "../constants/survey-builder.constants";
-import type { QuestionCardProps } from "../types/survey-component-props.types";
+import type { QuestionCardProps } from "../types/question-card-props.types";
 import { FieldErrorMessage } from "./field-error-message";
 import { OptionMarker } from "./option-marker";
 import { QuestionFloatingToolbar } from "./question-floating-toolbar";
@@ -137,7 +137,10 @@ export function QuestionCard({
                     statementError && "border-danger",
                   )}
                 >
-                  <span aria-hidden="true" className="text-sm font-medium text-ink">
+                  <span
+                    aria-hidden="true"
+                    className="text-sm font-medium text-ink"
+                  >
                     {position}.
                   </span>
                   <Input
@@ -148,17 +151,26 @@ export function QuestionCard({
                     placeholder={SURVEY_TEXT.untitledQuestion}
                     aria-required="true"
                     aria-invalid={statementError ? true : undefined}
-                    aria-describedby={statementError ? `${baseId}-statement-error` : undefined}
-                    onChange={(event) => onStatementChange(question.id, event.target.value)}
+                    aria-describedby={
+                      statementError ? `${baseId}-statement-error` : undefined
+                    }
+                    onChange={(event) =>
+                      onStatementChange(question.id, event.target.value)
+                    }
                     className="h-11 flex-1 rounded-none border-0 bg-transparent px-0 text-sm font-medium text-ink shadow-none focus-visible:ring-0 aria-invalid:ring-0 md:text-sm dark:bg-transparent"
                   />
                 </div>
-                <FieldErrorMessage id={`${baseId}-statement-error`} message={statementError} />
+                <FieldErrorMessage
+                  id={`${baseId}-statement-error`}
+                  message={statementError}
+                />
               </div>
               <QuestionTypeSelect
                 id={`${baseId}-type`}
                 value={question.type}
-                onChange={(questionType) => onTypeChange(question.id, questionType)}
+                onChange={(questionType) =>
+                  onTypeChange(question.id, questionType)
+                }
               />
             </div>
 
@@ -172,7 +184,9 @@ export function QuestionCard({
                   canRemove={canRemoveOptions}
                   shouldFocus={focusOptionId === option.id}
                   isInvalid={Boolean(optionsError)}
-                  onChange={(label) => onOptionChange(question.id, option.id, label)}
+                  onChange={(label) =>
+                    onOptionChange(question.id, option.id, label)
+                  }
                   onRemove={() => onRemoveOption(question.id, option.id)}
                   onFocusHandled={onFocusHandled}
                 />
@@ -187,7 +201,10 @@ export function QuestionCard({
                   {SURVEY_TEXT.addOption}
                 </Button>
               </div>
-              <FieldErrorMessage id={`${baseId}-options-error`} message={optionsError} />
+              <FieldErrorMessage
+                id={`${baseId}-options-error`}
+                message={optionsError}
+              />
             </div>
 
             <div className="mt-3 flex items-center justify-end gap-1 border-t border-border pt-3 text-ink-soft">
@@ -209,8 +226,14 @@ export function QuestionCard({
               >
                 <Trash2 aria-hidden="true" />
               </Button>
-              <Separator orientation="vertical" className="mx-2 h-6 data-vertical:self-center" />
-              <Label htmlFor={`${baseId}-required`} className="cursor-pointer font-normal text-ink">
+              <Separator
+                orientation="vertical"
+                className="mx-2 h-6 data-vertical:self-center"
+              />
+              <Label
+                htmlFor={`${baseId}-required`}
+                className="cursor-pointer font-normal text-ink"
+              >
                 {SURVEY_TEXT.required}
               </Label>
               <Switch
@@ -231,8 +254,14 @@ export function QuestionCard({
             className="cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/20"
           >
             <QuestionSummary question={question} index={index} />
-            <FieldErrorMessage id={`${baseId}-statement-error`} message={statementError} />
-            <FieldErrorMessage id={`${baseId}-options-error`} message={optionsError} />
+            <FieldErrorMessage
+              id={`${baseId}-statement-error`}
+              message={statementError}
+            />
+            <FieldErrorMessage
+              id={`${baseId}-options-error`}
+              message={optionsError}
+            />
           </div>
         )}
       </Card>

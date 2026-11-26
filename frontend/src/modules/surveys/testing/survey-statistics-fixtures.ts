@@ -1,4 +1,5 @@
-import type { SurveyQuestionStatistic, SurveyStatistics } from "../types/survey.types";
+import type { SurveyQuestionStatistic } from "../types/survey-question-statistic.types";
+import type { SurveyStatistics } from "../types/survey-statistics.types";
 
 export const STATISTICS_PERIODS = ["II-2026", "I-2026"];
 

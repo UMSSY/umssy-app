@@ -1,17 +1,16 @@
 "use client";
 
+import { CalendarDays } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import {
-  DESCRIPTION_PREVIEW_CHARS,
-  INTERNSHIP_CONTRACT_TYPE,
-  SALARY_TO_BE_AGREED,
-} from "../constants/job-offers.constants";
+import { INTERNSHIP_CONTRACT_TYPE, SALARY_TO_BE_AGREED } from "../constants/job-offers.constants";
 import { ExpandableText } from "./expandable-text";
+import { ExpirationDateCard } from "./expiration-date-card";
 import { JobOfferHighlights } from "./job-offer-highlights";
 import { StepActions } from "./step-actions";
 import type { PreviewStepProps } from "../types/preview-step-props.types";
 import { formatVacancyCount } from "../utils/format-vacancy-count";
+import { formatShortExpirationDate } from "../utils/format-expiration-date";
 
 export function PreviewStep({
   conditions,
@@ -19,6 +18,7 @@ export function PreviewStep({
   isSubmitting,
   error,
   isEditMode,
+   expiration,
   onPrevious,
   onConfirm,
 }: PreviewStepProps) {
@@ -64,9 +64,17 @@ export function PreviewStep({
           />
         </div>
 
+        {expiration?.confirmedDate && !isEditMode && (
+          <p className="mb-6 flex items-center gap-2 text-sm text-ink">
+            <CalendarDays aria-hidden="true" className="size-4 text-accent" />
+            Postulaciones hasta el{" "}
+            <strong>{formatShortExpirationDate(expiration.confirmedDate)}</strong>
+          </p>
+        )}
+        
         <ExpandableText
           text={conditions.description}
-          maxChars={DESCRIPTION_PREVIEW_CHARS}
+          maxChars={125}
           className="mb-6 text-sm leading-relaxed whitespace-pre-line text-text-secondary"
         />
 
@@ -99,7 +107,7 @@ export function PreviewStep({
           ))}
         </ul>
       </div>
-
+      {expiration && !isEditMode && <ExpirationDateCard expiration={expiration} />}
       {error && (
         <Alert variant="destructive" className="mx-auto mt-6 max-w-3xl">
           <AlertTitle>{error.message}</AlertTitle>
@@ -118,7 +126,6 @@ export function PreviewStep({
       <StepActions
         secondaryLabel="Anterior"
         showPreviousIcon
-        primaryVariant="brand"
         primaryLabel={isSubmitting ? busyLabel : confirmLabel}
         onSecondary={onPrevious}
         onPrimary={onConfirm}

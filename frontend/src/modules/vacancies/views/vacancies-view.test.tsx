@@ -1,10 +1,17 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useAppliedJobOfferIds } from "@/modules/matching/hooks/use-applied-job-offer-ids";
 import { jobApplicationService } from "@/modules/matching/services/job-application.service";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { vacanciesService } from "../services/vacancies.service";
 import { buildVacancy } from "../testing/vacancy-fixtures";
 import { VacanciesView } from "./vacancies-view";
+
+vi.mock("@/modules/matching/hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
 
 vi.mock("../services/vacancies.service", () => ({
   vacanciesService: { listPublished: vi.fn() },
@@ -22,8 +29,8 @@ const VACANCIES = [
   buildVacancy({ id: "7c3e9a10-1d2b-4f5a-9c8e-2b4d6f8a0c11", title: "Analista de Datos", companyName: "Datos SRL", requirements: ["SQL"] }),
 ];
 
-function setRole(roleTag: string) {
-  sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag }))}.s`);
+async function setRole(roleTag: string) {
+  await saveAccessToken(`h.${btoa(JSON.stringify({ roleTag }))}.s`);
 }
 
 beforeEach(() => {
@@ -38,17 +45,6 @@ afterEach(() => {
 });
 
 describe("VacanciesView", () => {
-  it("lista las vacantes publicadas que devuelve la API", async () => {
-    renderWithQuery(<VacanciesView />);
-
-    expect(await screen.findByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).toHaveAttribute(
-      "href",
-      `/vacancies/${VACANCIES[0].id}`,
-    );
-    expect(screen.getByRole("status")).toHaveTextContent("2 vacantes encontradas");
-    expect(listPublished).toHaveBeenCalledTimes(1);
-  });
-
   it("permite recuperar los resultados desde una búsqueda sin coincidencias", async () => {
     renderWithQuery(<VacanciesView />);
     const initialLinks = await screen.findAllByRole("link", { name: /^Ver detalles de / });
@@ -64,16 +60,6 @@ describe("VacanciesView", () => {
 
     expect(searchInput).toHaveValue("");
     expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(initialLinks.length);
-  });
-
-  it("busca también por tecnología requerida", async () => {
-    renderWithQuery(<VacanciesView />);
-    await screen.findAllByRole("link", { name: /^Ver detalles de / });
-
-    fireEvent.change(screen.getByRole("searchbox", { name: /Buscar vacantes/ }), { target: { value: "sql" } });
-
-    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Ver detalles de Analista de Datos" })).toBeInTheDocument();
   });
 
   it("avisa cuando todavía no hay vacantes publicadas", async () => {
@@ -99,8 +85,26 @@ describe("VacanciesView", () => {
     expect(await screen.findByRole("link", { name: "Ver detalles de Analista de Datos" })).toBeInTheDocument();
   });
 
+  it("avisa que la vacante ya no está disponible cuando el enlace apunta a una oferta fuera del listado", async () => {
+    renderWithQuery(<VacanciesView initialVacancyId="7a0d4c52-9b1e-4e63-8f0a-5c2d1b3e4f60" />);
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Esta vacante ya no está disponible" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: "Enviar postulación" })).toBeNull();
+  });
+
+  it("no afirma que la vacante no está disponible si el listado no pudo cargarse", async () => {
+    listPublished.mockRejectedValue(new Error("network"));
+    renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
+
+    expect(await screen.findByRole("heading", { name: "No pudimos cargar las vacantes" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByText("Esta vacante ya no está disponible")).toBeNull();
+  });
+
   it("muestra el botón de postular a titulados y estudiantes en el detalle", async () => {
-    setRole("estudiante");
+    await setRole("estudiante");
     renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
 
     const dialog = await screen.findByRole("dialog");
@@ -110,7 +114,7 @@ describe("VacanciesView", () => {
   });
 
   it("no muestra el botón de postular a un mentor", async () => {
-    setRole("mentor");
+    await setRole("mentor");
     renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
 
     const dialog = await screen.findByRole("dialog");
@@ -120,14 +124,95 @@ describe("VacanciesView", () => {
   });
 });
 
-describe("VacanciesView - tarjeta de vacante", () => {
-  it("muestra la modalidad de la vacante", async () => {
-    listPublished.mockResolvedValue([buildVacancy({ modality: "Remoto" })]);
+describe("VacanciesView - criterios de HU-11", () => {
+  it("lista cada vacante publicada que devuelve la API, sin filtrar por el perfil (AC-11.1)", async () => {
+    listPublished.mockResolvedValue([
+      ...VACANCIES,
+      buildVacancy({ id: "0f2c6a7e-3b1d-4c5e-8a9f-1d2e3f4a5b6c", title: "Ingeniero COBOL", requirements: ["COBOL"] }),
+    ]);
     renderWithQuery(<VacanciesView />);
 
-    expect(await screen.findByText("Remoto")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Ver detalles de Ingeniero COBOL" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).toHaveAttribute("href", `/vacancies/${VACANCIES[0].id}`);
+    expect(listPublished).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(3);
+    expect(screen.getByRole("status")).toHaveTextContent("3 vacantes encontradas");
   });
 
+  it("muestra en la tarjeta el título, la empresa, la descripción, el salario, el contrato y Ver detalles (AC-11.2)", async () => {
+    listPublished.mockResolvedValue([buildVacancy()]);
+    renderWithQuery(<VacanciesView />);
+
+    const card = (await screen.findByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).closest("article");
+    expect(card).not.toBeNull();
+    const scope = within(card as HTMLElement);
+    expect(scope.getByRole("heading", { name: "Desarrollador Full Stack" })).toBeInTheDocument();
+    expect(scope.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
+    expect(scope.getByText("Desarrollo de servicios web con Node.js y React.")).toBeInTheDocument();
+    expect(scope.getByText("Bs 5.000 - 8.000")).toBeInTheDocument();
+    expect(scope.getByText("Presencial")).toBeInTheDocument();
+    expect(scope.getByText("Medio tiempo")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["el cargo", "analista", "Ver detalles de Analista de Datos"],
+    ["la empresa", "datos srl", "Ver detalles de Analista de Datos"],
+    ["un requisito", "sql", "Ver detalles de Analista de Datos"],
+  ])("filtra por %s y el contador refleja solo los resultados (AC-11.6, AC-11.7)", async (_label, term, expectedLink) => {
+    renderWithQuery(<VacanciesView />);
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+
+    fireEvent.change(screen.getByRole("searchbox", { name: /Buscar vacantes/ }), { target: { value: term } });
+
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: expectedLink })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("1 vacante encontrada");
+  });
+
+  it("mantiene el aviso de error si al reintentar la consulta vuelve a fallar (AC-11.12)", async () => {
+    listPublished.mockRejectedValue(new Error("network"));
+    renderWithQuery(<VacanciesView />);
+
+    const alert = await screen.findByRole("alert");
+    fireEvent.click(within(alert).getByRole("button", { name: "Reintentar" }));
+
+    await vi.waitFor(() => expect(listPublished).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole("heading", { name: "No pudimos cargar las vacantes" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Ver detalles de / })).toBeNull();
+  });
+
+  it("muestra en el detalle las condiciones, la ubicación, la descripción y las tecnologías (AC-11.13)", async () => {
+    listPublished.mockResolvedValue([
+      buildVacancy({ positionsAvailable: 3, languages: "Español, Inglés", requirements: ["Node.js", "React"] }),
+    ]);
+    renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
+
+    const dialog = await screen.findByRole("dialog");
+    const conditions = within(within(dialog).getByLabelText("Condiciones de la vacante"));
+    expect(conditions.getByText("Bs 5.000 - 8.000")).toBeInTheDocument();
+    expect(conditions.getByText("Presencial")).toBeInTheDocument();
+    expect(conditions.getByText("Medio tiempo")).toBeInTheDocument();
+    expect(conditions.getByText("3")).toBeInTheDocument();
+    expect(conditions.getByText("Español, Inglés")).toBeInTheDocument();
+    expect(conditions.getByRole("link", { name: /Ver en el mapa/ })).toHaveAttribute("target", "_blank");
+    expect(within(dialog).getByRole("heading", { name: "Descripción" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("heading", { name: "Tecnologías requeridas" })).toBeInTheDocument();
+    expect(within(dialog).getByText("Node.js")).toBeInTheDocument();
+  });
+
+  it("vuelve al listado al pulsar Volver al listado en el detalle (AC-11.14)", async () => {
+    renderWithQuery(<VacanciesView />);
+
+    fireEvent.click(await screen.findByRole("link", { name: "Ver detalles de Analista de Datos" }));
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Volver al listado" }));
+
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(2);
+  });
+});
+
+describe("VacanciesView - tarjeta de vacante", () => {
   it("muestra las habilidades requeridas como chips", async () => {
     listPublished.mockResolvedValue([buildVacancy({ requirements: ["Node.js", "React"] })]);
     renderWithQuery(<VacanciesView />);
@@ -165,4 +250,39 @@ describe("VacanciesView - tarjeta de vacante", () => {
       expect(screen.queryByRole("link", { name: /Ver ubicación/ })).toBeNull();
     },
   );
+
+  it("apila la tarjeta en pantallas pequeñas y la reparte en tres columnas desde md", async () => {
+    listPublished.mockResolvedValue([buildVacancy()]);
+    renderWithQuery(<VacanciesView />);
+
+    const card = (await screen.findByRole("link", { name: /^Ver detalles de / })).closest("article");
+
+    expect(card).toHaveClass("grid-cols-[auto_minmax(0,1fr)]", "md:grid-cols-[auto_minmax(0,1fr)_auto]");
+    expect(screen.getByRole("list", { name: "Fechas de la vacante" }).parentElement).toHaveClass(
+      "col-span-2",
+      "md:col-span-1",
+    );
+  });
+
+  it("muestra «Ya te postulaste» solo en las vacantes con postulación activa", async () => {
+    await setRole("estudiante");
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set([VACANCIES[0].id]));
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+    expect(screen.getAllByText("Ya te postulaste")).toHaveLength(1);
+    const article = screen.getByText(VACANCIES[0].title).closest("article");
+    expect(within(article as HTMLElement).getByText("Ya te postulaste")).toBeInTheDocument();
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set<string>());
+  });
+
+  it("no muestra el chip a quien no puede postularse", async () => {
+    await setRole("empresa");
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set([VACANCIES[0].id]));
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+    expect(screen.queryByText("Ya te postulaste")).not.toBeInTheDocument();
+    vi.mocked(useAppliedJobOfferIds).mockReturnValue(new Set<string>());
+  });
 });

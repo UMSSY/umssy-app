@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NO_RESPONSES_TREND_TEXT } from '../constants/survey-statistics.constants.js';
+
 import type { TrendComparison } from '../types/survey-statistics.type.js';
 import { buildQuestionTrend } from '../utils/build-question-trend.js';
 
@@ -90,7 +90,7 @@ describe('buildQuestionTrend', () => {
         isMultipleChoice: false,
       }),
     ).toEqual({
-      text: NO_RESPONSES_TREND_TEXT,
+      text: 'Sin respuestas registradas en este periodo.',
       direction: 'neutral',
     });
   });

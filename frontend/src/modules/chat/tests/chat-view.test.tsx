@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 
@@ -34,6 +36,7 @@ import * as chatApi from "../services/chat-api";
 import type { Conversation } from "../types/conversation.types";
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(window.location.search),
   usePathname: () => "/chat",
   useRouter: () => ({
     replace: vi.fn(),
@@ -57,6 +60,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   sessionStorage.clear();
   vi.unstubAllGlobals();
+  window.history.pushState({}, "", "/chat");
 });
 
 const testConversations: Conversation[] = [
@@ -219,48 +223,90 @@ describe("ChatView & ChatPage", () => {
     },
   );
 
-  it(
-    "debe renderizar la página de chat con una sola navegación principal",
-    async () => {
-      stubMatchMedia();
+  it("debe renderizar la página de chat con una sola navegación principal", async () => {
+    stubMatchMedia();
 
-      sessionStorage.setItem(
-        "accessToken",
-        `h.${btoa(
-          JSON.stringify({
-            roleTag: "titulado",
-          }),
-        )}.s`,
-      );
+    await saveAccessToken(
+      `h.${btoa(
+        JSON.stringify({
+          roleTag: "titulado",
+        }),
+      )}.s`,
+    );
 
-      vi.spyOn(chatApi, "getConversations")
+    vi.spyOn(chatApi, "getConversations")
         .mockResolvedValue(testConversations);
 
-      renderWithQueryClient(
+    renderWithQueryClient(
         <AppLayout>
           <ChatPage />
         </AppLayout>,
       );
 
-      expect(
+    expect(
         screen.getByText("Chats"),
       ).toBeDefined();
 
-      expect(
+    expect(
         screen.getAllByRole("navigation", {
           name: "Menú principal",
         }),
       ).toHaveLength(1);
 
-      expect(
+    expect(
         screen.getByRole("link", {
           name: /Chat|Mensajes/i,
         }),
       ).toHaveAttribute("href", "/chat");
 
-      expect(
+    expect(
         await screen.findByText("Usuario de Prueba 1"),
       ).toBeDefined();
-    },
-  );
+  });
+
+  it("abre automaticamente la conversacion contextual de postulacion segun parametros de URL", async () => {
+    window.history.pushState(
+      {},
+      "",
+      "/chat?contactId=contact-postulacion-1&contextType=POSTULACION&contextId=postulacion-uuid-99",
+    );
+
+    const postulationConv: Conversation = {
+      id: "conv-post-99",
+      contact: {
+        id: "contact-postulacion-1",
+        fullName: "Reclutador Tech",
+        avatarUrl: null,
+        isOnline: true,
+      },
+      contextType: "POSTULACION",
+      contextId: "postulacion-uuid-99",
+      lastMessage: null,
+      unreadCount: 0,
+      updatedAt: new Date().toISOString(),
+    };
+
+    vi.spyOn(chatApi, "getConversations").mockResolvedValue([postulationConv]);
+    const getOrCreateSpy = vi
+      .spyOn(chatApi, "getOrCreateConversation")
+      .mockResolvedValue(postulationConv);
+
+    renderWithQueryClient(<ChatView />);
+
+    await waitFor(() => {
+      expect(getOrCreateSpy).toHaveBeenCalledWith("contact-postulacion-1", {
+        contextType: "POSTULACION",
+        contextId: "postulacion-uuid-99",
+      });
+      expect(screen.getByTestId("chat-contact-name").textContent).toBe(
+        "Reclutador Tech",
+      );
+      expect(
+        screen.getByTestId("chat-room-postulation-badge"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("chat-room-postulation-banner"),
+      ).toBeInTheDocument();
+    });
+  });
 });

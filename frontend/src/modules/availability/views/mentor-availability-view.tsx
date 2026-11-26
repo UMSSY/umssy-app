@@ -8,21 +8,21 @@ import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
-import {
-  MY_AVAILABILITY_EYEBROW,
-  MY_AVAILABILITY_TEXT,
-} from "../constants/my-availability.constants";
+import { MY_AVAILABILITY_TEXT } from "../constants/my-availability.constants";
 import { AvailabilityLoading } from "../components/availability-loading";
 import { BlockForm } from "../components/block-form";
+import { splitDraft } from "../utils/block-range";
 import { BlockedDatePanel } from "../components/blocked-date-panel";
 import { BlockedDatesList } from "../components/blocked-dates-list";
 import { EditBlockPanel } from "../components/edit-block-panel";
 import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
+import { WeekGridDensityToggle } from "../components/week-grid/week-grid-density-toggle";
 import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
 import { useElementHeight } from "../hooks/use-element-height";
 import { useBlockedDates } from "../hooks/use-blocked-dates";
 import { useMyBlocks } from "../hooks/use-my-blocks";
+import { useWeekGridDensity } from "../hooks/use-week-grid-density";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { MentorAvailabilityViewProps } from "../types/mentor-availability-view-props.types";
@@ -38,7 +38,9 @@ export function MentorAvailabilityView({
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const [draft, setDraft] = useState<CreateAvailabilityBlockInput | null>(null);
   const { ref: weekNavRef, height: weekNavHeight } = useElementHeight<HTMLElement>();
+  const { density, setDensity } = useWeekGridDensity();
 
   const {
     blocks,
@@ -101,7 +103,7 @@ export function MentorAvailabilityView({
       <header>
         <PageHeading
           title={MY_AVAILABILITY_TEXT.title}
-          description={`${MY_AVAILABILITY_EYEBROW}. ${BLOCKED_DATE_TEXT.viewHint}`}
+          description={`Mentorías. ${BLOCKED_DATE_TEXT.viewHint}`}
           actions={<ReceiveRequestsSwitch />}
         />
       </header>
@@ -139,6 +141,7 @@ export function MentorAvailabilityView({
             >
               {MY_AVAILABILITY_TEXT.today}
             </Button>
+            <WeekGridDensityToggle density={density} onDensityChange={setDensity} />
             <p className="ml-auto text-sm text-muted-foreground">
               {BOLIVIA_TIME_LABEL}
             </p>
@@ -169,6 +172,8 @@ export function MentorAvailabilityView({
                 onEditBlock={handleEditBlock}
                 blockedDates={blockedDates}
                 onSelectDate={handleSelectDate}
+                density={density}
+                draftBlocks={showBlockedPanel || showEditPanel ? [] : splitDraft(draft)}
               />
             </>
           )}
@@ -207,6 +212,7 @@ export function MentorAvailabilityView({
               isSubmitting={isSubmitting}
               onSubmit={handleCreate}
               onCancel={handleCancelCreate}
+              onDraftChange={setDraft}
             />
           </div>
           <BlockedDatesList />

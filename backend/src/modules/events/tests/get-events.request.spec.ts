@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { GetEventsSchema, MAX_SEARCH_LENGTH } from '../requests/get-events.request.js';
+import {
+  GetEventsSchema,
+  MAX_SEARCH_LENGTH,
+} from '../requests/get-events.request.js';
 
 describe('GetEventsSchema', () => {
   it('applies default page and limit when not provided', () => {
@@ -7,6 +10,11 @@ describe('GetEventsSchema', () => {
     expect(parsed.page).toBe(1);
     expect(parsed.limit).toBe(10);
     expect(parsed.search).toBeUndefined();
+  });
+
+  it('does not expose the internal visibility decision as a query parameter', () => {
+    const parsed = GetEventsSchema.parse({ isPublishedOnly: 'false' });
+    expect(parsed).not.toHaveProperty('isPublishedOnly');
   });
 
   it('trims leading and trailing whitespace from search', () => {
@@ -37,11 +45,15 @@ describe('GetEventsSchema', () => {
   });
 
   it('accepts 50 characters and rejects the 51st character', () => {
-    expect(GetEventsSchema.safeParse({ search: 'a'.repeat(50) }).success).toBe(true);
+    expect(GetEventsSchema.safeParse({ search: 'a'.repeat(50) }).success).toBe(
+      true,
+    );
     const result = GetEventsSchema.safeParse({ search: 'a'.repeat(51) });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('search no puede tener más de 50 caracteres');
+      expect(result.error.issues[0].message).toBe(
+        'search no puede tener más de 50 caracteres',
+      );
     }
   });
 
@@ -66,5 +78,23 @@ describe('GetEventsSchema', () => {
     expect(parsed.categoryId).toBe('22222222-2222-2222-2222-222222222221');
     expect(parsed.statusId).toBe('22222222-2222-2222-2222-222222222224');
   });
+});
 
+describe('GetEventsSchema sort', () => {
+  it('accepts the supported sort options', () => {
+    expect(GetEventsSchema.parse({ sort: 'popular' }).sort).toBe('popular');
+    expect(GetEventsSchema.parse({ sort: 'recommended' }).sort).toBe(
+      'recommended',
+    );
+  });
+
+  it('rejects an unknown sort option', () => {
+    expect(GetEventsSchema.safeParse({ sort: 'date' }).success).toBe(false);
+  });
+
+  it('accepts the finished scope and rejects unknown scopes', () => {
+    expect(GetEventsSchema.parse({ scope: 'finished' }).scope).toBe('finished');
+    expect(GetEventsSchema.parse({}).scope).toBeUndefined();
+    expect(GetEventsSchema.safeParse({ scope: 'past' }).success).toBe(false);
+  });
 });

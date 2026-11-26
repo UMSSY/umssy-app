@@ -4,8 +4,9 @@ import type { SupportMutation } from '../types/support-mutation.types';
 
 import { useRef } from "react";
 import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
-import { REGISTRATION_QUERY_KEYS, useRegistrationSession } from "@/modules/registrations";
+import { REGISTRATION_QUERY_KEYS, useRegistrationSession } from "@/modules/event-registrations";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { hasCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { registrationsService } from "../services/registrations.service";
 import { getProposalSupportErrorMessage } from "../utils/proposal-support-error";
@@ -32,6 +33,10 @@ function applySupport<T extends EventItem>(event: T, response: ProposalSupportRe
   };
 }
 
+function isActiveSupportSession(capturedToken: string | null): boolean {
+  return getAccessToken() === capturedToken && (Boolean(capturedToken) || hasCookieSession());
+}
+
 export function useProposalSupport(eventId: string | null) {
   const queryClient = useQueryClient();
   const accessToken = useRegistrationSession();
@@ -42,7 +47,7 @@ export function useProposalSupport(eventId: string | null) {
     mutationFn: ({ eventId, accessToken }: SupportMutation) =>
       registrationsService.supportProposal(eventId, accessToken),
     onSuccess: async (response, variables) => {
-      if (getAccessToken() !== variables.accessToken) return;
+      if (!isActiveSupportSession(variables.accessToken)) return;
 
       const listKey = [...REGISTRATION_QUERY_KEYS.list, variables.accessToken];
       const detailKey = [...REGISTRATION_QUERY_KEYS.detail(variables.eventId), variables.accessToken];
@@ -50,7 +55,7 @@ export function useProposalSupport(eventId: string | null) {
         queryClient.cancelQueries({ queryKey: listKey }),
         queryClient.cancelQueries({ queryKey: detailKey, exact: true }),
       ]);
-      if (getAccessToken() !== variables.accessToken) return;
+      if (!isActiveSupportSession(variables.accessToken)) return;
 
       queryClient.setQueriesData<InfiniteData<EventsListResponse>>(
         { queryKey: listKey },
@@ -107,7 +112,7 @@ export function useProposalSupport(eventId: string | null) {
   return {
     support: async () => {
       const token = getAccessToken();
-      if (!eventId || !token || isSubmittingRef.current) return null;
+      if (!eventId || (!token && !hasCookieSession()) || isSubmittingRef.current) return null;
       isSubmittingRef.current = true;
       mutation.reset();
       try {

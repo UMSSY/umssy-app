@@ -1,9 +1,5 @@
-import {
-  CERTIFICATE_ALLOWED_EXTENSIONS,
-  CERTIFICATE_ALLOWED_TYPES,
-  FILE_VALIDATION_MESSAGES,
-  validateFile,
-} from "@/modules/profile";
+import { DOCUMENT_ALLOWED_EXTENSIONS, DOCUMENT_ALLOWED_TYPES } from "@/shared/constants/file-upload.constants";
+import { FILE_VALIDATION_MESSAGES, validateFile } from "@/modules/profile";
 import {
   APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL,
   APPOINTMENT_DOCUMENT_TYPE_LABELS,
@@ -12,8 +8,8 @@ import {
 export const validateAppointmentDocument = (file: File): string | null =>
   validateFile(
     file,
-    CERTIFICATE_ALLOWED_TYPES,
-    CERTIFICATE_ALLOWED_EXTENSIONS,
+    DOCUMENT_ALLOWED_TYPES,
+    DOCUMENT_ALLOWED_EXTENSIONS,
     FILE_VALIDATION_MESSAGES.invalidCertificateType,
   );
 

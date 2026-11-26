@@ -1,11 +1,16 @@
-import type { AxiosHeaders, AxiosRequestConfig } from "axios";
-import { afterEach, describe, expect, it } from "vitest";
+import * as authBroadcast from "@/shared/utils/auth-broadcast";
+import "@/shared/testing/indexed-db.mock";
+import axios, { type AxiosHeaders, type AxiosRequestConfig } from "axios";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "./api-client";
 import {
   clearAccessToken,
   getAccessToken,
   saveAccessToken,
 } from "./storage/access-token-storage";
+import { hasCookieSession } from "./storage/cookie-session-state";
+
+afterEach(() => vi.restoreAllMocks());
 
 async function captureRequestHeaders(config: AxiosRequestConfig = {}) {
   let headers: AxiosHeaders | undefined;
@@ -32,8 +37,21 @@ describe("apiClient authorization", () => {
     clearAccessToken();
   });
 
+  it('rejects offline mutations before sending them', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    const adapter = vi.fn();
+    await expect(
+      apiClient.post('/events/test', {}, { adapter }),
+    ).rejects.toThrow('Necesitas conexión');
+    expect(adapter).not.toHaveBeenCalled();
+  });
+
+  it("configures withCredentials to true to transmit HttpOnly session cookies", () => {
+    expect(apiClient.defaults.withCredentials).toBe(true);
+  });
+
   it("adds a Bearer token when an access token exists", async () => {
-    saveAccessToken("stored-token");
+    await saveAccessToken("stored-token");
 
     const headers = await captureRequestHeaders();
 
@@ -47,7 +65,7 @@ describe("apiClient authorization", () => {
   });
 
   it("preserves an explicitly supplied Authorization header", async () => {
-    saveAccessToken("stored-token");
+    await saveAccessToken("stored-token");
 
     const headers = await captureRequestHeaders({
       headers: { Authorization: "Basic explicit-credentials" },
@@ -63,27 +81,137 @@ describe("apiClient session errors", () => {
   function rejectWithStatus(status: number, tokenDuringResponse?: string) {
     return apiClient.get("/private-resource", {
       adapter: async (config) => {
-        if (tokenDuringResponse) saveAccessToken(tokenDuringResponse);
+        if (tokenDuringResponse) await saveAccessToken(tokenDuringResponse);
         throw Object.assign(new Error("Solicitud rechazada"), { isAxiosError: true, config, response: { status, data: { detail: "Solicitud rechazada" } } });
       },
     });
   }
 
   it("invalidates the current session on an authenticated 401 without a mounted guard", async () => {
-    saveAccessToken("expired-token");
+    await saveAccessToken("expired-token");
     await expect(rejectWithStatus(401)).rejects.toThrow("Solicitud rechazada");
     expect(getAccessToken()).toBeNull();
   });
 
   it("does not invalidate a newer session when an old request returns 401", async () => {
-    saveAccessToken("old-token");
+    await saveAccessToken("old-token");
     await expect(rejectWithStatus(401, "new-token")).rejects.toThrow();
     expect(getAccessToken()).toBe("new-token");
   });
 
-  it.each([400, 403, 404, 422, 500])("preserves the session and original error on HTTP %s", async (status) => {
-    saveAccessToken("valid-token");
-    await expect(rejectWithStatus(status)).rejects.toMatchObject({ response: { status, data: { detail: "Solicitud rechazada" } } });
-    expect(getAccessToken()).toBe("valid-token");
+  it.each([400, 403, 404, 422, 500])(
+    "preserves the session and original error on HTTP %s",
+    async (status) => {
+      await saveAccessToken("valid-token");
+      await expect(rejectWithStatus(status)).rejects.toMatchObject({ response: { status, data: { detail: "Solicitud rechazada" } } });
+      expect(getAccessToken()).toBe("valid-token");
+    },
+  );
+
+  it("broadcasts SESSION_CLOSED when 401 response includes a session closure code", async () => {
+    const broadcastSpy = vi.spyOn(authBroadcast, "broadcastAuthEvent").mockImplementation(() => {});
+    await saveAccessToken("expired-token");
+
+    let rejected = false;
+    try {
+      await apiClient.get("/private-resource", {
+        adapter: async (config) => {
+          throw Object.assign(new Error("Revocado"), {
+            isAxiosError: true,
+            config,
+            response: {
+              status: 401,
+              data: { code: "SESSION_REVOKED", detail: "Sesión revocada" },
+            },
+          });
+        },
+      });
+    } catch {
+      rejected = true;
+    }
+
+    expect(rejected).toBe(true);
+    expect(broadcastSpy).toHaveBeenCalledWith({
+      type: "SESSION_CLOSED",
+      reason: "SESSION_REVOKED",
+    });
+    broadcastSpy.mockRestore();
+  });
+
+  it("retries request once after a successful token refresh on 401 without code", async () => {
+    let callCount = 0;
+    const postSpy = vi.spyOn(axios, "post").mockResolvedValueOnce({
+      data: { ok: true, accessToken: "new-access-token" },
+    });
+
+    const response = await apiClient.get("/protected", {
+      adapter: async (config) => {
+        callCount++;
+        if (callCount === 1) {
+          throw Object.assign(new Error("Token expired"), {
+            isAxiosError: true,
+            config,
+            response: { status: 401, data: {} },
+          });
+        }
+        return {
+          data: { success: true },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      },
+    });
+
+    expect(callCount).toBe(2);
+    expect(response.data).toEqual({ success: true });
+    expect(postSpy).toHaveBeenCalled();
+    postSpy.mockRestore();
+  });
+
+  it("drops stale Authorization header and retries with cookie when /auth/refresh rotates cookies without accessToken in body", async () => {
+    await saveAccessToken("expired-in-memory-jwt");
+    const seenAuthHeaders: Array<string | undefined> = [];
+    const postSpy = vi.spyOn(axios, "post").mockResolvedValueOnce({
+      data: { ok: true, data: { roleTag: "titulado", roles: ["titulado"] } },
+    });
+
+    const response = await apiClient.get("/protected-cookie", {
+      adapter: async (config) => {
+        seenAuthHeaders.push(config.headers?.get?.("Authorization") as string | undefined);
+        if (seenAuthHeaders.length === 1) {
+          throw Object.assign(new Error("Token expired"), {
+            isAxiosError: true,
+            config,
+            response: { status: 401, data: {} },
+          });
+        }
+        return {
+          data: { ok: true },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      },
+    });
+
+    expect(response.data).toEqual({ ok: true });
+    expect(seenAuthHeaders).toEqual(["Bearer expired-in-memory-jwt", undefined]);
+    expect(getAccessToken()).toBeNull();
+    expect(hasCookieSession()).toBe(true);
+    postSpy.mockRestore();
+  });
+
+  it("does not attach an already-expired JWT from memory and switches to cookie mode", async () => {
+    const expiredJwt = `h.${btoa(JSON.stringify({ sub: "u1", exp: Math.floor(Date.now() / 1000) - 60 }))}.s`;
+    await saveAccessToken(expiredJwt);
+
+    const headers = await captureRequestHeaders();
+
+    expect(headers?.has("Authorization")).toBe(false);
+    expect(getAccessToken()).toBeNull();
+    expect(hasCookieSession()).toBe(true);
   });
 });

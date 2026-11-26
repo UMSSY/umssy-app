@@ -19,9 +19,11 @@ const record: CvMetadataRecord = {
 
 describe('CvMetadataRepository', () => {
   let repository: CvMetadataRepository;
+  let findUser: ReturnType<typeof vi.fn>;
   let queryRaw: ReturnType<typeof vi.fn>;
 
-  const lastQuery = (): Prisma.Sql => queryRaw.mock.calls.at(-1)?.[0] as Prisma.Sql;
+  const lastQuery = (): Prisma.Sql =>
+    queryRaw.mock.calls.at(-1)?.[0] as Prisma.Sql;
 
   const expectNoFileContent = (sql: string) => {
     expect(sql).not.toMatch(/\bc\.cv_pdf_data\b/);
@@ -31,8 +33,10 @@ describe('CvMetadataRepository', () => {
 
   beforeEach(() => {
     queryRaw = vi.fn();
+    findUser = vi.fn();
     repository = new CvMetadataRepository({
       $queryRaw: queryRaw,
+      user: { findUnique: findUser },
     } as unknown as PrismaService);
   });
 
@@ -40,7 +44,9 @@ describe('CvMetadataRepository', () => {
     it('filters the cv by id and owner and flags whether it is current', async () => {
       queryRaw.mockResolvedValue([record]);
 
-      await expect(repository.findByIdForUser(userId, cvId)).resolves.toEqual(record);
+      await expect(repository.findByIdForUser(userId, cvId)).resolves.toEqual(
+        record,
+      );
 
       const { text: sql, values } = lastQuery();
       expect(values).toEqual([cvId, userId]);
@@ -52,32 +58,41 @@ describe('CvMetadataRepository', () => {
     it('returns null when the cv does not belong to the user', async () => {
       queryRaw.mockResolvedValue([]);
 
-      await expect(repository.findByIdForUser(userId, cvId)).resolves.toBeNull();
+      await expect(
+        repository.findByIdForUser(userId, cvId),
+      ).resolves.toBeNull();
     });
   });
 
   describe('countByUserId', () => {
-    it('counts the visible cvs of the user as an integer', async () => {
-      queryRaw.mockResolvedValue([{ total: 7 }]);
-
+    it('counts only visible CVs without loading file contents', async () => {
+      findUser.mockResolvedValue({ _count: { cvFiles: 7 } });
       await expect(repository.countByUserId(userId)).resolves.toBe(7);
-
-      const { text: sql, values } = lastQuery();
-      expect(values).toEqual([userId]);
-      expect(sql).toContain('count(c.id)::int');
-      expect(sql).toContain('GROUP BY u.id');
-      expect(sql).toContain('cv_pdf_data IS NOT NULL AND cv_uploaded_at IS NOT NULL');
+      expect(findUser).toHaveBeenCalledWith({
+        where: { id: userId },
+        select: {
+          _count: {
+            select: {
+              cvFiles: {
+                where: {
+                  cvPdfData: { not: null },
+                  cvUploadedAt: { not: null },
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(queryRaw).not.toHaveBeenCalled();
     });
 
-    it('returns zero when the user exists without visible cvs', async () => {
-      queryRaw.mockResolvedValue([{ total: 0 }]);
-
+    it('returns zero when the user exists without visible CVs', async () => {
+      findUser.mockResolvedValue({ _count: { cvFiles: 0 } });
       await expect(repository.countByUserId(userId)).resolves.toBe(0);
     });
 
     it('returns null when the user does not exist', async () => {
-      queryRaw.mockResolvedValue([]);
-
+      findUser.mockResolvedValue(null);
       await expect(repository.countByUserId(userId)).resolves.toBeNull();
     });
   });
@@ -86,7 +101,9 @@ describe('CvMetadataRepository', () => {
     it('pages the cvs newest first and marks the newest as current', async () => {
       queryRaw.mockResolvedValue([record]);
 
-      await expect(repository.findPageByUserId(userId, 10, 5)).resolves.toEqual([record]);
+      await expect(repository.findPageByUserId(userId, 10, 5)).resolves.toEqual(
+        [record],
+      );
 
       const { text: sql, values } = lastQuery();
       expect(values).toEqual([userId, 5, 10]);

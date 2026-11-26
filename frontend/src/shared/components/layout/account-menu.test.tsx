@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -31,7 +32,7 @@ describe("Account menu", () => {
     expect(screen.queryByRole("menuitem", { name: "Solicitudes de acceso" })).not.toBeInTheDocument();
   });
   it("asks for confirmation before closing the session and keeps it open when the user cancels", async () => {
-    saveAccessToken("test-token");
+    await saveAccessToken("test-token");
     const user = userEvent.setup();
     renderWithQuery(<AccountMenu roles={["mentor"]} />);
     await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
@@ -45,7 +46,7 @@ describe("Account menu", () => {
     expect(replace).not.toHaveBeenCalled();
   });
   it("closes the session and removes private cached data once confirmed", async () => {
-    saveAccessToken("test-token");
+    await saveAccessToken("test-token");
     const user = userEvent.setup();
     const { client } = renderWithQuery(<AccountMenu roles={["mentor"]} />);
     client.setQueryData(["private-data"], { name: "Usuario" });

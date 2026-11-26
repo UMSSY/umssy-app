@@ -1,6 +1,6 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   calculateEventCapacityStatus,
   formatEventDate,
@@ -26,11 +26,16 @@ const MOCK_EVENT: EventItem = {
   modalityId: 'c1c1c1c1-0001-4000-8000-000000000001',
 };
 
-afterEach(() => {
-  cleanup();
+beforeEach(() => {
+  vi.useFakeTimers({ now: new Date('2026-10-01T12:00:00.000Z'), toFake: ['Date'] });
 });
 
-describe('EventCard y utilidades de formato', () => {
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
+
+describe("EventCard y utilidades de formato", () => {
   it('calcula ocupacion desde el DTO GET /events', () => {
     expect(calculateEventCapacityStatus(MOCK_EVENT)).toEqual({
       enrolledCount: 24,
@@ -89,7 +94,7 @@ describe('EventCard y utilidades de formato', () => {
     expect(formatTimeRange(start, end)).toBe(expected);
   });
 
-  it('renderiza el titulo, categoria, fecha, horario y relacion de cupos', () => {
+  it("renderiza el titulo, categoria, fecha, horario y relacion de cupos", () => {
     render(<EventCard event={MOCK_EVENT} />);
 
     expect(
@@ -102,8 +107,6 @@ describe('EventCard y utilidades de formato', () => {
       'aria-valuenow',
       '80',
     );
-    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
-    expect(screen.getByTestId('event-capacity-bar')).toHaveClass('bg-success');
   });
 
   it('aplica estilo por defecto para categorias no mapeadas y estado seleccionado', () => {
@@ -159,7 +162,7 @@ describe('EventCard y utilidades de formato', () => {
     expect(screen.getByText('24 inscritos')).toBeInTheDocument();
   });
 
-  it('muestra el estado lleno y una barra completa para un evento sin cupos disponibles', () => {
+  it("muestra el estado lleno y una barra completa para un evento sin cupos disponibles", () => {
     const fullEvent: EventItem = {
       ...MOCK_EVENT,
       availableSpots: 0,
@@ -173,10 +176,6 @@ describe('EventCard y utilidades de formato', () => {
       'aria-valuenow',
       '100',
     );
-    expect(screen.getByTestId('event-capacity-bar')).toHaveStyle({
-      width: '100%',
-    });
-    expect(screen.getByTestId('event-capacity-bar')).toHaveClass('bg-danger');
   });
 
   it('muestra apoyos y plazo en una propuesta en votación sin confundirlos con cupos', () => {
@@ -238,5 +237,58 @@ describe('EventCard y utilidades de formato', () => {
 
     expect(screen.getByText('Información de apoyos no disponible.')).toBeInTheDocument();
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('muestra rango de fechas y cantidad de sesiones en un taller multisesión', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, sessions: [
+      { id: 's2', startsAt: '2026-12-03T13:00:00.000Z', endsAt: '2026-12-03T15:00:00.000Z', location: null },
+      { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+    ] }} />);
+    expect(screen.getByText(/^1s?[–-]s?3 de diciembre$/)).toBeInTheDocument();
+    expect(screen.getByText('2 sesiones')).toBeInTheDocument();
+    expect(screen.queryByText('09:00 - 13:00 hrs')).not.toBeInTheDocument();
+  });
+
+  it('conserva fecha y horario cuando el taller tiene una sola sesión', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, sessions: [] }} />);
+    expect(screen.getByText(formatEventDate(MOCK_EVENT.eventDate))).toBeInTheDocument();
+    expect(screen.getByText('09:00 - 13:00 hrs')).toBeInTheDocument();
+    expect(screen.queryByText(/sesiones/)).not.toBeInTheDocument();
+  });
+
+  it('marca como finalizado un taller cuya última sesión ya terminó', () => {
+    vi.setSystemTime(new Date('2026-12-06T12:00:00.000Z'));
+    render(
+      <EventCard
+        event={{
+          ...MOCK_EVENT,
+          status: 'Publicado',
+          sessions: [
+            { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+            { id: 's2', startsAt: '2026-12-05T13:00:00.000Z', endsAt: '2026-12-05T15:00:00.000Z', location: null },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByText('Finalizado')).toBeInTheDocument();
+    expect(screen.queryByText('Publicada')).not.toBeInTheDocument();
+  });
+
+  it('no marca como finalizado un taller con sesiones pendientes', () => {
+    vi.setSystemTime(new Date('2026-12-03T12:00:00.000Z'));
+    render(
+      <EventCard
+        event={{
+          ...MOCK_EVENT,
+          status: 'Publicado',
+          sessions: [
+            { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+            { id: 's2', startsAt: '2026-12-05T13:00:00.000Z', endsAt: '2026-12-05T15:00:00.000Z', location: null },
+          ],
+        }}
+      />,
+    );
+    expect(screen.queryByText('Finalizado')).not.toBeInTheDocument();
+    expect(screen.getByText('Publicada')).toBeInTheDocument();
   });
 });

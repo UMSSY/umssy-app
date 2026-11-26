@@ -31,7 +31,10 @@ describe('updatePersonalInfoSchema', () => {
     ['phone', '+591 7000 0000 0000 0'],
     ['personalEmail', 'valeria'],
   ])('rejects an invalid %s (%s)', (field, value) => {
-    const result = updatePersonalInfoSchema.safeParse({ ...validPersonalInfo, [field]: value });
+    const result = updatePersonalInfoSchema.safeParse({
+      ...validPersonalInfo,
+      [field]: value,
+    });
 
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].path).toEqual([field]);
@@ -45,7 +48,10 @@ describe('updatePersonalInfoSchema', () => {
 describe('updatePresentationSchema', () => {
   it('accepts the headline and the about me text', () => {
     expect(
-      updatePresentationSchema.parse({ headline: ' Junior developer ', aboutMe: 'Graduate.' }),
+      updatePresentationSchema.parse({
+        headline: ' Junior developer ',
+        aboutMe: 'Graduate.',
+      }),
     ).toEqual({ headline: 'Junior developer', aboutMe: 'Graduate.' });
   });
 

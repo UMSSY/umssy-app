@@ -1,0 +1,286 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
+import { NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
+import { apiClient } from "@/shared/services/api-client";
+import type { AccessRequestPayload } from "../types/access-request-payload.types";
+import type { ApiResult } from "../types/api-result.types";
+import type { CreateAccessRequestResponse } from "../types/create-access-request-response.types";
+import type { FieldErrors } from "../types/field-errors.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
+import type { SubmitRequestResponse } from "../types/submit-request-response.types";
+import type { UploadDocumentResponse } from "../types/upload-document-response.types";
+import { DOCUMENT_TYPES, type DocumentType } from "../constants/document-types.constants";
+import type { DocumentCorrectionResponse } from "../types/document-correction-response.types";
+import { getRequestCodeFromLink } from "../utils/get-request-code-from-link";
+import { isDocumentCorrectionToken } from "../utils/document-correction-link";
+import { CORRECTION_AUTHORIZATION_MESSAGE, CORRECTION_MISSING_FILE_MESSAGE, CORRECTION_MISSING_TYPE_MESSAGE, CORRECTION_RETRY_MESSAGE } from "../constants/document-correction.constants";
+import { FILE_TOO_LARGE_MESSAGE, validateDocumentFile } from "../utils/validate-document-file";
+import type { SendOptions } from "../types/access-request-send-options.types";
+
+const GENERIC_ERROR_MESSAGE = "No se pudo completar la solicitud. Inténtalo de nuevo.";
+const NOT_FOUND_MESSAGE = "La solicitud ya no existe";
+const STATUS_NOT_FOUND_MESSAGE = "No se encontró la solicitud";
+
+const KNOWN_FIELDS = [
+  "firstName",
+  "lastName",
+  "idCardNumber",
+  "idCardIssuedIn",
+  "sisCode",
+  "email",
+  "phone",
+  "birthDate",
+  "graduationYear",
+  "career",
+  "documentType",
+] as const;
+
+const DUPLICATE_WORDS: ReadonlyArray<[string, keyof FieldErrors]> = [
+  ["correo", "email"],
+  ["carnet", "idCardNumber"],
+  ["código sis", "sisCode"],
+];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function unwrapBody(body: unknown): unknown {
+  return isRecord(body) && typeof body.statusCode === "number" && "ok" in body && isRecord(body.data) ? body.data : body;
+}
+
+function failure(status: number, message: string, fieldErrors: FieldErrors = {}): ApiResult<never> {
+  return { ok: false, status, fieldErrors, message };
+}
+
+function fromZodIssues(issues: unknown[]): ApiResult<never> {
+  const fieldErrors: FieldErrors = {};
+  let generalMessage: string | undefined;
+  for (const issue of issues) {
+    if (!isRecord(issue) || typeof issue.message !== "string") continue;
+    const path = Array.isArray(issue.path) ? issue.path : [];
+    const field = KNOWN_FIELDS.find((name) => name === path[0]);
+    if (field) {
+      fieldErrors[field] ??= issue.message;
+    } else {
+      generalMessage ??= issue.message;
+    }
+  }
+  const hasFields = Object.keys(fieldErrors).length > 0;
+  return failure(
+    400,
+    generalMessage ?? (hasFields ? "Revisa los campos marcados" : GENERIC_ERROR_MESSAGE),
+    fieldErrors,
+  );
+}
+
+function fromDomainError(status: number, detail: string): ApiResult<never> {
+  const fieldErrors: FieldErrors = {};
+  const text = detail.toLowerCase();
+  if (status === 409) {
+    for (const [word, field] of DUPLICATE_WORDS) {
+      if (text.includes(word)) fieldErrors[field] = detail;
+    }
+  } else if (text.includes("año de titulación")) {
+    fieldErrors.graduationYear = detail;
+  }
+  return failure(status, detail, fieldErrors);
+}
+
+function parseError(
+  status: number,
+  body: unknown,
+  notFoundMessage = NOT_FOUND_MESSAGE,
+): ApiResult<never> {
+  if (status === 404) return failure(404, notFoundMessage);
+  if (status === 413) return failure(413, FILE_TOO_LARGE_MESSAGE);
+  if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
+  if (Array.isArray(body.message)) return fromZodIssues(body.message);
+  if (Array.isArray(body.errors)) {
+    return fromZodIssues(
+      body.errors.map((error) =>
+        isRecord(error) && typeof error.field === "string"
+          ? { ...error, path: error.field.split(".") }
+          : error,
+      ),
+    );
+  }
+  if (typeof body.detail === "string") return fromDomainError(status, body.detail);
+  if (typeof body.message === "string") return failure(status, body.message);
+  return failure(status, GENERIC_ERROR_MESSAGE);
+}
+
+async function send<T>(
+  method: "get" | "post" | "patch" | "delete",
+  url: string,
+  payload?: AccessRequestPayload | FormData,
+  options: SendOptions = {},
+): Promise<ApiResult<T>> {
+  try {
+    const response = await apiClient.request({
+      method,
+      url,
+      data: payload,
+      ...(options.params && { params: options.params }),
+      ...(options.headers && { headers: options.headers }),
+      ...(options.onUploadProgress && { onUploadProgress: options.onUploadProgress }),
+      validateStatus: () => true,
+    });
+    if (response.status >= 200 && response.status < 300) {
+      if (isRecord(response.data) && response.data.ok === false) return failure(0, GENERIC_ERROR_MESSAGE);
+      const body = unwrapBody(response.data);
+      if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
+      return { ok: true, data: body as T };
+    }
+    return parseError(response.status, response.data, options.notFoundMessage);
+  } catch {
+    return failure(0, NETWORK_ERROR_MESSAGE);
+  }
+}
+
+async function createAccessRequest(payload: AccessRequestPayload): Promise<ApiResult<CreateAccessRequestResponse>> {
+  const result = await send<Record<string, unknown>>("post", "/access-requests", payload);
+  if (!result.ok) return result;
+  const { id } = result.data;
+  if (typeof id !== "string" || id.trim().length === 0) return failure(0, GENERIC_ERROR_MESSAGE);
+  return { ok: true, data: { id } };
+}
+
+async function uploadDocument(
+  id: string,
+  file: File,
+  documentType: DocumentType,
+  onProgress?: (percent: number) => void,
+): Promise<ApiResult<UploadDocumentResponse>> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("documentType", documentType);
+
+  const result = await send<Record<string, unknown>>(
+    "post",
+    `/access-requests/${id}/document`,
+    form,
+    {
+      onUploadProgress: (event) => {
+        if (!onProgress || !event.total) return;
+        onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+      },
+    },
+  );
+  if (!result.ok) return result;
+  const { documentFileId } = result.data;
+  if (typeof documentFileId !== "string" || documentFileId.trim().length === 0) {
+    return failure(0, GENERIC_ERROR_MESSAGE);
+  }
+  return { ok: true, data: { id, documentFileId, documentType } };
+}
+
+async function submitAccessRequest(
+  id: string,
+): Promise<ApiResult<SubmitRequestResponse>> {
+  const result = await send<Record<string, unknown>>(
+    "post",
+    `/access-requests/${id}/submit`,
+  );
+  if (!result.ok) return result;
+  const { requestCode, submittedAt, status } = result.data;
+  if (typeof requestCode !== "string" || requestCode.trim().length === 0 || typeof submittedAt !== "string") {
+    return failure(0, GENERIC_ERROR_MESSAGE);
+  }
+  return { ok: true, data: { id, requestCode, status: typeof status === "string" ? status : "pending", submittedAt } };
+}
+
+async function getRequestStatus(
+  code: string,
+  email: string,
+): Promise<ApiResult<RequestStatusResponse>> {
+  const result = await send<Record<string, unknown>>(
+    "get",
+    `/access-requests/status/${code}`,
+    undefined,
+    {
+      params: { email },
+      notFoundMessage: STATUS_NOT_FOUND_MESSAGE,
+    },
+  );
+  if (!result.ok) {
+    const [firstFieldMessage] = Object.values(result.fieldErrors);
+    return result.status === 400 && firstFieldMessage
+      ? failure(400, firstFieldMessage)
+      : result;
+  }
+  const { requestCode, status } = result.data;
+  if (typeof requestCode !== "string" || typeof status !== "string") return failure(0, GENERIC_ERROR_MESSAGE);
+  return { ok: true, data: result.data as unknown as RequestStatusResponse };
+}
+
+function correctionFailure(status: number): ApiResult<never> {
+  const message = status === 401 || status === 403
+    ? CORRECTION_AUTHORIZATION_MESSAGE
+    : status === 409
+      ? "La solicitud cambió o no admite este reenvío. Vuelve a verificar su estado desde el enlace de tu correo."
+      : status === 413
+        ? FILE_TOO_LARGE_MESSAGE
+        : status === 400
+          ? "No se pudo aceptar el archivo. Revisa su formato, tamaño y tipo de documento."
+          : CORRECTION_RETRY_MESSAGE;
+  return failure(status, message);
+}
+
+async function resubmitDocument(
+  code: string,
+  token: string,
+  file: File,
+  documentType: DocumentType,
+  onProgress?: (percent: number) => void,
+): Promise<ApiResult<DocumentCorrectionResponse>> {
+  const requestCode = getRequestCodeFromLink(code);
+  if (!requestCode) return correctionFailure(400);
+  if (!isDocumentCorrectionToken(token)) return correctionFailure(401);
+  if (!file) return failure(400, CORRECTION_MISSING_FILE_MESSAGE);
+  const invalid = validateDocumentFile(file);
+  if (invalid) return failure(400, invalid);
+  if (!DOCUMENT_TYPES.includes(documentType)) return failure(400, CORRECTION_MISSING_TYPE_MESSAGE);
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("documentType", documentType);
+  const result = await send<Record<string, unknown>>(
+    "post",
+    `/access-requests/${requestCode}/resubmit`,
+    form,
+    {
+      headers: { Authorization: `${BEARER_PREFIX}${token}` },
+      onUploadProgress: (event) => {
+        if (!onProgress || !event.total) return;
+        onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+      },
+    },
+  );
+  if (!result.ok) return correctionFailure(result.status);
+  if (result.data.requestCode !== requestCode || result.data.status !== "pending") return correctionFailure(0);
+  return { ok: true, data: { requestCode, status: "pending" } };
+}
+
+export const accessRequestService = {
+  resubmitDocument,
+  createAccessRequest,
+  updateAccessRequest: (id: string, payload: AccessRequestPayload) =>
+    send<Partial<CreateAccessRequestResponse>>(
+      "patch",
+      `/access-requests/${id}`,
+      payload,
+    ),
+  deleteAccessRequest: (id: string) =>
+    send<Partial<CreateAccessRequestResponse>>(
+      "delete",
+      `/access-requests/${id}`,
+    ),
+  uploadDocument,
+  removeDocument: (id: string) =>
+    send<{ id: string; documentFileId: null }>(
+      "delete",
+      `/access-requests/${id}/document`,
+    ),
+  submitAccessRequest,
+  getRequestStatus,
+};

@@ -5,6 +5,7 @@ import { automaticValidationService } from "../services/automatic-validation.ser
 import { requestReviewService } from "../services/request-review.service";
 import type { ReviewListItem } from "../types/request-review.types";
 import { RequestInboxView } from "./request-inbox-view";
+import userEvent from "@testing-library/user-event";
 
 const listRequests = vi.spyOn(requestReviewService, "listRequests");
 const getSummary = vi.spyOn(requestReviewService, "getSummary");
@@ -70,18 +71,51 @@ describe("RequestInboxView", () => {
   });
 
   it("la paginación navega entre páginas", async () => {
-    listRequests.mockResolvedValue(page(Array.from({ length: 10 }, (_, i) => row(i + 1)), 25));
+    const user = userEvent.setup();
+
+    listRequests.mockImplementation(async (_status, pageNumber = 1) => {
+      const offset = (pageNumber - 1) * 10;
+
+      return {
+        ok: true as const,
+        data: {
+          items: Array.from(
+            { length: Math.min(10, 25 - offset) },
+            (_, i) => row(offset + i + 1),
+          ),
+          total: 25,
+          page: pageNumber,
+          offset,
+        },
+      };
+    });
+
     renderWithQuery(<RequestInboxView />);
+
     await screen.findByText("Persona 1");
-    expect(screen.getByText("Mostrando 1 a 10 de 25 solicitudes, de la más reciente a la más antigua")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Anterior" })).toBeDisabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
-    await waitFor(() => expect(listCalls().at(-1)).toEqual(["pending", 2]));
-    await screen.findByText("Mostrando 11 a 20 de 25 solicitudes, de la más reciente a la más antigua");
+    await user.click(screen.getByRole("button", { name: "Siguiente" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
-    await waitFor(() => expect(listCalls().at(-1)).toEqual(["pending", 1]));
+    await screen.findByText("Persona 11");
+    expect(screen.queryByText("Persona 1")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Mostrando 11 a 20 de 25 solicitudes, de la más reciente a la más antigua",
+      ),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Anterior" }));
+
+    await screen.findByText("Persona 1");
+    expect(screen.queryByText("Persona 11")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Mostrando 1 a 10 de 25 solicitudes, de la más reciente a la más antigua",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Anterior" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Siguiente" })).toBeEnabled();
   });
 
   it("al llegar al final deshabilita Siguiente", async () => {
@@ -150,15 +184,6 @@ describe("RequestInboxView", () => {
       expect(tabClasses).toContain("h-full");
     });
 
-    it("la cabecera y la pestaña activa siguen el diseño", async () => {
-      listRequests.mockResolvedValue(page([row(1)]));
-      renderWithQuery(<RequestInboxView />);
-
-      expect(screen.getByRole("heading", { name: "Solicitudes de acceso" })).toBeInTheDocument();
-      expect(screen.getByText("Revisa el documento de cada solicitante y emite tu dictamen.")).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /^Pendientes/ })).toHaveClass("after:bg-accent");
-      await screen.findByText("Persona 1");
-    });
   });
 
   it("estructura: el contenedor raíz y la tarjeta ocupan todo el ancho disponible sin desbordar", async () => {

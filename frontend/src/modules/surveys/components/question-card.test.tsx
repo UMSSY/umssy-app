@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildSurveyState } from "../testing/survey-fixtures";
-import type { QuestionCardProps } from "../types/survey-component-props.types";
+import type { QuestionCardProps } from "../types/question-card-props.types";
 import { QuestionCard } from "./question-card";
 
 const QUESTION = buildSurveyState().questions[0];
@@ -70,7 +70,10 @@ describe("QuestionCard", () => {
     await user.click(screen.getByRole("button", { name: "Añadir pregunta" }));
     await user.click(screen.getByRole("button", { name: "Vista previa" }));
 
-    expect(props.onStatementChange).toHaveBeenCalledWith(QUESTION.id, `${QUESTION.statement}?`);
+    expect(props.onStatementChange).toHaveBeenCalledWith(
+      QUESTION.id,
+      `${QUESTION.statement}?`,
+    );
     expect(props.onOptionChange).toHaveBeenCalledWith(QUESTION.id, "o2", "Independiente!");
     expect(props.onAddOption).toHaveBeenCalledWith(QUESTION.id);
     expect(props.onToggleRequired).toHaveBeenCalledWith(QUESTION.id);

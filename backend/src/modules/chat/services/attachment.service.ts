@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
+import { Injectable, Inject, Optional, forwardRef } from '@nestjs/common';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
 import {
   MAX_IMAGE_SIZE_BYTES,
-  MAX_PDF_SIZE_BYTES,
   ALLOWED_IMAGE_MIME_TYPES,
   ALLOWED_PDF_MIME_TYPES,
 } from '../constants/attachment.constants.js';
@@ -24,6 +24,7 @@ import { MessageRepository } from '../repositories/message.repository.js';
 import { MessageStatusService } from './message-status.service.js';
 import { BlockService } from './block.service.js';
 import { ChatRolePolicyService } from './chat-role-policy.service.js';
+import { MessageService } from './message.service.js';
 import type { SendAttachmentMessageDto } from '../requests/send-attachment-message.schema.js';
 import type { AttachmentFileDownload } from '../types/attachment.types.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
@@ -40,6 +41,9 @@ export class AttachmentService {
     private readonly fileValidationService: FileValidationService,
     private readonly blockService: BlockService,
     private readonly chatRolePolicyService: ChatRolePolicyService,
+    @Optional()
+    @Inject(forwardRef(() => MessageService))
+    private readonly messageService?: MessageService,
   ) {}
 
   async uploadAndSend(
@@ -69,7 +73,7 @@ export class AttachmentService {
       );
     }
 
-    if (isPdf && file.size > MAX_PDF_SIZE_BYTES) {
+    if (isPdf && file.size > MAX_FILE_UPLOAD_SIZE_BYTES) {
       throw new AttachmentTooLargeException(
         'El documento supera el tamaño maximo permitido 10 MB.',
       );
@@ -78,7 +82,7 @@ export class AttachmentService {
     const uploadedFile = this.attachmentMapper.toUploadedFile(file);
     const validatedFile = this.fileValidationService.validate(uploadedFile, {
       allowedTypes: isImage ? ['jpg', 'png'] : ['pdf'],
-      maxSizeBytes: isImage ? MAX_IMAGE_SIZE_BYTES : MAX_PDF_SIZE_BYTES,
+      maxSizeBytes: isImage ? MAX_IMAGE_SIZE_BYTES : MAX_FILE_UPLOAD_SIZE_BYTES,
     });
 
     const conversation = await this.conversationRepository.findById(
@@ -97,10 +101,7 @@ export class AttachmentService {
       throw new NotConversationParticipantException();
     }
 
-    const otherParticipantId = this.getOtherParticipantId(
-      conversation,
-      userId,
-    );
+    const otherParticipantId = this.getOtherParticipantId(conversation, userId);
     if (
       otherParticipantId &&
       (await this.blockService.isBlockedBetween(userId, otherParticipantId))
@@ -112,6 +113,10 @@ export class AttachmentService {
       await this.chatRolePolicyService.assertCanCommunicate(
         userId,
         otherParticipantId,
+        {
+          contextType: conversation.contextType ?? undefined,
+          contextId: conversation.contextId ?? undefined,
+        },
       );
     }
 
@@ -152,11 +157,15 @@ export class AttachmentService {
       now,
     );
 
-    await this.participantRepository.markRead(
-      dto.conversationId,
-      userId,
-      now,
-    );
+    await this.participantRepository.markRead(dto.conversationId, userId, now);
+
+    if (this.messageService) {
+      await this.messageService.dispatchMessageNotification({
+        conversationId: dto.conversationId,
+        senderId: userId,
+        previewText: isImage ? 'Imagen' : 'Documento PDF',
+      });
+    }
 
     return this.attachmentMapper.toMessageResponse({
       message,
@@ -169,9 +178,8 @@ export class AttachmentService {
     userId: string,
     attachmentId: string,
   ): Promise<AttachmentFileDownload> {
-    const record = await this.attachmentRepository.findDownloadById(
-      attachmentId,
-    );
+    const record =
+      await this.attachmentRepository.findDownloadById(attachmentId);
     if (!record || !record.fileData) {
       throw new AttachmentNotFoundException();
     }

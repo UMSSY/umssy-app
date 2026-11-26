@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CV_FILE_NAME_MAX_LENGTH, CV_MIME_TYPE } from '../constants/cv.constants.js';
+
 import type { CvResponse } from '../responses/cv.response.js';
 import type { CvFileDownload } from '../types/cv-file-download.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
@@ -19,14 +19,18 @@ export class CvMapper {
   }
 
   toResponse(record: CvMetadataRecord): CvResponse | null {
-    if (record.id === null || record.sizeBytes === null || record.uploadedAt === null) {
+    if (
+      record.id === null ||
+      record.sizeBytes === null ||
+      record.uploadedAt === null
+    ) {
       return null;
     }
 
     return {
       id: record.id,
       fileName: record.fileName ?? this.buildFileName(record),
-      fileType: CV_MIME_TYPE,
+      fileType: 'application/pdf',
       sizeInBytes: record.sizeBytes,
       updatedAt: record.uploadedAt.toISOString(),
       isCurrent: record.isCurrent,
@@ -51,7 +55,7 @@ export class CvMapper {
   toStoredFileName(originalName: string | undefined): string | undefined {
     const trimmed = originalName?.trim();
 
-    return trimmed ? trimmed.slice(0, CV_FILE_NAME_MAX_LENGTH) : undefined;
+    return trimmed ? trimmed.slice(0, 255) : undefined;
   }
 
   toFileDownload(content: Buffer, record: CvMetadataRecord): CvFileDownload {
@@ -60,7 +64,7 @@ export class CvMapper {
       fileName: record.fileName
         ? this.toHeaderSafeName(record.fileName)
         : this.buildFileName(record),
-      mimeType: CV_MIME_TYPE,
+      mimeType: 'application/pdf',
     };
   }
 

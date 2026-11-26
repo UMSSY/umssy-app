@@ -3,6 +3,8 @@ import { SURVEY_ERROR_MESSAGES } from '../constants/survey.constants.js';
 
 export class SurveyNotOpenException extends DomainException {
   constructor() {
-    super(SURVEY_ERROR_MESSAGES.SURVEY_NOT_OPEN, 400, 'SURVEY_NOT_OPEN', { field: 'surveyId' });
+    super(SURVEY_ERROR_MESSAGES.SURVEY_NOT_OPEN, 400, 'SURVEY_NOT_OPEN', {
+      field: 'surveyId',
+    });
   }
 }

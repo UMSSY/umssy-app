@@ -12,9 +12,7 @@ const BASE_INPUT: MatchingInput = {
 };
 
 function compare(overrides: Partial<MatchingInput> = {}) {
-  const service = Object.create(
-    MatchingService.prototype,
-  ) as MatchingService;
+  const service = Object.create(MatchingService.prototype) as MatchingService;
 
   return service.intersectRequirements({
     ...BASE_INPUT,
@@ -62,10 +60,7 @@ describe('HU-02A T2.2 - Profile matching', () => {
       userSkills: [' typescript ', 'POSTGRESQL'],
     });
 
-    expect(result.matchedSkills).toEqual([
-      'TypeScript',
-      'PostgreSQL',
-    ]);
+    expect(result.matchedSkills).toEqual(['TypeScript', 'PostgreSQL']);
     expect(result.allRequiredSkillsMatch).toBe(true);
   });
 

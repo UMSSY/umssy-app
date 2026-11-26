@@ -24,7 +24,10 @@ export class ProfilePhotoService {
     private readonly profilePhotoMapper: ProfilePhotoMapper,
   ) {}
 
-  async upload(userId: string, file: MulterFile | undefined): Promise<ProfilePhotoResponse> {
+  async upload(
+    userId: string,
+    file: MulterFile | undefined,
+  ): Promise<ProfilePhotoResponse> {
     await this.ensureProfileExists(userId);
 
     const validatedFile = this.fileValidationService.validate(
@@ -40,7 +43,9 @@ export class ProfilePhotoService {
     await this.ensureProfileExists(userId);
 
     const content = await this.photoFileRepository.read(userId);
-    const mimeType = content ? this.fileValidationService.detectMimeType(content) : undefined;
+    const mimeType = content
+      ? this.fileValidationService.detectMimeType(content)
+      : undefined;
 
     if (!content || !mimeType) {
       throw new PhotoNotFoundException();

@@ -9,15 +9,19 @@ import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
 import type { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
 import { CvService } from '../services/cv.service.js';
-import type { RadarIntegrationService } from '../../radar-integration/radar-integration.service.js';
+import type { RadarIntegrationService } from '../../radar-integration/services/radar-integration.service.js';
 import type { CvFileStorage } from '../types/cv-file-storage.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const cvId = '22222222-2222-4222-8222-222222222222';
 const olderCvId = '33333333-3333-4333-8333-333333333333';
-const pdfContent = Buffer.from("%PDF-1.4\n" + " ".repeat(50) + "\n%%EOF\n");
-const pngContent = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(50), Buffer.from([0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82])]);
+const pdfContent = Buffer.from('%PDF-1.4\n' + ' '.repeat(50) + '\n%%EOF\n');
+const pngContent = Buffer.concat([
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  Buffer.alloc(50),
+  Buffer.from([0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82]),
+]);
 
 const buildRecord = (
   overrides: Partial<CvMetadataRecord> = {},
@@ -68,7 +72,10 @@ describe('CvService', () => {
       storage as unknown as CvFileStorage,
       new FileValidationService(),
       new CvMapper(),
-      { ingestCv: vi.fn().mockResolvedValue(undefined), cvRemoved: vi.fn().mockResolvedValue(undefined) } as unknown as RadarIntegrationService,
+      {
+        ingestCv: vi.fn().mockResolvedValue(undefined),
+        cvRemoved: vi.fn().mockResolvedValue(undefined),
+      } as unknown as RadarIntegrationService,
     );
   });
 
@@ -83,7 +90,12 @@ describe('CvService', () => {
       const result = await service.list(userId, { page: 1, limit: 5 });
 
       expect(repository.findPageByUserId).toHaveBeenCalledWith(userId, 0, 5);
-      expect(result).toMatchObject({ totalItems: 7, totalPages: 2, page: 1, limit: 5 });
+      expect(result).toMatchObject({
+        totalItems: 7,
+        totalPages: 2,
+        page: 1,
+        limit: 5,
+      });
       expect(result.items.map((item) => [item.id, item.isCurrent])).toEqual([
         [cvId, true],
         [olderCvId, false],
@@ -102,7 +114,9 @@ describe('CvService', () => {
     it('returns an empty page without querying when the user has no cvs', async () => {
       repository.countByUserId.mockResolvedValue(0);
 
-      await expect(service.list(userId, { page: 1, limit: 5 })).resolves.toEqual({
+      await expect(
+        service.list(userId, { page: 1, limit: 5 }),
+      ).resolves.toEqual({
         items: [],
         totalItems: 0,
         totalPages: 0,
@@ -124,9 +138,9 @@ describe('CvService', () => {
     it('throws profile not found when the user does not exist', async () => {
       repository.countByUserId.mockResolvedValue(null);
 
-      await expect(service.list(userId, { page: 1, limit: 5 })).rejects.toBeInstanceOf(
-        ProfileNotFoundException,
-      );
+      await expect(
+        service.list(userId, { page: 1, limit: 5 }),
+      ).rejects.toBeInstanceOf(ProfileNotFoundException);
     });
   });
 
@@ -142,7 +156,10 @@ describe('CvService', () => {
         fileName: 'old.pdf',
         mimeType: 'application/pdf',
       });
-      expect(repository.findByIdForUser).toHaveBeenCalledWith(userId, olderCvId);
+      expect(repository.findByIdForUser).toHaveBeenCalledWith(
+        userId,
+        olderCvId,
+      );
       expect(storage.readById).toHaveBeenCalledWith(userId, olderCvId);
     });
 
@@ -173,9 +190,17 @@ describe('CvService', () => {
 
       const result = await service.upload(userId, buildMulterFile(pdfContent));
 
-      expect(storage.create).toHaveBeenCalledWith(userId, pdfContent, 'resume.pdf');
+      expect(storage.create).toHaveBeenCalledWith(
+        userId,
+        pdfContent,
+        'resume.pdf',
+      );
       expect(repository.findByIdForUser).toHaveBeenCalledWith(userId, cvId);
-      expect(result).toMatchObject({ id: cvId, isCurrent: true, fileName: 'resume.pdf' });
+      expect(result).toMatchObject({
+        id: cvId,
+        isCurrent: true,
+        fileName: 'resume.pdf',
+      });
     });
 
     it('returns null when the created cv cannot be read back', async () => {
@@ -183,7 +208,9 @@ describe('CvService', () => {
       storage.create.mockResolvedValue(cvId);
       repository.findByIdForUser.mockResolvedValue(null);
 
-      await expect(service.upload(userId, buildMulterFile(pdfContent))).resolves.toBeNull();
+      await expect(
+        service.upload(userId, buildMulterFile(pdfContent)),
+      ).resolves.toBeNull();
     });
 
     it('rejects a missing file without saving', async () => {
@@ -228,7 +255,9 @@ describe('CvService', () => {
     it('removes the requested cv of the user', async () => {
       storage.removeById.mockResolvedValue(true);
 
-      await expect(service.removeById(userId, olderCvId)).resolves.toBeUndefined();
+      await expect(
+        service.removeById(userId, olderCvId),
+      ).resolves.toBeUndefined();
       expect(storage.removeById).toHaveBeenCalledWith(userId, olderCvId);
     });
 

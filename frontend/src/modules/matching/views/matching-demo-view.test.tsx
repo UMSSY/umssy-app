@@ -1,0 +1,139 @@
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { MatchingDemoView } from "@/modules/matching/views/matching-demo-view";
+
+vi.mock("@/modules/matching/components/radar-chart", () => ({
+  RadarChart: () => (
+    <div data-testid="matching-radar-chart">
+      Radar de compatibilidad
+    </div>
+  ),
+}));
+
+afterEach(() => {
+  cleanup();
+});
+
+describe("MatchingDemoView", () => {
+  it("renderiza la pantalla principal de matching", () => {
+    render(<MatchingDemoView />);
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Buscar candidatos",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("option", {
+        name: "Tech Lead",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("option", {
+        name: "Data Scientist Sr.",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("option", {
+        name: "DevOps Engineer",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/6 candidatos/i),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByTestId("matching-radar-chart"),
+    ).toBeInTheDocument();
+  });
+
+  it("filtra candidatos mediante el buscador", () => {
+    render(<MatchingDemoView />);
+
+    const searchInput = screen.getByRole("searchbox", {
+      name: "Buscar candidato",
+    });
+
+    fireEvent.change(searchInput, {
+      target: {
+        value: "Carlos",
+      },
+    });
+
+    expect(
+      screen.getByText(/1 candidato/i),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getAllByText(/Carlos Mendoza/i).length,
+    ).toBeGreaterThan(0);
+
+    expect(
+      screen.queryByText(/Lucía Flores/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("muestra el estado vacío cuando no existen coincidencias", () => {
+    render(<MatchingDemoView />);
+
+    const searchInput = screen.getByRole("searchbox", {
+      name: "Buscar candidato",
+    });
+
+    fireEvent.change(searchInput, {
+      target: {
+        value: "candidato inexistente",
+      },
+    });
+
+    expect(
+      screen.getByText(
+        /No se encontraron candidatos para "candidato inexistente"/i,
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        "Selecciona un candidato de la lista para ver su detalle.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("actualiza el perfil objetivo al cambiar de vacante", () => {
+    render(<MatchingDemoView />);
+
+    expect(
+      screen.getByText(/Compatibilidad vs\. Tech Lead/i),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
+      target: { value: screen.getByRole("option", { name: "Data Scientist Sr." }).getAttribute("value") },
+    });
+
+    expect(
+      screen.getByText(
+        /Compatibilidad vs\. Data Scientist Sr\./i,
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
+      target: { value: screen.getByRole("option", { name: "DevOps Engineer" }).getAttribute("value") },
+    });
+
+    expect(
+      screen.getByText(
+        /Compatibilidad vs\. DevOps Engineer/i,
+      ),
+    ).toBeInTheDocument();
+  });
+});

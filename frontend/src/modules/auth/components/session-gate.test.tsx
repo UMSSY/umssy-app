@@ -1,6 +1,14 @@
-import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import "@/shared/testing/indexed-db.mock";
+import {
+  clearAccessToken,
+  getAccessToken,
+  saveAccessToken,
+} from "@/shared/services/storage/access-token-storage";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/shared/contexts/auth-context";
+import { clearCookieSessionState } from "@/shared/services/storage/cookie-session-state";
 import { apiClient } from "@/shared/services/api-client";
 import { hasSessionMarker, setSessionMarker } from "../utils/session-cookie";
 import { SessionGate } from "./session-gate";
@@ -24,15 +32,17 @@ describe("SessionGate", () => {
   beforeEach(() => window.history.replaceState({}, "", "/profile?tab=cv"));
   afterEach(() => {
     cleanup();
-    sessionStorage.clear();
+    clearAccessToken();
+    clearCookieSessionState();
     document.cookie = "umssy_session=; Max-Age=0; Path=/";
+    document.cookie = "umssy_has_session=; Max-Age=0; Path=/";
     replace.mockReset();
     route.pathname = "/profile";
     window.history.replaceState({}, "", "/");
   });
 
-  it("con token muestra el contenido, no redirige y mantiene la cookie", () => {
-    saveAccessToken("token-de-prueba");
+  it("con token muestra el contenido, no redirige y mantiene la cookie", async () => {
+    await saveAccessToken("token-de-prueba");
     renderGate();
 
     expect(screen.getByText("contenido privado")).toBeInTheDocument();
@@ -60,7 +70,7 @@ describe("SessionGate", () => {
   });
 
   it("un 401 del backend cierra la sesión y lleva al login", async () => {
-    saveAccessToken("token-de-prueba");
+    await saveAccessToken("token-de-prueba");
     renderGate();
 
     await expect(
@@ -69,13 +79,13 @@ describe("SessionGate", () => {
       }),
     ).rejects.toThrow("no autorizado");
 
-    expect(sessionStorage.getItem("accessToken")).toBeNull();
+    expect(getAccessToken()).toBeNull();
     expect(hasSessionMarker()).toBe(false);
     expect(replace).toHaveBeenCalledWith("/login?next=%2Fprofile%3Ftab%3Dcv");
   });
 
   it("otros errores no cierran la sesión", async () => {
-    saveAccessToken("token-de-prueba");
+    await saveAccessToken("token-de-prueba");
     renderGate();
 
     await expect(
@@ -84,12 +94,12 @@ describe("SessionGate", () => {
       }),
     ).rejects.toThrow("fallo");
 
-    expect(sessionStorage.getItem("accessToken")).toBe("token-de-prueba");
+    expect(getAccessToken()).toBe("token-de-prueba");
     expect(replace).not.toHaveBeenCalled();
   });
 
   it("el interceptor central sigue invalidando la sesión después de desmontar el guard", async () => {
-    saveAccessToken("token-de-prueba");
+    await saveAccessToken("token-de-prueba");
     const { unmount } = renderGate();
     unmount();
 
@@ -99,6 +109,43 @@ describe("SessionGate", () => {
       }),
     ).rejects.toThrow();
 
-    expect(sessionStorage.getItem("accessToken")).toBeNull();
+    expect(getAccessToken()).toBeNull();
+  });
+
+  it("hidrata la sesión desde el backend cuando el almacenamiento inicia sin token en memoria", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({
+      data: {
+        data: {
+          id: "user-cookie-1",
+          roles: ["titulado"],
+          idleTimeoutSeconds: 900,
+          warningSeconds: 180,
+          absoluteExpiresAt: "2026-11-25T10:00:00.000Z",
+        },
+      },
+    } as never);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    try {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <SessionGate>
+              <p>contenido privado</p>
+            </SessionGate>
+          </AuthProvider>
+        </QueryClientProvider>,
+      );
+
+      await waitFor(() =>
+        expect(screen.getByText("contenido privado")).toBeInTheDocument(),
+      );
+      expect(replace).not.toHaveBeenCalled();
+    } finally {
+      getSpy.mockRestore();
+      queryClient.clear();
+    }
   });
 });

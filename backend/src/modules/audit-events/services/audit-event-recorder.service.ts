@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
-import { MAX_AUDIT_DETAIL_LENGTH } from '../constants/audit-events.constants.js';
+
 import { AuditEventsRepository } from '../repositories/audit-events.repository.js';
 import type { RecordAuditEventInput } from '../types/record-audit-event-input.types.js';
 
@@ -11,7 +11,7 @@ export class AuditEventRecorderService {
 
   // Con tx el evento se guarda en la misma transacción que el cambio que lo origina
   record(input: RecordAuditEventInput, tx?: Prisma.TransactionClient) {
-    const detail = input.detail ? input.detail.slice(0, MAX_AUDIT_DETAIL_LENGTH) : null;
+    const detail = input.detail ? input.detail.slice(0, 500) : null;
     return this.auditEventsRepository.create({ ...input, detail }, tx);
   }
 }

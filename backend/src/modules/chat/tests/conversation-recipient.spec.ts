@@ -1,4 +1,3 @@
-
 import { describe, expect, it, vi } from 'vitest';
 import { ConversationService } from '../services/conversation.service.js';
 import type { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -31,7 +30,9 @@ describe('HU8: validación del destinatario', () => {
     const conversationMapper = {} as ConversationMapper;
 
     const chatRolePolicyService = {
-      assertCanCommunicate: vi.fn(),
+       assertCanCommunicate: vi
+        .fn()
+        .mockResolvedValue({ hasValidatedApplication: false }),
     } as unknown as ChatRolePolicyService;
 
     const educationsService = {

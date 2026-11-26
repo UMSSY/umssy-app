@@ -1,14 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CAREERS_STALE_TIME_MS, SURVEYS_QUERY_KEYS } from "../constants/surveys-query-keys.constants";
+import { MINUTE_MS } from "@/shared/constants/date-time.constants";
+import { SURVEYS_QUERY_KEYS } from "../constants/surveys-query-keys.constants";
 import { surveysService } from "../services/surveys.service";
 
 export function useCareers() {
   const query = useQuery({
     queryKey: SURVEYS_QUERY_KEYS.careers,
     queryFn: surveysService.listCareers,
-    staleTime: CAREERS_STALE_TIME_MS,
+    staleTime: 5 * MINUTE_MS,
   });
 
   return {

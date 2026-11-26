@@ -1,12 +1,21 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+  forwardRef,
+} from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
+import { ConnectionRequestService } from './connection-request.service.js';
 
 import { EducationsService } from '../../educations/services/educations.service.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
+import { ApplicationsService } from '../../applications/services/applications.service.js';
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
@@ -36,15 +45,26 @@ export class ConversationService {
     private readonly chatRolePolicyService: ChatRolePolicyService,
     private readonly educationsService: EducationsService,
     private readonly userSkillService: UserSkillService,
+    @Optional()
+    @Inject(forwardRef(() => ConnectionRequestService))
+    private readonly connectionRequestService?: ConnectionRequestService,
+    @Optional()
+    @Inject(forwardRef(() => ApplicationsService))
+    private readonly applicationsService?: ApplicationsService,
   ) {}
 
   async getOrCreate(
     currentUserId: string,
     contactId: string,
+    context?: {
+      contextType?: string;
+      contextId?: string;
+    },
   ): Promise<ConversationResponse> {
     const { conversation } = await this.getOrCreateWithStatus(
       currentUserId,
       contactId,
+      context,
     );
 
     return conversation;
@@ -53,6 +73,10 @@ export class ConversationService {
   async getOrCreateWithStatus(
     currentUserId: string,
     contactId: string,
+    context?: {
+      contextType?: string;
+      contextId?: string;
+    },
   ): Promise<{
     conversation: ConversationResponse;
     isCreated: boolean;
@@ -64,9 +88,8 @@ export class ConversationService {
       throw new SelfConversationException();
     }
 
-    const contact = await this.userLookupRepository.findById(
-      normalizedContactId,
-    );
+    const contact =
+      await this.userLookupRepository.findById(normalizedContactId);
 
     if (!contact) {
       throw new UserNotFoundException();
@@ -94,15 +117,16 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-       await this.chatRolePolicyService.assertCanCommunicate(
-      normalizedCurrentUserId,
-      normalizedContactId,
-    );
+    const { hasValidatedApplication } =
+      await this.chatRolePolicyService.assertCanCommunicate(
+        normalizedCurrentUserId,
+        normalizedContactId,
+        context,
+      );
 
-    const existing = await this.conversationRepository.findByOrderedPair(
-      userAId,
-      userBId,
-    );
+    const existing = context?.contextId
+      ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
+      : await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
     if (existing) {
       const conversation = await this.toResponse(
@@ -117,25 +141,33 @@ export class ConversationService {
       };
     }
 
-    const acceptedRequest =
-      await this.connectionRequestRepository.findAcceptedRequest(
-        userAId,
-        userBId,
-      );
+    if (!hasValidatedApplication) {
+      const hasAccepted = this.connectionRequestService
+        ? await this.connectionRequestService.hasAcceptedConnection(
+            userAId,
+            userBId,
+          )
+        : Boolean(
+            await this.connectionRequestRepository.findAcceptedRequest(
+              userAId,
+              userBId,
+            ),
+          );
 
-     if (!acceptedRequest) {
-      throw new ForbiddenException(
-        'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
-      );
+      if (!hasAccepted) {
+        throw new ForbiddenException(
+          'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
+        );
+      }
     }
 
     try {
-      const created =
-        await this.conversationRepository.createWithParticipants(
-          userAId,
-          userBId,
-          new Date(),
-        );
+      const created = await this.conversationRepository.createWithParticipants(
+        userAId,
+        userBId,
+        new Date(),
+        context,
+      );
 
       const conversation = await this.toResponse(
         created,
@@ -154,15 +186,16 @@ export class ConversationService {
       };
 
       if (
-        err?.code === 'P2002' ||
-        err?.message?.includes('P2002') ||
+        err?.code === UNIQUE_CONSTRAINT_VIOLATION_CODE ||
+        err?.message?.includes(UNIQUE_CONSTRAINT_VIOLATION_CODE) ||
         err?.message?.includes('Unique constraint')
       ) {
-        const concurrentExisting =
-          await this.conversationRepository.findByOrderedPair(
-            userAId,
-            userBId,
-          );
+        const concurrentExisting = context?.contextId
+          ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
+          : await this.conversationRepository.findByOrderedPair(
+              userAId,
+              userBId,
+            );
 
         if (concurrentExisting) {
           const conversation = await this.toResponse(
@@ -195,9 +228,7 @@ export class ConversationService {
     return participant !== null;
   }
 
-  async findAllForUser(
-    currentUserId: string,
-  ): Promise<ConversationResponse[]> {
+  async findAllForUser(currentUserId: string): Promise<ConversationResponse[]> {
     const [list, blockedIds] = await Promise.all([
       this.conversationRepository.findUserConversations(currentUserId),
       this.blockService.findBlockedIdsBy(currentUserId),
@@ -219,9 +250,7 @@ export class ConversationService {
       conversation.event?.id ||
       (!conversation.userAId && !conversation.userBId)
     ) {
-      return this.conversationMapper.toEventConversationResponse(
-        conversation,
-      );
+      return this.conversationMapper.toEventConversationResponse(conversation);
     }
 
     const contact =
@@ -233,7 +262,7 @@ export class ConversationService {
       throw new UserNotFoundException();
     }
 
-    const [onlineMap, participant, educations, userSkills] = await Promise.all([
+    const [onlineMap, participant, educations, userSkills, contextTitle] = await Promise.all([
       this.userPresenceService.mapOnlineStatus([contact.id]),
       this.participantRepository.findByConversationAndUser(
         conversation.id,
@@ -241,6 +270,13 @@ export class ConversationService {
       ),
       this.educationsService.findAll(contact.id),
       this.userSkillService.getUserSkills(contact.id),
+      conversation.contextType === 'POSTULACION' &&
+      conversation.contextId &&
+      this.applicationsService
+        ? this.applicationsService
+            .findVacancyTitleForChat(conversation.contextId)
+            .catch(() => null)
+        : Promise.resolve(null),
     ]);
 
     const unreadCount = participant
@@ -258,7 +294,7 @@ export class ConversationService {
 
     const academicTitle = latestEducation
       ? `${latestEducation.degree} / ${latestEducation.institution}`
-      : contact.headline ?? null;
+      : (contact.headline ?? null);
 
     const skills = userSkills.map((skill) => skill.name);
 
@@ -270,6 +306,7 @@ export class ConversationService {
       isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
       academicTitle,
       skills,
+      contextTitle,
     });
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+import type { ActivateParticipationModalProps } from "../../types/activate-participation-modal-props.types";
 
 import { AlertTriangle, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,14 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-type ActivateParticipationModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  isLoading: boolean;
-  errorMessage: string | null;
-};
 
 export function ActivateParticipationModal({
   isOpen,
@@ -94,7 +87,8 @@ export function ActivateParticipationModal({
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="cancel"
+              size="lg"
               onClick={onClose}
               disabled={isLoading}
               className="h-auto min-h-9 w-full px-5 py-2 text-xs whitespace-normal sm:w-auto"

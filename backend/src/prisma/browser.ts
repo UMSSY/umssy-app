@@ -168,6 +168,26 @@ export type TimeProposal = Prisma.TimeProposalModel
  */
 export type AppointmentHistory = Prisma.AppointmentHistoryModel
 /**
+ * Model AppointmentNotificationEvent
+ * 
+ */
+export type AppointmentNotificationEvent = Prisma.AppointmentNotificationEventModel
+/**
+ * Model AppointmentNotificationChannel
+ * 
+ */
+export type AppointmentNotificationChannel = Prisma.AppointmentNotificationChannelModel
+/**
+ * Model AppointmentNotificationStatus
+ * 
+ */
+export type AppointmentNotificationStatus = Prisma.AppointmentNotificationStatusModel
+/**
+ * Model AppointmentNotification
+ * 
+ */
+export type AppointmentNotification = Prisma.AppointmentNotificationModel
+/**
  * Model EventCategory
  * 
  */
@@ -177,6 +197,11 @@ export type EventCategory = Prisma.EventCategoryModel
  * 
  */
 export type Event = Prisma.EventModel
+/**
+ * Model EventSession
+ * 
+ */
+export type EventSession = Prisma.EventSessionModel
 /**
  * Model EventRegistration
  * 
@@ -248,6 +273,11 @@ export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
  */
 export type MentorSlotOffer = Prisma.MentorSlotOfferModel
 /**
+ * Model MentorCapacitySetting
+ * 
+ */
+export type MentorCapacitySetting = Prisma.MentorCapacitySettingModel
+/**
  * Model ActivationOtp
  * 
  */
@@ -303,6 +333,11 @@ export type ConnectionRequest = Prisma.ConnectionRequestModel
  */
 export type UserPresence = Prisma.UserPresenceModel
 /**
+ * Model PasswordHistory
+ * 
+ */
+export type PasswordHistory = Prisma.PasswordHistoryModel
+/**
  * Model PasswordResetOtp
  * 
  */
@@ -323,6 +358,11 @@ export type JobApplicationStatus = Prisma.JobApplicationStatusModel
  */
 export type JobApplication = Prisma.JobApplicationModel
 /**
+ * Model RadarApplicationConsent
+ * 
+ */
+export type RadarApplicationConsent = Prisma.RadarApplicationConsentModel
+/**
  * Model SurveyStatus
  * 
  */
@@ -342,6 +382,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  * 
  */
 export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
 /**
  * Model SurveyQuestion
  * 
@@ -417,3 +462,98 @@ export type RadarCvExtractionStatus = Prisma.RadarCvExtractionStatusModel
  * 
  */
 export type RadarCvReviewStatus = Prisma.RadarCvReviewStatusModel
+/**
+ * Model MentorParticipationStatus
+ * 
+ */
+export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
+/**
+ * Model MentorOfferStatus
+ * 
+ */
+export type MentorOfferStatus = Prisma.MentorOfferStatusModel
+/**
+ * Model RadarDocumentVerification
+ * 
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel
+/**
+ * Model PortfolioProvider
+ * 
+ */
+export type PortfolioProvider = Prisma.PortfolioProviderModel
+/**
+ * Model UserSocialAccount
+ * 
+ */
+export type UserSocialAccount = Prisma.UserSocialAccountModel
+/**
+ * Model UserPortfolioProject
+ * 
+ */
+export type UserPortfolioProject = Prisma.UserPortfolioProjectModel
+/**
+ * Model NotificationType
+ * 
+ */
+export type NotificationType = Prisma.NotificationTypeModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel
+/**
+ * Model RefreshToken
+ * 
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model NotificationPreference
+ * 
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model CompanyProfile
+ * 
+ */
+export type CompanyProfile = Prisma.CompanyProfileModel
+/**
+ * Model CompanyLogo
+ * 
+ */
+export type CompanyLogo = Prisma.CompanyLogoModel
+/**
+ * Model CompanyAccessRequest
+ * 
+ */
+export type CompanyAccessRequest = Prisma.CompanyAccessRequestModel
+/**
+ * Model CompanyActivationOtp
+ * 
+ */
+export type CompanyActivationOtp = Prisma.CompanyActivationOtpModel
+/**
+ * Model JobAlertMode
+ * 
+ */
+export type JobAlertMode = Prisma.JobAlertModeModel
+/**
+ * Model JobOfferNotificationPreference
+ * 
+ */
+export type JobOfferNotificationPreference = Prisma.JobOfferNotificationPreferenceModel
+/**
+ * Model RadarDocumentStatus
+ * 
+ */
+export type RadarDocumentStatus = Prisma.RadarDocumentStatusModel
+/**
+ * Model RadarDocumentSourceType
+ * 
+ */
+export type RadarDocumentSourceType = Prisma.RadarDocumentSourceTypeModel

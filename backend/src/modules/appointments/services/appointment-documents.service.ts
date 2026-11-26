@@ -1,10 +1,8 @@
+import { DOCUMENT_VALIDATION_RULES } from '../../../common/constants/file-upload.constants.js';
 import { Injectable } from '@nestjs/common';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import {
-  APPOINTMENT_DOCUMENT_OPEN_STATUSES,
-  APPOINTMENT_DOCUMENT_VALIDATION_RULES,
-} from '../constants/appointment-document.constants.js';
+import { APPOINTMENT_DOCUMENT_OPEN_STATUSES } from '../constants/appointment-document.constants.js';
 import {
   AppointmentClosedException,
   AppointmentDocumentNotFoundException,
@@ -47,7 +45,7 @@ export class AppointmentDocumentsService {
 
     const validatedFile = this.fileValidationService.validate(
       file ? this.documentMapper.toUploadedFile(file) : undefined,
-      APPOINTMENT_DOCUMENT_VALIDATION_RULES,
+      DOCUMENT_VALIDATION_RULES,
     );
     const saved = await this.documentsRepository.save(
       appointmentId,

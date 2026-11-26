@@ -1,35 +1,19 @@
-
 import { io, type Socket } from 'socket.io-client';
+import { resolveSocketEndpoint } from '@/shared/services/socket-endpoint';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
-import { ENV_CONFIG } from '@/shared/config/env.config';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
 
 let sharedSocket: Socket | null = null;
 
-export function resolveSocketEndpoint(
-  apiUrl: string = ENV_CONFIG.apiUrl || 'http://localhost:8080',
-): {
-  serverUrl: string;
-  path?: string;
-} {
-  try {
-    const parsed = new URL(apiUrl);
-    const serverUrl = parsed.origin;
-
-    return { serverUrl, path: '/api/socket.io' };
-  } catch {
-    return { serverUrl: apiUrl, path: '/api/socket.io' };
-  }
-}
-
-export function createChatSocket(token: string): Socket {
+export function createChatSocket(token?: string | null): Socket {
   const { serverUrl, path } = resolveSocketEndpoint();
 
   return io(`${serverUrl}/chat`, {
     autoConnect: false,
+    withCredentials: true,
     auth: (callback) => {
-      callback({
-        token: getAccessToken() ?? token,
-      });
+      const activeToken = getAccessToken() ?? (hasCookieSession() ? null : token);
+      callback(activeToken ? { token: activeToken } : {});
     },
     transports: ['websocket'],
     ...(path ? { path } : {}),
@@ -39,7 +23,7 @@ export function createChatSocket(token: string): Socket {
 export function getChatSocket(): Socket {
   const token = getAccessToken();
 
-  if (!token) {
+  if (!token && !hasCookieSession()) {
     throw new Error('No hay una sesión iniciada.');
   }
 

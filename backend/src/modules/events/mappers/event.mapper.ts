@@ -8,6 +8,7 @@ import type {
   EventItemResponse,
 } from '../types/events.types.js';
 import { formatUtcDate, formatUtcTime } from '../utils/event-date-time.js';
+import { mapEventSessions } from './event-session.mapper.js';
 
 export function mapEventToResponse(
   record: EventWithRelations,
@@ -18,7 +19,9 @@ export function mapEventToResponse(
   const hasThreshold = threshold !== null && threshold > 0;
 
   return {
-    ...(record.coverMimeType && { coverUrl: '/events/' + record.id + '/cover' }),
+    ...(record.coverMimeType && {
+      coverUrl: '/events/' + record.id + '/cover',
+    }),
     id: record.id,
     title: record.title,
     description: record.description,
@@ -26,6 +29,7 @@ export function mapEventToResponse(
     startTime: formatUtcTime(record.startTime),
     endTime: formatUtcTime(record.endTime),
     location: record.location,
+    sessions: mapEventSessions(record.sessions),
     capacity: record.capacity,
     availableSpots,
     registrationCount: supportCount,
@@ -36,7 +40,9 @@ export function mapEventToResponse(
       name: record.category.name,
     },
     statusId: record.statusId,
-    status: VOTING_STATUS_TITLES.includes(record.status.title) ? 'voting' : record.status.title,
+    status: VOTING_STATUS_TITLES.includes(record.status.title)
+      ? 'voting'
+      : record.status.title,
     origin: record.origin.title,
     supportCount,
     supportThreshold: hasThreshold ? threshold : null,

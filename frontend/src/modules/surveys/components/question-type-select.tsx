@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QUESTION_TYPE_ITEMS, QUESTION_TYPE_OPTIONS, SURVEY_ARIA } from "../constants/survey-builder.constants";
-import type { QuestionTypeSelectProps } from "../types/survey-component-props.types";
+import type { QuestionTypeSelectProps } from "../types/question-type-select-props.types";
 import { isQuestionType } from "../utils/is-question-type";
 
 const SELECTABLE_QUESTION_TYPE_OPTIONS = QUESTION_TYPE_OPTIONS.filter((option) => option.value !== "dropdown");

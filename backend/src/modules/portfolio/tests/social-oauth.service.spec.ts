@@ -1,0 +1,894 @@
+import { createHash } from 'node:crypto';
+import type { ConfigService } from '@nestjs/config';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ExternalProviderUnavailableException } from '../exceptions/external-provider-unavailable.exception.js';
+import { OAuthExchangeFailedException } from '../exceptions/oauth-exchange-failed.exception.js';
+import { UnsupportedPortfolioProviderException } from '../exceptions/unsupported-portfolio-provider.exception.js';
+import type { SocialAccountRepository } from '../repositories/social-account.repository.js';
+import { SocialAccountMapper } from '../mappers/social-account.mapper.js';
+import { SocialOAuthService } from '../services/social-oauth.service.js';
+import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
+
+const userId = '11111111-1111-4111-8111-111111111111';
+const verifier = 'a'.repeat(43);
+const challenge = createHash('sha256').update(verifier).digest('base64url');
+
+describe('SocialOAuthService', () => {
+  let service: SocialOAuthService;
+  let configMock: {
+    get: ReturnType<typeof vi.fn>;
+  };
+  let socialAccountRepositoryMock: {
+    upsertAccount: ReturnType<typeof vi.fn>;
+  };
+
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    configMock = {
+      get: vi.fn((key: string) => {
+        switch (key) {
+          case 'JWT_SECRET':
+            return 'test-secret';
+          case 'GITHUB_CLIENT_ID':
+            return 'gh-client-id';
+          case 'GITHUB_CLIENT_SECRET':
+            return 'gh-client-secret';
+          case 'GITHUB_CALLBACK_URL':
+            return 'https://app.umssy.test/oauth/github/callback';
+          case 'GITLAB_CLIENT_ID':
+            return 'gl-client-id';
+          case 'GITLAB_CLIENT_SECRET':
+            return 'gl-client-secret';
+          case 'GITLAB_CALLBACK_URL':
+            return 'https://app.umssy.test/oauth/gitlab/callback';
+          default:
+            return undefined;
+        }
+      }),
+    };
+
+    socialAccountRepositoryMock = {
+      upsertAccount: vi.fn(),
+    };
+
+    service = new SocialOAuthService(
+      configMock as unknown as ConfigService,
+      socialAccountRepositoryMock as unknown as SocialAccountRepository,
+      new SocialAccountMapper(),
+    );
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.restoreAllMocks();
+  });
+
+  describe('getAuthorizationUrl', () => {
+    it('returns authorization URL for GitHub with read:user scope', () => {
+      const result = service.getAuthorizationUrl(
+        'github',
+        undefined,
+        userId,
+        challenge,
+      );
+
+      expect(result.url).toContain('https://github.com/login/oauth/authorize');
+      expect(result.url).toContain('client_id=gh-client-id');
+      expect(result.url).toContain('scope=read%3Auser');
+      expect(new URL(result.url).searchParams.get('state')).toBeTruthy();
+      expect(new URL(result.url).searchParams.get('code_challenge')).toBe(
+        challenge,
+      );
+      expect(result.url).toContain(
+        'redirect_uri=https%3A%2F%2Fapp.umssy.test%2Foauth%2Fgithub%2Fcallback',
+      );
+    });
+
+    it('rejects GitHub authorization when configuration is missing', () => {
+      configMock.get.mockReturnValue(undefined);
+      expect(() =>
+        service.getAuthorizationUrl('github', undefined, userId, challenge),
+      ).toThrow();
+    });
+
+    it('returns authorization URL for GitLab with read_user scope and response_type=code', () => {
+      const result = service.getAuthorizationUrl(
+        'gitlab',
+        undefined,
+        userId,
+        challenge,
+      );
+
+      expect(result.url).toContain('https://gitlab.com/oauth/authorize');
+      expect(result.url).toContain('client_id=gl-client-id');
+      expect(result.url).toContain('response_type=code');
+      expect(result.url).toContain('scope=read_user');
+      expect(new URL(result.url).searchParams.get('state')).toBeTruthy();
+      expect(new URL(result.url).searchParams.get('code_challenge')).toBe(
+        challenge,
+      );
+      expect(result.url).toContain(
+        'redirect_uri=https%3A%2F%2Fapp.umssy.test%2Foauth%2Fgitlab%2Fcallback',
+      );
+    });
+
+    it('rejects GitLab authorization when configuration is missing', () => {
+      configMock.get.mockReturnValue(undefined);
+      expect(() =>
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge),
+      ).toThrow();
+    });
+
+    it('rejects GitLab authorization when its client secret is missing', () => {
+      const get = configMock.get.getMockImplementation()!;
+      configMock.get.mockImplementation((key: string) => key === 'GITLAB_CLIENT_SECRET' ? undefined : get(key));
+      expect(() => service.getAuthorizationUrl('gitlab', undefined, userId, challenge)).toThrow();
+    });
+
+    it('constructs the GitLab callback from the configured frontend origin', () => {
+      const get = configMock.get.getMockImplementation()!;
+      configMock.get.mockImplementation((key: string) =>
+        key === 'GITLAB_CALLBACK_URL'
+          ? undefined
+          : key === 'CORS_ORIGIN'
+            ? 'https://dev-umssy.zer4c.dev'
+            : get(key),
+      );
+      const url = new URL(
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge).url,
+      );
+      expect(url.searchParams.get('redirect_uri')).toBe(
+        'https://dev-umssy.zer4c.dev/oauth/gitlab/callback',
+      );
+      expect(url.searchParams.get('code_challenge_method')).toBe('S256');
+    });
+
+    it('rejects ambiguous frontend origins without a callback override', () => {
+      const get = configMock.get.getMockImplementation()!;
+      configMock.get.mockImplementation((key: string) =>
+        key === 'GITLAB_CALLBACK_URL'
+          ? undefined
+          : key === 'CORS_ORIGIN'
+            ? 'https://one.example,https://two.example'
+            : get(key),
+      );
+      expect(() =>
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge),
+      ).toThrow();
+    });
+
+    it('throws UnsupportedPortfolioProviderException for unknown provider', () => {
+      expect(() =>
+        service.getAuthorizationUrl(
+          'bitbucket' as unknown as PortfolioProvider,
+        ),
+      ).toThrow(UnsupportedPortfolioProviderException);
+    });
+  });
+
+  describe('connectWithCode - GitHub', () => {
+    it('rejects state issued for GitLab before contacting GitHub', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(
+        service.getAuthorizationUrl('gitlab', undefined, userId, challenge).url,
+      ).searchParams.get('state')!;
+      await expect(
+        service.connectWithCode(userId, 'github', 'code', state, verifier),
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('rejects GitHub state for a GitLab callback', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(
+        service.getAuthorizationUrl('github', undefined, userId, challenge).url,
+      ).searchParams.get('state')!;
+      await expect(
+        service.connectWithCode(userId, 'gitlab', 'code', state, verifier),
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+    it('rejects a state from another user or an incorrect verifier before contacting GitHub', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(
+        service.getAuthorizationUrl('github', undefined, userId, challenge).url,
+      ).searchParams.get('state')!;
+      await expect(
+        service.connectWithCode(
+          'another-user',
+          'github',
+          'code',
+          state,
+          verifier,
+        ),
+      ).rejects.toThrow();
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'code',
+          state,
+          'b'.repeat(43),
+        ),
+      ).rejects.toThrow();
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'code',
+          state + 'x',
+          verifier,
+        ),
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(socialAccountRepositoryMock.upsertAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects an expired authorization before contacting GitHub', async () => {
+      vi.useFakeTimers();
+      try {
+        const state = new URL(
+          service.getAuthorizationUrl('github', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!;
+        vi.advanceTimersByTime(10 * 60_000 + 1);
+        const fetchMock = vi.fn();
+        global.fetch = fetchMock;
+        await expect(
+          service.connectWithCode(userId, 'github', 'code', state, verifier),
+        ).rejects.toThrow();
+        expect(fetchMock).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+    it('exchanges code for access token in memory, fetches profile, and saves account without exposing token', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'gho_secret_access_token_12345',
+            token_type: 'bearer',
+            scope: 'read:user',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            id: 1234567,
+            login: 'octocat',
+            html_url: 'https://github.com/octocat',
+          }),
+        });
+      global.fetch = fetchMock;
+
+      socialAccountRepositoryMock.upsertAccount.mockResolvedValue({
+        id: 'acc-uuid',
+        userId,
+        provider: 'github',
+        externalId: '1234567',
+        username: 'octocat',
+        profileUrl: 'https://github.com/octocat',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.connectWithCode(
+        userId,
+        'github',
+        'auth-code-abc',
+        new URL(
+          service.getAuthorizationUrl('github', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(socialAccountRepositoryMock.upsertAccount).toHaveBeenCalledWith({
+        userId,
+        provider: 'github',
+        externalId: '1234567',
+        username: 'octocat',
+        profileUrl: 'https://github.com/octocat',
+      });
+
+      expect(result).toEqual({
+        id: 'acc-uuid',
+        provider: 'github',
+        username: 'octocat',
+        profileUrl: 'https://github.com/octocat',
+        connected: true,
+      });
+
+      expect(result).not.toHaveProperty('access_token');
+      expect(result).not.toHaveProperty('token');
+    });
+
+    it('handles profile without html_url by setting profileUrl to null', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            id: 111,
+            login: 'octonull',
+            html_url: undefined,
+          }),
+        });
+
+      socialAccountRepositoryMock.upsertAccount.mockResolvedValue({
+        id: 'acc-null',
+        userId,
+        provider: 'github',
+        externalId: '111',
+        username: 'octonull',
+        profileUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.connectWithCode(
+        userId,
+        'github',
+        'code',
+        new URL(
+          service.getAuthorizationUrl('github', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
+      );
+      expect(result.profileUrl).toBeNull();
+    });
+
+    it('throws OAuthExchangeFailedException if GitHub token exchange returns error', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue({
+          error: 'bad_verification_code',
+          error_description: 'The code passed is incorrect or expired.',
+        }),
+      });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'invalid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitHub token response has invalid JSON', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+      });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitHub token response status is not ok', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+      });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws ExternalProviderUnavailableException if GitHub token request fails due to network error', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(ExternalProviderUnavailableException);
+    });
+
+    it('throws ExternalProviderUnavailableException if GitHub user profile request fails due to network error', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockRejectedValueOnce(new Error('Network timeout'));
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(ExternalProviderUnavailableException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitHub user profile request returns 401', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 401,
+        });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitHub user profile has invalid JSON', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockRejectedValue(new Error('SyntaxError')),
+        });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitHub user profile lacks id or login', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            id: undefined,
+            login: '',
+          }),
+        });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'github',
+          'valid-code',
+          new URL(
+            service.getAuthorizationUrl('github', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+  });
+
+  describe('connectWithCode - GitLab', () => {
+    it('rejects a mismatched user or verifier without contacting GitLab', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock;
+      const state = new URL(service.getAuthorizationUrl('gitlab', undefined, userId, challenge).url).searchParams.get('state')!;
+      await expect(service.connectWithCode('other-user', 'gitlab', 'code', state, verifier)).rejects.toThrow();
+      await expect(service.connectWithCode(userId, 'gitlab', 'code', state, 'b'.repeat(43))).rejects.toThrow();
+      await expect(service.connectWithCode(userId, 'gitlab', 'code')).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+    it('exchanges code for access token in memory, fetches profile, and saves account without exposing token', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'glpat_secret_access_token_67890',
+            token_type: 'bearer',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            id: 7654321,
+            username: 'gitlabuser',
+            web_url: 'https://gitlab.com/gitlabuser',
+          }),
+        });
+      global.fetch = fetchMock;
+
+      socialAccountRepositoryMock.upsertAccount.mockResolvedValue({
+        id: 'acc-gl-uuid',
+        userId,
+        provider: 'gitlab',
+        externalId: '7654321',
+        username: 'gitlabuser',
+        profileUrl: 'https://gitlab.com/gitlabuser',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.connectWithCode(
+        userId,
+        'gitlab',
+        'auth-code-gl',
+        new URL(
+          service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      const tokenRequest = fetchMock.mock.calls[0][1] as RequestInit;
+      if (typeof tokenRequest.body !== 'string') throw new Error('Missing token request body');
+      expect(JSON.parse(tokenRequest.body)).toMatchObject({
+        code_verifier: verifier,
+        redirect_uri: 'https://app.umssy.test/oauth/gitlab/callback',
+      });
+      expect(socialAccountRepositoryMock.upsertAccount).toHaveBeenCalledWith({
+        userId,
+        provider: 'gitlab',
+        externalId: '7654321',
+        username: 'gitlabuser',
+        profileUrl: 'https://gitlab.com/gitlabuser',
+      });
+
+      expect(result).toEqual({
+        id: 'acc-gl-uuid',
+        provider: 'gitlab',
+        username: 'gitlabuser',
+        profileUrl: 'https://gitlab.com/gitlabuser',
+        connected: true,
+      });
+
+      expect(result).not.toHaveProperty('access_token');
+    });
+
+    it('handles GitLab profile without web_url by setting profileUrl to null', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            id: 777,
+            username: 'noweburl',
+            web_url: undefined,
+          }),
+        });
+
+      socialAccountRepositoryMock.upsertAccount.mockResolvedValue({
+        id: 'acc-noweb',
+        userId,
+        provider: 'gitlab',
+        externalId: '777',
+        username: 'noweburl',
+        profileUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.connectWithCode(
+        userId,
+        'gitlab',
+        'code',
+        new URL(
+          service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+            .url,
+        ).searchParams.get('state')!,
+        verifier,
+      );
+      expect(result.profileUrl).toBeNull();
+    });
+
+    it('throws OAuthExchangeFailedException if GitLab token exchange fails with status >= 400', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+      });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'invalid-code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitLab token response has invalid JSON', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockRejectedValue(new Error('Invalid json')),
+      });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitLab token response contains error', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue({
+          error: 'invalid_grant',
+          error_description: 'Code invalid',
+        }),
+      });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws ExternalProviderUnavailableException if GitLab token request fails due to network error', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(ExternalProviderUnavailableException);
+    });
+
+    it('throws ExternalProviderUnavailableException if GitLab user profile request fails due to network error', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockRejectedValueOnce(new Error('Timeout'));
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(ExternalProviderUnavailableException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitLab user profile response is not ok', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 403,
+        });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitLab user profile has invalid JSON', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockRejectedValue(new Error('JSON Parse')),
+        });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws OAuthExchangeFailedException if GitLab user profile is incomplete', async () => {
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            access_token: 'valid_token',
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({
+            id: undefined,
+            username: '',
+          }),
+        });
+
+      await expect(
+        service.connectWithCode(
+          userId,
+          'gitlab',
+          'code',
+          new URL(
+            service.getAuthorizationUrl('gitlab', undefined, userId, challenge)
+              .url,
+          ).searchParams.get('state')!,
+          verifier,
+        ),
+      ).rejects.toThrow(OAuthExchangeFailedException);
+    });
+
+    it('throws UnsupportedPortfolioProviderException for unsupported provider in connectWithCode', async () => {
+      await expect(
+        service.connectWithCode(
+          userId,
+          'bitbucket' as unknown as PortfolioProvider,
+          'code',
+        ),
+      ).rejects.toThrow(UnsupportedPortfolioProviderException);
+    });
+  });
+});

@@ -1,6 +1,8 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import {
   Controller,
   Delete,
+  Headers,
   Param,
   ParseUUIDPipe,
   Put,
@@ -20,10 +22,7 @@ import { CurrentUserId } from '../../../common/decorators/current-user-id.decora
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import {
-  CERTIFICATION_DOCUMENT_FIELD_NAME,
-  CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES,
-} from '../constants/certification-document.constants.js';
+import { CERTIFICATION_DOCUMENT_FIELD_NAME } from '../constants/certification-document.constants.js';
 import { CertificationDocumentsService } from '../services/certification-documents.service.js';
 import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
 
@@ -42,7 +41,7 @@ export class CertificationDocumentsController {
   @UseInterceptors(
     FileInterceptor(CERTIFICATION_DOCUMENT_FIELD_NAME, {
       limits: {
-        fileSize: CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES,
+        fileSize: MAX_FILE_UPLOAD_SIZE_BYTES,
         files: 1,
       },
     }),
@@ -64,16 +63,18 @@ export class CertificationDocumentsController {
     @CurrentUserId() userId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: MulterFile | undefined,
+    @Headers('x-document-version') version?: string,
   ): Promise<CertificationResponse> {
-    return this.certificationDocumentsService.upload(userId, id, file);
+    return this.certificationDocumentsService.upload(userId, id, file, version);
   }
 
   @Delete()
   async remove(
     @CurrentUserId() userId: string,
     @Param('id', ParseUUIDPipe) id: string,
+    @Headers('x-document-version') version?: string,
   ): Promise<null> {
-    await this.certificationDocumentsService.remove(userId, id);
+    await this.certificationDocumentsService.remove(userId, id, version);
     return null;
   }
 }

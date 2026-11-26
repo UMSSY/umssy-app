@@ -21,7 +21,10 @@ function buildRecord(): EventWithRelations {
     votingDeadline: null,
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
-    category: { id: 'cat-1', namee: 'Tecnologia' },
+    category: { id: 'cat-1', name: 'Tecnologia' },
+    coverMimeType: null,
+    registrations: [],
+    sessions: [],
     _count: { registrations: 3 },
   };
 }
@@ -36,8 +39,17 @@ describe('EventsService', () => {
   beforeEach(() => {
     repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
     service = new EventsService(new EventsRepository({} as never));
-    vi.spyOn(service, 'findAndCount').mockImplementation(repositoryMock.findAndCount);
-    vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
+    vi.spyOn(service, 'findAndCount').mockImplementation(
+      repositoryMock.findAndCount as (
+        payload: Parameters<EventsService['findAndCount']>[0],
+      ) => ReturnType<EventsService['findAndCount']>,
+    );
+    vi.spyOn(service, 'findById').mockImplementation(
+      repositoryMock.findById as (
+        id: string,
+        userId?: string,
+      ) => ReturnType<EventsService['findById']>,
+    );
     vi.spyOn(service, 'expireOverdueProposals').mockResolvedValue(0);
   });
 
@@ -85,11 +97,11 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: 'status-uuid',
-      isPublishedOnly: false,
       search: 'workshop',
       userId: undefined,
       skip: 10,
       take: 5,
+      visibility: { statusId: 'status-uuid' },
     });
   });
 
@@ -113,11 +125,11 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: undefined,
-      isPublishedOnly: true,
       search: 'Node',
       userId: undefined,
       skip: 10,
       take: 10,
+      visibility: expect.objectContaining({ status: { title: 'Publicado' } }),
     });
   });
   it.each([10, 3, 0, null])(
@@ -155,5 +167,90 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'user-1' }),
     );
+  });
+
+  describe('catalog visibility', () => {
+    const now = new Date('2026-11-27T14:00:00.000Z');
+
+    it('shows only published workshops that have not finished yet', () => {
+      expect(service.getCatalogVisibilityFilter({}, now)).toEqual(
+        service.getActiveRegistrationEventFilter(now),
+      );
+    });
+
+    it('adds proposals in voting when they are requested', () => {
+      expect(
+        service.getCatalogVisibilityFilter({ includeProposals: true }, now),
+      ).toEqual({
+        OR: [
+          service.getActiveRegistrationEventFilter(now),
+          { status: { title: { in: ['Votacion', 'En votación'] } } },
+        ],
+      });
+    });
+
+    it('keeps the exact status filter, used for expired proposals', () => {
+      expect(
+        service.getCatalogVisibilityFilter(
+          { statusId: 'status-uuid', includeProposals: true },
+          now,
+        ),
+      ).toEqual({ statusId: 'status-uuid' });
+    });
+
+    it('treats a multi-session workshop as active until its last session ends', () => {
+      const filter = service.getCatalogVisibilityFilter({}, now);
+      expect(filter.OR).toContainEqual({
+        sessions: { some: { endsAt: { gt: now } } },
+      });
+    });
+  });
+
+  describe('finished workshops in the catalog', () => {
+    const now = new Date('2026-11-27T14:00:00.000Z');
+
+    it('uses the same finished rule as the registration history', () => {
+      expect(
+        service.getCatalogVisibilityFilter(
+          { scope: 'finished', includeProposals: true },
+          now,
+        ),
+      ).toEqual(service.getFinishedEventFilter(now));
+    });
+
+    it('lets statusId prevail over scope', () => {
+      expect(
+        service.getCatalogVisibilityFilter(
+          { scope: 'finished', statusId: 'status-uuid' },
+          now,
+        ),
+      ).toEqual({ statusId: 'status-uuid' });
+    });
+
+    it('lists finished workshops newest first', async () => {
+      repositoryMock.findAndCount.mockResolvedValue({ items: [], total: 0 });
+      await service.findAll({ page: 1, limit: 10, scope: 'finished' });
+      expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newestFirst: true,
+          visibility: expect.objectContaining({
+            status: { title: { in: ['Publicado', 'Finalizado'] } },
+          }),
+        }),
+      );
+    });
+
+    it('keeps normal ordering when statusId overrides finished scope', async () => {
+      repositoryMock.findAndCount.mockResolvedValue({ items: [], total: 0 });
+      await service.findAll({
+        page: 1,
+        limit: 10,
+        scope: 'finished',
+        statusId: 'status-uuid',
+      });
+      expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
+        expect.not.objectContaining({ newestFirst: true }),
+      );
+    });
   });
 });

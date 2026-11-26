@@ -2,11 +2,15 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../services/session.service.js';
 import { ROLE_NAMES } from '../enums/roles.enum.js';
-import { BEARER_PREFIX } from '../constants/auth.constants.js';
+import { SAFE_HTTP_METHODS } from '../constants/auth.constants.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
+import { SessionRevokedException } from '../exceptions/session-revoked.exception.js';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
+import { UserInactiveException } from '../exceptions/user-inactive.exception.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
+import { parseCorsOrigins } from '../utils/cors-origins.js';
+import { extractAccessToken } from '../utils/extract-access-token.js';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -17,23 +21,24 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const authorization = request.headers?.authorization;
+    const extracted = extractAccessToken(request);
 
-    if (
-      typeof authorization !== 'string' ||
-      !authorization.startsWith(BEARER_PREFIX)
-    ) {
+    if (!extracted) {
       throw new MissingUserException();
     }
 
-    const token = authorization.slice(BEARER_PREFIX.length).trim();
-    if (!token) {
-      throw new MissingUserException();
+    if (
+      extracted.source === 'cookie' &&
+      !this.isTrustedCookieRequest(request)
+    ) {
+      throw new UnauthorizedSessionException();
     }
 
     let payload: LoginJwtPayload;
     try {
-      payload = await this.jwtService.verifyAsync<LoginJwtPayload>(token);
+      payload = await this.jwtService.verifyAsync<LoginJwtPayload>(
+        extracted.token,
+      );
     } catch {
       throw new UnauthorizedSessionException();
     }
@@ -47,13 +52,39 @@ export class JwtAuthGuard implements CanActivate {
       (payload.roles !== undefined &&
         (!Array.isArray(payload.roles) ||
           payload.roles.length === 0 ||
-          payload.roles.some((role) => !ROLE_NAMES.some((knownRole) => knownRole === role))))
+          payload.roles.some(
+            (role) => !ROLE_NAMES.some((knownRole) => knownRole === role),
+          )))
     ) {
       throw new UnauthorizedSessionException();
     }
 
-    request.user = await this.sessionService.getAuthenticatedUser(payload.sub);
+    // TODO: exigir sid cuando expiren los tokens emitidos antes de incluirlo
+    const hasSessionId = payload.sid !== undefined;
+    if (hasSessionId) {
+      await this.sessionService.assertSessionActive(payload.sid);
+    }
+
+    try {
+      request.user = await this.sessionService.getAuthenticatedUser(
+        payload.sub,
+      );
+    } catch (error) {
+      if (hasSessionId && error instanceof UserInactiveException) {
+        throw new SessionRevokedException();
+      }
+      throw error;
+    }
 
     return true;
+  }
+
+  private isTrustedCookieRequest(request: AuthenticatedRequest): boolean {
+    const method = request.method?.toUpperCase() ?? 'GET';
+    if (SAFE_HTTP_METHODS.some((safeMethod) => safeMethod === method)) {
+      return true;
+    }
+    const origin = request.headers?.origin;
+    return typeof origin === 'string' && parseCorsOrigins().includes(origin);
   }
 }

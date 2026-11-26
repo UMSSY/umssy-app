@@ -32,6 +32,9 @@ export type MentorSlotOfferMinAggregateOutputType = {
   expiresAt: Date | null
   requestId: string | null
   confirmedAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
+  statusId: string | null
 }
 
 export type MentorSlotOfferMaxAggregateOutputType = {
@@ -42,6 +45,9 @@ export type MentorSlotOfferMaxAggregateOutputType = {
   expiresAt: Date | null
   requestId: string | null
   confirmedAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
+  statusId: string | null
 }
 
 export type MentorSlotOfferCountAggregateOutputType = {
@@ -52,6 +58,9 @@ export type MentorSlotOfferCountAggregateOutputType = {
   expiresAt: number
   requestId: number
   confirmedAt: number
+  createdAt: number
+  updatedAt: number
+  statusId: number
   _all: number
 }
 
@@ -64,6 +73,9 @@ export type MentorSlotOfferMinAggregateInputType = {
   expiresAt?: true
   requestId?: true
   confirmedAt?: true
+  createdAt?: true
+  updatedAt?: true
+  statusId?: true
 }
 
 export type MentorSlotOfferMaxAggregateInputType = {
@@ -74,6 +86,9 @@ export type MentorSlotOfferMaxAggregateInputType = {
   expiresAt?: true
   requestId?: true
   confirmedAt?: true
+  createdAt?: true
+  updatedAt?: true
+  statusId?: true
 }
 
 export type MentorSlotOfferCountAggregateInputType = {
@@ -84,6 +99,9 @@ export type MentorSlotOfferCountAggregateInputType = {
   expiresAt?: true
   requestId?: true
   confirmedAt?: true
+  createdAt?: true
+  updatedAt?: true
+  statusId?: true
   _all?: true
 }
 
@@ -167,6 +185,9 @@ export type MentorSlotOfferGroupByOutputType = {
   expiresAt: Date
   requestId: string | null
   confirmedAt: Date | null
+  createdAt: Date
+  updatedAt: Date
+  statusId: string
   _count: MentorSlotOfferCountAggregateOutputType | null
   _min: MentorSlotOfferMinAggregateOutputType | null
   _max: MentorSlotOfferMaxAggregateOutputType | null
@@ -198,8 +219,12 @@ export type MentorSlotOfferWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
   requestId?: Prisma.UuidNullableFilter<"MentorSlotOffer"> | string | null
   confirmedAt?: Prisma.DateTimeNullableFilter<"MentorSlotOffer"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
+  statusId?: Prisma.UuidFilter<"MentorSlotOffer"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   request?: Prisma.XOR<Prisma.MentorParticipationRequestNullableScalarRelationFilter, Prisma.MentorParticipationRequestWhereInput> | null
+  statusCatalog?: Prisma.XOR<Prisma.MentorOfferStatusScalarRelationFilter, Prisma.MentorOfferStatusWhereInput>
 }
 
 export type MentorSlotOfferOrderByWithRelationInput = {
@@ -210,8 +235,12 @@ export type MentorSlotOfferOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrder
   requestId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   request?: Prisma.MentorParticipationRequestOrderByWithRelationInput
+  statusCatalog?: Prisma.MentorOfferStatusOrderByWithRelationInput
 }
 
 export type MentorSlotOfferWhereUniqueInput = Prisma.AtLeast<{
@@ -225,8 +254,12 @@ export type MentorSlotOfferWhereUniqueInput = Prisma.AtLeast<{
   offeredAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
   confirmedAt?: Prisma.DateTimeNullableFilter<"MentorSlotOffer"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
+  statusId?: Prisma.UuidFilter<"MentorSlotOffer"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   request?: Prisma.XOR<Prisma.MentorParticipationRequestNullableScalarRelationFilter, Prisma.MentorParticipationRequestWhereInput> | null
+  statusCatalog?: Prisma.XOR<Prisma.MentorOfferStatusScalarRelationFilter, Prisma.MentorOfferStatusWhereInput>
 }, "id" | "requestId">
 
 export type MentorSlotOfferOrderByWithAggregationInput = {
@@ -237,6 +270,9 @@ export type MentorSlotOfferOrderByWithAggregationInput = {
   expiresAt?: Prisma.SortOrder
   requestId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   _count?: Prisma.MentorSlotOfferCountOrderByAggregateInput
   _max?: Prisma.MentorSlotOfferMaxOrderByAggregateInput
   _min?: Prisma.MentorSlotOfferMinOrderByAggregateInput
@@ -253,6 +289,9 @@ export type MentorSlotOfferScalarWhereWithAggregatesInput = {
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"MentorSlotOffer"> | Date | string
   requestId?: Prisma.UuidNullableWithAggregatesFilter<"MentorSlotOffer"> | string | null
   confirmedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MentorSlotOffer"> | Date | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"MentorSlotOffer"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorSlotOffer"> | Date | string
+  statusId?: Prisma.UuidWithAggregatesFilter<"MentorSlotOffer"> | string
 }
 
 export type MentorSlotOfferCreateInput = {
@@ -261,8 +300,11 @@ export type MentorSlotOfferCreateInput = {
   offeredAt?: Date | string
   expiresAt: Date | string
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorSlotOffersInput
   request?: Prisma.MentorParticipationRequestCreateNestedOneWithoutOfferInput
+  statusCatalog?: Prisma.MentorOfferStatusCreateNestedOneWithoutRecordsInput
 }
 
 export type MentorSlotOfferUncheckedCreateInput = {
@@ -273,6 +315,9 @@ export type MentorSlotOfferUncheckedCreateInput = {
   expiresAt: Date | string
   requestId?: string | null
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  statusId?: string
 }
 
 export type MentorSlotOfferUpdateInput = {
@@ -281,8 +326,11 @@ export type MentorSlotOfferUpdateInput = {
   offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorSlotOffersNestedInput
   request?: Prisma.MentorParticipationRequestUpdateOneWithoutOfferNestedInput
+  statusCatalog?: Prisma.MentorOfferStatusUpdateOneRequiredWithoutRecordsNestedInput
 }
 
 export type MentorSlotOfferUncheckedUpdateInput = {
@@ -293,6 +341,9 @@ export type MentorSlotOfferUncheckedUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type MentorSlotOfferCreateManyInput = {
@@ -303,6 +354,9 @@ export type MentorSlotOfferCreateManyInput = {
   expiresAt: Date | string
   requestId?: string | null
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  statusId?: string
 }
 
 export type MentorSlotOfferUpdateManyMutationInput = {
@@ -311,6 +365,8 @@ export type MentorSlotOfferUpdateManyMutationInput = {
   offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorSlotOfferUncheckedUpdateManyInput = {
@@ -321,6 +377,9 @@ export type MentorSlotOfferUncheckedUpdateManyInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type MentorSlotOfferListRelationFilter = {
@@ -346,6 +405,9 @@ export type MentorSlotOfferCountOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   requestId?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
 }
 
 export type MentorSlotOfferMaxOrderByAggregateInput = {
@@ -356,6 +418,9 @@ export type MentorSlotOfferMaxOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   requestId?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
 }
 
 export type MentorSlotOfferMinOrderByAggregateInput = {
@@ -366,6 +431,9 @@ export type MentorSlotOfferMinOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   requestId?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
 }
 
 export type MentorSlotOfferCreateNestedManyWithoutUserInput = {
@@ -442,13 +510,58 @@ export type MentorSlotOfferUncheckedUpdateOneWithoutRequestNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MentorSlotOfferUpdateToOneWithWhereWithoutRequestInput, Prisma.MentorSlotOfferUpdateWithoutRequestInput>, Prisma.MentorSlotOfferUncheckedUpdateWithoutRequestInput>
 }
 
+export type MentorSlotOfferCreateNestedManyWithoutStatusCatalogInput = {
+  create?: Prisma.XOR<Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput> | Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput[] | Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput[]
+  connectOrCreate?: Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput | Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput[]
+  createMany?: Prisma.MentorSlotOfferCreateManyStatusCatalogInputEnvelope
+  connect?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+}
+
+export type MentorSlotOfferUncheckedCreateNestedManyWithoutStatusCatalogInput = {
+  create?: Prisma.XOR<Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput> | Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput[] | Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput[]
+  connectOrCreate?: Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput | Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput[]
+  createMany?: Prisma.MentorSlotOfferCreateManyStatusCatalogInputEnvelope
+  connect?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+}
+
+export type MentorSlotOfferUpdateManyWithoutStatusCatalogNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput> | Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput[] | Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput[]
+  connectOrCreate?: Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput | Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput[]
+  upsert?: Prisma.MentorSlotOfferUpsertWithWhereUniqueWithoutStatusCatalogInput | Prisma.MentorSlotOfferUpsertWithWhereUniqueWithoutStatusCatalogInput[]
+  createMany?: Prisma.MentorSlotOfferCreateManyStatusCatalogInputEnvelope
+  set?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  disconnect?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  delete?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  connect?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  update?: Prisma.MentorSlotOfferUpdateWithWhereUniqueWithoutStatusCatalogInput | Prisma.MentorSlotOfferUpdateWithWhereUniqueWithoutStatusCatalogInput[]
+  updateMany?: Prisma.MentorSlotOfferUpdateManyWithWhereWithoutStatusCatalogInput | Prisma.MentorSlotOfferUpdateManyWithWhereWithoutStatusCatalogInput[]
+  deleteMany?: Prisma.MentorSlotOfferScalarWhereInput | Prisma.MentorSlotOfferScalarWhereInput[]
+}
+
+export type MentorSlotOfferUncheckedUpdateManyWithoutStatusCatalogNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput> | Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput[] | Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput[]
+  connectOrCreate?: Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput | Prisma.MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput[]
+  upsert?: Prisma.MentorSlotOfferUpsertWithWhereUniqueWithoutStatusCatalogInput | Prisma.MentorSlotOfferUpsertWithWhereUniqueWithoutStatusCatalogInput[]
+  createMany?: Prisma.MentorSlotOfferCreateManyStatusCatalogInputEnvelope
+  set?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  disconnect?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  delete?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  connect?: Prisma.MentorSlotOfferWhereUniqueInput | Prisma.MentorSlotOfferWhereUniqueInput[]
+  update?: Prisma.MentorSlotOfferUpdateWithWhereUniqueWithoutStatusCatalogInput | Prisma.MentorSlotOfferUpdateWithWhereUniqueWithoutStatusCatalogInput[]
+  updateMany?: Prisma.MentorSlotOfferUpdateManyWithWhereWithoutStatusCatalogInput | Prisma.MentorSlotOfferUpdateManyWithWhereWithoutStatusCatalogInput[]
+  deleteMany?: Prisma.MentorSlotOfferScalarWhereInput | Prisma.MentorSlotOfferScalarWhereInput[]
+}
+
 export type MentorSlotOfferCreateWithoutUserInput = {
   id?: string
   status?: string
   offeredAt?: Date | string
   expiresAt: Date | string
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   request?: Prisma.MentorParticipationRequestCreateNestedOneWithoutOfferInput
+  statusCatalog?: Prisma.MentorOfferStatusCreateNestedOneWithoutRecordsInput
 }
 
 export type MentorSlotOfferUncheckedCreateWithoutUserInput = {
@@ -458,6 +571,9 @@ export type MentorSlotOfferUncheckedCreateWithoutUserInput = {
   expiresAt: Date | string
   requestId?: string | null
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  statusId?: string
 }
 
 export type MentorSlotOfferCreateOrConnectWithoutUserInput = {
@@ -497,6 +613,9 @@ export type MentorSlotOfferScalarWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
   requestId?: Prisma.UuidNullableFilter<"MentorSlotOffer"> | string | null
   confirmedAt?: Prisma.DateTimeNullableFilter<"MentorSlotOffer"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorSlotOffer"> | Date | string
+  statusId?: Prisma.UuidFilter<"MentorSlotOffer"> | string
 }
 
 export type MentorSlotOfferCreateWithoutRequestInput = {
@@ -505,7 +624,10 @@ export type MentorSlotOfferCreateWithoutRequestInput = {
   offeredAt?: Date | string
   expiresAt: Date | string
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorSlotOffersInput
+  statusCatalog?: Prisma.MentorOfferStatusCreateNestedOneWithoutRecordsInput
 }
 
 export type MentorSlotOfferUncheckedCreateWithoutRequestInput = {
@@ -515,6 +637,9 @@ export type MentorSlotOfferUncheckedCreateWithoutRequestInput = {
   offeredAt?: Date | string
   expiresAt: Date | string
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  statusId?: string
 }
 
 export type MentorSlotOfferCreateOrConnectWithoutRequestInput = {
@@ -539,7 +664,10 @@ export type MentorSlotOfferUpdateWithoutRequestInput = {
   offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorSlotOffersNestedInput
+  statusCatalog?: Prisma.MentorOfferStatusUpdateOneRequiredWithoutRecordsNestedInput
 }
 
 export type MentorSlotOfferUncheckedUpdateWithoutRequestInput = {
@@ -549,6 +677,59 @@ export type MentorSlotOfferUncheckedUpdateWithoutRequestInput = {
   offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type MentorSlotOfferCreateWithoutStatusCatalogInput = {
+  id?: string
+  status?: string
+  offeredAt?: Date | string
+  expiresAt: Date | string
+  confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMentorSlotOffersInput
+  request?: Prisma.MentorParticipationRequestCreateNestedOneWithoutOfferInput
+}
+
+export type MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput = {
+  id?: string
+  userId: string
+  status?: string
+  offeredAt?: Date | string
+  expiresAt: Date | string
+  requestId?: string | null
+  confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorSlotOfferCreateOrConnectWithoutStatusCatalogInput = {
+  where: Prisma.MentorSlotOfferWhereUniqueInput
+  create: Prisma.XOR<Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput>
+}
+
+export type MentorSlotOfferCreateManyStatusCatalogInputEnvelope = {
+  data: Prisma.MentorSlotOfferCreateManyStatusCatalogInput | Prisma.MentorSlotOfferCreateManyStatusCatalogInput[]
+  skipDuplicates?: boolean
+}
+
+export type MentorSlotOfferUpsertWithWhereUniqueWithoutStatusCatalogInput = {
+  where: Prisma.MentorSlotOfferWhereUniqueInput
+  update: Prisma.XOR<Prisma.MentorSlotOfferUpdateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedUpdateWithoutStatusCatalogInput>
+  create: Prisma.XOR<Prisma.MentorSlotOfferCreateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedCreateWithoutStatusCatalogInput>
+}
+
+export type MentorSlotOfferUpdateWithWhereUniqueWithoutStatusCatalogInput = {
+  where: Prisma.MentorSlotOfferWhereUniqueInput
+  data: Prisma.XOR<Prisma.MentorSlotOfferUpdateWithoutStatusCatalogInput, Prisma.MentorSlotOfferUncheckedUpdateWithoutStatusCatalogInput>
+}
+
+export type MentorSlotOfferUpdateManyWithWhereWithoutStatusCatalogInput = {
+  where: Prisma.MentorSlotOfferScalarWhereInput
+  data: Prisma.XOR<Prisma.MentorSlotOfferUpdateManyMutationInput, Prisma.MentorSlotOfferUncheckedUpdateManyWithoutStatusCatalogInput>
 }
 
 export type MentorSlotOfferCreateManyUserInput = {
@@ -558,6 +739,9 @@ export type MentorSlotOfferCreateManyUserInput = {
   expiresAt: Date | string
   requestId?: string | null
   confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  statusId?: string
 }
 
 export type MentorSlotOfferUpdateWithoutUserInput = {
@@ -566,7 +750,10 @@ export type MentorSlotOfferUpdateWithoutUserInput = {
   offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   request?: Prisma.MentorParticipationRequestUpdateOneWithoutOfferNestedInput
+  statusCatalog?: Prisma.MentorOfferStatusUpdateOneRequiredWithoutRecordsNestedInput
 }
 
 export type MentorSlotOfferUncheckedUpdateWithoutUserInput = {
@@ -576,6 +763,9 @@ export type MentorSlotOfferUncheckedUpdateWithoutUserInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type MentorSlotOfferUncheckedUpdateManyWithoutUserInput = {
@@ -585,6 +775,57 @@ export type MentorSlotOfferUncheckedUpdateManyWithoutUserInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type MentorSlotOfferCreateManyStatusCatalogInput = {
+  id?: string
+  userId: string
+  status?: string
+  offeredAt?: Date | string
+  expiresAt: Date | string
+  requestId?: string | null
+  confirmedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorSlotOfferUpdateWithoutStatusCatalogInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutMentorSlotOffersNestedInput
+  request?: Prisma.MentorParticipationRequestUpdateOneWithoutOfferNestedInput
+}
+
+export type MentorSlotOfferUncheckedUpdateWithoutStatusCatalogInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorSlotOfferUncheckedUpdateManyWithoutStatusCatalogInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  offeredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  requestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -597,8 +838,12 @@ export type MentorSlotOfferSelect<ExtArgs extends runtime.Types.Extensions.Inter
   expiresAt?: boolean
   requestId?: boolean
   confirmedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  statusId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   request?: boolean | Prisma.MentorSlotOffer$requestArgs<ExtArgs>
+  statusCatalog?: boolean | Prisma.MentorOfferStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorSlotOffer"]>
 
 export type MentorSlotOfferSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -609,8 +854,12 @@ export type MentorSlotOfferSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   expiresAt?: boolean
   requestId?: boolean
   confirmedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  statusId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   request?: boolean | Prisma.MentorSlotOffer$requestArgs<ExtArgs>
+  statusCatalog?: boolean | Prisma.MentorOfferStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorSlotOffer"]>
 
 export type MentorSlotOfferSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -621,8 +870,12 @@ export type MentorSlotOfferSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   expiresAt?: boolean
   requestId?: boolean
   confirmedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  statusId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   request?: boolean | Prisma.MentorSlotOffer$requestArgs<ExtArgs>
+  statusCatalog?: boolean | Prisma.MentorOfferStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorSlotOffer"]>
 
 export type MentorSlotOfferSelectScalar = {
@@ -633,20 +886,26 @@ export type MentorSlotOfferSelectScalar = {
   expiresAt?: boolean
   requestId?: boolean
   confirmedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  statusId?: boolean
 }
 
-export type MentorSlotOfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "status" | "offeredAt" | "expiresAt" | "requestId" | "confirmedAt", ExtArgs["result"]["mentorSlotOffer"]>
+export type MentorSlotOfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "status" | "offeredAt" | "expiresAt" | "requestId" | "confirmedAt" | "createdAt" | "updatedAt" | "statusId", ExtArgs["result"]["mentorSlotOffer"]>
 export type MentorSlotOfferInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   request?: boolean | Prisma.MentorSlotOffer$requestArgs<ExtArgs>
+  statusCatalog?: boolean | Prisma.MentorOfferStatusDefaultArgs<ExtArgs>
 }
 export type MentorSlotOfferIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   request?: boolean | Prisma.MentorSlotOffer$requestArgs<ExtArgs>
+  statusCatalog?: boolean | Prisma.MentorOfferStatusDefaultArgs<ExtArgs>
 }
 export type MentorSlotOfferIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   request?: boolean | Prisma.MentorSlotOffer$requestArgs<ExtArgs>
+  statusCatalog?: boolean | Prisma.MentorOfferStatusDefaultArgs<ExtArgs>
 }
 
 export type $MentorSlotOfferPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -654,15 +913,22 @@ export type $MentorSlotOfferPayload<ExtArgs extends runtime.Types.Extensions.Int
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     request: Prisma.$MentorParticipationRequestPayload<ExtArgs> | null
+    statusCatalog: Prisma.$MentorOfferStatusPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    /**
+     * Compatibilidad con SQL existente; el trigger sincroniza y valida el catálogo.
+     */
     status: string
     offeredAt: Date
     expiresAt: Date
     requestId: string | null
     confirmedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    statusId: string
   }, ExtArgs["result"]["mentorSlotOffer"]>
   composites: {}
 }
@@ -1059,6 +1325,7 @@ export interface Prisma__MentorSlotOfferClient<T, Null = never, ExtArgs extends 
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   request<T extends Prisma.MentorSlotOffer$requestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorSlotOffer$requestArgs<ExtArgs>>): Prisma.Prisma__MentorParticipationRequestClient<runtime.Types.Result.GetResult<Prisma.$MentorParticipationRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  statusCatalog<T extends Prisma.MentorOfferStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorOfferStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__MentorOfferStatusClient<runtime.Types.Result.GetResult<Prisma.$MentorOfferStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1095,6 +1362,9 @@ export interface MentorSlotOfferFieldRefs {
   readonly expiresAt: Prisma.FieldRef<"MentorSlotOffer", 'DateTime'>
   readonly requestId: Prisma.FieldRef<"MentorSlotOffer", 'String'>
   readonly confirmedAt: Prisma.FieldRef<"MentorSlotOffer", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"MentorSlotOffer", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"MentorSlotOffer", 'DateTime'>
+  readonly statusId: Prisma.FieldRef<"MentorSlotOffer", 'String'>
 }
     
 

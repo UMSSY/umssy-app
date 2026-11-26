@@ -1,8 +1,6 @@
-import type {
-  AffinityAxis,
-  Candidate,
-  Vacancy,
-} from "../types/matching-types";
+import type { AffinityAxis } from "../types/affinity-axis.types";
+import type { Candidate } from "../types/candidate.types";
+import type { Vacancy } from "../types/vacancy.types";
 
 export const AFFINITY_AXES: AffinityAxis[] = [
   { id: "desarrollo", label: "Desarrollo" },

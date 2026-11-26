@@ -58,7 +58,10 @@ describe('EventRegistrationsService.support', () => {
 
   beforeEach(() => {
     registerSupport.mockReset();
-    service = new EventRegistrationsService(new EventRegistrationsRepository({} as never), {} as never);
+    service = new EventRegistrationsService(
+      new EventRegistrationsRepository({} as never),
+      {} as never,
+    );
     vi.spyOn(service, 'registerSupport').mockImplementation(registerSupport);
   });
 

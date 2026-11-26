@@ -10,6 +10,3 @@ export const PROPOSAL_SUPPORT_ERROR_MESSAGES = {
   VALIDATION_ERROR: 'La propuesta seleccionada no es válida. Actualiza el listado.',
   INTERNAL_ERROR: 'No pudimos registrar tu apoyo. Inténtalo nuevamente.',
 } as const;
-
-export const DEFAULT_PROPOSAL_SUPPORT_ERROR_MESSAGE =
-  'No pudimos registrar tu apoyo. Revisa la conexión e inténtalo nuevamente.';

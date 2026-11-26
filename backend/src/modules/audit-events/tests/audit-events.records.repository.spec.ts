@@ -12,7 +12,10 @@ function build() {
     count: vi.fn(),
     findUnique: vi.fn().mockResolvedValue(null),
   };
-  return { auditEvent, repository: new AuditEventsRepository({ auditEvent } as any) };
+  return {
+    auditEvent,
+    repository: new AuditEventsRepository({ auditEvent } as any),
+  };
 }
 
 const INPUT: RecordAuditEventInput = {
@@ -41,7 +44,12 @@ describe('AuditEventsRepository.create', () => {
       actorName: 'Carla Montaño',
       actorRole: 'administrativo',
       accessRequest: { connect: { id: 'req-1' } },
-      action: { connectOrCreate: { where: { title: 'approved' }, create: { title: 'approved' } } },
+      action: {
+        connectOrCreate: {
+          where: { title: 'approved' },
+          create: { title: 'approved' },
+        },
+      },
       actor: { connect: { id: 'admin-1' } },
       evidenceFile: { connect: { id: 'file-1' } },
     });
@@ -53,7 +61,11 @@ describe('AuditEventsRepository.create', () => {
   it('un evento del Sistema sin documento no conecta usuario ni archivo', async () => {
     const { auditEvent, repository } = build();
 
-    await repository.create({ ...INPUT, actor: { id: null, name: 'Sistema', role: 'sistema' }, evidenceFileId: null });
+    await repository.create({
+      ...INPUT,
+      actor: { id: null, name: 'Sistema', role: 'sistema' },
+      evidenceFileId: null,
+    });
 
     const { data } = auditEvent.create.mock.calls[0][0];
     expect(data.actor).toBeUndefined();
@@ -62,7 +74,9 @@ describe('AuditEventsRepository.create', () => {
 
   it('usa el cliente de la transacción cuando se le pasa', async () => {
     const { auditEvent, repository } = build();
-    const tx = { auditEvent: { create: vi.fn().mockResolvedValue({ id: 'evt-2' }) } };
+    const tx = {
+      auditEvent: { create: vi.fn().mockResolvedValue({ id: 'evt-2' }) },
+    };
 
     await repository.create(INPUT, tx as any);
 
@@ -75,9 +89,18 @@ describe('AuditEventsRepository: exportación', () => {
   it('findBatch usa el mismo filtro y orden del listado sin contar', async () => {
     const { auditEvent, repository } = build();
 
-    await repository.findBatch({ filters: { responsibleId: UUID }, skip: 500, take: 500 });
+    await repository.findBatch({
+      filters: { responsibleId: UUID },
+      skip: 500,
+      take: 500,
+    });
 
-    expect(auditEvent.findMany.mock.calls[0][0]).toMatchObject({ where: { AND: [{ actorId: UUID }] }, orderBy: AUDIT_EVENT_ORDER, skip: 500, take: 500 });
+    expect(auditEvent.findMany.mock.calls[0][0]).toMatchObject({
+      where: { AND: [{ actorId: UUID }] },
+      orderBy: AUDIT_EVENT_ORDER,
+      skip: 500,
+      take: 500,
+    });
     expect(auditEvent.count).not.toHaveBeenCalled();
   });
 });

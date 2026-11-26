@@ -5,7 +5,13 @@ export * from './types/attachment.types';
 export * from './types/link-preview.types';
 export * from './contexts/socket-context';
 export { ChatPanel, ChatDock } from "./components/chat-panel";
-export { MessagingUiProvider } from "./contexts/messaging-ui-context";
+export {
+  MessagingUiProvider,
+  useMessagingUi,
+} from "./contexts/messaging-ui-context";
+export { getOrCreateConversation } from "./services/chat-api";
+export { useOpenContextualChat } from "./hooks/use-open-contextual-chat";
+export type { OpenContextualChatParams } from "./types/open-contextual-chat-params.types";
 export { ChatImageThumbnail } from "./components/chat-image-thumbnail";
 export { ChatPdfCard } from "./components/chat-pdf-card";
 export { ChatLinkPreviewCard } from "./components/chat-link-preview-card";
@@ -25,6 +31,8 @@ export type {
   EventRoomEmptyStateProps,
 } from "./types";
 export { useLinkPreview } from "./hooks/use-link-preview";
+export { useConversationVisibility } from "./hooks/use-conversation-visibility";
+export { getActiveConversationId } from "./services/active-conversation";
 export {
   parseMessageWithLinks,
   extractFirstValidUrl,

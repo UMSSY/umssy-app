@@ -4,6 +4,7 @@ import { seedCitiesCatalog } from '../../modules/profile/seeds/cities-catalog.se
 import { seedRadarAreasCatalog } from '../../modules/profile/seeds/radar-areas-catalog.seed.js';
 import { seedSkillsCatalog } from '../../modules/skills/seeds/skills-catalog.seed.js';
 import { seedCatalogStages } from './catalog-stages.js';
+import { seedNotificationTypes } from '../../modules/notifications/seeds/notification-types-catalog.seed.js';
 
 export async function seedRequiredCatalogs(
   tx: Prisma.TransactionClient,
@@ -13,4 +14,5 @@ export async function seedRequiredCatalogs(
   await seedRadarAreasCatalog(tx);
   await seedSkillsCatalog(tx);
   await seedCatalogStages(tx);
+  await seedNotificationTypes(tx);
 }

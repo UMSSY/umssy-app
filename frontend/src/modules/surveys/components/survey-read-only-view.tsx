@@ -12,7 +12,7 @@ import {
 } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
-import type { SurveyReadOnlyViewProps } from "../types/survey-component-props.types";
+import type { SurveyReadOnlyViewProps } from "../types/survey-read-only-view-props.types";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
 import { toSurveyBuilderState } from "../utils/to-survey-builder-state";
 import { PreviewQuestion } from "./preview-question";

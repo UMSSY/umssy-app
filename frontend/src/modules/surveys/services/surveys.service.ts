@@ -1,21 +1,20 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import { getFileNameFromDisposition } from "@/shared/utils/download-file";
-import type {
-  Career,
-  CreateSurveyPayload,
-  CreatedSurvey,
-  SurveyDetail,
-  SurveyStatistics,
-  SurveySummary,
-} from "../types/survey.types";
-import type { SubmitSurveyPayload } from "../types/survey-answer.types";
-import { SURVEY_SAVE_TIMEOUT_MS } from "../constants/surveys-query-keys.constants";
+import type { Career } from "../types/career.types";
+import type { CreateSurveyPayload } from "../types/create-survey-payload.types";
+import type { CreatedSurvey } from "../types/created-survey.types";
+import type { SurveyDetail } from "../types/survey-detail.types";
+import type { SurveyStatistics } from "../types/survey-statistics.types";
+import type { SurveySummary } from "../types/survey-summary.types";
+import type { SubmitSurveyPayload } from "../types/submit-survey-payload.types";
 
 export const surveysService = {
-  createSurvey: async (payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
+  createSurvey: async (
+    payload: CreateSurveyPayload,
+  ): Promise<ApiResponse<CreatedSurvey>> => {
     const { data } = await apiClient.post<ApiResponse<CreatedSurvey>>("/surveys", payload, {
-      timeout: SURVEY_SAVE_TIMEOUT_MS,
+      timeout: 15_000,
     });
     return data;
   },
@@ -31,25 +30,42 @@ export const surveysService = {
   },
 
   getSurvey: async (id: string): Promise<ApiResponse<SurveyDetail>> => {
-    const { data } = await apiClient.get<ApiResponse<SurveyDetail>>(`/surveys/${id}`);
+    const { data } = await apiClient.get<ApiResponse<SurveyDetail>>(
+      `/surveys/${id}`,
+    );
     return data;
   },
 
-  updateSurvey: async (id: string, payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
-    const { data } = await apiClient.patch<ApiResponse<CreatedSurvey>>(`/surveys/${id}`, payload, {
-      timeout: SURVEY_SAVE_TIMEOUT_MS,
-    });
+  updateSurvey: async (
+    id: string,
+    payload: CreateSurveyPayload,
+  ): Promise<ApiResponse<CreatedSurvey>> => {
+    const { data } = await apiClient.patch<ApiResponse<CreatedSurvey>>(
+      `/surveys/${id}`,
+      payload,
+      {
+        timeout: 15_000,
+      },
+    );
     return data;
   },
 
   unpublishSurvey: async (id: string): Promise<void> => {
-    await apiClient.patch(`/surveys/${id}/unpublish`, undefined, { timeout: SURVEY_SAVE_TIMEOUT_MS });
+    await apiClient.patch(`/surveys/${id}/unpublish`, undefined, {
+      timeout: 15_000,
+    });
   },
 
-  getSurveyStatistics: async (id: string, period?: string): Promise<ApiResponse<SurveyStatistics>> => {
-    const { data } = await apiClient.get<ApiResponse<SurveyStatistics>>(`/surveys/${id}/statistics`, {
-      params: { period },
-    });
+  getSurveyStatistics: async (
+    id: string,
+    period?: string,
+  ): Promise<ApiResponse<SurveyStatistics>> => {
+    const { data } = await apiClient.get<ApiResponse<SurveyStatistics>>(
+      `/surveys/${id}/statistics`,
+      {
+        params: { period },
+      },
+    );
     return data;
   },
 
@@ -57,15 +73,17 @@ export const surveysService = {
     id: string,
     payload: SubmitSurveyPayload,
   ): Promise<ApiResponse<{ success: boolean; message: string }>> => {
-    const { data } = await apiClient.post<ApiResponse<{ success: boolean; message: string }>>(
-      `/surveys/${id}/responses`,
-      payload,
-    );
+    const { data } = await apiClient.post<
+      ApiResponse<{ success: boolean; message: string }>
+    >(`/surveys/${id}/responses`, payload);
     return data;
   },
 
-  exportSurveyPdf: async (id: string, period?: string): Promise<{ file: Blob; fileName: string }> => {
-    const response = await apiClient.get<Blob>(`/surveys/${id}/export-pdf`, {
+  exportSurveyPdf: async (
+    id: string,
+    period?: string,
+  ): Promise<{ file: Blob; fileName: string }> => {
+    const response = await apiClient.get<Blob>(`/surveys/${id}/report`, {
       responseType: "blob",
       params: { period },
     });
@@ -78,5 +96,3 @@ export const surveysService = {
     };
   },
 };
-
-

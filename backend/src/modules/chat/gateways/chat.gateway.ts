@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, Optional } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -12,10 +12,13 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
+import { SOCKET_CORS_CONFIG } from '../../../common/utils/cors-origins.js';
+import { extractSocketAccessToken } from '../../../common/utils/extract-socket-access-token.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
+import { ChatVisibilityService } from '../services/chat-visibility.service.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 import { eventRoomJoinSchema } from '../requests/event-room-join.request.js';
 import type { SocketMessagePayload } from '../types/socket-message-payload.types.js';
@@ -27,9 +30,7 @@ import type { MessageResponse } from '../responses/message.response.js';
 @WebSocketGateway({
   namespace: '/chat',
   path: '/api/socket.io',
-  cors: {
-    origin: '*',
-  },
+  cors: SOCKET_CORS_CONFIG,
 })
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -46,17 +47,22 @@ export class ChatGateway
     private readonly userPresenceService: UserPresenceService,
     private readonly messageService: MessageService,
     private readonly eventRoomService: EventRoomService,
+    @Optional()
+    private readonly chatVisibilityService?: ChatVisibilityService,
   ) {}
 
   afterInit(server: Server) {
     server.use(async (socket: Socket, next: (error?: Error) => void) => {
       try {
-        const token = socket.handshake.auth?.token;
+        const token = extractSocketAccessToken(socket.handshake);
         if (!token) {
           return next(new Error('unauthorized'));
         }
 
         const payload = await this.jwtService.verifyAsync(token);
+        if (payload.sid !== undefined) {
+          await this.sessionService.assertSessionActive(payload.sid);
+        }
         const user = await this.sessionService.getAuthenticatedUser(
           payload.sub,
         );
@@ -111,6 +117,8 @@ export class ChatGateway
     const user = client.data.user;
     if (!user) return;
 
+    this.chatVisibilityService?.removeSocket(user.id, client.id);
+
     try {
       await this.userPresenceService.markOffline(user.id);
       this.server.emit('presence:offline', {
@@ -164,6 +172,39 @@ export class ChatGateway
         error: 'No se pudo abrir la conversación',
       };
     }
+  }
+
+  @SubscribeMessage('visibility:changed')
+  handleVisibilityChanged(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    body?: {
+      conversationId?: string | null;
+      isFocused?: boolean;
+      isOpen?: boolean;
+      visible?: boolean;
+    },
+  ) {
+    const user = client.data.user;
+    if (!user) return { ok: false };
+
+    const conversationId =
+      typeof body?.conversationId === 'string' ? body.conversationId : null;
+    const isFocused =
+      typeof body?.isFocused === 'boolean'
+        ? body.isFocused
+        : (body?.visible ?? true);
+    const isOpen = typeof body?.isOpen === 'boolean' ? body.isOpen : isFocused;
+
+    this.chatVisibilityService?.setConversationVisibility(
+      user.id,
+      client.id,
+      conversationId,
+      Boolean(isFocused),
+      Boolean(isOpen),
+    );
+
+    return { ok: true };
   }
 
   @SubscribeMessage('event_room:join')

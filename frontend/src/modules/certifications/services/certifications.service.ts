@@ -1,10 +1,11 @@
+import { NOT_FOUND_STATUS } from "@/shared/constants/http.constants";
 import { apiClient } from "@/shared/services/api-client";
 import {
   CERTIFICATION_DOCUMENT_FIELD_NAME,
   CERTIFICATIONS_ENDPOINT,
   getCertificationDocumentEndpoint,
 } from "../config/certification-api.config";
-import { NOT_FOUND_STATUS } from "@/modules/profile";
+
 import type { ApiResponse } from "@/modules/profile";
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
@@ -63,11 +64,11 @@ export const certificationsService = {
     await apiClient.delete(`${CERTIFICATIONS_ENDPOINT}/${id}`, { headers: getAuthHeaders() });
   },
 
-  uploadDocument: async (id: string, file: File): Promise<void> => {
+  uploadDocument: async (id: string, file: File, version?: string): Promise<void> => {
     const formData = new FormData();
     formData.append(CERTIFICATION_DOCUMENT_FIELD_NAME, file);
     await apiClient.put(getCertificationDocumentEndpoint(id), formData, {
-      headers: getAuthHeaders(),
+      headers: { ...getAuthHeaders(), ...(version && { "X-Document-Version": version }) },
     });
   },
 
@@ -86,7 +87,7 @@ export const certificationsService = {
     }
   },
 
-  deleteDocument: async (id: string): Promise<void> => {
-    await apiClient.delete(getCertificationDocumentEndpoint(id), { headers: getAuthHeaders() });
+  deleteDocument: async (id: string, version?: string): Promise<void> => {
+    await apiClient.delete(getCertificationDocumentEndpoint(id), { headers: { ...getAuthHeaders(), ...(version && { "X-Document-Version": version }) } });
   },
 };

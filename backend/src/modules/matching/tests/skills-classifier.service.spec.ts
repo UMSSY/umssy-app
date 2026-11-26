@@ -35,7 +35,10 @@ describe('SkillsClassifierService', () => {
   });
 
   it('ignora las palabras que no estan en el catalogo', () => {
-    const result = classifier.classify(['desarrollador', 'backend', 'equipo', 'python'], CATALOG);
+    const result = classifier.classify(
+      ['desarrollador', 'backend', 'equipo', 'python'],
+      CATALOG,
+    );
 
     expect(result).toEqual([{ id: 'a1', name: 'Python' }]);
   });
@@ -58,9 +61,12 @@ describe('SkillsClassifierService', () => {
     ['C++', { id: 'g7', name: 'C++' }],
     ['c#', { id: 'h8', name: 'C#' }],
     ['.net', { id: 'i9', name: '.NET' }],
-  ])('conserva los signos de la clave al comparar (%s)', (candidate, expected) => {
-    expect(classifier.classify([candidate], CATALOG)).toEqual([expected]);
-  });
+  ])(
+    'conserva los signos de la clave al comparar (%s)',
+    (candidate, expected) => {
+      expect(classifier.classify([candidate], CATALOG)).toEqual([expected]);
+    },
+  );
 
   it('no confunde C, C++ y C# entre si', () => {
     const catalog = [
@@ -69,9 +75,15 @@ describe('SkillsClassifierService', () => {
       { id: '3', name: 'C#' },
     ];
 
-    expect(classifier.classify(['c'], catalog)).toEqual([{ id: '2', name: 'C' }]);
-    expect(classifier.classify(['c++'], catalog)).toEqual([{ id: '1', name: 'C++' }]);
-    expect(classifier.classify(['c#'], catalog)).toEqual([{ id: '3', name: 'C#' }]);
+    expect(classifier.classify(['c'], catalog)).toEqual([
+      { id: '2', name: 'C' },
+    ]);
+    expect(classifier.classify(['c++'], catalog)).toEqual([
+      { id: '1', name: 'C++' },
+    ]);
+    expect(classifier.classify(['c#'], catalog)).toEqual([
+      { id: '3', name: 'C#' },
+    ]);
   });
 
   it('ignora las tildes al comparar', () => {
@@ -83,7 +95,10 @@ describe('SkillsClassifierService', () => {
   });
 
   it('no repite una habilidad que aparece varias veces', () => {
-    const result = classifier.classify(['python', 'django', 'python', 'PYTHON'], CATALOG);
+    const result = classifier.classify(
+      ['python', 'django', 'python', 'PYTHON'],
+      CATALOG,
+    );
 
     expect(result.map((skill) => skill.id)).toEqual(['a1', 'b2']);
   });
@@ -98,9 +113,12 @@ describe('SkillsClassifierService', () => {
     [[], CATALOG],
     [['python'], []],
     [['', '   '], CATALOG],
-  ])('responde una lista vacia si no hay nada que detectar (%o)', (candidates, catalog) => {
-    expect(classifier.classify(candidates, catalog)).toEqual([]);
-  });
+  ])(
+    'responde una lista vacia si no hay nada que detectar (%o)',
+    (candidates, catalog) => {
+      expect(classifier.classify(candidates, catalog)).toEqual([]);
+    },
+  );
 
   describe('nombres que quedan iguales tras la normalizacion', () => {
     it('conserva solo la habilidad escrita igual que la clave', () => {
@@ -109,7 +127,9 @@ describe('SkillsClassifierService', () => {
         { id: '2', name: 'Diseno' },
       ];
 
-      expect(classifier.classify(['diseno'], catalog)).toEqual([{ id: '2', name: 'Diseno' }]);
+      expect(classifier.classify(['diseno'], catalog)).toEqual([
+        { id: '2', name: 'Diseno' },
+      ]);
     });
 
     it('descarta la clave ambigua si ninguna se escribe igual', () => {
@@ -125,10 +145,16 @@ describe('SkillsClassifierService', () => {
   it('funciona de punta a punta con el texto del wireframe de HU-01', () => {
     const text =
       'Trabajé como desarrollador backend usando Python y Django, aplicando metodologías Scrum con un equipo proactivo y puntual.';
-    const candidates = nlpService.tokenizeAndFilter(nlpService.normalizeText(text));
+    const candidates = nlpService.tokenizeAndFilter(
+      nlpService.normalizeText(text),
+    );
 
     const result = classifier.classify(candidates, CATALOG);
 
-    expect(result.map((skill) => skill.name)).toEqual(['Python', 'Django', 'Scrum']);
+    expect(result.map((skill) => skill.name)).toEqual([
+      'Python',
+      'Django',
+      'Scrum',
+    ]);
   });
 });

@@ -14,7 +14,7 @@ const samplePdfAttachment: MessageAttachment = {
   fileName: "Oferta_desarrollo_web_v2.pdf",
   mimeType: "application/pdf",
   fileSize: 245 * 1024,
-  url: "/api/chat/attachments/att-pdf-1/download",
+  url: "/api/chat/attachments/att-pdf-1/file",
   type: "PDF",
 };
 

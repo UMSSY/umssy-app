@@ -12,14 +12,27 @@ describe('HTTP error normalization', () => {
     [new HttpException('Private details', 503), 503, 'INTERNAL_ERROR'],
     [new Error('Database credentials'), 500, 'INTERNAL_ERROR'],
     ['unexpected rejection', 500, 'INTERNAL_ERROR'],
-  ])('preserves the status and hides unexpected details: %s', (error, statusCode, code) => {
-    vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-    const json = vi.fn();
-    const status = vi.fn().mockReturnValue({ json });
-    new DomainExceptionFilter().catch(error, { switchToHttp: () => ({ getResponse: () => ({ status }) }) } as unknown as ArgumentsHost);
-    expect(status).toHaveBeenCalledWith(statusCode);
-    expect(json).toHaveBeenCalledWith({ statusCode, ok: false, code, detail: expect.any(String), data: null });
-    expect(JSON.stringify(json.mock.calls)).not.toContain('Private details');
-    expect(JSON.stringify(json.mock.calls)).not.toContain('Database credentials');
-  });
+  ])(
+    'preserves the status and hides unexpected details: %s',
+    (error, statusCode, code) => {
+      vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+      const json = vi.fn();
+      const status = vi.fn().mockReturnValue({ json });
+      new DomainExceptionFilter().catch(error, {
+        switchToHttp: () => ({ getResponse: () => ({ status }) }),
+      } as unknown as ArgumentsHost);
+      expect(status).toHaveBeenCalledWith(statusCode);
+      expect(json).toHaveBeenCalledWith({
+        statusCode,
+        ok: false,
+        code,
+        detail: expect.any(String),
+        data: null,
+      });
+      expect(JSON.stringify(json.mock.calls)).not.toContain('Private details');
+      expect(JSON.stringify(json.mock.calls)).not.toContain(
+        'Database credentials',
+      );
+    },
+  );
 });

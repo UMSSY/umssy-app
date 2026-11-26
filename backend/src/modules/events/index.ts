@@ -1,9 +1,19 @@
 export { EventsModule } from './events.module.js';
 export { EventsService } from './services/events.service.js';
-export { PUBLISHED_STATUS_TITLE } from './constants/events.constants.js';
+export {
+  PUBLISHED_STATUS_TITLE,
+  FINISHED_STATUS_TITLE,
+} from './constants/events.constants.js';
 export type { EventSupportContext } from './types/event-support-context.types.js';
 export type { SupportEventRecord } from './types/support-event-record.types.js';
-export { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from './constants/events.constants.js';
+export {
+  COMMUNITY_ORIGIN_TITLE,
+  EXPIRED_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
+} from './constants/events.constants.js';
 export { EventNotFoundException } from './exceptions/event-not-found.exception.js';
 
 export type { RegistrationScheduleEvent } from './types/registration-schedule-event.types.js';
+export type { EventSessionResponse } from './types/event-session-response.types.js';
+export { mapEventSessions } from './mappers/event-session.mapper.js';
+export type { FinishedEventThreshold } from './types/finished-event-threshold.types.js';

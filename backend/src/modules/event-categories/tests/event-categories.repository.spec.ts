@@ -4,7 +4,10 @@ import { EventCategoriesRepository } from '../repositories/event-categories.repo
 describe('EventCategoriesRepository', () => {
   let repository: EventCategoriesRepository;
   let prismaMock: {
-    eventCategory: { findMany: ReturnType<typeof vi.fn>; count: ReturnType<typeof vi.fn> };
+    eventCategory: {
+      findMany: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+    };
     $transaction: ReturnType<typeof vi.fn>;
   };
 
@@ -14,7 +17,9 @@ describe('EventCategoriesRepository', () => {
         findMany: vi.fn(),
         count: vi.fn(),
       },
-      $transaction: vi.fn().mockImplementation((promises) => Promise.all(promises)),
+      $transaction: vi
+        .fn()
+        .mockImplementation((promises) => Promise.all(promises)),
     };
     repository = new EventCategoriesRepository(prismaMock as never);
   });
@@ -45,7 +50,9 @@ describe('EventCategoriesRepository', () => {
     expect(prismaMock.eventCategory.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.eventCategory.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.eventCategory.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('escapes wildcards in category search parameter', async () => {

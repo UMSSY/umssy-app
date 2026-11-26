@@ -12,7 +12,7 @@ import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useSurveyDetail } from "../hooks/use-survey-detail";
 import { useEditSurveyDraft } from "../hooks/use-edit-survey-draft";
 import { useUpdateSurvey } from "../hooks/use-update-survey";
-import type { SurveyDetailViewProps } from "../types/survey-component-props.types";
+import type { SurveyDetailViewProps } from "../types/survey-detail-view-props.types";
 import { toSurveyBuilderState } from "../utils/to-survey-builder-state";
 
 export function SurveyDetailView({ id }: SurveyDetailViewProps) {

@@ -1,4 +1,5 @@
 "use client";
+import type { JobRecommendationCardProps } from "../types/job-recommendation-card-props.types";
 
 import Link from "next/link";
 import { Check, MapPin } from "lucide-react";
@@ -8,16 +9,15 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Card } from "@/components/ui/card";
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";
+import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
+import { CARD_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
+import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
+import { AppliedJobChip } from "./applied-job-chip";
 import {
   HIGH_AFFINITY_THRESHOLD,
   JOB_MATCHING_MESSAGES,
   JOBS_ROUTE,
 } from "../constants/job-matching.constants";
-import type { RecommendedJob } from "../types/job-matching.types";
-
-interface JobRecommendationCardProps {
-  job: RecommendedJob;
-}
 
 export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
   const pendingSkills = job.skills.filter((skill) => !job.matchedSkills.includes(skill));
@@ -26,10 +26,19 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
   const locationUrl = getSafeMapsUrl(job.locationUrl);
 
   return (
-    <Card className="h-full gap-3 p-4">
+    <Card
+      className={cn(
+        VACANCY_CARD_CLASS,
+        "h-full gap-3 p-4",
+        CARD_MOTION_CLASS,
+      )}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
+            <AppliedJobChip jobOfferId={job.jobOfferId} />
+          </div>
           <p className="text-sm text-text-secondary">{job.companyName}</p>
           <p className="flex items-center gap-1.5 text-sm text-text-secondary">
             <ModalityIcon modality={job.modality} className="size-3.5" />
@@ -40,13 +49,21 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
           <p className="text-sm font-semibold text-ink">
             {job.score}% {JOB_MATCHING_MESSAGES.affinityCaption}
           </p>
-          {isHighAffinity ? <Badge>{JOB_MATCHING_MESSAGES.highAffinityLabel}</Badge> : null}
+          {isHighAffinity ? (
+            <Badge>{JOB_MATCHING_MESSAGES.highAffinityLabel}</Badge>
+          ) : null}
         </div>
       </div>
+      <VacancyDateBadges
+        publishedAt={job.publishedAt}
+        expiresAt={job.expiresAt}
+      />
       {job.skills.length > 0 ? (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold tracking-wide text-text-secondary uppercase">
-            {hasMatchedSkills ? JOB_MATCHING_MESSAGES.matchedLabel : "Habilidades requeridas"}
+            {hasMatchedSkills
+              ? JOB_MATCHING_MESSAGES.matchedLabel
+              : "Habilidades requeridas"}
           </p>
           <ul className="flex flex-wrap gap-2">
             {job.matchedSkills.map((skill) => (
@@ -71,7 +88,10 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
             href={locationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(buttonVariants({ variant: "link" }), "h-auto gap-1 p-0 text-ink")}
+            className={cn(
+              buttonVariants({ variant: "link" }),
+              "h-auto gap-1 p-0",
+            )}
           >
             <MapPin className="size-3.5" aria-hidden="true" />
             {JOB_MATCHING_MESSAGES.viewLocation}
@@ -80,7 +100,10 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
         ) : null}
         <Link
           href={`${JOBS_ROUTE}/${job.jobOfferId}`}
-          className={cn(buttonVariants({ variant: "link" }), "ml-auto h-auto p-0 font-bold text-ink")}
+          className={cn(
+            buttonVariants({ variant: "link" }),
+            "ml-auto h-auto p-0 font-bold",
+          )}
         >
           {JOB_MATCHING_MESSAGES.viewJob}
           <span className="sr-only"> {job.title}</span>

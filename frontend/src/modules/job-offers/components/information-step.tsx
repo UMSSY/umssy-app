@@ -1,28 +1,14 @@
 "use client";
 
+import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
+
 import { useLayoutEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
-import {
-  CONTRACT_TYPES,
-  EDITING_KEYS,
-  FIELD_FOCUS_CLASS,
-  INTERNSHIP_CONTRACT_TYPE,
-  MAX_CATEGORY_CHARS,
-  MAX_LANGUAGES_CHARS,
-  MAX_MAPS_LINK_CHARS,
-  MAX_TITLE_CHARS,
-  MAX_VACANCIES,
-  MAX_VACANCY_DIGITS,
-  MODALITIES,
-  SALARY_TO_BE_AGREED,
-  TITLE_ALLOWED_REGEX,
-  TITLE_DISALLOWED_CHARS_REGEX,
-  VACANCY_MESSAGES,
-} from "../constants/job-offers.constants";
+import { CONTRACT_TYPES, EDITING_KEYS, FIELD_FOCUS_CLASS, INTERNSHIP_CONTRACT_TYPE, MAX_LANGUAGES_CHARS, MAX_TITLE_CHARS, MAX_VACANCIES, MAX_VACANCY_DIGITS, SALARY_TO_BE_AGREED, TITLE_ALLOWED_REGEX, TITLE_DISALLOWED_CHARS_REGEX, VACANCY_MESSAGES } from "../constants/job-offers.constants";
 import { countDigits, findCaretAfterDigits, formatSalaryInput } from "../utils/format-salary-input";
 import type { Modality } from "../types/modality.types";
 import { getMapsLinkError } from "../utils/validate-vacancy";
@@ -112,11 +98,11 @@ export function InformationStep({
             </Label>
             <span className="text-xs text-text-secondary">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
           </div>
-          <Input 
-            id="title" 
-            placeholder="Desarrollador Backend" 
+          <Input
+            id="title"
+            placeholder="Desarrollador Backend"
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
-            value={conditions.title} 
+            value={conditions.title}
             onChange={handleTitleChange}
             onKeyDown={handleTitleKeyDown}
             maxLength={MAX_TITLE_CHARS}
@@ -140,7 +126,7 @@ export function InformationStep({
             }}
             className="mt-1.5 grid w-full grid-cols-3 gap-2"
           >
-            {MODALITIES.map((modality) => (
+            {JOB_MODALITIES.map((modality) => (
               <ToggleGroupItem
                 key={modality}
                 value={modality}
@@ -162,9 +148,9 @@ export function InformationStep({
             id="mapsLink"
             placeholder="https://maps.app.goo.gl/..."
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
-            value={conditions.mapsLink} 
-            onChange={(event) => updateField("mapsLink", event.target.value.slice(0, MAX_MAPS_LINK_CHARS))}
-            maxLength={MAX_MAPS_LINK_CHARS}
+            value={conditions.mapsLink}
+            onChange={(event) => updateField("mapsLink", event.target.value.slice(0, 2048))}
+            maxLength={2048}
             aria-invalid={Boolean(mapsLinkMessage)}
             aria-describedby={mapsLinkMessage ? "mapsLink-error" : undefined}
           />
@@ -195,13 +181,13 @@ export function InformationStep({
           <Label htmlFor="category" className="text-xs font-semibold">
             Categoría <span className="text-ink-soft">*</span>
           </Label>
-          <Input 
-            id="category" 
-            placeholder="Tecnología" 
+          <Input
+            id="category"
+            placeholder="Tecnología"
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
-            value={conditions.category} 
-            onChange={(event) => updateField("category", event.target.value.slice(0, MAX_CATEGORY_CHARS))}
-            maxLength={MAX_CATEGORY_CHARS}
+            value={conditions.category}
+            onChange={(event) => updateField("category", event.target.value.slice(0, 100))}
+            maxLength={100}
             aria-invalid={Boolean(errors.category)}
             aria-describedby={errors.category ? "category-error" : undefined}
           />
@@ -212,11 +198,11 @@ export function InformationStep({
           <Label htmlFor="vacancyCount" className="text-xs font-semibold">
             Número de vacantes <span className="text-ink-soft">*</span>
           </Label>
-          <Input 
-            id="vacancyCount" 
-            placeholder="1" 
+          <Input
+            id="vacancyCount"
+            placeholder="1"
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
-            value={conditions.vacancyCount} 
+            value={conditions.vacancyCount}
             onChange={handleVacancyChange}
             onKeyDown={handleNumberKeyDown}
             inputMode="numeric"
@@ -231,12 +217,12 @@ export function InformationStep({
           <Label htmlFor="salary" className="text-xs font-semibold">
             Salario {!isInternship && <span className="text-ink-soft">*</span>}
           </Label>
-          <Input 
-            id="salary" 
+          <Input
+            id="salary"
             ref={salaryInputRef}
-            placeholder={isInternship ? SALARY_TO_BE_AGREED : "Bs 6.500 - 8.000"} 
+            placeholder={isInternship ? SALARY_TO_BE_AGREED : "Bs 6.500 - 8.000"}
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
-            value={conditions.salary} 
+            value={conditions.salary}
             disabled={isInternship}
             onChange={handleSalaryChange}
             onBlur={handleSalaryBlur}
@@ -250,12 +236,12 @@ export function InformationStep({
           <Label htmlFor="languages" className="text-xs font-semibold">
             Idiomas <span className="text-ink-soft">*</span>
           </Label>
-          <Input 
-            id="languages" 
-            placeholder="Español, inglés intermedio" 
+          <Input
+            id="languages"
+            placeholder="Español, inglés intermedio"
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
-            value={conditions.languages} 
-            onChange={(event) => updateField("languages", event.target.value)} 
+            value={conditions.languages}
+            onChange={(event) => updateField("languages", event.target.value)}
             maxLength={MAX_LANGUAGES_CHARS}
             aria-invalid={Boolean(errors.languages)}
             aria-describedby={errors.languages ? "languages-error" : undefined}

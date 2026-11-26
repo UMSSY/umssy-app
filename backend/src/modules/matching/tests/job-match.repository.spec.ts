@@ -1,22 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { JOB_MATCH_SELECT } from '../constants/job-match.constants.js';
-import { JobMatchRepository } from '../repositories/job-match.repository.js';
+import { JOB_MATCH_SELECT } from '../../job-offers/constants/job-match.constants.js';
+import { JobOfferMatchRepository } from '../../job-offers/repositories/job-offer-match.repository.js';
 
-describe('JobMatchRepository', () => {
+describe('JobOfferMatchRepository', () => {
   let prisma: {
     jobOffer: {
       findFirst: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
     };
   };
-  let repository: JobMatchRepository;
+  let repository: JobOfferMatchRepository;
 
   beforeEach(() => {
     prisma = {
       jobOffer: { findFirst: vi.fn(), findMany: vi.fn() },
     };
-    repository = new JobMatchRepository(prisma as unknown as PrismaService);
+    repository = new JobOfferMatchRepository(
+      prisma as unknown as PrismaService,
+    );
   });
 
   it('busca una vacante publicada y vigente por id', async () => {
@@ -58,6 +60,13 @@ describe('JobMatchRepository', () => {
       },
       orderBy: { createdAt: 'desc' },
       select: JOB_MATCH_SELECT,
+    });
+  });
+
+  it('pide las fechas de publicación y de expiración de la vacante', () => {
+    expect(JOB_MATCH_SELECT).toMatchObject({
+      publishedAt: true,
+      expiresAt: true,
     });
   });
 

@@ -3,14 +3,7 @@ import { AxiosError, AxiosHeaders } from "axios";
 import { toast } from "sonner";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
-import {
-  CONNECTION_ERROR_MESSAGE,
-  INTERNAL_ERROR_MESSAGE,
-  RATE_LIMIT_MESSAGE,
-  REJECTED_USERS_LOAD_ERROR_MESSAGE,
-  REPORT_ALERT_DURATION_MS,
-  SLOW_REQUEST_MESSAGE,
-} from "../constants/reports.constants";
+import { CONNECTION_ERROR_MESSAGE, REPORT_ALERT_DURATION_MS, SLOW_REQUEST_MESSAGE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import { useRejectedUsers } from "./use-rejected-users";
 
@@ -66,13 +59,13 @@ describe("useRejectedUsers", () => {
   it("avisa con Sonner cuando el servidor limita las solicitudes (429)", async () => {
     renderWithError(buildHttpError(429));
 
-    await waitFor(() => expect(toast.warning).toHaveBeenCalledWith(RATE_LIMIT_MESSAGE, toastOptions));
+    await waitFor(() => expect(toast.warning).toHaveBeenCalledWith("Error 429: Demasiadas solicitudes, intenta nuevamente en unos segundos", toastOptions));
   });
 
   it("avisa con Sonner cuando el servidor falla internamente (500)", async () => {
     renderWithError(buildHttpError(500));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(INTERNAL_ERROR_MESSAGE, toastOptions));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Error 500: Ocurrió un error interno en el servidor", toastOptions));
   });
 
   it.each([503, 504])("avisa con Sonner de un error de conexión cuando el servidor responde %i", async (status) => {
@@ -90,7 +83,7 @@ describe("useRejectedUsers", () => {
   it("no muestra aviso para otros errores, pero sí el mensaje de carga fallida", async () => {
     const { result } = renderWithError(buildHttpError(404));
 
-    await waitFor(() => expect(result.current.errorMessage).toBe(REJECTED_USERS_LOAD_ERROR_MESSAGE));
+    await waitFor(() => expect(result.current.errorMessage).toBe("No se pudo cargar el reporte de usuarios rechazados."));
     expect(toast.warning).not.toHaveBeenCalled();
     expect(toast.error).not.toHaveBeenCalled();
   });
@@ -98,7 +91,7 @@ describe("useRejectedUsers", () => {
   it("no muestra aviso si el error no viene de la API", async () => {
     const { result } = renderWithError(new Error("otro"));
 
-    await waitFor(() => expect(result.current.errorMessage).toBe(REJECTED_USERS_LOAD_ERROR_MESSAGE));
+    await waitFor(() => expect(result.current.errorMessage).toBe("No se pudo cargar el reporte de usuarios rechazados."));
     expect(toast.warning).not.toHaveBeenCalled();
     expect(toast.error).not.toHaveBeenCalled();
   });

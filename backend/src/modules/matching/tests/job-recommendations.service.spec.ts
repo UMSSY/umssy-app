@@ -2,7 +2,7 @@ import type { JobOffersService } from '../../job-offers/services/job-offers.serv
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { JobMatchSourceService } from '../services/job-match-source.service.js';
 import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
@@ -15,10 +15,12 @@ interface OfferOptions {
   careers?: string[];
   minExperienceYears?: number | null;
   createdAt?: Date;
+  expiresAt?: Date | null;
 }
 
 const PUBLISHED_AT = new Date('2026-10-10T12:00:00.000Z');
 const PUBLISHED_LATER = new Date('2026-10-20T12:00:00.000Z');
+const EXPIRES_AT = new Date('2026-11-25T03:59:59.000Z');
 
 function offer(
   id: string,
@@ -30,6 +32,8 @@ function offer(
     title: id,
     description: 'Descripción',
     createdAt: options.createdAt ?? PUBLISHED_AT,
+    publishedAt: options.createdAt ?? PUBLISHED_AT,
+    expiresAt: options.expiresAt === undefined ? null : options.expiresAt,
     locationUrl: 'https://maps.google.com/?q=x',
     requiredCareers: options.careers ?? [],
     minExperienceYears: options.minExperienceYears ?? null,
@@ -68,7 +72,7 @@ describe('HU-06 recommendations contract', () => {
     } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
       { findScoringOffers } as unknown as JobOffersService,
-      { findPublished } as unknown as JobMatchRepository,
+      { findPublished } as unknown as JobMatchSourceService,
       new VacancyScoringService(
         { getUserSkills } as unknown as UserSkillService,
         { findCandidateProfile } as unknown as CandidateProfileService,
@@ -118,9 +122,27 @@ describe('HU-06 recommendations contract', () => {
       companyName: 'Empresa',
       modality: 'Remoto',
       locationUrl: 'https://maps.google.com/?q=x',
+      publishedAt: '2026-10-10T12:00:00.000Z',
+      expiresAt: null,
       score: 50,
       skills: ['Python', 'SQL'],
       matchedSkills: ['Python'],
+    });
+  });
+
+  it('returns the publication and the expiry dates of every offer', async () => {
+    findPublished.mockResolvedValue([
+      offer('expiring', ['Python'], {
+        createdAt: PUBLISHED_LATER,
+        expiresAt: EXPIRES_AT,
+      }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items[0]).toMatchObject({
+      publishedAt: '2026-10-20T12:00:00.000Z',
+      expiresAt: '2026-11-25T03:59:59.000Z',
     });
   });
 
@@ -171,7 +193,10 @@ describe('HU-06 recommendations contract', () => {
   });
 
   it('AC-02.5: returns an empty list when no offer has affinity above 0 %', async () => {
-    findPublished.mockResolvedValue([offer('java', ['Java']), offer('go', ['Go'])]);
+    findPublished.mockResolvedValue([
+      offer('java', ['Java']),
+      offer('go', ['Go']),
+    ]);
 
     await expect(service.recommendations('user')).resolves.toEqual({
       isProfileComplete: true,

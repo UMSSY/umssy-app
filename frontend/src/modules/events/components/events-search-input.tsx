@@ -4,8 +4,6 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import type { EventsSearchInputProps } from '../types/events-search-input-props.types';
 
-import { SEARCH_MAX_LENGTH } from '../constants/events.constants';
-
 export function EventsSearchInput({ value, onChange }: EventsSearchInputProps) {
   return (
     <div className="relative w-full sm:w-64">
@@ -16,10 +14,10 @@ export function EventsSearchInput({ value, onChange }: EventsSearchInputProps) {
       <Input
         type="search"
         value={value}
-        onChange={(event) => onChange(event.target.value.slice(0, SEARCH_MAX_LENGTH))}
+        onChange={(event) => onChange(event.target.value.slice(0, 50))}
         placeholder="Buscar taller..."
         aria-label="Buscar taller"
-        maxLength={SEARCH_MAX_LENGTH}
+        maxLength={50}
         className="h-10 rounded-full bg-surface pl-10 shadow-2xs"
       />
     </div>

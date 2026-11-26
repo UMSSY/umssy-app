@@ -21,7 +21,10 @@ export async function seedSurveysFixtures(
       opensAt: surveyFixtureDate(context, survey.opensAtDays),
       closesAt: surveyFixtureDate(context, survey.closesAtDays),
       statusId: context.getReference('survey_statuses', survey.status),
-      targetAudienceId: context.getReference('survey_target_audiences', SurveyTargetAudience.GRADUATES),
+      targetAudienceId: context.getReference(
+        'survey_target_audiences',
+        SurveyTargetAudience.GRADUATES,
+      ),
       createdById: context.adminId,
       createdAt: surveyFixtureDate(context, survey.createdAtDays),
     }),

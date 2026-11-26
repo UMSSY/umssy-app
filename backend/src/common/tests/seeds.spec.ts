@@ -4,11 +4,16 @@ const seedUsers = vi.fn();
 const seedAvailability = vi.fn();
 const seedAccessRequests = vi.fn();
 const seedEvents = vi.fn();
+const seedHistoryScenarioEvents = vi.fn();
 const seedEventRegistrations = vi.fn();
+const seedHistoryScenarioRegistrations = vi.fn();
+const seedAttendanceQaFixtures = vi.fn();
+const seedMultisessionScenarios = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
 const seedJobOffers = vi.fn();
 const seedChat = vi.fn();
+const seedRadar = vi.fn();
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn().mockResolvedValue('hash'),
@@ -23,6 +28,10 @@ vi.mock('../../modules/access-requests/seeds/access-requests.seed.js', () => ({
 vi.mock('../../modules/events/seeds/events.seed.js', () => ({
   seedEvents: (...args: unknown[]) => seedEvents(...args),
 }));
+vi.mock('../../modules/events/seeds/history-scenarios-events.seed.js', () => ({
+  seedHistoryScenarioEvents: (...args: unknown[]) =>
+    seedHistoryScenarioEvents(...args),
+}));
 vi.mock(
   '../../modules/event-registrations/seeds/event-registrations.seed.js',
   () => ({
@@ -30,6 +39,24 @@ vi.mock(
       seedEventRegistrations(...args),
   }),
 );
+vi.mock(
+  '../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js',
+  () => ({
+    seedHistoryScenarioRegistrations: (...args: unknown[]) =>
+      seedHistoryScenarioRegistrations(...args),
+  }),
+);
+vi.mock(
+  '../../modules/event-registrations/seeds/attendance-qa-fixtures.seed.js',
+  () => ({
+    seedAttendanceQaFixtures: (...args: unknown[]) =>
+      seedAttendanceQaFixtures(...args),
+  }),
+);
+vi.mock('../../modules/events/seeds/multisession-scenarios.seed.js', () => ({
+  seedMultisessionScenarios: (...args: unknown[]) =>
+    seedMultisessionScenarios(...args),
+}));
 vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
   seedTechnicalAreas: (...args: unknown[]) => seedTechnicalAreas(...args),
 }));
@@ -45,6 +72,9 @@ vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
 vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
   seedChat: (...args: unknown[]) => seedChat(...args),
 }));
+vi.mock('../../modules/radar-integration/seeds/radar.seed.js', () => ({
+  seedRadar: (...args: unknown[]) => seedRadar(...args),
+}));
 
 const { runSeed } = await import('../database/seeds.js');
 
@@ -54,6 +84,9 @@ function setupSeeds() {
     users: {
       eventGraduate: user('e1'),
       emptyGraduate: user('e2'),
+      historyGraduate: user('h1'),
+      workshopOrganizer: user('w1'),
+      workshopParticipant: user('w2'),
       mentorA: user('m1'),
       mentorB: user('m2'),
       graduate: user('g1'),
@@ -100,16 +133,36 @@ describe('runSeed', () => {
 
     const summary = await runSeed(client as never);
 
-    expect(client.$transaction).toHaveBeenCalledTimes(9);
+    expect(client.$transaction).toHaveBeenCalledTimes(14);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
     expect(seedJobOffers).toHaveBeenCalledWith(tx);
     expect(seedUsers).toHaveBeenCalledWith(tx, 'hash');
     expect(seedEvents).toHaveBeenCalledWith(tx, 'e1');
+    expect(seedHistoryScenarioEvents).toHaveBeenCalledWith(
+      tx,
+      'e1',
+      expect.any(Date),
+    );
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
+    expect(seedHistoryScenarioRegistrations).toHaveBeenCalledWith(
+      tx,
+      'e1',
+      'h1',
+      expect.any(Date),
+    );
+    expect(seedAttendanceQaFixtures).toHaveBeenCalledWith(tx, expect.any(Date));
+    expect(seedMultisessionScenarios).toHaveBeenCalledWith(tx, {
+      organizerId: 'w1',
+      participantId: 'w2',
+    });
     expect(seedAvailability).toHaveBeenCalledWith(
       tx,
-      expect.objectContaining({ mentorId: 'm1', performanceMentorId: 'm2', graduateId: 'g1' }),
+      expect.objectContaining({
+        mentorId: 'm1',
+        performanceMentorId: 'm2',
+        graduateId: 'g1',
+      }),
       expect.any(Date),
     );
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
@@ -117,7 +170,7 @@ describe('runSeed', () => {
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 3,
-      users: 11,
+      users: 14,
       userRoles: 7,
       blocks: 58,
       appointments: 53,
@@ -127,5 +180,11 @@ describe('runSeed', () => {
       accessRequests: { statuses: 5, documentTypes: 2, careers: 2 },
     });
     expect(client.$disconnect).not.toHaveBeenCalled();
+    expect(seedRadar).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({
+        graduate: { id: 'g1' },
+      }),
+    );
   });
 });

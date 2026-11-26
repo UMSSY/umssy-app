@@ -5,19 +5,11 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiError as AxiosError, isApiError as isAxiosError } from "@/shared/services/api-client";
 import { toast } from "sonner";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
-import {
-  CONNECTION_ERROR_MESSAGE,
-  INTERNAL_ERROR_MESSAGE,
-  RATE_LIMIT_MESSAGE,
-  REJECTED_USERS_LOAD_ERROR_MESSAGE,
-  REJECTED_USERS_PAGE_SIZE,
-  REPORT_ALERT_DURATION_MS,
-  SLOW_REQUEST_MESSAGE,
-} from "../constants/reports.constants";
+import { CONNECTION_ERROR_MESSAGE, REJECTED_USERS_PAGE_SIZE, REPORT_ALERT_DURATION_MS, SLOW_REQUEST_MESSAGE } from "../constants/reports.constants";
 import { REPORTS_QUERY_KEYS } from "../constants/reports-query-keys.constants";
 import { reportsService } from "../services/reports.service";
 import { useReportSnapshot } from "./use-report-snapshot";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import type { RoleTag } from "@/modules/auth";
 
 function notifyRequestError(error: unknown, id: string) {
@@ -28,9 +20,9 @@ function notifyRequestError(error: unknown, id: string) {
   if (error.code === AxiosError.ECONNABORTED || error.code === AxiosError.ETIMEDOUT) {
     toast.warning(SLOW_REQUEST_MESSAGE, options);
   } else if (error.response?.status === 429) {
-    toast.warning(RATE_LIMIT_MESSAGE, options);
+    toast.warning("Error 429: Demasiadas solicitudes, intenta nuevamente en unos segundos", options);
   } else if (error.response?.status === 500) {
-    toast.error(INTERNAL_ERROR_MESSAGE, options);
+    toast.error("Error 500: Ocurrió un error interno en el servidor", options);
   } else if (isConnectionError(error)) {
     toast.error(CONNECTION_ERROR_MESSAGE, options);
   }
@@ -40,12 +32,13 @@ export function useRejectedUsers(page: number, userType?: RoleTag, period?: Acad
   const { resolveSnapshotAt, renewSnapshot } = useReportSnapshot();
   const query = useQuery({
     queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, userType, period, search),
-    queryFn: ({ signal }) => {
+    queryFn: async ({ signal }) => {
       const snapshotAt = resolveSnapshotAt(page);
-      return reportsService.getRejectedUsers(
+      const response = await reportsService.getRejectedUsers(
         { page, limit: REJECTED_USERS_PAGE_SIZE, userType, period, search, ...(snapshotAt && { snapshotAt }) },
         signal,
       );
+      return { response, snapshotAt };
     },
     placeholderData: keepPreviousData,
   });
@@ -60,15 +53,16 @@ export function useRejectedUsers(page: number, userType?: RoleTag, period?: Acad
     void refetch();
   }, [refetch, renewSnapshot]);
 
-  const result = query.isError ? undefined : query.data?.data;
+  const result = query.isError ? undefined : query.data?.response.data;
   const totalItems = result?.totalItems ?? 0;
 
   return {
     users: result?.items ?? [],
     totalItems,
     totalPages: Math.max(1, Math.ceil(totalItems / REJECTED_USERS_PAGE_SIZE)),
+    snapshotAt: query.isError ? undefined : query.data?.snapshotAt,
     isLoading: query.isFetching,
-    errorMessage: query.isError && !query.isFetching ? REJECTED_USERS_LOAD_ERROR_MESSAGE : undefined,
+    errorMessage: query.isError && !query.isFetching ? "No se pudo cargar el reporte de usuarios rechazados." : undefined,
     refresh,
   };
 }

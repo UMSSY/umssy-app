@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { AxiosError, type AxiosResponse } from "axios";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
@@ -13,14 +15,48 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
+vi.mock("../hooks/use-requirements-skills-preview", () => {
+  const none: never[] = [];
+  return {
+    useRequirementsSkillsPreview: () => ({
+      detectedSkills: none,
+      processingTimeMs: undefined,
+      isAnalyzing: false,
+      isError: false,
+    }),
+  };
+});
 vi.mock("@/components/ui/select", () => ({
-  Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string) => void }) => (
-    <div data-testid="select" onClick={() => onValueChange?.("Tiempo completo")}>{children}</div>
+  Select: ({
+    children,
+    onValueChange,
+  }: {
+    children: React.ReactNode;
+    onValueChange?: (value: string) => void;
+  }) => (
+    <div
+      data-testid="select"
+      onClick={() => onValueChange?.("Tiempo completo")}
+    >
+      {children}
+    </div>
   ),
-  SelectTrigger: ({ children, id }: { children: React.ReactNode; id?: string }) => <div id={id}>{children}</div>,
-  SelectValue: ({ placeholder }: { placeholder?: string }) => <span>{placeholder}</span>,
-  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SelectItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectTrigger: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => <div id={id}>{children}</div>,
+  SelectValue: ({ placeholder }: { placeholder?: string }) => (
+    <span>{placeholder}</span>
+  ),
+  SelectContent: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  SelectItem: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 const EXPECTED_PAYLOAD = {
@@ -59,16 +95,30 @@ function fillInformation() {
   click("Continuar");
 }
 
-async function fillRequirements() {
-  await screen.findByRole("button", { name: "Docker" });
-  type("description", "Buscamos un DevOps con Docker y Kubernetes.");
-  click("Docker");
+function addSkillFromDialog(search: string, name: string) {
   click("+ Añadir habilidad");
-  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: "kuber" } });
-  click("Kubernetes");
+  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: search } });
+  click(name);
   click("Añadir habilidad");
-  await waitFor(() => expect(screen.queryByText("Buscar habilidad")).not.toBeInTheDocument());
+}
+
+async function fillRequirements() {
+  await screen.findByRole("button", { name: "+ Añadir habilidad" });
+  type("description", "Buscamos un DevOps con Docker y Kubernetes.");
+  addSkillFromDialog("docker", "Docker");
+  addSkillFromDialog("kuber", "Kubernetes");
   click("Continuar");
+}
+
+async function chooseAndConfirmClosingDate() {
+  fireEvent.click(screen.getByText("Establecer fecha de expiración"));
+  const firstAvailableDay = screen
+    .getAllByRole("button")
+    .find((button) => button.hasAttribute("data-day") && !button.hasAttribute("disabled"));
+  if (!firstAvailableDay) throw new Error("No hay días disponibles en el calendario");
+  fireEvent.click(firstAvailableDay);
+  fireEvent.click(await screen.findByRole("button", { name: "Sí, confirmar" }));
+  await screen.findByText(/se cerrará automáticamente el/i);
 }
 
 async function goToPreview() {
@@ -78,11 +128,11 @@ async function goToPreview() {
 }
 
 describe("Registrar vacante: wizard completo conectado al backend", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     Element.prototype.scrollIntoView = vi.fn();
     window.history.pushState({}, "", "/vacancies/register");
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
     vi.mocked(apiClient.get).mockResolvedValue({
       data: { statusCode: 200, ok: true, detail: "", data: [PYTHON, DOCKER, KUBERNETES] },
     });
@@ -108,7 +158,10 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
     expect(apiClient.get).toHaveBeenCalledWith("/job-offers/skills");
     expect(apiClient.post).toHaveBeenCalledTimes(1);
-    expect(apiClient.post).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers`, EXPECTED_PAYLOAD);
+    expect(apiClient.post).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers`,
+      EXPECTED_PAYLOAD,
+    );
 
     click("Publicar otra vacante");
     await waitFor(() => expect(byId("title")).toBeInTheDocument());
@@ -120,11 +173,11 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     await goToPreview();
 
     click("Anterior");
-    await screen.findByRole("button", { name: "Docker" });
+    await screen.findByRole("button", { name: "Quitar Docker" });
 
-    expect(screen.getByRole("button", { name: "Docker" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Kubernetes" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Python" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Quitar Docker" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Quitar Kubernetes" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Quitar Python" })).not.toBeInTheDocument();
     expect(byId("description").value).toBe("Buscamos un DevOps con Docker y Kubernetes.");
   });
 
@@ -173,7 +226,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
   });
 
   it("no llama al backend si la sesión no es de empresa", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+    await saveAccessToken(buildSessionToken("titulado"));
     renderWithQuery(<RegisterVacancyView />);
     await goToPreview();
 
@@ -195,7 +248,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
   it("paso 2: exige descripción y al menos una tecnología", async () => {
     renderWithQuery(<RegisterVacancyView />);
     fillInformation();
-    await screen.findByRole("button", { name: "Docker" });
+    await screen.findByRole("button", { name: "+ Añadir habilidad" });
 
     click("Continuar");
 
@@ -253,10 +306,12 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     renderWithQuery(<RegisterVacancyView jobOfferId="offer-1" />);
 
     await screen.findByText("Editar vacante");
-    expect(apiClient.get).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`);
+    expect(apiClient.get).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1`,
+    );
     expect(byId("title").value).toBe("DevOps Senior");
     click("Continuar");
-    await screen.findByRole("button", { name: "Docker" });
+    await screen.findByRole("button", { name: "Quitar Docker" });
     click("Continuar");
     await screen.findByText("Revisa tu publicación");
     click("Confirmar edición");
@@ -266,7 +321,10 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
       position: "top-center",
       duration: 5000,
     });
-    expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, EXPECTED_PAYLOAD);
+    expect(apiClient.put).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1`,
+      EXPECTED_PAYLOAD,
+    );
     expect(apiClient.post).not.toHaveBeenCalled();
   });
 
@@ -279,5 +337,66 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("La vacante no existe o no pertenece a la empresa.");
     expect(document.getElementById("title")).toBeNull();
+  });
+
+  it("publica con la fecha de cierre confirmada y la muestra en la confirmación", async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(CREATED);
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    await chooseAndConfirmClosingDate();
+    click("Confirmar publicación");
+
+    expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
+    expect(screen.getByText(/Se cerrará automáticamente el .* a las 23:59\./)).toBeInTheDocument();
+    const [, payload] = vi.mocked(apiClient.post).mock.calls[0];
+    expect(payload).toEqual({
+      ...EXPECTED_PAYLOAD,
+      expiresAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T03:59:00\.000Z$/),
+    });
+  });
+
+  it("sin fecha de cierre lo indica en la confirmación", async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(CREATED);
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    click("Confirmar publicación");
+
+    expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
+    expect(screen.getByText(/No tiene fecha de cierre/)).toBeInTheDocument();
+  });
+
+  it("no publica si se marcó la fecha de cierre sin confirmarla, y el aviso se va al desmarcarla", async () => {
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    fireEvent.click(screen.getByText("Establecer fecha de expiración"));
+    click("Confirmar publicación");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Elige y confirma una fecha de cierre");
+    expect(apiClient.post).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+  });
+
+  it("si el backend rechaza la fecha de cierre muestra su motivo", async () => {
+    vi.mocked(apiClient.post).mockRejectedValue(
+      responseError(422, {
+        code: "JOB_OFFER_EXPIRY_IN_PAST",
+        data: null,
+        detail: "La fecha de cierre debe ser posterior al momento actual.",
+      }),
+    );
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    await chooseAndConfirmClosingDate();
+    click("Confirmar publicación");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Algunos datos de la vacante no son válidos");
+    expect(alert).toHaveTextContent("La fecha de cierre debe ser posterior al momento actual.");
   });
 });

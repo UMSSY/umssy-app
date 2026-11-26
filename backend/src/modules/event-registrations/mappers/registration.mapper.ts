@@ -3,13 +3,19 @@ import { InternalException } from '../../../common/exceptions/internal.exception
 import type { RegistrationRecord } from '../types/registration-record.types.js';
 import type { RegistrationResponse } from '../types/registration-response.types.js';
 
-export function mapRegistration(record: RegistrationRecord): RegistrationResponse {
-  const status = record.status.title === REGISTRATION_STATUS_TITLES.confirmed
-    ? 'confirmed'
-    : record.status.title === REGISTRATION_STATUS_TITLES.cancelled
-      ? 'cancelled'
-      : null;
-  if (status === null || (status === 'confirmed') !== (record.cancelledAt === null)) {
+export function mapRegistration(
+  record: RegistrationRecord,
+): RegistrationResponse {
+  const status =
+    record.status.title === REGISTRATION_STATUS_TITLES.confirmed
+      ? 'confirmed'
+      : record.status.title === REGISTRATION_STATUS_TITLES.cancelled
+        ? 'cancelled'
+        : null;
+  if (
+    status === null ||
+    (status === 'confirmed') !== (record.cancelledAt === null)
+  ) {
     throw new InternalException();
   }
   return {

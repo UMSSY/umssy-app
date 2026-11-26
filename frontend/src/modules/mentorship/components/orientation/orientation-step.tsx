@@ -1,14 +1,8 @@
 "use client";
+import type { OrientationStepProps } from "../../types/orientation-step-props.types";
 
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
-import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
-
-type OrientationStepProps = {
-  orientationTypes: OrientationTypeResponse[];
-  selectedOrientationTypeIds: string[];
-  onSelectionChange: (ids: string[]) => void;
-};
 
 export function OrientationStep({
   orientationTypes,

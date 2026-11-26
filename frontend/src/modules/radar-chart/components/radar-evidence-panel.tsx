@@ -5,7 +5,7 @@ import type { RadarEvidencePanelProps } from "../types/radar-evidence-panel-prop
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useWorkExperiences } from "@/modules/work-experience";
-import { useEducations } from "@/modules/education";
+import { useEducations } from "@/modules/educations";
 import { useCertifications } from "@/modules/certifications";
 import { useRadarSourceNames } from "../hooks/use-radar-source-names";
 import { useRadarEvidenceFiles } from "../hooks/use-radar-evidence-files";
@@ -36,6 +36,7 @@ export function RadarEvidencePanel({
   radar,
   selected,
   onClose,
+  actions,
 }: RadarEvidencePanelProps) {
   const work = useWorkExperiences();
   const education = useEducations();
@@ -156,6 +157,7 @@ export function RadarEvidencePanel({
       subtitle="Información aprobada asociada a la puntuación publicada"
       footer={
         <div className="flex flex-col gap-2">
+          {actions}
           {cvRefs.map((id) => (
             <Button
               key={id}

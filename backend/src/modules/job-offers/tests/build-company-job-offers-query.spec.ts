@@ -1,10 +1,12 @@
-
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
   type ListCompanyJobOffersRequest,
 } from '../requests/list-company-job-offers.request.js';
-import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+import {
+  JobOfferContractType,
+  JobOfferModality,
+} from '../types/job-offer.enum.js';
 import { buildCompanyJobOffersQuery } from '../utils/build-company-job-offers-query.js';
 
 const COMPANY_ID = 'a0000000-0000-4000-8000-000000000001';
@@ -39,21 +41,27 @@ describe('buildCompanyJobOffersQuery', () => {
   });
 
   it('filtra por tipo de contrato usando el título del catálogo', () => {
-    expect(build({ contractType: JobOfferContractType.INTERNSHIP }).where).toEqual({
+    expect(
+      build({ contractType: JobOfferContractType.INTERNSHIP }).where,
+    ).toEqual({
       companyId: COMPANY_ID,
       contractType: { title: 'Pasantía' },
     });
   });
 
   it('convierte el rango de fechas a días completos en hora de Bolivia', () => {
-    expect(build({ dateFrom: '2026-10-01', dateTo: '2026-10-31' }).where.publishedAt).toEqual({
+    expect(
+      build({ dateFrom: '2026-10-01', dateTo: '2026-10-31' }).where.publishedAt,
+    ).toEqual({
       gte: new Date('2026-10-01T04:00:00.000Z'),
       lt: new Date('2026-11-01T04:00:00.000Z'),
     });
   });
 
   it('incluye todo el día cuando ambas fechas son iguales', () => {
-    expect(build({ dateFrom: '2026-10-21', dateTo: '2026-10-21' }).where.publishedAt).toEqual({
+    expect(
+      build({ dateFrom: '2026-10-21', dateTo: '2026-10-21' }).where.publishedAt,
+    ).toEqual({
       gte: new Date('2026-10-21T04:00:00.000Z'),
       lt: new Date('2026-10-22T04:00:00.000Z'),
     });

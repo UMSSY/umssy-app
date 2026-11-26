@@ -21,7 +21,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>();
 
     if (exception instanceof ZodValidationException) {
-      const error = exception.getZodError() as { issues: readonly ValidationIssue[] };
+      const error = exception.getZodError() as {
+        issues: readonly ValidationIssue[];
+      };
       exception = buildRequestValidationException(error.issues);
     }
 

@@ -15,12 +15,13 @@ import type { NlpTextSource } from '../../nlp/types/nlp-text-source.type.js';
 import type { ProfileSkillProcessingState } from '../../nlp/types/profile-skill-processing-state.type.js';
 import type { ProfileSkillRow } from '../../nlp/types/profile-skill-row.type.js';
 import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
-import type { ProfileRepository } from '../../profile/repositories/profile.repository.js';
+import type { ProfileService } from '../../profile/services/profile.service.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import type { SkillRepository } from '../repositories/skill.repository.js';
 import type { UserSkillRepository } from '../repositories/user-skill.repository.js';
+import type { UserSkillEvidenceRepository } from '../repositories/user-skill-evidence.repository.js';
 import { UserSkillService } from '../services/user-skill.service.js';
 import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
 
@@ -44,7 +45,11 @@ class InMemoryProfileSkills {
   beforePublish?: () => Promise<void>;
   private sequence = 0;
 
-  addRow(skillId: string, source: 'manual' | 'nlp', evidenceRefs: readonly unknown[] = []): void {
+  addRow(
+    skillId: string,
+    source: 'manual' | 'nlp',
+    evidenceRefs: readonly unknown[] = [],
+  ): void {
     const skill = catalogById.get(skillId)!;
     this.sequence += 1;
     this.rows.push({
@@ -65,8 +70,10 @@ class InMemoryProfileSkills {
       this.rows = this.rows
         .filter((row) => !changes.deleteIds.includes(row.id))
         .map((row) => {
-          if (changes.toDetectedIds.includes(row.id)) return { ...row, source: 'nlp' };
-          if (changes.toManualIds.includes(row.id)) return { ...row, source: 'manual' };
+          if (changes.toDetectedIds.includes(row.id))
+            return { ...row, source: 'nlp' };
+          if (changes.toManualIds.includes(row.id))
+            return { ...row, source: 'manual' };
           return row;
         });
 
@@ -123,7 +130,8 @@ class InMemoryProfileSkills {
         processedRevision: revision,
         dictionaryVersion,
         updatedAt: now,
-        resultVersion: this.state.resultVersion + (changed || isFirstResult ? 1 : 0),
+        resultVersion:
+          this.state.resultVersion + (changed || isFirstResult ? 1 : 0),
       };
 
       return { state: this.state, changed };
@@ -132,13 +140,18 @@ class InMemoryProfileSkills {
 
   readonly skills = {
     findProfileSkillRows: async () => [...this.rows],
-    reconcileDetected: async (_userId: string, detected: readonly NlpDetectedSkill[]) => {
+    reconcileDetected: async (
+      _userId: string,
+      detected: readonly NlpDetectedSkill[],
+    ) => {
       const plan = planSkillReconciliation(this.rows, detected);
 
       this.rows = this.rows
         .filter((row) => !plan.deleteIds.includes(row.id))
         .map((row) => {
-          const update = plan.updates.find((candidate) => candidate.id === row.id);
+          const update = plan.updates.find(
+            (candidate) => candidate.id === row.id,
+          );
 
           return update
             ? {
@@ -153,14 +166,18 @@ class InMemoryProfileSkills {
         this.addRow(create.skillId, 'nlp', create.evidenceRefs);
       }
 
-      return plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+      return (
+        plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
+      );
     },
   };
 
   private manualRecords() {
     return this.rows
       .filter((row) => row.source === 'manual')
-      .sort((first, second) => first.skill.name.localeCompare(second.skill.name))
+      .sort((first, second) =>
+        first.skill.name.localeCompare(second.skill.name),
+      )
       .map((row) => ({
         skill: {
           id: row.skillId,
@@ -201,13 +218,13 @@ describe('Skill changes sent to the radar', () => {
 
     const prisma = {
       skill: {
-        findMany: vi.fn().mockResolvedValue(
-          catalog.map(({ id, name }) => ({ id, name })),
-        ),
+        findMany: vi
+          .fn()
+          .mockResolvedValue(catalog.map(({ id, name }) => ({ id, name }))),
       },
     };
 
-   detection = new SkillDetectionService();
+    detection = new SkillDetectionService();
 
     const sources = {
       ensureProfileExists: vi.fn().mockResolvedValue(undefined),
@@ -236,16 +253,17 @@ describe('Skill changes sent to the radar', () => {
         }),
     };
 
-    const profileRepository = {
-      findByUserId: vi.fn().mockResolvedValue({ id: userId }),
+    const profileService = {
+      ensureProfileExists: vi.fn().mockResolvedValue({ id: userId }),
     };
 
     service = new UserSkillService(
       store.userSkills as unknown as UserSkillRepository,
       skillRepository as unknown as SkillRepository,
-      profileRepository as unknown as ProfileRepository,
+      profileService as unknown as ProfileService,
       new SkillMapper(),
       analysis,
+      { replaceDetected: vi.fn() } as unknown as UserSkillEvidenceRepository,
     );
   });
 
@@ -383,10 +401,7 @@ describe('Skill changes sent to the radar', () => {
       skillIds: [reactId, pythonId],
     });
 
-    expect(saved.map((skill) => skill.name)).toEqual([
-      'Python',
-      'React',
-    ]);
+    expect(saved.map((skill) => skill.name)).toEqual(['Python', 'React']);
 
     expect((await analysis.getRadarSnapshot(userId)).status).toBe('error');
 

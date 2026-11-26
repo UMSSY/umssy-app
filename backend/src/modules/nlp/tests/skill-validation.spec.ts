@@ -1,9 +1,5 @@
-
 import { describe, expect, it } from 'vitest';
-import {
-  NLP_SOURCE_TEXT_MAX_LENGTH,
-  NLP_VALIDATION_MESSAGES,
-} from '../constants/nlp-validation.constants.js';
+import { NLP_VALIDATION_MESSAGES } from '../constants/nlp-validation.constants.js';
 import { SkillValidationService } from '../services/skill-validation.service.js';
 import type { NlpCatalogSkill } from '../types/nlp-catalog-skill.type.js';
 import { validateSkillName } from '../utils/validate-skill-name.js';
@@ -59,7 +55,7 @@ describe('SkillValidationService', () => {
       {
         id: 'long',
         type: 'education',
-        text: 'x'.repeat(NLP_SOURCE_TEXT_MAX_LENGTH + 1),
+        text: 'x'.repeat(20_000 + 1),
       },
     ]);
 
@@ -134,7 +130,10 @@ describe('SkillValidationService', () => {
     const validation = service.validateDetected(
       [
         { name: 'HTML5', evidenceRefs: [{ type: 'education', id: 'e1' }] },
-        { name: 'html5', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] },
+        {
+          name: 'html5',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+        },
       ],
       catalog,
     );
@@ -189,9 +188,9 @@ describe('SkillValidationService', () => {
       ],
     );
 
-    expect(
-      validation.accepted.map(({ id, name }) => [id, name]),
-    ).toEqual([['skill-power-automate', 'Power Automate']]);
+    expect(validation.accepted.map(({ id, name }) => [id, name])).toEqual([
+      ['skill-power-automate', 'Power Automate'],
+    ]);
 
     expect(validation.discarded).toEqual([]);
   });

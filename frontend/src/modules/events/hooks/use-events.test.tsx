@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -21,18 +22,36 @@ beforeEach(() => {
   getEventsMock.mockReset();
 });
 
-describe('useEvents', () => {
-  it('merges repeated event IDs across pages using the latest counter without merging different workshops', async () => {
-    const first = Array.from({ length: 50 }, (_, index) => ({ id: `event-${index}`, title: 'Same title', registrationCount: 1 }));
+describe("useEvents", () => {
+  it("merges repeated event IDs across pages using the latest counter without merging different workshops", async () => {
+    const first = Array.from({ length: 50 }, (_, index) => ({
+      id: `event-${index}`,
+      title: "Same title",
+      registrationCount: 1,
+    }));
     getEventsMock.mockResolvedValueOnce({ data: first, page: 1, offset: 0 })
       .mockResolvedValueOnce({ data: [{ ...first[0], registrationCount: 2 }, { ...first[0], id: 'other-event' }], page: 2, offset: 50 });
     const { result } = renderHook(() => useEvents());
     await waitFor(() => expect(result.current.hasMore).toBe(true));
     act(() => result.current.loadMore());
     await waitFor(() => expect(result.current.events).toHaveLength(51));
-    expect(result.current.events.filter(event => event.id === 'event-0')).toHaveLength(1);
-    expect(result.current.events.find(event => event.id === 'event-0')?.registrationCount).toBe(2);
-    expect(result.current.events.some(event => event.id === 'other-event')).toBe(true);
+    expect(
+      result.current.events.filter((event) => event.id === "event-0"),
+    ).toHaveLength(1);
+    expect(
+      result.current.events.find((event) => event.id === "event-0")
+        ?.registrationCount,
+    ).toBe(2);
+    expect(
+      result.current.events.some((event) => event.id === "other-event"),
+    ).toBe(true);
+  });
+  it('reports the profile state of the first page and assumes complete when absent', async () => {
+    getEventsMock.mockResolvedValueOnce({ data: [], page: 1, offset: 0, isProfileComplete: false });
+    const { result } = renderHook(() => useEvents());
+
+    expect(result.current.isProfileComplete).toBe(true);
+    await waitFor(() => expect(result.current.isProfileComplete).toBe(false));
   });
   it('carga la primera pagina y actualiza el estado', async () => {
     const response: EventsListResponse = {
@@ -55,11 +74,11 @@ describe('useEvents', () => {
     expect(result.current.hasMore).toBe(false);
   });
 
-  it('carga pagina adicional al recibir una pagina completa', async () => {
+  it("carga pagina adicional al recibir una pagina completa", async () => {
     const firstPage: EventsListResponse = {
       data: Array.from({ length: 50 }, (_, index) => ({
         id: `event-${index}`,
-      })) as EventsListResponse['data'],
+      })) as EventsListResponse["data"],
       page: 1,
       offset: 0,
     };
@@ -91,9 +110,12 @@ describe('useEvents', () => {
     expect(result.current.hasMore).toBe(false);
   });
 
-  it('keeps loaded pages when the event list is refreshed', async () => {
+  it("keeps loaded pages when the event list is refreshed", async () => {
     const firstPage: EventsListResponse = {
-      data: Array.from({ length: 50 }, (_, index) => ({ id: `event-${index}`, availableSpots: 5 })) as EventsListResponse['data'],
+      data: Array.from({ length: 50 }, (_, index) => ({
+        id: `event-${index}`,
+        availableSpots: 5,
+      })) as EventsListResponse["data"],
       page: 1,
       offset: 0,
     };
@@ -148,7 +170,7 @@ describe('useEvents', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
-  it('separa hasSupported entre la sesión anónima y dos usuarios', async () => {
+  it("separa hasSupported entre la sesión anónima y dos usuarios", async () => {
     getEventsMock.mockImplementation((
       _params: unknown,
       _signal: AbortSignal,
@@ -162,10 +184,10 @@ describe('useEvents', () => {
     const { result } = renderHook(() => useEvents());
     await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
 
-    act(() => saveAccessToken('token-a'));
+    await act(async () => await saveAccessToken("token-a"));
     await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(true));
 
-    act(() => saveAccessToken('token-b'));
+    await act(async () => await saveAccessToken("token-b"));
     await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
 
     act(() => clearAccessToken());
@@ -180,6 +202,18 @@ describe('useEvents', () => {
       expect.objectContaining({ includeProposals: true }),
       expect.any(AbortSignal),
       'token-b',
+    );
+  });
+
+  it('sends the finished scope to the catalog request', async () => {
+    getEventsMock.mockResolvedValue({ data: [], page: 1, offset: 0 });
+    renderHook(() => useEvents({ search: '', categoryId: null, scope: 'finished' }));
+    await waitFor(() =>
+      expect(getEventsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ scope: 'finished', includeProposals: true }),
+        expect.any(AbortSignal),
+        null,
+      ),
     );
   });
 });

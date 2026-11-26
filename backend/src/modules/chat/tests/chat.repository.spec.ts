@@ -48,10 +48,7 @@ describe('ConversationRepository', () => {
             OR: [
               {
                 eventId: null,
-                OR: [
-                  { userAId: 'user-1' },
-                  { userBId: 'user-1' },
-                ],
+                OR: [{ userAId: 'user-1' }, { userBId: 'user-1' }],
               },
               {
                 eventId: { not: null },
@@ -96,11 +93,7 @@ describe('ConversationRepository', () => {
       conversationUpsert.mockResolvedValue({ id: 'conv-group-1' });
       participantUpsert.mockResolvedValue({});
 
-      const result = await repository.upsertByEventId(
-        'event-1',
-        'user-1',
-        now,
-      );
+      const result = await repository.upsertByEventId('event-1', 'user-1', now);
 
       expect(conversationUpsert).toHaveBeenCalledWith(
         expect.objectContaining({

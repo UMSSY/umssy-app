@@ -21,8 +21,14 @@ export class SurveyNotificationsController {
   constructor(private readonly surveysService: SurveysService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Obtiene las notificaciones de encuestas asignadas al usuario actual' })
-  @ApiOkResponse({ description: 'Listado de avisos de encuestas con estado clasificado automáticamente' })
+  @ApiOperation({
+    summary:
+      'Obtiene las notificaciones de encuestas asignadas al usuario actual',
+  })
+  @ApiOkResponse({
+    description:
+      'Listado de avisos de encuestas con estado clasificado automáticamente',
+  })
   getNotifications(
     @CurrentUserId() userId: string,
     @CurrentUser() user?: AuthenticatedUser,

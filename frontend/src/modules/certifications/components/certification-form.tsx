@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useProfileCompletionFocus } from "@/modules/profile";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateField } from "@/shared/components/date-field";
@@ -40,11 +41,15 @@ function getDocumentChange(
 }
 
 export function CertificationForm({
+  requireDocument=true,
   initialData,
   currentDocumentName,
   onSubmit,
   onCancel,
   onValuesChange,
+  onDirtyChange,
+  onBusyChange,
+  saveLabel = "Guardar certificación",
 }: CertificationFormProps) {
   const [values, setValues] = useState<CreateCertificationDto>(
     initialData ?? EMPTY_CERTIFICATION_VALUES,
@@ -60,6 +65,19 @@ export function CertificationForm({
   const isEditing = Boolean(initialData);
   const isBusy = isSubmitting;
   const title = isEditing ? "Editar certificación" : "Agregar certificación";
+  const original = initialData ?? EMPTY_CERTIFICATION_VALUES;
+  const hasChanges = values.name !== original.name
+    || values.issuingOrganization !== original.issuingOrganization
+    || values.issueDate !== original.issueDate
+    || selectedFile !== null
+    || isRemovingDocument;
+  useEffect(() => { onDirtyChange?.(hasChanges); }, [hasChanges, onDirtyChange]);
+  useEffect(() => { onBusyChange?.(isSubmitting || isReadingFile); }, [isSubmitting, isReadingFile, onBusyChange]);
+  useProfileCompletionFocus('certifications', {
+    'certification-name': values.name,
+    'certification-issuingOrganization': values.issuingOrganization,
+    'certification-issueDate': values.issueDate,
+  }, !isBusy);
 
   const handleValueChange = (field: keyof CreateCertificationDto, value: string) => {
     onValuesChange?.();
@@ -120,7 +138,7 @@ export function CertificationForm({
 
     let currentFileError = fileError;
     const hasDocument = Boolean(selectedFile) || Boolean(currentDocumentName && !isRemovingDocument);
-    if (!hasDocument) {
+    if (requireDocument && !hasDocument) {
       currentFileError = CERTIFICATION_VALIDATION_MESSAGES.documentRequired;
       setFileError(currentFileError);
     }
@@ -216,7 +234,7 @@ export function CertificationForm({
         selectedFile={selectedFile}
         currentDocumentName={currentDocumentName}
         isRemovalPending={isRemovingDocument}
-        isRequired={true}
+        isRequired={requireDocument}
         error={fileError ?? submitFileError}
         disabled={isBusy}
         isReading={isReadingFile}
@@ -230,7 +248,8 @@ export function CertificationForm({
         <div className="flex gap-3">
           <Button
             type="button"
-            variant="outline"
+            variant="cancel"
+            size="lg"
             className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
             disabled={isBusy}
             onClick={onCancel}
@@ -243,7 +262,7 @@ export function CertificationForm({
             disabled={isBusy || isReadingFile}
           >
             {isBusy ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
-            {isBusy ? "Guardando..." : "Guardar certificación"}
+            {isBusy ? "Guardando..." : saveLabel}
           </Button>
         </div>
       </div>

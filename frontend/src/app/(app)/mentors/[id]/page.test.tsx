@@ -1,6 +1,6 @@
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as service from "@/modules/mentorship/services/mentor-profile.service";
@@ -36,8 +36,24 @@ describe("MentorProfilePage", () => {
     expect(screen.getByText("Arquitecta de Software")).toBeInTheDocument();
     expect(screen.getByText("Sobre mí")).toBeInTheDocument();
     expect(screen.getByText("Trayectoria actual")).toBeInTheDocument();
-    expect(screen.getByText("Áreas técnicas")).toBeInTheDocument();
-    expect(screen.getByText("Tipos de orientación")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Áreas técnicas", level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "¿En qué puedo orientarte?",
+        level: 2,
+      }),
+    ).toBeInTheDocument();
+    const guidanceTypes = screen.getByRole("group", {
+      name: "Tipos de orientación",
+    });
+    expect(
+      within(guidanceTypes).getByRole("button", { name: "Orientación técnica" }),
+    ).toBeInTheDocument();
+    expect(
+      within(guidanceTypes).getByRole("button", { name: "Revisión de CV" }),
+    ).toBeInTheDocument();
 
     expect(request).toHaveBeenCalledWith(
       MENTOR_PROFILE_FIXTURE.id,

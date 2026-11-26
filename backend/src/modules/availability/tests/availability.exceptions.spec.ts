@@ -35,7 +35,10 @@ describe('availability exceptions', () => {
   });
 
   it.each([
-    [new BlockedDateHasAppointmentException(), 'No puedes bloquear un día con citas confirmadas'],
+    [
+      new BlockedDateHasAppointmentException(),
+      'No puedes bloquear un día con citas confirmadas',
+    ],
     [new BlockedDateInPastException(), 'No se pueden bloquear fechas pasadas'],
     [new DayBlockedException(), 'Ese día está bloqueado'],
   ])('%o usa el mensaje de la HU-08', (exception, message) => {

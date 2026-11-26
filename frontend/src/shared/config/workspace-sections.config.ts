@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, LayoutGrid, MessageCircle, Radar, UserRound, Users } from "lucide-react";
 import type { WorkspaceSectionProps } from "@/shared/types/workspace-section-props.types";
 
 export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
@@ -28,15 +28,26 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Explorar talleres", href: "/events" },
       { label: "Proponer taller", href: "/events/propose" },
       { label: "Mis inscripciones", href: "/events/my-passes" },
+      { label: "Mis talleres", href: "/events/my-workshops" },
     ],
   },
   {
     id: "company", label: "Empresas", icon: Building2, patterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/],
     items: [
       { label: "Portal de empresa", href: "/recruiters" },
+      { label: "Perfil de empresa", href: "/recruiters/profile" },
       { label: "Historial", href: "/recruiters/history" },
       { label: "Publicar vacante", href: "/recruiters/job-offers/new" },
       { label: "Buscar candidatos", href: "/matching" },
+    ],
+  },
+  {
+    id: "heatmaps", label: "Mapas de calor", icon: LayoutGrid, patterns: [/^\/backoffice\/reports\/heatmaps(?:\/|$)/],
+    items: [
+      { label: "Habilidades por Carrera", href: "/backoffice/reports/heatmaps/skills-by-career" },
+      { label: "Habilidades vs. Rango Salarial", href: "/backoffice/reports/heatmaps/skills-by-salary" },
+      { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability" },
+      { label: "Habilidades vs. Experiencia", href: "/backoffice/reports/heatmaps/skills-by-experience" },
     ],
   },
   {
@@ -47,7 +58,6 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
     ],
   },
-  // Va antes de "requests", que abarca todo /backoffice.
   {
     id: "surveys", label: "Encuestas", icon: ClipboardList, patterns: [/^\/backoffice\/surveys(?:\/|$)/],
     items: [
@@ -55,7 +65,12 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Crear encuesta", href: "/backoffice/surveys/create" },
     ],
   },
-  { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
+  {
+    id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [
+      { label: "Solicitudes de acceso", href: "/backoffice/solicitudes" },
+      { label: "Control de cupos", href: "/backoffice/mentor-capacity" },
+    ],
+  },
   { id: "radar-review", label: "Revisión de radares", icon: Radar, patterns: [/^\/affinity-radar\/review-queue\/?$/], items: [] },
   {
     id: "vacancies",

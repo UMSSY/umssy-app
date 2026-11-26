@@ -3,7 +3,7 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ProfileSummary } from "../types/profile-summary.types";
 import { ContactInfoCard } from "./contact-info-card";
-import { EducationListCard } from "@/modules/education/components/education-list-card";
+import { EducationListCard } from "@/modules/educations/components/education-list-card";
 import { PresentationSummaryCard } from "./presentation-summary-card";
 import { ProfileInfoItem } from "./profile-info-item";
 import { ProfilePreviewCard } from "./profile-preview-card";
@@ -42,6 +42,17 @@ describe("profile components with missing data", () => {
     expect(
       screen.getByText("Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan."),
     ).toBeInTheDocument();
+  });
+
+  it("shows the saved headline even when the presentation description is empty", () => {
+    render(
+      <PresentationSummaryCard
+        profile={{ ...PROFILE_WITH_EMPTY_FIELDS, headline: "Desarrollador con TypeScript y Node.js" }}
+      />,
+    );
+
+    expect(screen.getByText("Titular profesional")).toBeVisible();
+    expect(screen.getByText("Desarrollador con TypeScript y Node.js")).toBeVisible();
   });
 
   it("renders the preview card when the values are null", () => {

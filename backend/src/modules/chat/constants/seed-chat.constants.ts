@@ -6,18 +6,30 @@ import type {
 } from '../types/seed-chat-definition.types.js';
 
 export const SEED_MESSAGE_STATUSES: SeedMessageStatusDefinition[] = [
-  { title: MESSAGE_STATUS_TITLES.SENDING,   description: 'El mensaje se está enviando' },
-  { title: MESSAGE_STATUS_TITLES.SENT,      description: 'El mensaje llegó al servidor' },
-  { title: MESSAGE_STATUS_TITLES.DELIVERED, description: 'El mensaje llegó al destinatario' },
-  { title: MESSAGE_STATUS_TITLES.READ,      description: 'El destinatario abrió el mensaje' },
+  {
+    title: MESSAGE_STATUS_TITLES.SENDING,
+    description: 'El mensaje se está enviando',
+  },
+  {
+    title: MESSAGE_STATUS_TITLES.SENT,
+    description: 'El mensaje llegó al servidor',
+  },
+  {
+    title: MESSAGE_STATUS_TITLES.DELIVERED,
+    description: 'El mensaje llegó al destinatario',
+  },
+  {
+    title: MESSAGE_STATUS_TITLES.READ,
+    description: 'El destinatario abrió el mensaje',
+  },
 ];
 
 export const SEED_USER_PRESENCES: SeedUserPresenceDefinition[] = [
-  { email: 'mentor.a@umssy.test',     isOnline: true },
-  { email: 'empresa@umssy.test',      isOnline: true },
-  { email: 'titulado.1@umssy.test',   isOnline: true },
-  { email: 'prueba@umss.edu.bo',      isOnline: false, minutesAgo: 180 },
-  { email: 'mentor.b@umssy.test',     isOnline: false, minutesAgo: 2880 },
+  { email: 'mentor.a@umssy.test', isOnline: true },
+  { email: 'empresa@umssy.test', isOnline: true },
+  { email: 'titulado.1@umssy.test', isOnline: true },
+  { email: 'prueba@umss.edu.bo', isOnline: false, minutesAgo: 180 },
+  { email: 'mentor.b@umssy.test', isOnline: false, minutesAgo: 2880 },
   { email: 'estudiante.1@umssy.test', isOnline: false, minutesAgo: 20160 },
 ];
 
@@ -29,9 +41,26 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
     lastReadAtByA: { minutesAgo: 45 },
     lastReadAtByB: 'now',
     messages: [
-      { fromA: true,  content: 'Hola Mentor Alfa, te envié la actualización de mi postulación.', minutesAgo: 60, status: 'READ' },
-      { fromA: false, content: 'Excelente, acabo de revisarla y se ve muy sólida.', minutesAgo: 30, status: 'SENT' },
-      { fromA: false, content: '¿Pudiste revisar los requerimientos de la vacante de Frontend?', minutesAgo: 15, status: 'SENT' },
+      {
+        fromA: true,
+        content:
+          'Hola Mentor Alfa, te envié la actualización de mi postulación.',
+        minutesAgo: 60,
+        status: 'READ',
+      },
+      {
+        fromA: false,
+        content: 'Excelente, acabo de revisarla y se ve muy sólida.',
+        minutesAgo: 30,
+        status: 'SENT',
+      },
+      {
+        fromA: false,
+        content:
+          '¿Pudiste revisar los requerimientos de la vacante de Frontend?',
+        minutesAgo: 15,
+        status: 'SENT',
+      },
     ],
   },
   {
@@ -41,8 +70,18 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
     lastReadAtByA: 'now',
     lastReadAtByB: 'now',
     messages: [
-      { fromA: false, content: 'Perfecto, coordinamos la llamada para mañana a primera hora.', minutesAgo: 240, status: 'READ' },
-      { fromA: true,  content: 'De acuerdo, nos vemos a las 9.', minutesAgo: 230, status: 'READ' },
+      {
+        fromA: false,
+        content: 'Perfecto, coordinamos la llamada para mañana a primera hora.',
+        minutesAgo: 240,
+        status: 'READ',
+      },
+      {
+        fromA: true,
+        content: 'De acuerdo, nos vemos a las 9.',
+        minutesAgo: 230,
+        status: 'READ',
+      },
     ],
   },
   {
@@ -52,8 +91,18 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
     lastReadAtByA: { minutesAgo: 2000 },
     lastReadAtByB: 'now',
     messages: [
-      { fromA: true,  content: 'Hola Carlos, quedo atento a la documentación de la empresa.', minutesAgo: 1600, status: 'READ' },
-      { fromA: false, content: '[Archivo] Te envié el documento de soporte en formato PDF.', minutesAgo: 1440, status: 'SENT' },
+      {
+        fromA: true,
+        content: 'Hola Carlos, quedo atento a la documentación de la empresa.',
+        minutesAgo: 1600,
+        status: 'READ',
+      },
+      {
+        fromA: false,
+        content: '[Archivo] Te envié el documento de soporte en formato PDF.',
+        minutesAgo: 1440,
+        status: 'SENT',
+      },
     ],
   },
   {
@@ -63,7 +112,13 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
     lastReadAtByA: 'now',
     lastReadAtByB: 'now',
     messages: [
-      { fromA: false, content: 'Tu sesión de orientación técnica fue agendada con éxito para el próximo ciclo.', minutesAgo: 4320, status: 'READ' },
+      {
+        fromA: false,
+        content:
+          'Tu sesión de orientación técnica fue agendada con éxito para el próximo ciclo.',
+        minutesAgo: 4320,
+        status: 'READ',
+      },
     ],
   },
   {
@@ -73,7 +128,13 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
     lastReadAtByA: 'now',
     lastReadAtByB: 'now',
     messages: [
-      { fromA: true,  content: 'Estimado estudiante, muchas gracias por la información compartida en el webinar dictado el mes pasado.', minutesAgo: 20160, status: 'READ' },
+      {
+        fromA: true,
+        content:
+          'Estimado estudiante, muchas gracias por la información compartida en el webinar dictado el mes pasado.',
+        minutesAgo: 20160,
+        status: 'READ',
+      },
     ],
   },
   {
@@ -84,7 +145,12 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
     lastReadAtByA: 'now',
     lastReadAtByB: 'now',
     messages: [
-      { fromA: true, content: 'Bienvenidos a la sala del taller de NestJS', minutesAgo: 10, status: 'SENT' },
+      {
+        fromA: true,
+        content: 'Bienvenidos a la sala del taller de NestJS',
+        minutesAgo: 10,
+        status: 'SENT',
+      },
     ],
   },
 ];

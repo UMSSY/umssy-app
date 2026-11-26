@@ -4,7 +4,9 @@ import { AvailabilityMapper } from '../mappers/availability.mapper.js';
 import type { AvailabilityBlockWithAppointmentDetail } from '../types/availability-block-with-appointment-detail.types.js';
 import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
 
-const buildBlock = (statuses: string[] = []): AvailabilityBlockWithAppointments =>
+const buildBlock = (
+  statuses: string[] = [],
+): AvailabilityBlockWithAppointments =>
   ({
     id: 'block-1',
     mentorId: 'mentor-1',
@@ -37,29 +39,46 @@ describe('AvailabilityMapper', () => {
   });
 
   it('marca como confirmed un bloque con cita confirmada', () => {
-    expect(mapper.toResponse(buildBlock([AppointmentStatusTitle.CONFIRMED])).state).toBe('confirmed');
+    expect(
+      mapper.toResponse(buildBlock([AppointmentStatusTitle.CONFIRMED])).state,
+    ).toBe('confirmed');
   });
 
   it('muestra como confirmed un bloque con una cita pendiente heredada', () => {
-    expect(mapper.toResponse(buildBlock([AppointmentStatusTitle.LEGACY_PENDING])).state).toBe('confirmed');
+    expect(
+      mapper.toResponse(buildBlock([AppointmentStatusTitle.LEGACY_PENDING]))
+        .state,
+    ).toBe('confirmed');
   });
 
   it('reconoce confirmaciones heredadas sin cambiar sus títulos', () => {
-    expect(mapper.toResponse(buildBlock([AppointmentStatusTitle.LEGACY_CONFIRMED])).state).toBe('confirmed');
+    expect(
+      mapper.toResponse(buildBlock([AppointmentStatusTitle.LEGACY_CONFIRMED]))
+        .state,
+    ).toBe('confirmed');
   });
 
   it('marca como free un bloque cuyas citas están canceladas o completadas', () => {
-    const block = buildBlock([AppointmentStatusTitle.CANCELLED, AppointmentStatusTitle.COMPLETED]);
+    const block = buildBlock([
+      AppointmentStatusTitle.CANCELLED,
+      AppointmentStatusTitle.COMPLETED,
+    ]);
     expect(mapper.toResponse(block).state).toBe('free');
   });
 
   it('marca como confirmed un bloque si al menos una de sus citas está activa', () => {
-    const block = buildBlock([AppointmentStatusTitle.CANCELLED, AppointmentStatusTitle.CONFIRMED]);
+    const block = buildBlock([
+      AppointmentStatusTitle.CANCELLED,
+      AppointmentStatusTitle.CONFIRMED,
+    ]);
     expect(mapper.toResponse(block).state).toBe('confirmed');
   });
 
   it('mapea una lista manteniendo el orden', () => {
-    const second = { ...buildBlock([AppointmentStatusTitle.CONFIRMED]), id: 'block-2' };
+    const second = {
+      ...buildBlock([AppointmentStatusTitle.CONFIRMED]),
+      id: 'block-2',
+    };
     const result = mapper.toResponseList([buildBlock(), second]);
     expect(result.map((block) => [block.id, block.state])).toEqual([
       ['block-1', 'free'],
@@ -75,15 +94,25 @@ describe('AvailabilityMapper', () => {
       orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
     };
     const ownerBlock = (appointments: (typeof appointment)[] = []) =>
-      ({ ...buildBlock(), appointments }) as unknown as AvailabilityBlockWithAppointmentDetail;
+      ({
+        ...buildBlock(),
+        appointments,
+      }) as unknown as AvailabilityBlockWithAppointmentDetail;
 
     it('agrega quién reservó y el tema a un bloque con cita confirmada', () => {
       expect(mapper.toOwnerResponse(ownerBlock([appointment]))).toEqual({
         ...mapper.toResponse(buildBlock([AppointmentStatusTitle.CONFIRMED])),
         appointment: {
           id: 'appointment-1',
-          counterpart: { id: 'student-1', fullName: 'Luis Flores', role: 'student' },
-          orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+          counterpart: {
+            id: 'student-1',
+            fullName: 'Luis Flores',
+            role: 'student',
+          },
+          orientationType: {
+            id: 'orientation-1',
+            name: 'Orientación profesional',
+          },
         },
       });
     });
@@ -95,13 +124,23 @@ describe('AvailabilityMapper', () => {
     });
 
     it('acepta una cita sin tema registrado', () => {
-      const result = mapper.toOwnerResponse(ownerBlock([{ ...appointment, orientationType: null as never }]));
+      const result = mapper.toOwnerResponse(
+        ownerBlock([{ ...appointment, orientationType: null as never }]),
+      );
       expect(result.appointment?.orientationType).toBeNull();
     });
 
     it('mapea una lista manteniendo el orden', () => {
-      const result = mapper.toOwnerResponseList([ownerBlock(), { ...ownerBlock([appointment]), id: 'block-2' }]);
-      expect(result.map((block) => [block.id, block.appointment?.counterpart.fullName ?? null])).toEqual([
+      const result = mapper.toOwnerResponseList([
+        ownerBlock(),
+        { ...ownerBlock([appointment]), id: 'block-2' },
+      ]);
+      expect(
+        result.map((block) => [
+          block.id,
+          block.appointment?.counterpart.fullName ?? null,
+        ]),
+      ).toEqual([
         ['block-1', null],
         ['block-2', 'Luis Flores'],
       ]);

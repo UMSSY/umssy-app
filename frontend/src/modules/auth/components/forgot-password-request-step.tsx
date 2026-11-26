@@ -1,4 +1,5 @@
-import type { FormEvent } from "react";
+import type { ForgotPasswordRequestStepProps } from "../types/forgot-password-step.types";
+import { CredentialRestrictionNotice } from "./credential-restriction-notice";
 import Link from "next/link";
 import { LoaderCircle, Mail } from "lucide-react";
 import { BrandLogo } from "@/shared/components/layout/brand-logo";
@@ -6,14 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface ForgotPasswordRequestStepProps {
-  email: string;
-  setEmail: (email: string) => void;
-  emailError: string;
-  setEmailError: (error: string) => void;
-  onSubmit: (e: FormEvent) => void;
-  isPending: boolean;
-}
 
 export function ForgotPasswordRequestStep({
   email,
@@ -21,6 +14,7 @@ export function ForgotPasswordRequestStep({
   emailError,
   setEmailError,
   onSubmit,
+  restriction,
   isPending,
 }: ForgotPasswordRequestStepProps) {
   return (
@@ -48,6 +42,7 @@ export function ForgotPasswordRequestStep({
               type="email"
               required
               autoComplete="email"
+              disabled={isPending}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -69,11 +64,13 @@ export function ForgotPasswordRequestStep({
           ) : null}
         </div>
 
+        <CredentialRestrictionNotice restriction={restriction} />
+
         <Button
           type="submit"
           variant="institutional"
-          disabled={isPending}
-          className="h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
+          disabled={isPending || Boolean(restriction)}
+          className="h-12 w-full text-base font-extrabold tracking-wide uppercase"
         >
           {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
           {isPending ? "Enviando..." : "ENVIAR CÓDIGO →"}
@@ -82,4 +79,3 @@ export function ForgotPasswordRequestStep({
     </div>
   );
 }
-

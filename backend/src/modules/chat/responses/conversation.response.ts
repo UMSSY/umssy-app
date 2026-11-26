@@ -22,6 +22,9 @@ interface ConversationBaseResponse {
   } | null;
   unreadCount: number;
   isBlockedByMe: boolean;
+  contextType?: string | null;
+  contextId?: string | null;
+  contextTitle?: string | null;
   updatedAt: string;
 }
 export interface DirectConversationResponse extends ConversationBaseResponse {

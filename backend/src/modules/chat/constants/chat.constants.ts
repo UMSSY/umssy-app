@@ -1,9 +1,4 @@
 export const MIN_SEARCH_CHARS = 2;
-export const MAX_SEARCH_QUERY_LENGTH = 100;
-export const MAX_SEARCH_RESULTS = 20;
-
-export const DEFAULT_MESSAGE_PAGE_SIZE = 20;
-export const MAX_MESSAGE_PAGE_SIZE = 50;
 
 export const DEFAULT_CONVERSATION_PAGE_SIZE = 20;
 export const MAX_CONVERSATION_PAGE_SIZE = 50;

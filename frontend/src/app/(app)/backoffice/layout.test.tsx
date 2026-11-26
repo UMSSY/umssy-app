@@ -1,4 +1,7 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import AppLayout from "../layout";
@@ -7,6 +10,11 @@ import BackofficeLayout from "./layout";
 vi.mock("next/navigation", () => ({
   usePathname: () => "/backoffice/solicitudes",
   useRouter: () => ({ replace: vi.fn() }),
+}));
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
 }));
 
 vi.mock("@/modules/request-review/hooks/use-backoffice-session", () => ({
@@ -22,9 +30,11 @@ vi.mock("@/modules/request-review/hooks/use-status-counts", () => ({
 }));
 
 describe("BackofficeLayout inside AppLayout", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     stubMatchMedia();
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`);
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`,
+    );
   });
   afterEach(() => {
     cleanup();
@@ -40,7 +50,12 @@ describe("BackofficeLayout inside AppLayout", () => {
     );
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: /Solicitudes/ })).toHaveAttribute("href", "/backoffice/solicitudes");
+    expect(
+      screen.getByRole("link", {
+        name: (content) =>
+          content.startsWith("Solicitudes") && !content.includes("empresas"),
+      }),
+    ).toHaveAttribute("href", "/backoffice/solicitudes");
     expect(screen.getByText("Contenido administrativo")).toBeDefined();
     expect(screen.getByRole("link", { name: "Revisión de radares" })).toBeDefined();
   });

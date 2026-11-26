@@ -2,11 +2,10 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaveFileHandle } from "@/shared/types/save-file.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
-import { EXPORT_SUCCESS_MESSAGE, EXPORT_SUCCESS_TOAST_DURATION_MS } from "../constants/reports.constants";
+
 import { useExportReportCsv } from "./use-export-report-csv";
 
 const EXPORTED_FILE = { file: new Blob(["Usuario"], { type: "text/csv" }), fileName: "usuarios.csv" };
-
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((resolvePromise) => { resolve = resolvePromise; });
@@ -87,7 +86,7 @@ describe("useExportReportCsv", () => {
       await exporting;
     });
 
-    expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
     expect(result.current.isExporting).toBe(false);
   });
 
@@ -95,10 +94,10 @@ describe("useExportReportCsv", () => {
     const { result } = renderHook(() => useExportReportCsv(() => Promise.resolve(EXPORTED_FILE), "usuarios.csv"));
 
     await act(async () => { await result.current.exportCsv(); });
-    expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(EXPORT_SUCCESS_TOAST_DURATION_MS - 1); });
-    expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
+    await act(async () => { await vi.advanceTimersByTimeAsync(4000 - 1); });
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
 
     await act(async () => { await vi.advanceTimersByTimeAsync(1); });
     expect(result.current.successMessage).toBeUndefined();
@@ -118,7 +117,7 @@ describe("useExportReportCsv", () => {
     expect(result.current.isExporting).toBe(false);
 
     await act(async () => { await result.current.exportCsv(); });
-    expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
   });
 
   it("no inicia otra exportación mientras se está guardando", async () => {
@@ -148,10 +147,23 @@ describe("useExportReportCsv", () => {
     await act(async () => { await result.current.exportCsv(); });
 
     expect(downloadFileModule.downloadFile).toHaveBeenCalledWith(EXPORTED_FILE.file, "usuarios.csv");
-    expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
     expect(result.current.errorMessage).toBeUndefined();
-    await act(async () => { await vi.advanceTimersByTimeAsync(EXPORT_SUCCESS_TOAST_DURATION_MS); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(4000); });
     expect(result.current.successMessage).toBeUndefined();
+  });
+
+  it("descarga el PDF generado por el servidor sin abrir el selector CSV", async () => {
+    const pdfFile = { file: new Blob(["%PDF-1.4"], { type: "application/pdf" }), fileName: "usuarios.pdf" };
+    const exportReport = vi.fn().mockResolvedValue(pdfFile);
+    const { result } = renderHook(() => useExportReportCsv(exportReport, "usuarios.csv"));
+
+    await act(async () => { await result.current.exportCsv("pdf", "page"); });
+
+    expect(picker).not.toHaveBeenCalled();
+    expect(exportReport).toHaveBeenCalledWith("page", "pdf");
+    expect(downloadFileModule.downloadFile).toHaveBeenCalledWith(pdfFile.file, "usuarios.pdf");
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
   });
 
   it("no muestra éxito si falla la generación del CSV", async () => {

@@ -2,7 +2,8 @@ import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
 import type { ManualSkillChanges } from '../types/manual-skill-changes.type.js';
 import type { UserSkillSourceRow } from '../types/user-skill-source-row.type.js';
 
-const hasEvidence = (value: unknown) => Array.isArray(value) && value.length > 0;
+const hasEvidence = (value: unknown) =>
+  Array.isArray(value) && value.length > 0;
 
 export function planManualSkillChanges(
   rows: readonly UserSkillSourceRow[],
@@ -22,7 +23,10 @@ export function planManualSkillChanges(
     if (requested.has(row.skillId)) {
       if (isDetected) changes.toManualIds.push(row.id);
     } else if (!isDetected) {
-      (hasEvidence(row.evidenceRefs) ? changes.toDetectedIds : changes.deleteIds).push(row.id);
+      (hasEvidence(row.evidenceRefs)
+        ? changes.toDetectedIds
+        : changes.deleteIds
+      ).push(row.id);
     }
   }
   return changes;

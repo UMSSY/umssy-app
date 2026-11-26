@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Download, FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import {
@@ -23,15 +22,22 @@ import { formatBlockRange } from "@/shared/utils/date-time";
 import { getInitials } from "@/shared/utils/get-initials";
 import {
   APPOINTMENTS_TEXT,
+  APPOINTMENT_CANCELLATION_TEXT,
   APPOINTMENT_DETAIL_TEXT,
   APPOINTMENT_ROLE_LABELS,
-  APPOINTMENT_STATUS_CLASSES,
-  APPOINTMENT_STATUS_LABELS,
 } from "../constants/appointments.constants";
+import { AppointmentStatusBadge } from "./appointment-status-badge";
 import { useAppointment } from "../hooks/use-appointment";
 import { useCounterpartPhoto } from "../hooks/use-counterpart-photo";
 import { useDownloadAppointmentDocument } from "../hooks/use-download-appointment-document";
+import { CancelAppointmentDialog } from "./cancel-appointment-dialog";
+import { JoinMeetingButton } from "./join-meeting-button";
 import type { AppointmentDetailDialogProps } from "../types/appointment-detail-dialog-props.types";
+import {
+  canRebookAfterCancellation,
+  getCancellationLabel,
+  isCancellationAttributed,
+} from "../utils/appointment-cancellation.utils";
 import {
   formatAppointmentDate,
   formatAppointmentRequestedAt,
@@ -46,6 +52,8 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
   const handleOpenChange = (open: boolean) => {
     if (!open) onClose();
   };
+
+  const showRebookButton = appointment ? canRebookAfterCancellation(appointment) : false;
 
   return (
     <Dialog open={appointmentId !== null} onOpenChange={handleOpenChange}>
@@ -73,12 +81,20 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
                   {" · "}
                   {appointment.orientationType?.name ?? APPOINTMENTS_TEXT.noTopic}
                 </DialogDescription>
-                <Badge
-                  variant="outline"
-                  className={APPOINTMENT_STATUS_CLASSES[appointment.status]}
-                >
-                  {APPOINTMENT_STATUS_LABELS[appointment.status]}
-                </Badge>
+                <AppointmentStatusBadge
+                  status={appointment.status}
+                  label={
+                    appointment.status === "CANCELLED"
+                      ? getCancellationLabel(appointment.cancellation)
+                      : undefined
+                  }
+                  className={
+                    appointment.status === "CANCELLED" &&
+                    isCancellationAttributed(appointment.cancellation)
+                      ? "text-destructive"
+                      : undefined
+                  }
+                />
               </div>
             </DialogHeader>
 
@@ -106,6 +122,17 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
             </dl>
 
             <Separator />
+
+            {appointment.status === "CANCELLED" && appointment.cancellation?.reason ? (
+              <section className="space-y-2" aria-labelledby="appointment-cancellation-reason-title">
+                <h3 id="appointment-cancellation-reason-title" className="text-sm font-semibold text-ink">
+                  {APPOINTMENT_DETAIL_TEXT.cancellationReasonTitle}
+                </h3>
+                <p className="rounded-lg bg-surface-soft p-3 text-sm wrap-anywhere whitespace-pre-line text-ink">
+                  {appointment.cancellation.reason}
+                </p>
+              </section>
+            ) : null}
 
             <section className="space-y-2" aria-labelledby="appointment-message-title">
               <h3 id="appointment-message-title" className="text-sm font-semibold text-ink">
@@ -159,11 +186,22 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
               </section>
             ) : null}
 
-            <DialogFooter>
+            <DialogFooter className="sm:flex-wrap">
+              <CancelAppointmentDialog key={appointment.id} appointment={appointment} />
               <DialogClose render={<Button variant="outline" />}>
                 {APPOINTMENT_DETAIL_TEXT.close}
               </DialogClose>
-              {appointment.counterpart.role === "mentor" ? (
+              {appointment.status === "CONFIRMED" ? (
+                <JoinMeetingButton meetingUrl={appointment.meetingUrl} />
+              ) : null}
+              {showRebookButton ? (
+                <Link
+                  href={`/mentors/${appointment.counterpart.id}`}
+                  className={buttonVariants()}
+                >
+                  {APPOINTMENT_CANCELLATION_TEXT.rebook}
+                </Link>
+              ) : appointment.counterpart.role === "mentor" ? (
                 <Link
                   href={`/mentors/${appointment.counterpart.id}`}
                   className={buttonVariants()}

@@ -10,3 +10,6 @@ export { SurveysStorageUnavailableException } from './surveys-storage-unavailabl
 export { SurveyAlreadyAnsweredException } from './survey-already-answered.exception.js';
 export { SurveyExpiredException } from './survey-expired.exception.js';
 export { SurveyNotOpenException } from './survey-not-open.exception.js';
+export { SurveyReminderNotAllowedException } from './survey-reminder-not-allowed.exception.js';
+export { SurveyWithoutPendingRespondentsException } from './survey-without-pending-respondents.exception.js';
+export { SurveyReminderDeliveryFailedException } from './survey-reminder-delivery-failed.exception.js';

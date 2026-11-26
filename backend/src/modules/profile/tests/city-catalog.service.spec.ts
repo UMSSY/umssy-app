@@ -59,9 +59,9 @@ describe('CityCatalogService', () => {
     it('throws CityNotFoundException when the city does not exist', async () => {
       cityRepository.exists.mockResolvedValue(false);
 
-      await expect(service.ensureCityExists('invalid-id')).rejects.toBeInstanceOf(
-        CityNotFoundException,
-      );
+      await expect(
+        service.ensureCityExists('invalid-id'),
+      ).rejects.toBeInstanceOf(CityNotFoundException);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ValidatedFile } from '../../../common/types/validated-file.type.js';
-import { APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH } from '../constants/appointment-document.constants.js';
+
 import { AppointmentDocumentMapper } from '../mappers/appointment-document.mapper.js';
 import {
   createDocumentFileRecord,
@@ -73,7 +73,7 @@ describe('AppointmentDocumentMapper', () => {
       validated(`${'a'.repeat(300)}.pdf`),
     ).fileName;
 
-    expect(fileName).toHaveLength(APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH);
+    expect(fileName).toHaveLength(255);
   });
 
   it('truncates by characters so an emoji at the limit is not split', () => {
@@ -81,9 +81,7 @@ describe('AppointmentDocumentMapper', () => {
       validated(`${'a'.repeat(254)}😀.pdf`),
     ).fileName;
 
-    expect(Array.from(fileName)).toHaveLength(
-      APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH,
-    );
+    expect(Array.from(fileName)).toHaveLength(255);
     expect(fileName.endsWith('😀')).toBe(true);
     expect(() =>
       mapper.toDownload(createDocumentFileRecord({ fileName })),

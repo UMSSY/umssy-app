@@ -7,27 +7,32 @@ export const RADAR_AREAS = [
   {
     id: 'cloud-devops',
     name: 'Cloud & DevOps',
-    description: 'Infraestructura en la nube, CI/CD, contenedores y automatización',
+    description:
+      'Infraestructura en la nube, CI/CD, contenedores y automatización',
   },
   {
     id: 'data-ai',
     name: 'Datos & IA',
-    description: 'Bases de datos, analítica, pipelines de datos e inteligencia artificial',
+    description:
+      'Bases de datos, analítica, pipelines de datos e inteligencia artificial',
   },
   {
     id: 'qa',
     name: 'QA & Testing',
-    description: 'Aseguramiento de la calidad, pruebas automatizadas y manuales',
+    description:
+      'Aseguramiento de la calidad, pruebas automatizadas y manuales',
   },
   {
     id: 'ciberseguridad',
     name: 'Ciberseguridad',
-    description: 'Seguridad informática, pentesting, auditoría y protección de datos',
+    description:
+      'Seguridad informática, pentesting, auditoría y protección de datos',
   },
   {
     id: 'gobernanza-ti',
     name: 'Gobernanza TI',
-    description: 'Gestión de proyectos, metodologías ágiles, ITIL y liderazgo técnico',
+    description:
+      'Gestión de proyectos, metodologías ágiles, ITIL y liderazgo técnico',
   },
 ] as const;
 

@@ -1,5 +1,5 @@
 import { toBoliviaTime } from "@/shared/utils/date-time";
-import { DATE_LOCALE } from "../constants/availability.constants";
+
 import { pad } from "./pad";
 
 export const toCalendarDate = (date: string): Date => {
@@ -13,8 +13,8 @@ export const toDateString = (date: Date): string =>
 export const formatDayAndMonth = (date: string): string => {
   const [year, month, day] = date.split("-").map(Number);
   const value = new Date(Date.UTC(year, month - 1, day));
-  const weekday = value.toLocaleDateString(DATE_LOCALE, { weekday: "long", timeZone: "UTC" });
-  const monthName = value.toLocaleDateString(DATE_LOCALE, { month: "long", timeZone: "UTC" });
+  const weekday = value.toLocaleDateString("es-BO", { weekday: "long", timeZone: "UTC" });
+  const monthName = value.toLocaleDateString("es-BO", { month: "long", timeZone: "UTC" });
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${day} de ${monthName}`;
 };
 

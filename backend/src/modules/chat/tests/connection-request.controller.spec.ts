@@ -1,4 +1,3 @@
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConnectionRequestController } from '../controllers/connection-request.controller.js';
@@ -36,10 +35,7 @@ describe('ConnectionRequestController', () => {
       receiverId: 'receiver-id',
     });
 
-    expect(service.send).toHaveBeenCalledWith(
-      user.id,
-      'receiver-id',
-    );
+    expect(service.send).toHaveBeenCalledWith(user.id, 'receiver-id');
 
     expect(result).toEqual(request);
   });
@@ -96,10 +92,7 @@ describe('ConnectionRequestController', () => {
 
     const result = await controller.accept(user, requestId);
 
-    expect(service.accept).toHaveBeenCalledWith(
-      requestId,
-      user.id,
-    );
+    expect(service.accept).toHaveBeenCalledWith(requestId, user.id);
 
     expect(result).toEqual(response);
   });
@@ -116,10 +109,7 @@ describe('ConnectionRequestController', () => {
 
     const result = await controller.reject(user, requestId);
 
-    expect(service.reject).toHaveBeenCalledWith(
-      requestId,
-      user.id,
-    );
+    expect(service.reject).toHaveBeenCalledWith(requestId, user.id);
 
     expect(result).toEqual(response);
   });

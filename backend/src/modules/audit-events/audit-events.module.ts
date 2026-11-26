@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
+import { AccessRequestDetailsModule } from '../access-requests/access-request-details.module.js';
 import { FilesModule } from '../files/files.module.js';
 import { AuditEventsController } from './controllers/audit-events.controller.js';
 import { AuditEventsRepository } from './repositories/audit-events.repository.js';
@@ -9,9 +10,15 @@ import { AuditEventsExportService } from './services/audit-events-export.service
 import { AuditEventsService } from './services/audit-events.service.js';
 
 @Module({
-  imports: [JwtAuthModule, FilesModule],
+  imports: [JwtAuthModule, FilesModule, AccessRequestDetailsModule],
   controllers: [AuditEventsController],
-  providers: [AuditEventsService, AuditEventsRepository, AuditEventRecorderService, AuditEventsExportService, AuditEventTimelineService],
+  providers: [
+    AuditEventsService,
+    AuditEventsRepository,
+    AuditEventRecorderService,
+    AuditEventsExportService,
+    AuditEventTimelineService,
+  ],
   exports: [AuditEventRecorderService, AuditEventTimelineService],
 })
 export class AuditEventsModule {}

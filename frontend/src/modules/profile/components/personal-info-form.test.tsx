@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_PERSONAL_INFO_VALUES } from "../config/profile-form-defaults.config";
@@ -38,6 +38,35 @@ describe("PersonalInfoForm", () => {
     cleanup();
   });
 
+  it("keeps guide labels, hints and errors scoped when the normal form stays mounted", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <>
+        <section aria-label="Formulario habitual">
+          <PersonalInfoForm initialValues={SAVED_VALUES} cities={CITIES} serverErrors={{ phone: "Revisa el teléfono habitual." }} onSubmit={vi.fn()} />
+        </section>
+        <section aria-label="Formulario de la guía">
+          <PersonalInfoForm idPrefix="profile-guide-" saveLabel="Guardar cambios" initialValues={SAVED_VALUES} cities={CITIES} serverErrors={{ phone: "Revisa el teléfono de la guía." }} onSubmit={vi.fn()} />
+        </section>
+      </>,
+    );
+    const normal = within(screen.getByRole("region", { name: "Formulario habitual" }));
+    const guide = within(screen.getByRole("region", { name: "Formulario de la guía" }));
+    expect(guide.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument();
+    for (const label of [/Nombres/, /Apellidos/, /Ciudad de residencia/, /Teléfono/, /Correo personal/]) {
+      const normalControl = normal.getByLabelText(label);
+      const guideControl = guide.getByLabelText(label);
+      expect(guideControl.id).toBe(`profile-guide-${normalControl.id}`);
+    }
+    expect(normal.getByLabelText(/Teléfono/)).toHaveAccessibleDescription(`${PHONE_HINT} Revisa el teléfono habitual.`);
+    expect(guide.getByLabelText(/Teléfono/)).toHaveAccessibleDescription(`${PHONE_HINT} Revisa el teléfono de la guía.`);
+    expect(guide.getByLabelText("Seleccionar fotografía de perfil")).toHaveAttribute("id", "profile-guide-profilePhoto");
+    await user.click(guide.getByText("Nombres"));
+    expect(guide.getByLabelText(/Nombres/)).toHaveFocus();
+    const ids = [...container.querySelectorAll("[id]")].map((element) => element.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("renders the personal information card with all the fields", async () => {
     const { user } = renderForm();
 
@@ -54,6 +83,16 @@ describe("PersonalInfoForm", () => {
 
     expect(await screen.findByRole("option", { name: "Cochabamba" })).toBeInTheDocument();
   }, 15000);
+
+  it("keeps the email and both connection buttons in the contact section without submitting the profile form", () => {
+    renderForm(SAVED_VALUES);
+    const contact = within(screen.getByRole("region", { name: "Contacto" }));
+    const connections = within(contact.getByRole("group", { name: "Cuentas de desarrollo" }));
+
+    expect(contact.getByLabelText(/Correo personal/)).toHaveValue("valeria@correo.com");
+    expect(connections.getByRole("button", { name: "Conectar con GitHub" })).toHaveAttribute("type", "button");
+    expect(connections.getByRole("button", { name: "Conectar con GitLab" })).toHaveAttribute("type", "button");
+  });
 
   it("shows the initial values", () => {
     renderForm(SAVED_VALUES);

@@ -1,20 +1,28 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useRecommendedJobs } from "../hooks/use-recommended-jobs";
-import type { RecommendedJob } from "../types/job-matching.types";
+import type { RecommendedJob } from "../types/recommended-job.types";
 import { RecommendedJobsView } from "./recommended-jobs-view";
+
+vi.mock("../hooks/use-applied-job-offer-ids", () => ({
+  useAppliedJobOfferIds: vi.fn(() => new Set<string>()),
+}));
 
 vi.mock("../hooks/use-recommended-jobs", () => ({
   useRecommendedJobs: vi.fn(),
 }));
 
+vi.mock("../components/job-alert-preference-selector", () => ({
+  JobAlertPreferenceSelector: () => null,
+}));
+
 const mockedUseRecommendedJobs = vi.mocked(useRecommendedJobs);
 
 const JOBS: RecommendedJob[] = [
-  { jobOfferId: "devops", title: "DevOps Senior", companyName: "TechBolivia", modality: "Remoto", score: 92, matchedSkills: ["Docker"], skills: ["Docker", "Terraform"] },
-  { jobOfferId: "backend", title: "Backend Developer", companyName: "Sofía Corp", modality: "Híbrido", score: 77, matchedSkills: ["Node.js"], skills: ["Node.js", "Redis"] },
-  { jobOfferId: "qa", title: "QA Automation Engineer", companyName: "Quantex", modality: "Híbrido", score: 68, matchedSkills: ["Cypress"], skills: ["Cypress", "Selenium"] },
-  { jobOfferId: "data", title: "Data Analyst Jr.", companyName: "Sofía Corp", modality: "Presencial", score: 41, matchedSkills: ["SQL"], skills: ["SQL", "Power BI"] },
+  { jobOfferId: "devops", title: "DevOps Senior", companyName: "TechBolivia", modality: "Remoto", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 92, matchedSkills: ["Docker"], skills: ["Docker", "Terraform"] },
+  { jobOfferId: "backend", title: "Backend Developer", companyName: "Sofía Corp", modality: "Híbrido", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 77, matchedSkills: ["Node.js"], skills: ["Node.js", "Redis"] },
+  { jobOfferId: "qa", title: "QA Automation Engineer", companyName: "Quantex", modality: "Híbrido", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 68, matchedSkills: ["Cypress"], skills: ["Cypress", "Selenium"] },
+  { jobOfferId: "data", title: "Data Analyst Jr.", companyName: "Sofía Corp", modality: "Presencial", publishedAt: "2026-11-10T15:00:00.000Z", expiresAt: null, score: 41, matchedSkills: ["SQL"], skills: ["SQL", "Power BI"] },
 ];
 
 function renderFeed(items: RecommendedJob[] = JOBS) {

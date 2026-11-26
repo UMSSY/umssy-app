@@ -1,6 +1,6 @@
 
 import { apiClient } from "@/shared/services/api-client";
-import { getAuthHeaders } from "@/modules/profile";
+import { getAuthHeaders } from "../utils/get-auth-headers";
 import type { ApiResponse } from "../types/api-response.types";
 import type { ProfileSkillsRadarResponse } from "../types/profile-skills-radar-response.types";
 
@@ -23,7 +23,7 @@ export const profileSkillsRadarService = {
   getSkills: async (): Promise<ProfileSkillsRadarResponse> => {
     const response = await apiClient.get<
       ApiResponse<ProfileSkillsRadarResponse>
-    >("/profile/skills-for-radar", {
+    >("/profile/me/skills/analysis", {
       headers: getAuthHeaders(),
     });
 

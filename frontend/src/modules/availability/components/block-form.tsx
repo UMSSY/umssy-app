@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDaysIcon, CircleAlertIcon } from "lucide-react";
 import { es } from "react-day-picker/locale";
 import { Alert, AlertTitle } from "@/components/ui/alert";
@@ -15,17 +15,12 @@ import { Input } from "@/components/ui/input";
 import { TimeSelect } from "./time-select";
 import { toBoliviaTime, toUtcIso } from "@/shared/utils/date-time";
 import { cn } from "cn";
-import {
-  FORM_TEXT,
-  MAX_REPEAT_WEEKS,
-  REPEAT_INTERVAL_DAYS,
-  REPEAT_WEEKLY_TEXT,
-  REQUIRED_MESSAGES,
-} from "../constants/availability.constants";
+import { BLOCK_RANGE_TEXT, FORM_TEXT, REPEAT_WEEKLY_TEXT, REQUIRED_MESSAGES } from "../constants/availability.constants";
 import type { BlockFormErrors } from "../types/block-form-errors.types";
 import type { BlockFormField } from "../types/block-form-field.types";
 import type { BlockFormProps } from "../types/block-form-props.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
+import { addBlockDuration, countBlocks, splitTimeRange } from "../utils/block-range";
 import { validateBlock } from "../utils/block-validation";
 import {
   addDaysToDateString,
@@ -54,6 +49,7 @@ export function BlockForm({
   onSubmit,
   onCancel,
   onValuesChange,
+  onDraftChange,
 }: BlockFormProps) {
   const [today] = useState(getBoliviaToday);
   const [date, setDate] = useState(() =>
@@ -62,9 +58,10 @@ export function BlockForm({
   const [startTime, setStartTime] = useState(() =>
     initialValues?.startAt ? toBoliviaTime(initialValues.startAt).time : "",
   );
-  const [endTime, setEndTime] = useState(() =>
-    initialValues?.endAt ? toBoliviaTime(initialValues.endAt).time : "",
-  );
+  const [endTime, setEndTime] = useState(() => {
+    if (mode === "edit" && initialValues?.startAt) return addBlockDuration(toBoliviaTime(initialValues.startAt).time);
+    return initialValues?.endAt ? toBoliviaTime(initialValues.endAt).time : "";
+  });
   const [repeatWeekly, setRepeatWeekly] = useState(false);
   const [repeatUntil, setRepeatUntil] = useState("");
   const [errors, setErrors] = useState<BlockFormErrors>({});
@@ -72,9 +69,16 @@ export function BlockForm({
   const text = FORM_TEXT[mode];
   const selectedDate = date ? toCalendarDate(date) : undefined;
   const timeLimits = { pastLimit: getPastTimeLimit(date), startTime, endTime };
-  const minRepeatUntil = date ? addDaysToDateString(date, REPEAT_INTERVAL_DAYS) : "";
-  const maxRepeatUntil = date ? addDaysToDateString(date, MAX_REPEAT_WEEKS * 7) : "";
+  const minRepeatUntil = date ? addDaysToDateString(date, 7) : "";
+  const maxRepeatUntil = date ? addDaysToDateString(date, 12 * 7) : "";
   const selectedRepeatUntil = repeatUntil ? toCalendarDate(repeatUntil) : undefined;
+  const blockRanges = startTime && endTime ? splitTimeRange(startTime, endTime) : [];
+
+  useEffect(() => {
+    if (!onDraftChange) return;
+    const isComplete = date && startTime && endTime && countBlocks(startTime, endTime) > 0;
+    onDraftChange(isComplete ? { startAt: toUtcIso(date, startTime), endAt: toUtcIso(date, endTime) } : null);
+  }, [date, startTime, endTime, onDraftChange]);
 
   const clearErrors = (...fields: BlockFormField[]) => {
     setErrors((prev) => {
@@ -89,10 +93,12 @@ export function BlockForm({
     const nextDate = day ? toDateString(day) : "";
     const pastLimit = getPastTimeLimit(nextDate);
     setDate(nextDate);
-    if (startTime && isStartTimeDisabled(startTime, { pastLimit, startTime: "", endTime: "" })) setStartTime("");
-    if (endTime && isEndTimeDisabled(endTime, { pastLimit, startTime: "", endTime: "" })) setEndTime("");
-    const nextMinRepeatUntil = nextDate ? addDaysToDateString(nextDate, REPEAT_INTERVAL_DAYS) : "";
-    const nextMaxRepeatUntil = nextDate ? addDaysToDateString(nextDate, MAX_REPEAT_WEEKS * 7) : "";
+    if (startTime && isStartTimeDisabled(startTime, { pastLimit, startTime: "", endTime: "" })) {
+      setStartTime("");
+      setEndTime("");
+    }
+    const nextMinRepeatUntil = nextDate ? addDaysToDateString(nextDate, 7) : "";
+    const nextMaxRepeatUntil = nextDate ? addDaysToDateString(nextDate, 12 * 7) : "";
     if (repeatUntil && (repeatUntil < nextMinRepeatUntil || repeatUntil > nextMaxRepeatUntil)) {
       setRepeatUntil("");
     }
@@ -102,6 +108,9 @@ export function BlockForm({
   const handleStartChange = (value: string) => {
     onValuesChange?.();
     setStartTime(value);
+    if (mode === "edit" || !endTime || countBlocks(value, endTime) === 0) {
+      setEndTime(value ? addBlockDuration(value) : "");
+    }
     clearErrors("startAt", "endAt");
   };
 
@@ -265,17 +274,21 @@ export function BlockForm({
                   onValueChange={handleEndChange}
                   invalid={Boolean(errors.endAt)}
                   describedBy={errors.endAt ? "endAt-error" : undefined}
-                  disabled={disabled}
+                  disabled={disabled || mode === "edit"}
                   isOptionHidden={(time) => isEndTimeDisabled(time, timeLimits)}
+                  getOptionHint={
+                    mode === "edit" || !startTime
+                      ? undefined
+                      : (time) => BLOCK_RANGE_TEXT.blockCount(countBlocks(startTime, time))
+                  }
                 />
                 {errors.endAt && <FieldError id="endAt-error">{errors.endAt}</FieldError>}
               </Field>
 
-              {mode !== "edit" && (
-                <FieldDescription className="col-span-1 text-xs sm:col-span-2">
-                  La hora de fin debe ser posterior a la de inicio.
-                </FieldDescription>
-              )}
+              <FieldDescription className="col-span-1 text-xs sm:col-span-2" aria-live="polite">
+                {BLOCK_RANGE_TEXT.durationHint}
+                {mode !== "edit" && blockRanges.length > 0 && ` ${BLOCK_RANGE_TEXT.summary(blockRanges)}`}
+              </FieldDescription>
             </FieldGroup>
 
             {mode !== "edit" && (
@@ -336,7 +349,7 @@ export function BlockForm({
         >
           <Button
             type="button"
-            variant="outline"
+            variant="cancel"
             size="lg"
             className={cn("w-full", mode !== "edit" && "sm:w-auto")}
             onClick={onCancel}

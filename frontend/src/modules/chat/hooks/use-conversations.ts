@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 import type {
@@ -19,6 +18,9 @@ import {
 
 import { setStoredConversationUnreadCount } from "../services/message-storage";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+import { CONVERSATIONS_QUERY_KEY } from "../constants/conversations-query-key";
+import { upsertConversation } from "../utils/upsert-conversation";
+import { useResolveContextualConversation } from "./use-resolve-contextual-conversation";
 
 const PAGE_SIZE = 10;
 
@@ -46,10 +48,9 @@ export function useConversations() {
     useState<string | null>(null);
 
   const queryClient = useQueryClient();
-  const queryKey = ["chat", "conversations"];
 
   const query = useQuery({
-    queryKey,
+    queryKey: CONVERSATIONS_QUERY_KEY,
     queryFn: () => getConversations(),
   });
 
@@ -58,20 +59,30 @@ export function useConversations() {
     [query.data],
   );
 
-  const isLoading = query.isFetching;
+  const isLoading = query.isFetching && query.data === undefined;
   const isError = query.isError && !query.isFetching;
 
-  function setConversationsData(
-    update: (current: Conversation[]) => Conversation[],
-  ) {
-    queryClient.setQueryData<Conversation[]>(
-      queryKey,
-      (current) => update(current ?? []),
-    );
-  }
+  const resolveContextualConversation = useResolveContextualConversation();
+
+  const setConversationsData = useCallback(
+    (update: (current: Conversation[]) => Conversation[]) => {
+      queryClient.setQueryData<Conversation[]>(
+        CONVERSATIONS_QUERY_KEY,
+        (current) => update(current ?? []),
+      );
+    },
+    [queryClient],
+  );
 
   const startMutation = useMutation({
-    mutationFn: (id: string) => getOrCreateConversation(id),
+    mutationFn: (params: { id: string; context?: { contextType?: string; contextId?: string } } | string) => {
+      if (typeof params === 'string') {
+        return getOrCreateConversation(params);
+      }
+      return params.context
+        ? getOrCreateConversation(params.id, params.context)
+        : getOrCreateConversation(params.id);
+    },
   });
 
   const readMutation = useMutation({
@@ -151,11 +162,7 @@ export function useConversations() {
   const selectedConversation = useMemo(() => {
     if (!selectedId) return null;
 
-    return (
-      conversationsData.find(
-        (item) => item.id === selectedId,
-      ) || null
-    );
+    return conversationsData.find((item) => item.id === selectedId) || null;
   }, [conversationsData, selectedId]);
 
   const hasMore =
@@ -207,6 +214,19 @@ export function useConversations() {
     setKeptInUnreadId(null);
   };
 
+  useEffect(() => {
+    if (!selectedId) return;
+    const current = conversationsData.find((item) => item.id === selectedId);
+    if (current && current.unreadCount > 0) {
+      readMutation.mutate(selectedId);
+      setConversationsData((prev) =>
+        prev.map((item) =>
+          item.id === selectedId ? { ...item, unreadCount: 0 } : item,
+        ),
+      );
+    }
+  }, [selectedId, conversationsData, readMutation, setConversationsData]);
+
   const simulateIncomingMessage = (
     conversationId: string,
     newContent: string,
@@ -224,9 +244,8 @@ export function useConversations() {
             ? 0
             : item.unreadCount + 1;
 
-        setStoredConversationUnreadCount(
-          conversationId,
-          newUnread,
+        void setStoredConversationUnreadCount(conversationId, newUnread).catch(
+          () => {},
         );
 
         return {
@@ -235,7 +254,7 @@ export function useConversations() {
           unreadCount: newUnread,
           lastMessage: {
             id: `msg-${Date.now()}`,
-            senderId: item.contact?.id ?? '',
+            senderId: item.contact?.id ?? "",
             content: newContent,
             isAttachment: false,
             createdAt: timestamp,
@@ -298,37 +317,51 @@ export function useConversations() {
 
   const startConversationWithContact = async (
     contactUser: User,
+    context?: { contextType?: string; contextId?: string },
   ) => {
     if (pendingContactId) return;
 
-    const alreadyInList =
-      findExistingConversationByContact(contactUser.id);
+    if (context?.contextId) {
+      const existingByContext = conversationsData.find(
+        (c) => c.contextId === context.contextId,
+      );
+      if (existingByContext) {
+        handleSelectConversation(existingByContext);
+        return;
+      }
+    } else {
+      const alreadyInList =
+        findExistingConversationByContact(contactUser.id);
 
-    if (alreadyInList) {
-      handleSelectConversation(alreadyInList);
-      return;
+      if (alreadyInList && !alreadyInList.contextId) {
+        handleSelectConversation(alreadyInList);
+        return;
+      }
     }
 
     setPendingContactId(contactUser.id);
 
     try {
       const conversation =
-        await startMutation.mutateAsync(contactUser.id);
+        await startMutation.mutateAsync({ id: contactUser.id, context });
 
-      setConversationsData((prev) => {
-        const exists = prev.some(
-          (item) => item.id === conversation.id,
-        );
-
-        return exists
-          ? prev
-          : [conversation, ...prev];
-      });
+      setConversationsData((prev) =>
+        upsertConversation(prev, conversation),
+      );
 
       setSelectedId(conversation.id);
     } finally {
       setPendingContactId(null);
     }
+  };
+
+  const openContextualConversation = async (
+    contactId: string,
+    context: { contextType: string; contextId: string },
+  ) => {
+    const conversation = await resolveContextualConversation({ contactId, context });
+    handleSelectConversation(conversation);
+    return conversation;
   };
 
   return {
@@ -353,5 +386,6 @@ export function useConversations() {
     setConversationBlocked,
     findExistingConversationByContact,
     startConversationWithContact,
+    openContextualConversation,
   };
 }

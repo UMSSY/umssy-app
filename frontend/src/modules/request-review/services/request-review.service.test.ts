@@ -1,3 +1,6 @@
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import { requestReviewService } from "./request-review.service";
@@ -7,12 +10,12 @@ const reply = (status: number, data: unknown) => get.mockResolvedValue({ status,
 const item = { id: "1", fullName: "Ana Pérez" };
 
 describe("requestReviewService.listRequests", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     get.mockReset();
     get.mockResolvedValue({ status: 500, data: {} } as never);
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    await saveAccessToken("token-de-prueba");
   });
-  afterEach(() => sessionStorage.clear());
+  afterEach(() => clearAccessToken());
 
   it("envía el estado, la página, el límite y el token Bearer", async () => {
     reply(200, { data: { items: [item], total: 11 }, page: 2, offset: 10 });
@@ -35,7 +38,7 @@ describe("requestReviewService.listRequests", () => {
   });
 
   it("sin token no envía la cabecera de autorización", async () => {
-    sessionStorage.clear();
+    clearAccessToken();
     reply(401, { detail: "Debes iniciar sesión para continuar" });
 
     await requestReviewService.listRequests("pending", 1);
@@ -77,12 +80,12 @@ describe("requestReviewService.listRequests", () => {
 
 describe("requestReviewService.getRequestDetail", () => {
   const detailBody = { id: "1", history: { submittedAt: null, openedAt: null, openedBy: null, reviewedAt: null, reviewedBy: null, rejectionReason: null } };
-  beforeEach(() => {
+  beforeEach(async () => {
     get.mockReset();
     get.mockResolvedValue({ status: 500, data: {} } as never);
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    await saveAccessToken("token-de-prueba");
   });
-  afterEach(() => sessionStorage.clear());
+  afterEach(() => clearAccessToken());
 
   it("pide el detalle con el token y acepta el cuerpo plano o envuelto", async () => {
     reply(200, detailBody);
@@ -157,11 +160,11 @@ describe("requestReviewService.getDocumentBlob", () => {
 describe("requestReviewService.approveRequest", () => {
   const patch = vi.spyOn(apiClient, "patch");
   const replyPatch = (status: number, data: unknown) => patch.mockResolvedValue({ status, data } as never);
-  beforeEach(() => {
+  beforeEach(async () => {
     patch.mockReset();
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    await saveAccessToken("token-de-prueba");
   });
-  afterEach(() => sessionStorage.clear());
+  afterEach(() => clearAccessToken());
 
   it("aprueba con el token y acepta el cuerpo plano o envuelto", async () => {
     replyPatch(200, { id: "1", status: "approved", activationCodeSent: true });
@@ -192,11 +195,11 @@ describe("requestReviewService.approveRequest", () => {
 describe("requestReviewService.rejectRequest", () => {
   const patch = vi.spyOn(apiClient, "patch");
   const replyPatch = (status: number, data: unknown) => patch.mockResolvedValue({ status, data } as never);
-  beforeEach(() => {
+  beforeEach(async () => {
     patch.mockReset();
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    await saveAccessToken("token-de-prueba");
   });
-  afterEach(() => sessionStorage.clear());
+  afterEach(() => clearAccessToken());
 
   it("envía el motivo con el token y acepta el cuerpo plano o envuelto", async () => {
     replyPatch(200, { id: "1", status: "rejected", notificationSent: true });
@@ -245,7 +248,7 @@ describe("requestReviewService.listRequests: filtros", () => {
     get.mockReset();
     get.mockResolvedValue({ status: 200, data: { data: { items: [], total: 0 } } } as never);
   });
-  afterEach(() => sessionStorage.clear());
+  afterEach(() => clearAccessToken());
 
   const paramsOf = () => get.mock.calls[0][1]?.params;
 
@@ -281,11 +284,11 @@ describe("requestReviewService.getSummary", () => {
     topRejectionReason: null,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     get.mockReset();
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    await saveAccessToken("token-de-prueba");
   });
-  afterEach(() => sessionStorage.clear());
+  afterEach(() => clearAccessToken());
 
   it("lee el cuerpo plano con el token Bearer", async () => {
     get.mockResolvedValue({ status: 200, data: summary } as never);

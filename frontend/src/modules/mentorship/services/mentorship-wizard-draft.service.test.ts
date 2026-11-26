@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
+
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
 import {
   readIndexedDb,
@@ -86,15 +86,15 @@ describe("mentorship wizard draft", () => {
   });
 
   it("discards an unowned legacy draft instead of assigning it to a user", async () => {
-    records.set(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY, validDraft);
+    records.set("umssy-mentorship-wizard-draft", validDraft);
     localStorage.setItem(
-      MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY,
+      "umssy-mentorship-wizard-draft",
       JSON.stringify(validDraft),
     );
 
     expect(await loadMentorshipWizardDraft(USER_A)).toBeNull();
-    expect(records.has(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBe(false);
-    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBeNull();
+    expect(records.has("umssy-mentorship-wizard-draft")).toBe(false);
+    expect(localStorage.getItem("umssy-mentorship-wizard-draft")).toBeNull();
     expect(
       records.has(getMentorshipWizardDraftStorageKey(USER_A)),
     ).toBe(false);

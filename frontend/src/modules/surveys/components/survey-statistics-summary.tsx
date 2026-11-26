@@ -1,7 +1,7 @@
 import { CheckCircle2, Clock, FileText, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SURVEY_STATUS_BADGE_CLASSES, SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
-import type { SurveyStatisticsSummaryProps } from "../types/survey-component-props.types";
+import type { SurveyStatisticsSummaryProps } from "../types/survey-statistics-summary-props.types";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
 
 export function SurveyStatisticsSummary({ statistics }: SurveyStatisticsSummaryProps) {

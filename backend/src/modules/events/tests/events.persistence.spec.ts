@@ -5,7 +5,10 @@ import { EventsService } from '../services/events.service.js';
 describe('EventsService', () => {
   let repository: EventsService;
   let prismaMock: {
-    event: { findMany: ReturnType<typeof vi.fn>; count: ReturnType<typeof vi.fn> };
+    event: {
+      findMany: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+    };
     $transaction: ReturnType<typeof vi.fn>;
   };
 
@@ -15,7 +18,9 @@ describe('EventsService', () => {
         findMany: vi.fn(),
         count: vi.fn(),
       },
-      $transaction: vi.fn().mockImplementation((promises) => Promise.all(promises)),
+      $transaction: vi
+        .fn()
+        .mockImplementation((promises) => Promise.all(promises)),
     };
     repository = new EventsService(new EventsRepository(prismaMock as never));
   });
@@ -23,14 +28,28 @@ describe('EventsService', () => {
   it('keeps voting proposals and cover metadata available after registration integration', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
-    await repository.findAndCount({ isPublishedOnly: true, includeProposals: true, skip: 0, take: 10 });
-    expect(prismaMock.event.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { status: { title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] } } },
-      select: expect.objectContaining({ coverMimeType: true, votingDeadline: true, supportThreshold: true }),
-    }));
+    await repository.findAndCount({
+      includeProposals: true,
+      skip: 0,
+      take: 10,
+    });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          status: {
+            title: { in: ['Publicado', 'Votacion', 'En votación'] },
+          },
+        },
+        select: expect.objectContaining({
+          coverMimeType: true,
+          votingDeadline: true,
+          supportThreshold: true,
+        }),
+      }),
+    );
   });
 
-  it('calls findMany and count with empty where when no filters are provided', async () => {
+  it('defaults to published workshops when no status filter is provided', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
@@ -38,36 +57,46 @@ describe('EventsService', () => {
 
     expect(prismaMock.$transaction).toHaveBeenCalledOnce();
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: {}, skip: 10, take: 5 }),
+      expect.objectContaining({ where: { status: { title: 'Publicado' } }, skip: 10, take: 5 }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: {} });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: { status: { title: 'Publicado' } } });
     expect(result).toEqual({ items: [], total: 0 });
   });
 
-    it('includes proposal statuses only when explicitly requested', async () => {
+  it('includes proposal statuses only when explicitly requested', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
-    await repository.findAndCount({ isPublishedOnly: true, includeProposals: true, skip: 0, take: 10 });
+    await repository.findAndCount({
+      includeProposals: true,
+      skip: 0,
+      take: 10,
+    });
 
     const expectedWhere = {
-      status: { title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] } },
+      status: {
+        title: { in: ['Publicado', 'Votacion', 'En votación'] },
+      },
     };
 
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('keeps the public catalogue published-only and selects proposal covers', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
-    await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
-    expect(prismaMock.event.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { status: { title: 'Publicado' } },
-      select: expect.objectContaining({ coverMimeType: true }),
-    }));
+    await repository.findAndCount({ skip: 0, take: 10 });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { status: { title: 'Publicado' } },
+        select: expect.objectContaining({ coverMimeType: true }),
+      }),
+    );
   });
 
   it('applies only search filter with case-insensitive partial match to where', async () => {
@@ -77,6 +106,7 @@ describe('EventsService', () => {
     await repository.findAndCount({ search: 'Tech', skip: 0, take: 10 });
 
     const expectedWhere = {
+      status: { title: 'Publicado' },
       title: {
         contains: 'Tech',
         mode: 'insensitive',
@@ -86,7 +116,9 @@ describe('EventsService', () => {
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('escapes wildcards percent (%) and underscore (_) in search', async () => {
@@ -96,6 +128,7 @@ describe('EventsService', () => {
     await repository.findAndCount({ search: '100%_test', skip: 0, take: 10 });
 
     const expectedWhere = {
+      status: { title: 'Publicado' },
       title: {
         contains: '100\\%\\_test',
         mode: 'insensitive',
@@ -113,34 +146,49 @@ describe('EventsService', () => {
 
     await repository.findAndCount({ categoryId: 'cat-abc', skip: 0, take: 10 });
 
-    const expectedWhere = { categoryId: 'cat-abc' };
+    const expectedWhere = { categoryId: 'cat-abc', status: { title: 'Publicado' } };
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('applies statusId filter to where in both queries', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
-    await repository.findAndCount({ statusId: 'status-abc', skip: 0, take: 10 });
+    await repository.findAndCount({
+      statusId: 'status-abc',
+      includeProposals: true,
+      skip: 0,
+      take: 10,
+    });
 
     const expectedWhere = { statusId: 'status-abc' };
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('combines search and categoryId with AND in where clause', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
-    await repository.findAndCount({ search: 'workshop', categoryId: 'cat-123', skip: 0, take: 10 });
+    await repository.findAndCount({
+      search: 'workshop',
+      categoryId: 'cat-123',
+      skip: 0,
+      take: 10,
+    });
 
     const expectedWhere = {
       categoryId: 'cat-123',
+      status: { title: 'Publicado' },
       title: {
         contains: 'workshop',
         mode: 'insensitive',
@@ -150,7 +198,9 @@ describe('EventsService', () => {
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('combines search, categoryId, and statusId in where clause', async () => {
@@ -177,7 +227,9 @@ describe('EventsService', () => {
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
-    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+    expect(prismaMock.event.count).toHaveBeenCalledWith({
+      where: expectedWhere,
+    });
   });
 
   it('orders by eventDate asc and startTime asc', async () => {
@@ -195,15 +247,23 @@ describe('EventsService', () => {
   it('counts only confirmed registrations that have not been cancelled', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
-    await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
-    expect(prismaMock.event.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      select: expect.objectContaining({
-        _count: { select: { registrations: { where: { cancelledAt: null, status: { title: 'Confirmada' } } } } },
+    await repository.findAndCount({ skip: 0, take: 10 });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          _count: {
+            select: {
+              registrations: {
+                where: { cancelledAt: null, status: { title: 'Confirmada' } },
+              },
+            },
+          },
+        }),
       }),
-    }));
+    );
   });
 
-    it('selects only the authenticated user registration when userId is provided', async () => {
+  it('selects only the authenticated user registration when userId is provided', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
@@ -226,13 +286,43 @@ describe('EventsService', () => {
     );
   });
 
-  it('does not select registrations when there is no userId', async () => {
+  it('does not return user registrations when there is no userId', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
     await repository.findAndCount({ skip: 0, take: 10 });
 
     const args = prismaMock.event.findMany.mock.calls[0][0];
-    expect(args.select).not.toHaveProperty('registrations');
+    expect(args.select.registrations.where.userId).toEqual({ in: [] });
+  });
+
+  it('applies the catalog visibility instead of the plain status filter', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+    const visibility = { status: { title: 'Publicado' }, OR: [{ sessions: { some: {} } }] };
+    await repository.findAndCount({
+      categoryId: 'cat-abc',
+      statusId: 'ignored-status',
+      includeProposals: true,
+      visibility,
+      skip: 0,
+      take: 10,
+    });
+    const expectedWhere = { categoryId: 'cat-abc', ...visibility };
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expectedWhere }),
+    );
+    expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+
+  it('orders finished workshops from the most recent', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+    await repository.findAndCount({ newestFirst: true, skip: 0, take: 10 });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ eventDate: 'desc' }, { startTime: 'desc' }, { id: 'asc' }],
+      }),
+    );
   });
 });

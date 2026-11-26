@@ -9,21 +9,46 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
+  GoogleEmailMismatchException,
+  GoogleAccountAlreadyLinkedException,
+  GoogleLinkTokenInvalidException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
+import type { RoleName } from '../../../common/enums/roles.enum.js';
+
+export const GOOGLE_ALLOWED_ROLES: readonly RoleName[] = [
+  'estudiante',
+  'titulado',
+  'mentor',
+] as const;
+import {
+  SESSION_IDLE_SECONDS,
+  SESSION_MAX_MS,
+  SESSION_WARNING_SECONDS,
+} from '../constants/session.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
-import { PASSWORD_RESET_EMAIL_MJML } from '../templates/password-reset-email.template.js';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { RefreshTokenService } from './refresh-token.service.js';
+import { PasswordHistoryService } from './password-history.service.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
+import type { GoogleLinkClaims } from '../types/google-link-claims.types.js';
+import type { GoogleLoginResult } from '../types/google-login-result.types.js';
+import {
+  GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
+  GOOGLE_REQUEST_NOT_APPROVED_MESSAGE,
+} from '../constants/google-link.constants.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import type { LoginDto } from '../requests/login.schema.js';
 import type { RequestPasswordResetDto } from '../requests/request-password-reset.schema.js';
 import type { VerifyPasswordResetDto } from '../requests/verify-password-reset.schema.js';
 import type { ResetPasswordDto } from '../requests/reset-password.schema.js';
 
-const OTP_EXPIRATION_MINUTES = 5;
-const RESEND_COOLDOWN_SECONDS = 120;
-const MAX_OTP_ATTEMPTS = 5;
+import {
+  MAX_OTP_ATTEMPTS,
+  OTP_EXPIRATION_MINUTES,
+  RESEND_COOLDOWN_SECONDS,
+} from '../constants/password-reset.constants.js';
 
 @Injectable()
 export class AuthService {
@@ -33,14 +58,35 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly passwordHistory: PasswordHistoryService,
   ) {}
 
   existsByEmail(email: string) {
     return this.authRepository.existsByEmail(email);
   }
 
-  getSession(user: AuthenticatedUser): SessionResponse {
-    return { id: user.id, email: user.email, roles: user.roles };
+  getAccessTokenMaxAgeMs(accessToken: string): number {
+    const payload = this.jwtService.decode<{ exp?: unknown } | null>(
+      accessToken,
+    );
+    if (typeof payload?.exp !== 'number') return SESSION_MAX_MS;
+    return Math.max(payload.exp * 1000 - Date.now(), 0);
+  }
+
+  getSession(
+    user: AuthenticatedUser,
+    absoluteExpiresAt: Date | null = null,
+  ): SessionResponse {
+    return {
+      id: user.id,
+      email: user.email,
+      roles: user.roles,
+      company: user.company ?? null,
+      idleTimeoutSeconds: SESSION_IDLE_SECONDS,
+      warningSeconds: SESSION_WARNING_SECONDS,
+      absoluteExpiresAt: absoluteExpiresAt?.toISOString() ?? null,
+    };
   }
 
   async login(dto: LoginDto): Promise<LoginResponse> {
@@ -59,27 +105,224 @@ export class AuthService {
     const roles = LOGIN_ROLE_PRIORITY.filter((role) => assignedRoles.has(role));
     const roleTag = dto.roleTag ?? roles[0];
     if (!roleTag || !roles.includes(roleTag)) {
-      throw new RoleNotAssignedException(dto.roleTag ? undefined : "El usuario no tiene roles habilitados");
+      throw new RoleNotAssignedException(
+        dto.roleTag ? undefined : 'El usuario no tiene roles habilitados',
+      );
     }
 
     const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
     return { accessToken, roleTag, roles };
   }
 
-  async requestPasswordReset(dto: RequestPasswordResetDto): Promise<{ ok: boolean; message: string }> {
+  async loginWithGoogle(
+    verifiedGoogle: { email: string; sub: string; picture?: string },
+    requestedRoleTag?: RoleName,
+  ): Promise<GoogleLoginResult> {
+    let user = await this.authRepository.findUserByGoogleSubWithRoles(
+      verifiedGoogle.sub,
+    );
+
+    const needsGoogleLink = !user;
+
+    if (!user) {
+      user = await this.authRepository.findUserByEmailWithRoles(
+        verifiedGoogle.email,
+      );
+      if (user) {
+        const existingSub =
+          await this.authRepository.findGoogleSocialAccountBySub(
+            verifiedGoogle.sub,
+          );
+        if (existingSub && existingSub.userId !== user.id) {
+          throw new InvalidCredentialsException(
+            'Esta cuenta de Google ya está vinculada a otro usuario.',
+          );
+        }
+      }
+    }
+
+    if (!user) {
+      const pendingRequest =
+        await this.authRepository.hasUnapprovedAccessRequest(
+          verifiedGoogle.email,
+        );
+      throw new InvalidCredentialsException(
+        pendingRequest
+          ? GOOGLE_REQUEST_NOT_APPROVED_MESSAGE
+          : GOOGLE_ACCOUNT_NOT_FOUND_MESSAGE,
+      );
+    }
+
+    const { roleTag, roles } = this.resolveGoogleRole(user, requestedRoleTag);
+
+    if (needsGoogleLink) {
+      return {
+        requiresLinking: true,
+        claims: {
+          userId: user.id,
+          googleSub: verifiedGoogle.sub,
+          email: verifiedGoogle.email,
+          ...(verifiedGoogle.picture && { picture: verifiedGoogle.picture }),
+        },
+      };
+    }
+
+    const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
+    return { accessToken, roleTag, roles };
+  }
+
+  async confirmGoogleLink(
+    claims: GoogleLinkClaims,
+    requestedRoleTag?: RoleName,
+  ): Promise<LoginResponse> {
+    const user = await this.authRepository.findUserByIdWithRoles(claims.userId);
+    if (
+      !user ||
+      user.email.trim().toLowerCase() !== claims.email.trim().toLowerCase()
+    ) {
+      throw new GoogleLinkTokenInvalidException();
+    }
+
+    const { roleTag, roles } = this.resolveGoogleRole(user, requestedRoleTag);
+
+    const existingSub = await this.authRepository.findGoogleSocialAccountBySub(
+      claims.googleSub,
+    );
+    if (existingSub && existingSub.userId !== user.id) {
+      throw new GoogleAccountAlreadyLinkedException();
+    }
+
+    await this.authRepository.linkGoogleAccount(
+      user.id,
+      claims.googleSub,
+      claims.email,
+      claims.picture,
+    );
+
+    const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
+    return { accessToken, roleTag, roles };
+  }
+
+  private resolveGoogleRole(
+    user: {
+      isActive: boolean | null;
+      roles: Array<{ role: { name: string } }>;
+    },
+    requestedRoleTag?: RoleName,
+  ): { roleTag: RoleName; roles: RoleName[] } {
+    if (user.isActive === false) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+    }
+
+    const assignedRoles = new Set(user.roles.map(({ role }) => role.name));
+    const authorizedRoles = LOGIN_ROLE_PRIORITY.filter(
+      (role) =>
+        assignedRoles.has(role) && GOOGLE_ALLOWED_ROLES.includes(role as RoleName),
+    );
+
+    if (authorizedRoles.length === 0) {
+      throw new RoleNotAssignedException(
+        'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
+      );
+    }
+
+    const roleTag = requestedRoleTag ?? authorizedRoles[0];
+    if (!roleTag || !authorizedRoles.includes(roleTag)) {
+      throw new RoleNotAssignedException(
+        requestedRoleTag
+          ? 'El rol seleccionado no está autorizado para acceder con Google.'
+          : 'El usuario no tiene roles habilitados para acceder con Google.',
+      );
+    }
+
+    return { roleTag, roles: authorizedRoles };
+  }
+
+  async linkGoogle(
+    user: AuthenticatedUser,
+    verifiedGoogle: { email: string; sub: string; picture?: string },
+  ): Promise<{ ok: boolean; detail: string }> {
+    if (
+      user.email.trim().toLowerCase() !==
+      verifiedGoogle.email.trim().toLowerCase()
+    ) {
+      throw new GoogleEmailMismatchException();
+    }
+
+    const dbUser = await this.authRepository.findUserByEmailWithRoles(user.email);
+    if (!dbUser) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de Google no está registrada en el sistema.',
+      );
+    }
+
+    if (dbUser.isActive === false) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+    }
+
+    const assignedRoles = new Set(dbUser.roles.map(({ role }) => role.name));
+    const hasAllowedRole = GOOGLE_ALLOWED_ROLES.some((r) => assignedRoles.has(r));
+    if (!hasAllowedRole) {
+      throw new RoleNotAssignedException(
+        'La vinculación con Google solo está permitida para estudiantes, titulados y mentores.',
+      );
+    }
+
+    const existingLink = await this.authRepository.findGoogleSocialAccountBySub(
+      verifiedGoogle.sub,
+    );
+    if (existingLink && existingLink.userId !== dbUser.id) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de Google ya está vinculada a otro usuario.',
+      );
+    }
+
+    await this.authRepository.linkGoogleAccount(
+      dbUser.id,
+      verifiedGoogle.sub,
+      verifiedGoogle.email,
+      verifiedGoogle.picture,
+    );
+
+    return {
+      ok: true,
+      detail: 'Cuenta vinculada exitosamente.',
+    };
+  }
+
+  async requestPasswordReset(
+    dto: RequestPasswordResetDto,
+  ): Promise<{ ok: boolean; message: string }> {
     const user = await this.authRepository.findUserByEmail(dto.email);
 
     if (!user || !user.isActive) {
-      this.logger.warn(`Solicitud de recuperación de contraseña para correo inexistente o inactivo: ${dto.email}`);
-      return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
+      this.logger.warn(
+        `Solicitud de recuperación de contraseña para correo inexistente o inactivo: ${dto.email}`,
+      );
+      return {
+        ok: true,
+        message:
+          'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+      };
     }
 
     const latestOtp = await this.authRepository.findLatestOtp(user.id);
     if (latestOtp) {
-      const elapsedSeconds = (Date.now() - latestOtp.createdAt.getTime()) / 1000;
+      const elapsedSeconds =
+        (Date.now() - latestOtp.createdAt.getTime()) / 1000;
       if (elapsedSeconds < RESEND_COOLDOWN_SECONDS) {
-        this.logger.warn('Cooldown activo para solicitud de código de: ' + dto.email);
-        return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
+        this.logger.warn(
+          'Cooldown activo para solicitud de código de: ' + dto.email,
+        );
+        return {
+          ok: true,
+          message:
+            'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+        };
       }
     }
 
@@ -87,14 +330,19 @@ export class AuthService {
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + OTP_EXPIRATION_MINUTES * 60 * 1000);
 
-    await this.authRepository.createPasswordResetOtp(user.id, codeHash, expiresAt);
+    await this.authRepository.createPasswordResetOtp(
+      user.id,
+      codeHash,
+      expiresAt,
+    );
 
-    const recipientName = `${user.firstName} ${user.lastName}`.trim() || 'Usuario';
+    const recipientName =
+      `${user.firstName} ${user.lastName}`.trim() || 'Usuario';
     await this.mailService.send({
       to: user.email,
       subject: `${code} es tu código de recuperación de contraseña - UMSSY`,
       text: `Hola, ${recipientName}: Tu código de recuperación es ${code}. Vence en ${OTP_EXPIRATION_MINUTES} minutos.`,
-      mjml: PASSWORD_RESET_EMAIL_MJML,
+      mjml: await loadMailTemplate('password-reset-email'),
       values: {
         recipientName,
         code,
@@ -102,7 +350,11 @@ export class AuthService {
       },
     });
 
-    return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
+    return {
+      ok: true,
+      message:
+        'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+    };
   }
 
   private async validateResetCode(email: string, code: string) {
@@ -133,15 +385,29 @@ export class AuthService {
     return { user, otp };
   }
 
-  async verifyPasswordReset(dto: VerifyPasswordResetDto): Promise<{ ok: boolean; message: string }> {
+  async verifyPasswordReset(
+    dto: VerifyPasswordResetDto,
+  ): Promise<{ ok: boolean; message: string }> {
     await this.validateResetCode(dto.email, dto.code);
     return { ok: true, message: 'Código de verificación validado con éxito.' };
   }
 
-  async resetPassword(dto: ResetPasswordDto): Promise<{ ok: boolean; message: string }> {
+  async resetPassword(
+    dto: ResetPasswordDto,
+  ): Promise<{ ok: boolean; message: string }> {
     const { user, otp } = await this.validateResetCode(dto.email, dto.code);
+    const expectedPasswordHash = await this.passwordHistory.validateNewPassword(
+      user.id,
+      dto.password,
+    );
     const newPasswordHash = await bcrypt.hash(dto.password, 10);
-    await this.authRepository.updateUserPasswordAndInvalidateOtp(user.id, newPasswordHash, otp.id);
+    await this.authRepository.updateUserPasswordAndInvalidateOtp(
+      user.id,
+      newPasswordHash,
+      otp.id,
+      expectedPasswordHash,
+    );
+    await this.refreshTokenService.revokeAllForUser(user.id);
 
     return { ok: true, message: 'Contraseña actualizada correctamente.' };
   }

@@ -5,4 +5,3 @@ export interface EducationDegreeCatalogEntry {
   readonly sources: readonly string[];
   readonly degrees: readonly EducationDegree[];
 }
-

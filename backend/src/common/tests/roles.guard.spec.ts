@@ -53,6 +53,19 @@ describe('RolesGuard', () => {
     );
   });
 
+  it('responde 403 si el usuario tiene identidad pero ningún rol', () => {
+    const guard = createGuard(['mentor']);
+    const withoutRoles = {
+      id: 'u3',
+      userId: 'u3',
+      email: 'x@test.com',
+      roles: [],
+    };
+    expect(() => guard.canActivate(createContext(withoutRoles))).toThrow(
+      ForbiddenRoleException,
+    );
+  });
+
   it('responde 401 si no hay usuario (el guard de sesión no corrió antes)', () => {
     const guard = createGuard(['mentor']);
     expect(() => guard.canActivate(createContext(undefined))).toThrow(

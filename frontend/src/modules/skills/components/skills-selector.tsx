@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { LoaderCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { CUSTOM_SKILL_HINT, CUSTOM_SKILL_HINT_ID, SKILL_NAME_MAX_LENGTH, SKILLS_UI_TEXTS } from "../constants/skills.constants";
+import { CUSTOM_SKILL_HINT, SKILL_NAME_MAX_LENGTH, SKILLS_UI_TEXTS } from "../constants/skills.constants";
 import type { SkillsSelectorProps } from "../types/skills-selector-props.types";
 import { getFieldErrorId, getFieldErrorProps } from "@/modules/profile";
 import { formatSkillName } from "../utils/format-skill-name";
@@ -27,12 +27,16 @@ export function SkillsSelector({
   hasLoadError = false,
   onRetry,
   feedback = null,
+  onCustomDraftChange,
+  saveLabel = SKILLS_UI_TEXTS.saveButton,
 }: SkillsSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [customSkillName, setCustomSkillName] = useState("");
   const [customSkillError, setCustomSkillError] = useState("");
 
   const isMutateDisabled = isSaving || hasLoadError;
+  const hasCustomDraft = customSkillName.trim().length > 0;
+  useEffect(() => { onCustomDraftChange?.(hasCustomDraft); }, [hasCustomDraft, onCustomDraftChange]);
 
   const selectedIds = useMemo(
     () => new Set((selectedSkills ?? []).map((skill) => skill.id)),
@@ -141,7 +145,7 @@ export function SkillsSelector({
                   }}
                   className="h-11"
                   {...getFieldErrorProps("custom-skill", customSkillError)}
-                  aria-describedby={[CUSTOM_SKILL_HINT_ID, customSkillError ? getFieldErrorId("custom-skill") : null]
+                  aria-describedby={["custom-skill-hint", customSkillError ? getFieldErrorId("custom-skill") : null]
                     .filter(Boolean)
                     .join(" ")}
                 />
@@ -155,7 +159,7 @@ export function SkillsSelector({
                   {SKILLS_UI_TEXTS.addButton}
                 </Button>
               </div>
-              <p id={CUSTOM_SKILL_HINT_ID} className="text-sm text-text-secondary">
+              <p id={"custom-skill-hint"} className="text-sm text-text-secondary">
                 {CUSTOM_SKILL_HINT}
               </p>
             </FormField>
@@ -204,7 +208,7 @@ export function SkillsSelector({
             className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "w-full")}
           >
             {isSaving ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
-            {isSaving ? SKILLS_UI_TEXTS.savingButton : SKILLS_UI_TEXTS.saveButton}
+            {isSaving ? SKILLS_UI_TEXTS.savingButton : saveLabel}
           </Button>
         </div>
       </SectionCard>

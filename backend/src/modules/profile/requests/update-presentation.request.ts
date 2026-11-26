@@ -6,4 +6,6 @@ export const updatePresentationSchema = z.object({
   aboutMe: aboutMeSchema,
 });
 
-export type UpdatePresentationRequest = z.infer<typeof updatePresentationSchema>;
+export type UpdatePresentationRequest = z.infer<
+  typeof updatePresentationSchema
+>;

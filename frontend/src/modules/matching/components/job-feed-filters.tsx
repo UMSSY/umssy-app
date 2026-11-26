@@ -1,26 +1,28 @@
 "use client";
+import type { JobFeedFiltersProps } from "../types/job-feed-filters-props.types";
+
+import { FILTER_BAR_MOTION_CLASS } from "@/shared/constants/card-motion.constants";
+import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
 
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { JOB_FEED_MESSAGES, JOB_FEED_MODALITIES } from "../constants/job-matching.constants";
-import type { JobFeedFilters as JobFeedFiltersValue } from "../types/job-feed-filters.types";
-import { hasActiveFilters } from "../utils/filter-recommended-jobs";
+import { JOB_FEED_MESSAGES } from "../constants/job-matching.constants";
 
-interface JobFeedFiltersProps {
-  filters: JobFeedFiltersValue;
-  onChange: (filters: JobFeedFiltersValue) => void;
-  onClear: () => void;
-}
+import { hasActiveFilters } from "../utils/filter-recommended-jobs";
 
 export function JobFeedFilters({ filters, onChange, onClear }: JobFeedFiltersProps) {
   return (
     <div
       role="search"
-      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 md:flex-row md:items-center"
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 md:flex-row md:items-center",
+        FILTER_BAR_MOTION_CLASS,
+      )}
     >
       <div className="relative md:max-w-sm md:flex-1">
         <Search
@@ -44,7 +46,7 @@ export function JobFeedFilters({ filters, onChange, onClear }: JobFeedFiltersPro
         className="w-full md:w-48"
       >
         <NativeSelectOption value="">{JOB_FEED_MESSAGES.allModalities}</NativeSelectOption>
-        {JOB_FEED_MODALITIES.map((modality) => (
+        {JOB_MODALITIES.map((modality) => (
           <NativeSelectOption key={modality} value={modality}>
             {modality}
           </NativeSelectOption>

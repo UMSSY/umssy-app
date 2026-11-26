@@ -1,3 +1,4 @@
+import { DOCUMENT_VALIDATION_RULES } from '../../../common/constants/file-upload.constants.js';
 import { Injectable } from '@nestjs/common';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
@@ -6,7 +7,7 @@ import { CertificationMapper } from '../../certifications/mappers/certification.
 import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
 import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
-import { CERTIFICATION_DOCUMENT_VALIDATION_RULES } from '../constants/certification-document.constants.js';
+
 import { CertificationDocumentNotFoundException } from '../exceptions/certification-document-not-found.exception.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
@@ -15,7 +16,9 @@ import type { CertificationDocumentDownload } from '../types/certification-docum
 import type { CertificationDocumentMetadata } from '../types/certification-document-metadata.type.js';
 
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
-import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+import { CertificationDocumentVersionConflictException } from '../exceptions/certification-document-version-conflict.exception.js';
 
 @Injectable()
 export class CertificationDocumentsService {
@@ -44,7 +47,7 @@ export class CertificationDocumentsService {
   } {
     const validated = this.fileValidationService.validate(
       file ? this.documentMapper.toUploadedFile(file) : undefined,
-      CERTIFICATION_DOCUMENT_VALIDATION_RULES,
+      DOCUMENT_VALIDATION_RULES,
     );
     return {
       content: validated.buffer,
@@ -63,11 +66,14 @@ export class CertificationDocumentsService {
     userId: string,
     id: string,
     file: MulterFile | undefined,
+    expectedVersion?: string,
   ): Promise<CertificationResponse> {
     await this.getOwnedOrFail(userId, id);
 
     const prepared = this.prepare(file);
     await this.transactions.run(async (context) => {
+      if (expectedVersion)
+        await this.requireCurrentVersion(userId, id, expectedVersion, context);
       await this.documentsRepository.save(id, prepared.content, context);
       await this.audit.saveDocumentMetadata(
         userId,
@@ -100,7 +106,11 @@ export class CertificationDocumentsService {
     );
   }
 
-  async remove(userId: string, id: string): Promise<void> {
+  async remove(
+    userId: string,
+    id: string,
+    expectedVersion?: string,
+  ): Promise<void> {
     await this.getOwnedOrFail(userId, id);
 
     if (!(await this.documentsRepository.hasDocument(id))) {
@@ -108,10 +118,28 @@ export class CertificationDocumentsService {
     }
 
     await this.transactions.run(async (context) => {
+      if (expectedVersion)
+        await this.requireCurrentVersion(userId, id, expectedVersion, context);
       await this.documentsRepository.remove(id, context);
       await this.audit.saveDocumentMetadata(userId, id, null, context);
     });
     await this.skillsAnalysis.refreshAfterChange(userId);
+  }
+
+  private async requireCurrentVersion(
+    userId: string,
+    id: string,
+    expectedVersion: string,
+    context: TransactionContext,
+  ): Promise<void> {
+    await this.documentsRepository.lockOwnedCertification(id, userId, context);
+    const current = await this.audit.findActiveCertificationVerification(
+      userId,
+      id,
+      context,
+    );
+    if (current?.id !== expectedVersion)
+      throw new CertificationDocumentVersionConflictException();
   }
 
   private async getOwnedOrFail(

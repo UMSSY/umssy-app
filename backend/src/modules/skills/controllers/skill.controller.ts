@@ -56,9 +56,12 @@ export class SkillController {
 
   @Post('custom')
   @ApiBody(toApiBody(createCustomSkillSchema))
-  @ApiCreatedResponse({ description: 'Custom skill, or the existing skill with the same name' })
+  @ApiCreatedResponse({
+    description: 'Custom skill, or the existing skill with the same name',
+  })
   createCustomSkill(
-    @Body({ schema: createCustomSkillSchema }) request: CreateCustomSkillRequest,
+    @Body({ schema: createCustomSkillSchema })
+    request: CreateCustomSkillRequest,
   ): Promise<SkillResponse> {
     return this.skillCatalogService.createCustomSkill(request);
   }

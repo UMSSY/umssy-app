@@ -1,9 +1,6 @@
+import type { MentorQuerySkeletonProps } from "../../types/mentor-query-skeleton-props.types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
-type MentorQuerySkeletonProps = {
-  isProfile?: boolean;
-};
 
 export function MentorQuerySkeleton({
   isProfile = false,

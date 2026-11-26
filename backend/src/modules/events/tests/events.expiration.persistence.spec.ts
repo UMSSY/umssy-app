@@ -11,10 +11,12 @@ describe('EventsService.expireOverdueProposals', () => {
   beforeEach(() => {
     findStatus.mockReset();
     updateMany.mockReset();
-    service = new EventsService(new EventsRepository({
-      eventStatus: { findUnique: findStatus },
-      event: { updateMany },
-    } as never));
+    service = new EventsService(
+      new EventsRepository({
+        eventStatus: { findUnique: findStatus },
+        event: { updateMany },
+      } as never),
+    );
   });
 
   it('pasa a Vencido solo propuestas de la comunidad en votación con el plazo cumplido', async () => {

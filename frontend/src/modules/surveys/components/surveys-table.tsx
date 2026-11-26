@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SURVEY_STATUS_BADGE_CLASSES, SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_TABLE_COLUMNS } from "../constants/survey-routes.constants";
-import type { SurveysTableProps } from "../types/survey-component-props.types";
+import type { SurveysTableProps } from "../types/surveys-table-props.types";
 import { formatIsoDateTime } from "../utils/survey-dates";
 import { SurveyRowActions } from "./survey-row-actions";
 

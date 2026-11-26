@@ -1,4 +1,5 @@
 "use client";
+import type { ConfirmDiscardDialogProps } from "../types/confirm-discard-dialog-props.types";
 
 import {
   AlertDialog,
@@ -10,13 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface ConfirmDiscardDialogProps {
-  open: boolean;
-  candidateName: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
 
 export function ConfirmDiscardDialog({
   open,
@@ -42,7 +36,7 @@ export function ConfirmDiscardDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-critical-action text-critical-action-foreground hover:bg-critical-action/90"
+            variant="outline"
             onClick={onConfirm}
           >
             Sí, descartar

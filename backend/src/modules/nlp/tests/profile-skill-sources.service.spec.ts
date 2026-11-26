@@ -13,7 +13,7 @@ const userId = '11111111-1111-4111-8111-111111111111';
 describe('ProfileSkillSourcesService', () => {
   const educations = { findAnalysisSources: vi.fn() };
   const workExperience = { findAnalysisSources: vi.fn() };
-  const profile = { ensureProfileExists: vi.fn() };
+  const profile = { getProfile:vi.fn(), ensureProfileExists: vi.fn() };
   const skills = { findCatalog: vi.fn() };
 
   const certifications = {
@@ -21,6 +21,7 @@ describe('ProfileSkillSourcesService', () => {
   };
 
   const radarEvidence = {
+    findCertificateSkills: vi.fn().mockResolvedValue([]),
     findCurrentCvText: vi.fn(),
   };
 
@@ -35,30 +36,49 @@ describe('ProfileSkillSourcesService', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    profile.getProfile.mockResolvedValue({headline:null,aboutMe:null});
 
     certifications.findManyByUserId.mockResolvedValue([]);
     radarEvidence.findCurrentCvText.mockResolvedValue([]);
+    radarEvidence.findCertificateSkills.mockResolvedValue([]);
   });
 
-
   it('delegates profile validation and propagates the owner exception', async () => {
-    profile.ensureProfileExists.mockRejectedValue(new ProfileNotFoundException());
+    profile.ensureProfileExists.mockRejectedValue(
+      new ProfileNotFoundException(),
+    );
 
-    await expect(service.ensureProfileExists(userId)).rejects.toBeInstanceOf(ProfileNotFoundException);
+    await expect(service.ensureProfileExists(userId)).rejects.toBeInstanceOf(
+      ProfileNotFoundException,
+    );
     expect(profile.ensureProfileExists).toHaveBeenCalledWith(userId);
   });
 
   it('assembles analysis texts through owner services without employer or institution names', async () => {
     workExperience.findAnalysisSources.mockResolvedValue([
-      { id: 'w1', position: 'Desarrollador backend', description: 'APIs con Node.js', company: 'Privada' },
+      {
+        id: 'w1',
+        position: 'Desarrollador backend',
+        description: 'APIs con Node.js',
+        company: 'Privada',
+      },
       { id: 'w2', position: 'Analista', description: null },
     ]);
     educations.findAnalysisSources.mockResolvedValue([
-      { id: 'e1', degree: 'Ingeniería de Sistemas', description: '  ', institution: 'Privada' },
+      {
+        id: 'e1',
+        degree: 'Ingeniería de Sistemas',
+        description: '  ',
+        institution: 'Privada',
+      },
     ]);
 
     await expect(service.findTextSources(userId)).resolves.toEqual([
-      { id: 'w1', type: 'work-experience', text: 'Desarrollador backend.\nAPIs con Node.js' },
+      {
+        id: 'w1',
+        type: 'work-experience',
+        text: 'Desarrollador backend.\nAPIs con Node.js',
+      },
       { id: 'w2', type: 'work-experience', text: 'Analista' },
       { id: 'e1', type: 'education', text: 'Ingeniería de Sistemas' },
     ]);
@@ -75,44 +95,48 @@ describe('ProfileSkillSourcesService', () => {
   });
 
   it('propagates source failures to the analysis coordinator', async () => {
-    educations.findAnalysisSources.mockRejectedValue(new Error('education unavailable'));
+    educations.findAnalysisSources.mockRejectedValue(
+      new Error('education unavailable'),
+    );
     workExperience.findAnalysisSources.mockResolvedValue([]);
 
-    await expect(service.findTextSources(userId)).rejects.toThrow('education unavailable');
+    await expect(service.findTextSources(userId)).rejects.toThrow(
+      'education unavailable',
+    );
   });
 
   it('includes certifications and current CV text as NLP sources', async () => {
-  workExperience.findAnalysisSources.mockResolvedValue([]);
-  educations.findAnalysisSources.mockResolvedValue([]);
+    workExperience.findAnalysisSources.mockResolvedValue([]);
+    educations.findAnalysisSources.mockResolvedValue([]);
 
-  certifications.findManyByUserId.mockResolvedValue([
-    {
-      id: 'cert-1',
-      name: 'AWS Certified',
-      issuingOrganization: 'Amazon',
-    },
-  ]);
+    certifications.findManyByUserId.mockResolvedValue([
+      {
+        id: 'cert-1',
+        name: 'AWS Certified',
+        issuingOrganization: 'Amazon',
+      },
+    ]);
 
-  radarEvidence.findCurrentCvText.mockResolvedValue([
-    {
-      id: 'cv-1',
-      type: 'cv',
-      text: 'Python, Docker',
-    },
-  ]);
+    radarEvidence.findCurrentCvText.mockResolvedValue([
+      {
+        id: 'cv-1',
+        type: 'cv',
+        text: 'Python, Docker',
+      },
+    ]);
 
-  await expect(service.findTextSources(userId)).resolves.toEqual([
-    {
-      id: 'cert-1',
-      type: 'certification',
-      text: 'AWS Certified. Amazon',
-    },
-    {
-      id: 'cv-1',
-      type: 'cv',
-      text: 'Python, Docker',
-    },
-  ]);
+    await expect(service.findTextSources(userId)).resolves.toEqual([
+      {
+        id: 'cert-1',
+        type: 'certification',
+        text: 'AWS Certified. Amazon',
+      },
+      {
+        id: 'cv-1',
+        type: 'cv',
+        text: 'Python, Docker',
+      },
+    ]);
 
     expect(certifications.findManyByUserId).toHaveBeenCalledWith(userId);
     expect(radarEvidence.findCurrentCvText).toHaveBeenCalledWith(userId);

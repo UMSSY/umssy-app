@@ -22,9 +22,9 @@ describe('validateEnv', () => {
   );
 
   it('trata valores vacios o con solo espacios como faltantes', () => {
-    expect(() => validateEnv({ ...validEnv, JWT_EXPIRES_IN: '', CORS_ORIGIN: '  ' })).toThrow(
-      'JWT_EXPIRES_IN, CORS_ORIGIN',
-    );
+    expect(() =>
+      validateEnv({ ...validEnv, JWT_EXPIRES_IN: '', CORS_ORIGIN: '  ' }),
+    ).toThrow('JWT_EXPIRES_IN, CORS_ORIGIN');
   });
 
   it('lista todas las variables faltantes en un solo mensaje', () => {

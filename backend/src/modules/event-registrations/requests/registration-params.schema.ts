@@ -5,7 +5,9 @@ export const EVENT_REGISTRATION_PARAMS_SCHEMA = z.object({
 });
 
 export const REGISTRATION_PARAMS_SCHEMA = z.object({
-  registrationId: z.guid({ error: 'El identificador de la inscripción no es válido.' }),
+  registrationId: z.guid({
+    error: 'El identificador de la inscripción no es válido.',
+  }),
 });
 
 export const REGISTRATION_ID_SCHEMA = z.object({

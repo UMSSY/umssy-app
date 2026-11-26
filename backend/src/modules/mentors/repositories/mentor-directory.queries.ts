@@ -1,19 +1,19 @@
+import { resolveMentorAreas } from '../constants/radar-mentor-areas.constants.js';
 import { Prisma } from '../../../prisma/client.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import { containsNormalizedText } from '../../../common/prisma/contains-normalized-text.js';
+import type { MentorDirectorySearchService } from '../services/mentor-directory-search.service.js';
 
-type DirectoryFilters = Pick<
+export type DirectoryFilters = Pick<
   MentorDirectoryQuery,
-  'search' | 'area' | 'orientation' | 'available'
+  'search' | 'area' | 'areaIds' | 'orientation' | 'available'
 >;
-
-function normalized(value: Prisma.Sql): Prisma.Sql {
-  return Prisma.sql`lower(regexp_replace(normalize(${value}, NFD), ${'[\u0300-\u036f]'}, '', 'g'))`;
-}
 
 export function directoryPredicate(
   filters: DirectoryFilters,
   now: Date,
+  search: Pick<MentorDirectorySearchService, 'matchingUsers'>,
 ): Prisma.Sql {
   const conditions = [
     Prisma.sql`u.is_active = true AND EXISTS (
@@ -24,10 +24,16 @@ export function directoryPredicate(
   ];
   if (filters.available)
     conditions.push(Prisma.sql`u.is_available_for_mentoring = true`);
-  if (filters.area)
+  if (filters.areaIds?.length) {
+    const ids = filters.areaIds.map((id) => Prisma.sql`${id}::uuid`);
+    conditions.push(Prisma.sql`EXISTS (
+    SELECT 1 FROM mentor_technical_areas mta
+    WHERE mta.mentor_id = u.id AND mta.technical_area_id IN (${Prisma.join(ids)})
+  )`);
+  } else if (filters.area)
     conditions.push(Prisma.sql`EXISTS (
     SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
-    WHERE mta.mentor_id = u.id AND ta.name = ${filters.area}
+    WHERE mta.mentor_id = u.id AND (ta.id::text = ${filters.area} OR ta.name IN (${Prisma.join(resolveMentorAreas(filters.area))}))
   )`);
   if (filters.orientation)
     conditions.push(Prisma.sql`EXISTS (
@@ -36,8 +42,13 @@ export function directoryPredicate(
   )`);
   for (const term of filters.search.trim().split(/\s+/).filter(Boolean)) {
     conditions.push(Prisma.sql`(
-      strpos(${normalized(Prisma.sql`u.first_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
-      OR strpos(${normalized(Prisma.sql`u.last_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
+      ${containsNormalizedText(Prisma.sql`u.first_name`, term)}
+      OR ${containsNormalizedText(Prisma.sql`u.last_name`, term)}
+      OR ${containsNormalizedText(Prisma.sql`coalesce(u.headline, '')`, term)}
+      OR ${containsNormalizedText(Prisma.sql`coalesce(u.about_me, '')`, term)}
+      OR EXISTS (SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
+        WHERE mta.mentor_id = u.id AND ${containsNormalizedText(Prisma.sql`ta.name`, term)})
+      OR ${search.matchingUsers(Prisma.sql`u.id`, term)}
     )`);
   }
   return Prisma.join(conditions, ' AND ');

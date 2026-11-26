@@ -6,10 +6,13 @@ import { DocumentUploadInterceptor } from '../interceptors/document-upload.inter
 
 describe('DocumentUploadInterceptor', () => {
   const interceptor = new DocumentUploadInterceptor();
-  const run = (handle: () => ReturnType<typeof of>) => lastValueFrom(interceptor.intercept({} as any, { handle } as any));
+  const run = (handle: () => ReturnType<typeof of>) =>
+    lastValueFrom(interceptor.intercept({} as any, { handle } as any));
 
   it('convierte PayloadTooLargeException en FileTooLargeException (413)', async () => {
-    const error = await run(() => throwError(() => new PayloadTooLargeException())).catch((e) => e);
+    const error = await run(() =>
+      throwError(() => new PayloadTooLargeException()),
+    ).catch((e) => e);
 
     expect(error).toBeInstanceOf(FileTooLargeException);
     expect(error.statusCode).toBe(413);
@@ -23,6 +26,8 @@ describe('DocumentUploadInterceptor', () => {
   });
 
   it('deja pasar las respuestas normales', async () => {
-    await expect(run(() => of({ id: 'id-1' }))).resolves.toEqual({ id: 'id-1' });
+    await expect(run(() => of({ id: 'id-1' }))).resolves.toEqual({
+      id: 'id-1',
+    });
   });
 });

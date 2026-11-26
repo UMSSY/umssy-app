@@ -5,13 +5,18 @@ import { pathToFileURL } from 'node:url';
 import { Logger } from '@nestjs/common';
 
 import { seedEvents } from '../../modules/events/seeds/events.seed.js';
+import { seedHistoryScenarioEvents } from '../../modules/events/seeds/history-scenarios-events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
+import { seedHistoryScenarioRegistrations } from '../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js';
+import { seedAttendanceQaFixtures } from '../../modules/event-registrations/seeds/attendance-qa-fixtures.seed.js';
+import { seedMultisessionScenarios } from '../../modules/events/seeds/multisession-scenarios.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { seedChat } from '../../modules/chat/seeds/chat.seed.js';
+import { seedRadar } from '../../modules/radar-integration/seeds/radar.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
 import {
   hashSeedPassword,
@@ -66,8 +71,28 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
     );
     const { users } = usersResult;
     await runModule('eventos', (tx) => seedEvents(tx, users.eventGraduate.id));
+    await runModule('escenarios de talleres históricos', (tx) =>
+      seedHistoryScenarioEvents(tx, users.eventGraduate.id, now),
+    );
     await runModule('inscripciones', (tx) =>
       seedEventRegistrations(tx, users.eventGraduate.id),
+    );
+    await runModule('inscripciones de historial', (tx) =>
+      seedHistoryScenarioRegistrations(
+        tx,
+        users.eventGraduate.id,
+        users.historyGraduate.id,
+        now,
+      ),
+    );
+    await runModule('escenarios QA de asistencia HU-08-12', (tx) =>
+      seedAttendanceQaFixtures(tx, now),
+    );
+    await runModule('escenarios de talleres multisesión', (tx) =>
+      seedMultisessionScenarios(tx, {
+        organizerId: users.workshopOrganizer.id,
+        participantId: users.workshopParticipant.id,
+      }),
     );
     const availabilityResult = await runModule('disponibilidad', (tx) =>
       seedAvailability(
@@ -86,6 +111,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
       seedAccessRequests,
     );
     await runModule('chat', seedChat);
+    await runModule('radar', (tx) => seedRadar(tx, users));
 
     return {
       weeks: availabilityResult.weeks,

@@ -39,6 +39,7 @@ vi.mock("@/shared/contexts/auth-context", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(window.location.search),
   usePathname: () => "/dashboard",
   useRouter: () => ({
     replace: vi.fn(),
@@ -340,7 +341,8 @@ describe("ChatPanel", () => {
         name: "Campo de redacción de mensaje",
       });
 
-      expect(fullInput).toBeDisabled();
+      expect(fullInput).toHaveAttribute("readonly");
+      expect(fullInput).toHaveAttribute("aria-busy", "true");
       expect(fullInput).toHaveValue("Primer mensaje");
 
       await act(async () => {
@@ -348,7 +350,7 @@ describe("ChatPanel", () => {
       });
 
       await waitFor(() => {
-        expect(fullInput).toBeEnabled();
+        expect(fullInput).not.toHaveAttribute("readonly");
       });
 
       await waitFor(() => {
@@ -366,6 +368,148 @@ describe("ChatPanel", () => {
       expect(sentCalls()).toHaveLength(1);
     },
   );
+
+  it("follows the visible area of the screen while open so the input stays above the keyboard", () => {
+    const viewport = Object.assign(new EventTarget(), { height: 800, offsetTop: 0 });
+    vi.stubGlobal("visualViewport", viewport);
+
+    try {
+      render(
+        <MessagingUiProvider>
+          <ChatPanel roles={["mentor"]} />
+          <ChatDock />
+        </MessagingUiProvider>,
+      );
+      const dock = screen.getByTestId("chat-dock");
+      expect(dock.style.getPropertyValue("--chat-dock-height")).toBe("100dvh");
+
+      fireEvent.click(screen.getByRole("button", { name: "Abrir mensajes rápidos" }));
+      expect(dock.style.getPropertyValue("--chat-dock-height")).toBe("800px");
+
+      act(() => {
+        viewport.height = 420;
+        viewport.offsetTop = 60;
+        viewport.dispatchEvent(new Event("resize"));
+      });
+      expect(dock.style.getPropertyValue("--chat-dock-height")).toBe("420px");
+      expect(dock.style.getPropertyValue("--chat-dock-top")).toBe("60px");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("locks the page behind and keeps the focused field visible when the keyboard changes the visible area on mobile", async () => {
+    const viewport = Object.assign(new EventTarget(), { height: 800, offsetTop: 0 });
+    const scrollIntoView = vi.fn();
+    vi.stubGlobal("visualViewport", viewport);
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === "(width < 48rem)",
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    try {
+      render(
+        <MessagingUiProvider>
+          <ChatPanel roles={["mentor"]} />
+          <ChatDock />
+        </MessagingUiProvider>,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Abrir mensajes rápidos" }));
+      expect(document.documentElement.style.overflow).toBe("hidden");
+
+      scrollIntoView.mockClear();
+      act(() => {
+        viewport.height = 420;
+        viewport.dispatchEvent(new Event("resize"));
+      });
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" }));
+
+      fireEvent.click(screen.getByRole("button", { name: "Cerrar mensajes rápidos" }));
+      expect(document.documentElement.style.overflow).toBe("");
+    } finally {
+      HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("updates page scroll locking across the md breakpoint while the chat stays open", () => {
+    const mediaQuery = Object.assign(new EventTarget(), { matches: true });
+    const matchMedia = vi.fn().mockReturnValue(mediaQuery);
+    vi.stubGlobal("matchMedia", matchMedia);
+    const root = document.documentElement;
+    const originalOverflow = root.style.overflow;
+    root.style.overflow = "auto";
+
+    try {
+      const { unmount } = render(
+        <MessagingUiProvider>
+          <ChatPanel roles={["mentor"]} />
+          <ChatDock />
+        </MessagingUiProvider>,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Abrir mensajes rápidos" }));
+      expect(matchMedia).toHaveBeenCalledWith("(width < 48rem)");
+      expect(root.style.overflow).toBe("hidden");
+
+      mediaQuery.matches = false;
+      mediaQuery.dispatchEvent(new Event("change"));
+      expect(root.style.overflow).toBe("auto");
+      expect(screen.getByRole("button", { name: "Cerrar mensajes rápidos" })).toBeInTheDocument();
+
+      mediaQuery.matches = true;
+      mediaQuery.dispatchEvent(new Event("change"));
+      expect(root.style.overflow).toBe("hidden");
+
+      unmount();
+      expect(root.style.overflow).toBe("auto");
+      mediaQuery.dispatchEvent(new Event("change"));
+      expect(root.style.overflow).toBe("auto");
+    } finally {
+      root.style.overflow = originalOverflow;
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("discounts the browser toolbar that Chrome still counts as hidden when the keyboard opens", () => {
+    const viewport = Object.assign(new EventTarget(), { height: 717, offsetTop: 0 });
+    vi.stubGlobal("visualViewport", viewport);
+    vi.stubGlobal("innerWidth", 411);
+    vi.stubGlobal("innerHeight", 717);
+
+    try {
+      render(
+        <MessagingUiProvider>
+          <ChatPanel roles={["mentor"]} />
+          <ChatDock />
+        </MessagingUiProvider>,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Abrir mensajes rápidos" }));
+      const dock = screen.getByTestId("chat-dock");
+
+      act(() => {
+        vi.stubGlobal("innerHeight", 773);
+        viewport.height = 773;
+        window.dispatchEvent(new Event("resize"));
+      });
+      expect(dock.style.getPropertyValue("--chat-dock-height")).toBe("773px");
+
+      act(() => {
+        viewport.height = 395;
+        viewport.dispatchEvent(new Event("resize"));
+      });
+      expect(dock.style.getPropertyValue("--chat-dock-height")).toBe("339px");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });
 
 vi.mock('../hooks/use-chat-connection', () => ({

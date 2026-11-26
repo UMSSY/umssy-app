@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 
 import React from 'react';
 import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
@@ -52,6 +53,7 @@ function renderWithProviders() {
 
 describe('SocketProvider', () => {
   beforeEach(() => {
+    accessTokenStorage.clearAccessToken();
     vi.clearAllMocks();
   });
 
@@ -80,28 +82,22 @@ describe('SocketProvider', () => {
   });
 
   it('inicia la conexión tras login y la elimina al cerrar sesión', async () => {
-    const token = vi
-      .spyOn(accessTokenStorage, 'getAccessToken')
-      .mockReturnValue(null);
+    accessTokenStorage.clearAccessToken();
 
     renderWithProviders();
 
     expect(screen.getByTestId('has-socket')).toHaveTextContent('No');
 
-    token.mockReturnValue('login-token');
-
-    act(() => {
-      window.dispatchEvent(new Event('access-token-change'));
+    await act(async () => {
+      expect(await accessTokenStorage.saveAccessToken('login-token')).toBe(true);
     });
 
     await waitFor(() => {
       expect(screen.getByTestId('has-socket')).toHaveTextContent('Sí');
     });
 
-    token.mockReturnValue(null);
-
     act(() => {
-      window.dispatchEvent(new Event('access-token-change'));
+      accessTokenStorage.clearAccessToken();
     });
 
     await waitFor(() => {

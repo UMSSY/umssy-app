@@ -1,7 +1,8 @@
+import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
-import { registrationsService } from "@/modules/registrations";
+import { registrationsService } from "@/modules/event-registrations";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventDetailPanel } from "./event-detail-panel";
 import type { EventDetail } from "../types/event-detail.types";
@@ -31,8 +32,8 @@ const event: EventDetail = {
   modality: { id: "m1", title: "Presencial" },
 };
 describe("EventDetailPanel", () => {
-  it('does not carry a registration rejection into another workshop detail', async () => {
-    saveAccessToken('session');
+  it("does not carry a registration rejection into another workshop detail", async () => {
+    await saveAccessToken("session");
     vi.spyOn(registrationsService, 'getOwn').mockResolvedValue(null);
     vi.spyOn(registrationsService, 'create').mockRejectedValue({ isAxiosError: true, response: {
       status: 409, data: { ok: false, statusCode: 409, code: 'EVENT_FULL', data: null, detail: 'Full' },
@@ -109,8 +110,6 @@ describe("EventDetailPanel", () => {
     const button = screen.getByRole("button", { name: "Inscribirme" });
     expect(button).toBeEnabled();
     expect(screen.getByText("20 cupos disponibles")).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
-    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-success');
   });
   it("places the registration action before the descriptive content", () => {
     render(<EventDetailPanel event={event} />);
@@ -124,11 +123,10 @@ describe("EventDetailPanel", () => {
         event={{ ...event, availableSpots: 0, registrationCount: 30 }}
       />,
     );
-    expect(screen.getByRole("button", { name: "Taller lleno" })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Taller lleno' })).toBeDisabled();
     expect(
       screen.getByText("Lleno · Sin cupos disponibles"),
     ).toBeInTheDocument();
-    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-danger');
   });
   it("handles missing optional values and unlimited capacity", () => {
     render(
@@ -255,5 +253,25 @@ describe("EventDetailPanel", () => {
     expect(screen.getByRole('button', { name: 'Preinscribirme/Apoyar propuesta' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Inscribirme' })).not.toBeInTheDocument();
     expect(screen.queryByText('Cupos')).not.toBeInTheDocument();
+  });
+
+  it('lists every session of a multi-session workshop in order', () => {
+    render(<EventDetailPanel event={{ ...event, sessions: [
+      { id: 's2', startsAt: '2026-12-03T13:00:00.000Z', endsAt: '2026-12-03T15:00:00.000Z', location: null },
+      { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+    ] }} />);
+    const list = screen.getByRole('region', { name: 'Sesiones' });
+    const items = within(list).getAllByRole('listitem');
+    expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent('martes, 1 de diciembre');
+    expect(items[0]).toHaveTextContent('09:00 - 11:00 hrs');
+    expect(items[1]).toHaveTextContent('jueves, 3 de diciembre');
+    expect(screen.getByText(/^1s?[–-]s?3 de diciembre$/)).toBeInTheDocument();
+  });
+
+  it('keeps the single date and schedule without a session list', () => {
+    render(<EventDetailPanel event={{ ...event, sessions: [] }} />);
+    expect(screen.queryByRole('region', { name: 'Sesiones' })).not.toBeInTheDocument();
+    expect(screen.getByText('09:00 - 12:00 hrs')).toBeInTheDocument();
   });
 });

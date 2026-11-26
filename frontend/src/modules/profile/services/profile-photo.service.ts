@@ -1,13 +1,13 @@
+import { NOT_FOUND_STATUS } from "@/shared/constants/http.constants";
 import { apiClient } from "@/shared/services/api-client";
-import { NOT_FOUND_STATUS } from "../constants/http-status.constants";
-import { PHOTO_ENDPOINT, PHOTO_UPLOAD_FIELD_NAME } from "../constants/photo-api.constants";
+
 import { getAuthHeaders } from "../utils/get-auth-headers";
 import { getHttpStatus } from "../utils/get-http-status";
 
 export const profilePhotoService = {
   getPhoto: async (): Promise<Blob | null> => {
     try {
-      const response = await apiClient.get<Blob>(PHOTO_ENDPOINT, {
+      const response = await apiClient.get<Blob>("/profile/me/photo", {
         responseType: "blob",
         headers: getAuthHeaders(),
       });
@@ -22,11 +22,11 @@ export const profilePhotoService = {
 
   uploadPhoto: async (file: File): Promise<void> => {
     const formData = new FormData();
-    formData.append(PHOTO_UPLOAD_FIELD_NAME, file);
-    await apiClient.put(PHOTO_ENDPOINT, formData, { headers: getAuthHeaders() });
+    formData.append("file", file);
+    await apiClient.put("/profile/me/photo", formData, { headers: getAuthHeaders() });
   },
 
   deletePhoto: async (): Promise<void> => {
-    await apiClient.delete(PHOTO_ENDPOINT, { headers: getAuthHeaders() });
+    await apiClient.delete("/profile/me/photo", { headers: getAuthHeaders() });
   },
 };

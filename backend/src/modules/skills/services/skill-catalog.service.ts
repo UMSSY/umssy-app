@@ -1,3 +1,4 @@
+import { radarSkillPoints } from '../../../common/radar/radar-skill-rubric.js';
 import { Injectable } from '@nestjs/common';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';
@@ -13,13 +14,23 @@ export class SkillCatalogService {
   ) {}
 
   async listCatalog(request: SearchSkillsRequest): Promise<SkillResponse[]> {
-    const skills = await this.skillRepository.findCatalog(request.search || undefined);
-    return skills.map((skill) => this.skillMapper.toResponse(skill));
+    const skills = await this.skillRepository.findCatalog(
+      request.search || undefined,
+    );
+    return skills.map((skill) => ({
+      ...this.skillMapper.toResponse(skill),
+      areaId: skill.areaId,
+      radarPoints: radarSkillPoints(false),
+      radarHighRelevancePoints: radarSkillPoints(true),
+    }));
   }
 
-  async createCustomSkill(request: CreateCustomSkillRequest): Promise<SkillResponse> {
+  async createCustomSkill(
+    request: CreateCustomSkillRequest,
+  ): Promise<SkillResponse> {
     const existingSkill = await this.skillRepository.findByName(request.name);
-    const skill = existingSkill ?? (await this.skillRepository.createCustom(request.name));
+    const skill =
+      existingSkill ?? (await this.skillRepository.createCustom(request.name));
     return this.skillMapper.toResponse(skill);
   }
 }

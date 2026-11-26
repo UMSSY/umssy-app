@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 import {
+  EVENT_CATALOG_SCOPES,
+  EVENT_SORT_OPTIONS,
   MAX_PAGE_SIZE,
   MAX_SEARCH_LENGTH,
 } from '../constants/events.constants.js';
@@ -10,13 +12,18 @@ export {
 } from '../constants/events.constants.js';
 
 export const GetEventsSchema = z.object({
-  includeProposals: z.enum(['true', 'false']).transform((value) => value === 'true').optional(),
+  includeProposals: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(10),
   categoryId: z
     .guid({ message: 'categoryId debe ser un UUID válido' })
     .optional(),
   statusId: z.guid({ message: 'statusId debe ser un UUID válido' }).optional(),
+  sort: z.enum(EVENT_SORT_OPTIONS).optional(),
+  scope: z.enum(EVENT_CATALOG_SCOPES).optional(),
   search: z
     .string()
     .trim()

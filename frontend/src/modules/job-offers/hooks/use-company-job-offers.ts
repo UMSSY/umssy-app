@@ -10,13 +10,13 @@ import type { CompanyJobOffersStatus } from "../types/company-job-offers-status.
 import type { JobOfferFilters } from "../types/job-offer-filters.types";
 import type { JobOfferListScope } from "../types/job-offer-list-scope.types";
 import { selectVisibleOffers, toListParams } from "../utils/filter-job-offers";
-import { getCurrentCompany } from "../utils/get-current-company";
+import { useCurrentCompany } from "../hooks/use-current-company";
 
 export function useCompanyJobOffers(
   filters: JobOfferFilters,
   scope: JobOfferListScope = "published",
 ) {
-  const companyId = getCurrentCompany().id;
+  const companyId = useCurrentCompany().id;
   const params = toListParams(filters);
 
   const query = useQuery({
@@ -33,7 +33,7 @@ export function useCompanyJobOffers(
   }, [query.isError, query.errorUpdatedAt, scope]);
 
   const status: CompanyJobOffersStatus =
-    companyId === null || query.isError ? "error" : query.isPending ? "loading" : "ready";
+    companyId === null ? "no-company" : query.isError ? "error" : query.isPending ? "loading" : "ready";
 
   return {
     companyId,

@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AxiosError, type AxiosResponse } from "axios";
@@ -5,7 +7,7 @@ import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { REOPEN_JOB_OFFER_TEXT, TOAST_OPTIONS } from "../constants/job-offers.constants";
+import { CLOSE_JOB_OFFER_TEXT, REOPEN_JOB_OFFER_TEXT, TOAST_OPTIONS } from "../constants/job-offers.constants";
 import { jobOffersService } from "../services/job-offers.service";
 import { buildJobOffer, buildSessionToken, COMPANY_ID } from "../testing/vacancy-fixtures";
 import { VacancyList } from "./vacancy-list";
@@ -23,9 +25,9 @@ function mockOffers(offers = OFFERS) {
 }
 
 describe("VacancyList en modo historial", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {
@@ -34,6 +36,83 @@ describe("VacancyList en modo historial", () => {
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     clearAccessToken();
+  });
+
+  it("cierra una vacante activa desde el historial", async () => {
+    const user = userEvent.setup();
+
+    const updatedOffers = OFFERS.map((offer) =>
+      offer.id === "active"
+        ? { ...offer, status: "Cerrada" as const }
+        : offer,
+    );
+
+    mockOffers()
+      .mockResolvedValueOnce(OFFERS)
+      .mockResolvedValueOnce(updatedOffers);
+
+    const close = vi
+      .spyOn(jobOffersService, "close")
+      .mockResolvedValue(updatedOffers[0]);
+
+    renderWithQuery(<VacancyList scope="history" />);
+
+    const closeButton = await screen.findByRole("button", {
+      name: "Cerrar vacante Ingeniero Backend",
+    });
+
+    expect(closeButton).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", {
+        name: "Cerrar vacante Analista de Sistemas",
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", {
+        name: "Cerrar vacante Diseñador Gráfico",
+      }),
+    ).not.toBeInTheDocument();
+
+    await user.click(closeButton);
+
+    const dialog = await screen.findByRole("alertdialog");
+
+    expect(dialog).toHaveTextContent("Ingeniero Backend");
+
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: /^Cerrar(?: vacante)?$/i,
+      }),
+    );
+
+    expect(close).toHaveBeenCalledWith(COMPANY_ID, "active");
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", {
+          name: "Cerrar vacante Ingeniero Backend",
+        }),
+      ).not.toBeInTheDocument();
+
+      expect(
+        screen.getAllByRole("button", { name: "Reabrir" }),
+      ).toHaveLength(2);
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Ingeniero Backend" }),
+    ).toBeInTheDocument();
+
+    expect(toast.success).toHaveBeenCalledWith(
+      CLOSE_JOB_OFFER_TEXT.success,
+      TOAST_OPTIONS,
+    );
   });
 
   it("muestra todas las vacantes con su etiqueta de estado", async () => {

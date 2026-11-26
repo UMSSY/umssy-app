@@ -1,3 +1,4 @@
+import type { ActivationConfirmDialogProps } from "../../types/activation-confirm-dialog-props.types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,13 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-type ActivationConfirmDialogProps = {
-  open: boolean;
-  isActivating: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-};
 
 export function ActivationConfirmDialog({
   open,

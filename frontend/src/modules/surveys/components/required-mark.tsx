@@ -1,5 +1,5 @@
 import { cn } from "cn";
-import type { RequiredMarkProps } from "../types/survey-component-props.types";
+import type { RequiredMarkProps } from "../types/required-mark-props.types";
 
 export function RequiredMark({ className }: RequiredMarkProps) {
   return (

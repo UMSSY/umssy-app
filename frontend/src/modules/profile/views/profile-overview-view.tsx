@@ -8,15 +8,17 @@ import { PresentationSummaryCard } from "../components/presentation-summary-card
 import { ProfileCompletionBanner } from "../components/profile-completion-banner";
 import { ProfilePageLayout } from "../components/profile-page-layout";
 import { ProfilePhotoFeedback } from "../components/profile-photo-feedback";
+import { PortfolioProfileSection } from "../components/portfolio-profile-section";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { useProfile } from "../hooks/use-profile";
 import { useProfilePhoto } from "../hooks/use-profile-photo";
 import { isProfileComplete } from "../utils/is-profile-complete";
 import { toProfileSummary } from "../utils/to-profile-summary";
 
-const EducationProfileSection = dynamic(() => import("@/modules/education").then((module) => module.EducationProfileSection));
+const EducationProfileSection = dynamic(() => import("@/modules/educations").then((module) => module.EducationProfileSection));
 const WorkExperienceProfileSection = dynamic(() => import("@/modules/work-experience").then((module) => module.WorkExperienceProfileSection));
 const CertificationProfileSection = dynamic(() => import("@/modules/certifications").then((module) => module.CertificationProfileSection));
+const CvExportButton = dynamic(() => import("@/modules/cv").then((module) => module.CvExportButton));
 const SkillsProfileSection = dynamic(() => import("@/modules/skills").then((module) => module.SkillsProfileSection));
 
 export function ProfileOverviewView() {
@@ -28,6 +30,7 @@ export function ProfileOverviewView() {
     <ProfilePageLayout
       title="Mi perfil"
       description="Tu información y trayectoria profesional, en un solo lugar."
+      actions={profile ? <CvExportButton /> : undefined}
     >
       {isLoading ? (
         <p role="status" className="text-sm text-text-secondary">
@@ -51,6 +54,7 @@ export function ProfileOverviewView() {
           <PresentationSummaryCard profile={summary} />
           <WorkExperienceProfileSection />
           <EducationProfileSection />
+          <PortfolioProfileSection />
           <CertificationProfileSection />
           </ProfileSurface>
         </div>

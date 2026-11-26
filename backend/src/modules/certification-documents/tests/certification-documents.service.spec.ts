@@ -1,4 +1,4 @@
-import type { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import type { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';

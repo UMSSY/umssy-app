@@ -1,87 +1,160 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
+import { toast as notify } from 'sonner';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Eye, Save, X } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { WorkspacePage } from "@/shared/components/layout/workspace-page";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
-import { cn } from "@/lib/utils";
-import { TechnicalAreaCard } from "../components/technical-area-card";
-import { useTechnicalAreas } from "../hooks/use-technical-areas";
+  DiscardChangesDialog,
+  PROFILE_CHANGES_SAVED_MESSAGE,
+  PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
+  PROFILE_SELECTION_REQUIRED_MESSAGE,
+  useMentorProfileDraft,
+  useOrientationConfig,
+  useCurrentUserId,
+  MentorProfilePreview,
+} from '@/modules/mentorship';
+
+import { WorkspacePage } from '@/shared/components/layout/workspace-page';
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
+
+import { TechnicalAreaCard } from '../components/technical-area-card';
+import { useTechnicalAreas } from '../hooks/use-technical-areas';
 
 export function TechnicalAreasView() {
   const router = useRouter();
 
-  const { areas, savedIds, isSaving, isLoading, hasLoadError, hasAccessError, save, retry } = useTechnicalAreas();
-  const [draftIds, setSelectedIds] = useState<string[] | null>(null);
-  const selectedIds = draftIds ?? savedIds;
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
-  const [toast, setToast] = useState<{ isError: boolean; text: string } | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null,
+  );
+  const {
+    areas,
+    savedIds,
+    isSaving,
+    isLoading,
+    hasLoadError,
+    hasAccessError,
+    save,
+    retry,
+  } = useTechnicalAreas();
+
+  const {
+    orientationTypes,
+    savedIds: savedOrientationIds,
+    isLoading: isOrientationLoading,
+    hasLoadError: hasOrientationLoadError,
+  } = useOrientationConfig();
+
+  const { currentUserId } = useCurrentUserId();
+
+  const {
+    technicalAreaIds: draftIds,
+    orientationTypeIds: draftOrientationIds,
+    setTechnicalAreaIds: setSelectedIds,
+    clearTechnicalAreaIds,
+    clearAllDrafts,
+  } = useMentorProfileDraft();
+
+  const selectedIds = draftIds ?? savedIds;
+  const selectedOrientationIds = draftOrientationIds ?? savedOrientationIds;
 
   const hasChanges =
     selectedIds.length !== savedIds.length ||
     selectedIds.some((id) => !savedIds.includes(id));
+
   const hasNoSelection = selectedIds.length === 0;
 
-  const handleToggleArea = (id: string) =>
+  const canOpenPreview =
+    Boolean(currentUserId) &&
+    !isLoading &&
+    !hasLoadError &&
+    !hasAccessError &&
+    !isOrientationLoading &&
+    !hasOrientationLoadError;
+
+  const handleToggleArea = (id: string) => {
+    setValidationMessage(null);
     setSelectedIds((previous) =>
       (previous ?? savedIds).includes(id)
         ? (previous ?? savedIds).filter((item) => item !== id)
         : [...(previous ?? savedIds), id],
     );
+  };
 
   const showToast = (isError: boolean, text: string) => {
-    setToast({ isError, text });
-    setTimeout(() => setToast(null), 3500);
+    if (isError) notify.error(text);
+    else notify.success(text);
   };
 
   const handleSubmit = async () => {
-    if (hasNoSelection || hasAccessError) return;
+    if (hasAccessError || isSaving) return;
+
+    if (hasNoSelection) {
+      setValidationMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      return;
+    }
+
+    if (!hasChanges) return;
 
     try {
       await save(selectedIds);
-      showToast(false, "Áreas técnicas actualizadas correctamente");
+      clearTechnicalAreaIds();
+      setValidationMessage(null);
+      showToast(false, PROFILE_CHANGES_SAVED_MESSAGE);
     } catch {
-      showToast(
-        true,
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      );
-
+      showToast(true, PROFILE_CHANGES_SAVE_ERROR_MESSAGE);
     }
   };
 
-  const handleGoBack = () => {
-    if (hasChanges) setIsDiscardModalOpen(true);
-    else router.push("/mentors/participation");
+  const handleCancel = () => {
+    if (hasChanges) {
+      setIsDiscardModalOpen(true);
+      return;
+    }
+    router.push('/mentors/participation');
   };
 
+  const handleConfirmDiscard = () => {
+    clearAllDrafts();
+    setIsDiscardModalOpen(false);
+    router.push('/mentors/participation');
+  };
+
+  if (isPreviewOpen && currentUserId) {
+    return (
+      <MentorProfilePreview
+        mentorId={currentUserId}
+        technicalAreas={areas.filter((area) => selectedIds.includes(area.id))}
+        orientationTypes={orientationTypes.filter((orientation) =>
+          selectedOrientationIds.includes(orientation.id),
+        )}
+        onBack={() => setIsPreviewOpen(false)}
+      />
+    );
+  }
+
   return (
-    <WorkspacePage title="Editar áreas técnicas" description="Indica las áreas en las que puedes brindar orientación.">
-      {!isLoading &&
-        !hasLoadError &&
-        !hasAccessError &&
-        (hasNoSelection ? (
-          <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
-            Debe seleccionarse al menos un área para continuar
-          </Alert>
-        ) : (
+    <WorkspacePage
+      title="Editar áreas técnicas"
+      description="Indica las áreas en las que puedes brindar orientación."
+    >
+      {!isLoading && !hasLoadError && !hasAccessError && (
+        <>
+          {validationMessage && (
+            <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
+              {validationMessage}
+            </Alert>
+          )}
           <div className="mb-4 rounded-lg bg-surface-soft p-3 text-sm text-ink-soft">
             {selectedIds.length} seleccionadas
           </div>
-        ))}
+        </>
+      )}
 
       {isLoading && (
         <p role="status" aria-live="polite" className="py-8 text-center">
@@ -92,19 +165,29 @@ export function TechnicalAreasView() {
       {hasLoadError && (
         <Alert className="flex items-center justify-between gap-4 rounded-lg border border-danger/30 bg-interaction p-4 text-danger">
           <span>No se pudieron cargar las áreas técnicas.</span>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              retry();
-            }}
-          >
+          <Button type="button" variant="outline" onClick={retry}>
             Reintentar
           </Button>
         </Alert>
       )}
 
-      {hasAccessError && <Alert className="space-y-3 rounded-lg border border-border bg-surface-soft p-4 text-ink"><p>Necesitas una participación activa como mentor para editar áreas técnicas.</p><Link href="/mentors/participation" className={buttonVariants({ variant: "outline" })}>Revisar mi participación</Link><Link href="/mentorship" className={buttonVariants()}>Iniciar incorporación</Link></Alert>}
+      {hasAccessError && (
+        <Alert className="space-y-3 rounded-lg border border-border bg-surface-soft p-4 text-ink">
+          <p>
+            Necesitas una participación activa como mentor para editar áreas
+            técnicas.
+          </p>
+          <Link
+            href="/mentors/participation"
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            Revisar mi participación
+          </Link>
+          <Link href="/mentorship" className={buttonVariants()}>
+            Iniciar incorporación
+          </Link>
+        </Alert>
+      )}
 
       {!isLoading && !hasLoadError && !hasAccessError && (
         <fieldset
@@ -122,72 +205,56 @@ export function TechnicalAreasView() {
         </fieldset>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <Button
           type="button"
-          onClick={handleGoBack}
-          className="h-auto gap-2 rounded-lg bg-surface-soft px-4 py-2 text-sm font-normal text-ink hover:bg-surface-soft active:translate-y-0"
+          variant="cancel"
+          onClick={handleCancel}
+          disabled={isSaving}
+          className="h-auto gap-2 rounded-lg px-4 py-2 text-sm"
         >
-          <ArrowLeft size={16} /> Volver
+          <X size={16} /> Cancelar
         </Button>
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={hasNoSelection || isSaving || isLoading || hasLoadError || hasAccessError}
-          className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSaving ? (
-            "Guardando..."
-          ) : (
-            <>
-              <Save size={16} /> Guardar cambios
-            </>
-          )}
-        </Button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsPreviewOpen(true)}
+            disabled={!canOpenPreview}
+            className="h-auto gap-2 rounded-lg px-4 py-2"
+          >
+            <Eye size={16} /> Vista previa
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={
+              (!hasChanges && !hasNoSelection) ||
+              isSaving ||
+              isLoading ||
+              hasLoadError ||
+              hasAccessError
+            }
+            className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSaving ? (
+              'Guardando...'
+            ) : (
+              <>
+                <Save size={16} /> Guardar cambios
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
-      {toast && (
-        <Alert
-          className={cn("fixed right-4 bottom-4 w-auto rounded-lg border-0 px-4 py-3 text-white shadow-none", toast.isError ? "bg-danger" : "bg-ink-soft")}
-        >
-          {toast.text}
-        </Alert>
-      )}
-
-      <AlertDialog
+      <DiscardChangesDialog
         open={isDiscardModalOpen}
-        onOpenChange={(open, eventDetails) => {
-          if (eventDetails.reason === "close-press") {
-            setIsDiscardModalOpen(open);
-          }
-        }}
-      >
-        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-sm gap-0 rounded-lg bg-white p-6 ring-0 sm:max-w-sm">
-          <AlertDialogHeader className="place-items-start gap-0 text-left">
-            <AlertDialogTitle className="mb-2 text-lg font-bold">
-              ¿Descartar cambios?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="mb-4 text-left text-sm [text-wrap:wrap] text-text-secondary">
-              Tienes cambios sin guardar. Si sales, se perderán.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="-mx-0 -mb-0 flex-row justify-end gap-2 rounded-none border-0 bg-transparent p-0">
-            <AlertDialogCancel
-              onClick={() => setIsDiscardModalOpen(false)}
-              className="h-auto rounded-lg px-4 py-2 active:translate-y-0"
-            >
-              Seguir editando
-            </AlertDialogCancel>
-            <AlertDialogAction
-              type="button"
-              onClick={() => router.push("/mentors/participation")}
-              className="h-auto rounded-lg bg-critical-action px-4 py-2 text-critical-action-foreground hover:bg-critical-action/90 active:translate-y-0"
-            >
-              Descartar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onCancel={() => setIsDiscardModalOpen(false)}
+        onConfirm={handleConfirmDiscard}
+      />
     </WorkspacePage>
   );
 }

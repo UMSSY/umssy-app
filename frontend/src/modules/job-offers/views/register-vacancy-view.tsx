@@ -13,24 +13,19 @@ import { InformationStep } from "../components/information-step";
 import { PreviewStep } from "../components/preview-step";
 import { RequirementsStep } from "../components/requirements-step";
 import { VacancyStepper } from "../components/vacancy-stepper";
-import {
-  DISCARD_DIALOG_TEXT,
-  EDIT_DISCARD_DIALOG_TEXT,
-  EDIT_LEAVE_DIALOG_TEXT,
-  EDIT_MESSAGES,
-  LEAVE_DIALOG_TEXT,
-  RECRUITERS_HOME_ROUTE,
-  TOAST_OPTIONS,
-} from "../constants/job-offers.constants";
+import { DISCARD_DIALOG_TEXT, EDIT_DISCARD_DIALOG_TEXT, EDIT_LEAVE_DIALOG_TEXT, EDIT_MESSAGES, LEAVE_DIALOG_TEXT, PUBLISH_MESSAGES, TOAST_OPTIONS } from "../constants/job-offers.constants";
 import { useJobOfferForm } from "../hooks/use-job-offer-form";
 import { useLeaveGuard } from "../hooks/use-leave-guard";
 import { usePublishJobOffer } from "../hooks/use-publish-job-offer";
+import type { PublishError } from "../types/publish-error.types";
 import type { RegisterVacancyViewProps } from "../types/register-vacancy-view-props.types";
-import { getCurrentCompany } from "../utils/get-current-company";
+import { formatExpirationDate } from "../utils/format-expiration-date";
+import { useCurrentCompany } from "../hooks/use-current-company";
+import { useExpirationDate } from "../hooks/use-expiration-date";
 
 export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
   const isEditMode = !!jobOfferId;
-  const company = getCurrentCompany();
+  const company = useCurrentCompany();
   const router = useRouter();
   const discardText = isEditMode ? EDIT_DISCARD_DIALOG_TEXT : DISCARD_DIALOG_TEXT;
   const leaveText = isEditMode ? EDIT_LEAVE_DIALOG_TEXT : LEAVE_DIALOG_TEXT;
@@ -50,23 +45,38 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     goBack,
     reset,
   } = useJobOfferForm(jobOfferId);
+  const expiration = useExpirationDate();
 
   const publication = usePublishJobOffer(jobOfferId, {
     onSuccess: isEditMode
       ? () => {
           toast.success(EDIT_MESSAGES.success, TOAST_OPTIONS);
-          router.push(RECRUITERS_HOME_ROUTE);
+          router.push("/recruiters");
         }
       : undefined,
   });
   const leaveGuard = useLeaveGuard(hasUnsavedChanges && !publication.isSuccess);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
+  const [hasTriedToPublish, setHasTriedToPublish] = useState(false);
+
+  const expirationError: PublishError | null =
+    hasTriedToPublish && !expiration.isExpirationValid
+      ? { kind: "validation", message: PUBLISH_MESSAGES.expirationNotConfirmed, details: [] }
+      : null;
+
+  const handleConfirm = () => {
+    if (!expiration.isExpirationValid) {
+      setHasTriedToPublish(true);
+      return;
+    }
+    void publication.submit(conditions, expiration.confirmedDate);
+  };
 
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setIsDiscardDialogOpen(true);
     } else {
-      router.push(RECRUITERS_HOME_ROUTE);
+      router.push("/recruiters");
     }
   };
 
@@ -74,12 +84,16 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     setIsDiscardDialogOpen(false);
     publication.reset();
     reset();
-    router.push(RECRUITERS_HOME_ROUTE);
+    expiration.resetExpiration();
+    setHasTriedToPublish(false);
+    router.push("/recruiters");
   };
 
   const handleFinish = () => {
     publication.reset();
     reset();
+    expiration.resetExpiration();
+    setHasTriedToPublish(false);
   };
 
   if (isLoading) {
@@ -95,7 +109,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     return (
       <main className="mx-auto w-full max-w-7xl space-y-4 py-10" role="alert">
         <p className="text-sm text-ink">{loadError}</p>
-        <Link href={RECRUITERS_HOME_ROUTE} className={buttonVariants({ variant: "outline" })}>
+        <Link href={"/recruiters"} className={buttonVariants({ variant: "outline" })}>
           Volver a mi empresa
         </Link>
       </main>
@@ -109,8 +123,13 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
         <section className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <h2 className="text-lg font-semibold">{conditions.title}</h2>
           <p className="mt-2 text-sm text-text-secondary">{conditions.modality} · {conditions.contractType}</p>
+          <p className="mt-2 text-sm text-text-secondary">
+            {expiration.confirmedDate
+              ? `Se cerrará automáticamente el ${formatExpirationDate(expiration.confirmedDate)} a las 23:59.`
+              : "No tiene fecha de cierre: seguirá publicada hasta que la cierres manualmente."}
+          </p>
           <div className="mt-6 flex gap-3 border-t border-border pt-5">
-            <Link href={RECRUITERS_HOME_ROUTE} className={buttonVariants()}>Volver a mi empresa</Link>
+            <Link href={"/recruiters"} className={buttonVariants()}>Volver a mi empresa</Link>
             <Button variant="outline" onClick={handleFinish}>Publicar otra vacante</Button>
           </div>
         </section>
@@ -157,10 +176,11 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
               conditions={conditions}
               company={company}
               isSubmitting={publication.isSubmitting}
-              error={publication.error}
+              error={expirationError ?? publication.error}
               onPrevious={goBack}
               isEditMode={isEditMode}
-              onConfirm={() => void publication.submit(conditions)}
+              expiration={expiration}
+              onConfirm={handleConfirm}
             />
           )}
         </div>

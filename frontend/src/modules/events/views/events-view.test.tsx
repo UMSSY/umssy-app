@@ -1,9 +1,10 @@
+import "@/shared/testing/indexed-db.mock";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { buildLoginUrl } from "@/modules/auth/utils/safe-next-path";
-import { registrationsService as registrationApi } from "@/modules/registrations";
+import { buildLoginUrl } from "@/modules/auth";
+import { registrationsService as registrationApi } from "@/modules/event-registrations";
 import { toast } from "sonner";
 import { useEvent } from "../hooks/use-event";
 import { useEvents } from "../hooks/use-events";
@@ -114,7 +115,13 @@ beforeEach(() => {
     setSearchInput: vi.fn(),
     categoryId: null,
     setCategoryId: vi.fn(),
-    filters: { search: "", categoryId: null },
+    isPopular: false,
+    setIsPopular: vi.fn(),
+    isExpired: false,
+    setIsExpired: vi.fn(),
+    isFinished: false,
+    setIsFinished: vi.fn(),
+    filters: { search: "", categoryId: null, sort: "recommended" },
   });
   mockUseEventCategories.mockReturnValue({
     retry: vi.fn(),
@@ -123,6 +130,7 @@ beforeEach(() => {
     error: null,
   });
   mockUseEvents.mockReturnValue({
+    isProfileComplete: true,
     events: MOCK_EVENTS,
     error: null,
     hasMore: false,
@@ -220,7 +228,7 @@ describe("EventsView", () => {
     expect(
       screen.getByRole("heading", { name: /talleres y eventos/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/1 talleres disponibles/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 taller disponible$/i)).toBeInTheDocument();
     expect(
       screen.getByRole("search", { name: /filtros de talleres/i }),
     ).toBeInTheDocument();
@@ -230,6 +238,7 @@ describe("EventsView", () => {
 
   it("muestra estado de carga y lista vacia", () => {
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: null,
       hasMore: false,
@@ -243,6 +252,7 @@ describe("EventsView", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Cargando talleres");
 
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: null,
       hasMore: false,
@@ -261,6 +271,7 @@ describe("EventsView", () => {
   it("muestra el error del backend y permite reintentar", () => {
     const retry = vi.fn();
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: "No se pudieron cargar los talleres.",
       hasMore: false,
@@ -297,6 +308,7 @@ describe("EventsView", () => {
   it("solicita mas eventos cuando el endpoint indica otra pagina", () => {
     const loadMore = vi.fn();
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: MOCK_EVENTS,
       error: null,
       hasMore: true,
@@ -327,6 +339,92 @@ describe("EventsView", () => {
     expect(filterState.setCategoryId).toHaveBeenCalledWith("cat-1");
     expect(mockUseEvents).toHaveBeenCalledWith(filterState.filters);
   });
+  it("invites users with an incomplete profile to complete it without hiding the catalog", () => {
+    mockUseEvents.mockReturnValue({
+      isProfileComplete: false,
+      events: MOCK_EVENTS,
+      error: null,
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+      loadMore: vi.fn(),
+      retry: vi.fn(),
+    });
+    render(<EventsView />);
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Completa tu perfil para ver talleres recomendados para ti",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Completar mi perfil" }),
+    ).toHaveAttribute("href", "/profile/trajectory/skills");
+    expect(
+      screen.getByRole("searchbox", { name: "Buscar taller" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Desarrollo Web con React" }),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the profile notice when recommendations are available", () => {
+    render(<EventsView />);
+
+    expect(
+      screen.queryByRole("link", { name: "Completar mi perfil" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("toggles the popular order next to the category chips", () => {
+    render(<EventsView />);
+
+    const popular = screen.getByRole("button", { name: "Populares" });
+    expect(popular).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Todos" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    fireEvent.click(popular);
+
+    const filterState = mockUseEventsFilters.mock.results[0].value;
+    expect(filterState.setIsPopular).toHaveBeenCalledWith(true);
+  });
+
+  it("keeps popular and the selected category active together", () => {
+    const setIsPopular = vi.fn();
+    mockUseEventsFilters.mockReturnValue({
+      searchInput: "",
+      setSearchInput: vi.fn(),
+      categoryId: "cat-1",
+      setCategoryId: vi.fn(),
+      isPopular: true,
+      setIsPopular,
+      isExpired: false,
+      setIsExpired: vi.fn(),
+      isFinished: false,
+      setIsFinished: vi.fn(),
+      filters: { search: "", categoryId: "cat-1", sort: "popular" },
+    });
+    render(<EventsView />);
+
+    expect(screen.getByRole("button", { name: "Populares" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Tecnología" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(mockUseEvents).toHaveBeenCalledWith({
+      search: "",
+      categoryId: "cat-1",
+      sort: "popular",
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Populares" }));
+    expect(setIsPopular).toHaveBeenCalledWith(false);
+  });
+
   it("shows category loading without hiding the workshops", () => {
     mockUseEventCategories.mockReturnValue({
       categories: [],
@@ -368,9 +466,16 @@ describe("EventsView", () => {
       setSearchInput: vi.fn(),
       categoryId: null,
       setCategoryId: vi.fn(),
+      isPopular: false,
+      setIsPopular: vi.fn(),
+      isExpired: false,
+      setIsExpired: vi.fn(),
+      isFinished: false,
+      setIsFinished: vi.fn(),
       filters: { search: "Marketing", categoryId: null },
     });
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: null,
       hasMore: false,
@@ -435,6 +540,7 @@ describe("EventsView", () => {
 describe("EventsView proposal support", () => {
   beforeEach(() => {
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [PROPOSAL], error: null, hasMore: false, isLoading: false,
       isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn(),
     });
@@ -448,12 +554,14 @@ describe("EventsView proposal support", () => {
     expect(screen.getByText("Inicia sesión para apoyar esta propuesta.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
-    expect(push).toHaveBeenCalledWith(buildLoginUrl(`/events?proposal=${PROPOSAL.id}`));
+    expect(push).toHaveBeenCalledWith(
+      buildLoginUrl(`/events?proposal=${PROPOSAL.id}`),
+    );
     expect(supportRequest).not.toHaveBeenCalled();
   });
 
-  it("blocks accounts without the Titulado role before sending a request", () => {
-    saveAccessToken(tokenWithRoles(["estudiante"]));
+  it("blocks accounts without the Titulado role before sending a request", async () => {
+    await saveAccessToken(tokenWithRoles(["estudiante"]));
     showProposal();
     const supportRequest = vi.spyOn(registrationsService, "supportProposal");
     render(<EventsView initialProposalId={PROPOSAL.id} />);
@@ -465,7 +573,7 @@ describe("EventsView proposal support", () => {
 
   it("submits once, shows pending state, and reflects a registered support", async () => {
     const token = tokenWithRoles(["titulado"]);
-    saveAccessToken(token);
+    await saveAccessToken(token);
     showProposal();
     let resolve!: (value: ProposalSupportResponse) => void;
     const supportRequest = vi.spyOn(registrationsService, "supportProposal")
@@ -484,7 +592,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("keeps the action blocked after an already supported response", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
       isAxiosError: true,
@@ -494,8 +602,13 @@ describe("EventsView proposal support", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Ya apoyaste esta propuesta" })).toBeDisabled());
-    expect(screen.getByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` }))
-      .toHaveTextContent("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
+    expect(
+      screen.getByRole("complementary", {
+        name: `Detalle de ${PROPOSAL.title}`,
+      }),
+    ).toHaveTextContent(
+      "Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.",
+    );
     expect(within(screen.getByRole("region", { name: "Listado de talleres" }))
       .getByRole("button", { name: /desarrollo web con react/i }))
       .toHaveTextContent("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
@@ -504,7 +617,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("offers a retry after a network failure", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     const supportRequest = vi.spyOn(registrationsService, "supportProposal")
       .mockRejectedValueOnce(new Error("offline"))
@@ -519,7 +632,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("replaces a proposal that expired during the open detail", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
       isAxiosError: true,
@@ -531,16 +644,21 @@ describe("EventsView proposal support", () => {
 
     const expired = { ...PROPOSAL, status: "Vencido" };
     showProposal(expired);
-    mockUseEvents.mockReturnValue({ events: [expired], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
+    mockUseEvents.mockReturnValue({ isProfileComplete: true, events: [expired], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
     rerender(<EventsView initialProposalId={PROPOSAL.id} />);
 
-    expect(within(screen.getByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` }))
-      .getByText("Fecha límite superada · vencida automáticamente")).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("complementary", {
+          name: `Detalle de ${PROPOSAL.title}`,
+        }),
+      ).getByText("Fecha límite superada · vencida automáticamente"),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).toBeDisabled();
   });
 
   it("offers normal registration if another support published the proposal", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationApi, "getOwn").mockResolvedValue(null);
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
@@ -553,15 +671,15 @@ describe("EventsView proposal support", () => {
 
     const published = { ...PROPOSAL, status: "Publicado", hasSupported: false, registrationCount: 20, availableSpots: 10 };
     showProposal(published);
-    mockUseEvents.mockReturnValue({ events: [published], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
+    mockUseEvents.mockReturnValue({ isProfileComplete: true, events: [published], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
     rerender(<EventsView initialProposalId={PROPOSAL.id} />);
 
-    expect(screen.getByRole("button", { name: "Inscribirme" })).toHaveClass("bg-brand-red");
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toHaveClass("bg-primary");
     expect(screen.queryByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).not.toBeInTheDocument();
   });
 
   it("shows publication and the confirmed registration after reaching the threshold", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationApi, "getOwn").mockResolvedValue(null);
     vi.spyOn(registrationsService, "supportProposal").mockResolvedValue({
@@ -582,7 +700,7 @@ describe("EventsView proposal support", () => {
     ["AUTH_REQUIRED", 401],
     ["EVENT_NOT_FOUND", 404],
   ])("handles %s after an attempted support", async (code, status) => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
       isAxiosError: true,
@@ -592,11 +710,64 @@ describe("EventsView proposal support", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
     if (code === "AUTH_REQUIRED") {
-      await waitFor(() => expect(push).toHaveBeenCalledWith(buildLoginUrl(`/events?proposal=${PROPOSAL.id}`)));
+      await waitFor(() =>
+        expect(push).toHaveBeenCalledWith(
+          buildLoginUrl(`/events?proposal=${PROPOSAL.id}`),
+        ),
+      );
       expect(toast.info).toHaveBeenCalledWith("Debes iniciar sesión para apoyar una propuesta.");
     } else {
-      await waitFor(() => expect(screen.queryByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` })).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("complementary", {
+            name: `Detalle de ${PROPOSAL.title}`,
+          }),
+        ).not.toBeInTheDocument(),
+      );
       expect(toast.error).toHaveBeenCalledWith("No encontramos la propuesta solicitada.");
     }
+  });
+
+  it("switches to finished workshops and clears the other filters", () => {
+    render(<EventsView />);
+    const finished = screen.getByRole("button", { name: "Finalizados" });
+    expect(finished).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(finished);
+
+    const filterState = mockUseEventsFilters.mock.results[0].value;
+    expect(filterState.setIsFinished).toHaveBeenCalledWith(true);
+    expect(filterState.setIsExpired).toHaveBeenCalledWith(false);
+    expect(filterState.setIsPopular).toHaveBeenCalledWith(false);
+    expect(filterState.setCategoryId).toHaveBeenCalledWith(null);
+  });
+
+  it("counts finished workshops and explains an empty finished list", () => {
+    mockUseEventsFilters.mockReturnValue({
+      searchInput: "",
+      setSearchInput: vi.fn(),
+      categoryId: null,
+      setCategoryId: vi.fn(),
+      isPopular: false,
+      setIsPopular: vi.fn(),
+      isExpired: false,
+      setIsExpired: vi.fn(),
+      isFinished: true,
+      setIsFinished: vi.fn(),
+      filters: { search: "", categoryId: null, sort: "recommended", scope: "finished" },
+    });
+    mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
+      events: [],
+      error: null,
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+      loadMore: vi.fn(),
+      retry: vi.fn(),
+    });
+    render(<EventsView />);
+    expect(screen.getByText("0 talleres finalizados")).toBeInTheDocument();
+    expect(screen.getByText("No hay talleres finalizados por el momento.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Finalizados" })).toHaveAttribute("aria-pressed", "true");
   });
 });

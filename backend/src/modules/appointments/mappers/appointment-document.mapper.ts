@@ -3,10 +3,7 @@ import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import type { UploadedFile } from '../../../common/types/uploaded-file.type.js';
 import type { ValidatedFile } from '../../../common/types/validated-file.type.js';
 import { decodeUploadFileName } from '../../access-requests/helpers/decode-upload-file-name.js';
-import {
-  APPOINTMENT_DOCUMENT_DEFAULT_FILE_NAME,
-  APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH,
-} from '../constants/appointment-document.constants.js';
+
 import type { AppointmentDocumentDownload } from '../types/appointment-document-download.types.js';
 import type { AppointmentDocumentFileRecord } from '../types/appointment-document-file-record.types.js';
 import type { AppointmentDocumentMetadataRecord } from '../types/appointment-document-metadata-record.types.js';
@@ -64,8 +61,8 @@ export class AppointmentDocumentMapper {
       .replace(INVISIBLE_CHARACTERS, '')
       .trim();
 
-    return Array.from(name || APPOINTMENT_DOCUMENT_DEFAULT_FILE_NAME)
-      .slice(0, APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH)
+    return Array.from(name || 'documento')
+      .slice(0, 255)
       .join('');
   }
 

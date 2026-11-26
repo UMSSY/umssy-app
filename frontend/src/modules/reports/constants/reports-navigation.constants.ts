@@ -1,7 +1,6 @@
 import { ChartColumn } from "lucide-react";
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 
-export const REPORTS_HOME_PATH = "/backoffice";
 export const REGISTERED_USERS_REPORT_PATH = "/backoffice/reports/registered-users";
 export const REJECTED_USERS_REPORT_PATH = "/backoffice/reports/rejected-users";
 export const REPORT_HISTORY_PATH = "/backoffice/reports/history";

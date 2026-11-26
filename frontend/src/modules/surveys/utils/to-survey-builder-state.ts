@@ -1,6 +1,6 @@
 import { ALL_CAREERS_VALUE } from "../constants/survey-builder.constants";
-import type { SurveyBuilderState } from "../types/survey-builder.types";
-import type { SurveyDetail } from "../types/survey.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
+import type { SurveyDetail } from "../types/survey-detail.types";
 import { toSurveyAcademicPeriod } from "./survey-academic-periods";
 import { toDateValueFromIso } from "./survey-dates";
 

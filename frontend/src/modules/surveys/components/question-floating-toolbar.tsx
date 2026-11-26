@@ -4,7 +4,7 @@ import { CirclePlus, Copy, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { SURVEY_ARIA } from "../constants/survey-builder.constants";
-import type { QuestionFloatingToolbarProps } from "../types/survey-component-props.types";
+import type { QuestionFloatingToolbarProps } from "../types/question-floating-toolbar-props.types";
 
 export function QuestionFloatingToolbar({ onAddQuestion, onDuplicate, onPreview }: QuestionFloatingToolbarProps) {
   const actions = [

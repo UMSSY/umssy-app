@@ -1,3 +1,4 @@
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 const pad = (value: number): string => String(value).padStart(2, '0');
 
 
@@ -43,7 +44,6 @@ export function formatConversationDate(isoDateString?: string | null): string {
   }
     return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${pad(date.getFullYear() % 100)}`;
 
-  
 }
 
 export function getInitials(fullName: string): string {
@@ -92,12 +92,6 @@ export function formatMessageDateSeparator(isoString?: string | null): string {
     .toUpperCase();
 }
 
-export const BOLIVIA_TIME_ZONE = 'America/La_Paz';
-
-/**
- * Formatea la fecha de creación de la sala de evento como dd/mm/aa
- * en hora de Bolivia (America/La_Paz).
- */
 export function formatEventRoomCreatedAt(
   isoDateString?: string | null,
 ): string {
@@ -118,10 +112,6 @@ export function formatEventRoomCreatedAt(
   }).format(date);
 }
 
-/**
- * Formatea la hora de un mensaje en hora de Bolivia (America/La_Paz),
- * reutilizando el criterio de zona horaria del chat (es-BO).
- */
 export function formatEventRoomTime(isoDateString?: string | null): string {
   if (!isoDateString) {
     return '';

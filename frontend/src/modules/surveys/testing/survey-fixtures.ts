@@ -1,6 +1,8 @@
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import type { SurveyBuilderState } from "../types/survey-builder.types";
-import type { Career, CreatedSurvey, SurveySummary } from "../types/survey.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
+import type { Career } from "../types/career.types";
+import type { CreatedSurvey } from "../types/created-survey.types";
+import type { SurveySummary } from "../types/survey-summary.types";
 
 export const FIXED_NOW = new Date("2026-10-22T15:00:00.000Z");
 export const TODAY_VALUE = "2026-10-22";

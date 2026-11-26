@@ -47,7 +47,10 @@ describe('AttachmentController', () => {
   });
 
   it('should require chat roles (titulado, estudiante, mentor, empresa)', () => {
-    const roles = new Reflector().get<string[]>(ROLES_KEY, AttachmentController);
+    const roles = new Reflector().get<string[]>(
+      ROLES_KEY,
+      AttachmentController,
+    );
     expect(roles).toEqual(['titulado', 'estudiante', 'mentor', 'empresa']);
   });
 
@@ -80,7 +83,7 @@ describe('AttachmentController', () => {
         fileName: 'document.pdf',
         mimeType: 'application/pdf',
         fileSize: 1024,
-        url: '/api/chat/attachments/att-1/download',
+        url: '/api/chat/attachments/att-1/file',
         thumbnailUrl: null,
         type: 'PDF',
         createdAt: '2026-10-28T12:00:00.000Z',
@@ -95,48 +98,10 @@ describe('AttachmentController', () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it('uploadAndSendAlias should delegate to attachmentService.uploadAndSend', async () => {
-    const file = {
-      originalname: 'image.png',
-      mimetype: 'image/png',
-      size: 2048,
-      buffer: Buffer.from('fake-png'),
-    } as MulterFile;
-
-    const dto = {
-      conversationId: '22222222-2222-2222-2222-222222222222',
-      content: '',
-    };
-
-    const mockResponse = {
-      id: 'msg-2',
-      conversationId: dto.conversationId,
-      senderId: 'user-2',
-      content: '',
-      isAttachment: true,
-      attachmentType: 'image' as const,
-      status: 'sent' as const,
-      timestamp: '2026-10-28T12:00:00.000Z',
-      createdAt: '2026-10-28T12:00:00.000Z',
-      attachment: {
-        id: 'att-2',
-        messageId: 'msg-2',
-        fileName: 'image.png',
-        mimeType: 'image/png',
-        fileSize: 2048,
-        url: '/api/chat/attachments/att-2/download',
-        thumbnailUrl: null,
-        type: 'IMAGE',
-        createdAt: '2026-10-28T12:00:00.000Z',
-      },
-    };
-
-    mockService.uploadAndSend.mockResolvedValueOnce(mockResponse);
-
-    const result = await controller.uploadAndSendAlias('user-2', file, dto);
-
-    expect(mockService.uploadAndSend).toHaveBeenCalledWith('user-2', file, dto);
-    expect(result).toEqual(mockResponse);
+  it('exposes the upload operation at the canonical attachment resource', () => {
+    expect(
+      Reflect.getMetadata('path', AttachmentController.prototype.uploadAndSend),
+    ).toBe('attachments');
   });
 
   it('download should return StreamableFile with proper disposition and mime type', async () => {
@@ -167,7 +132,7 @@ describe('AttachmentController', () => {
       fileName: 'photo.jpg',
       mimeType: 'image/jpeg',
       fileSize: 5000,
-      url: '/api/chat/attachments/att-1/download',
+      url: '/api/chat/attachments/att-1/file',
       thumbnailUrl: null,
       type: 'IMAGE',
       createdAt: '2026-10-28T12:00:00.000Z',

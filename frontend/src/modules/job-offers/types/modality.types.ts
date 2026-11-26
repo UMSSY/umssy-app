@@ -1,3 +1,3 @@
-import type { MODALITIES } from "../constants/job-offers.constants";
+import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
 
-export type Modality = (typeof MODALITIES)[number];
+export type Modality = (typeof JOB_MODALITIES)[number];

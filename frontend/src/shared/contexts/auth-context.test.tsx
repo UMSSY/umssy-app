@@ -1,14 +1,20 @@
+import "@/shared/testing/indexed-db.mock";
+import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { Button as TestButton } from "@/components/ui/button";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { authService } from "@/modules/auth";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { AuthProvider, useAuth } from "./auth-context";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+}));
+
 afterEach(() => {
   cleanup();
-  sessionStorage.clear();
+  clearAccessToken();
   vi.restoreAllMocks();
 });
 
@@ -30,7 +36,9 @@ function renderSession() {
 
 describe("AuthProvider", () => {
   it("loads all current roles for an existing single-role token and refreshes them", async () => {
-    saveAccessToken(`h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`,
+    );
     const getSession = vi.spyOn(authService, "getSession").mockResolvedValue({ id: "u1", email: "user@test.com", roles: ["titulado", "mentor"] });
     renderSession();
     await waitFor(() => expect(screen.getByTestId("user-id")).toHaveTextContent("u1"));
@@ -53,10 +61,30 @@ describe("AuthProvider", () => {
   });
 
   it("clears a revoked session instead of retaining JWT permissions", async () => {
-    saveAccessToken(`h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`);
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`,
+    );
     vi.spyOn(authService, "getSession").mockRejectedValue(Object.assign(new Error("Unauthorized"), { isAxiosError: true, response: { status: 401 } }));
     renderSession();
-    await waitFor(() => expect(sessionStorage.getItem("accessToken")).toBeNull());
+    await waitFor(() => expect(getAccessToken()).toBeNull());
     expect(screen.getByTestId("roles").textContent).toBe("");
+  });
+
+  it("falls back to local JWT roles instead of staying in loading while offline", async () => {
+    await saveAccessToken(`h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
+    vi.spyOn(authService, "getSession").mockRejectedValue(new TypeError("Failed to fetch"));
+    onlineManager.setOnline(false);
+    function LoadingConsumer() {
+      const { isLoading, roles } = useAuth();
+      return <p data-testid="state">{isLoading ? "loading" : roles.join(",")}</p>;
+    }
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    try {
+      render(<QueryClientProvider client={client}><AuthProvider><LoadingConsumer /></AuthProvider></QueryClientProvider>);
+      await waitFor(() => expect(screen.getByTestId("state")).toHaveTextContent("titulado"));
+      expect(getAccessToken()).not.toBeNull();
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 });

@@ -1,9 +1,23 @@
 import type { AvailabilityBlockState } from "../types/availability-block-state.types";
+import type { WeekGridDensity } from "../types/week-grid-density.types";
 
-export const WEEK_GRID_START_HOUR = 7;
-export const WEEK_GRID_END_HOUR = 22;
 export const HOUR_HEIGHT_PX = 72;
-export const STICKY_GAP_PX = 16;
+
+export const COMPACT_HOUR_HEIGHT_PX = 30;
+
+export const HOUR_HEIGHT_PX_BY_DENSITY: Record<WeekGridDensity, number> = {
+  normal: HOUR_HEIGHT_PX,
+  compact: COMPACT_HOUR_HEIGHT_PX,
+};
+
+export const WEEK_GRID_DENSITY_STORAGE_KEY = "umssy-week-grid-density";
+
+export const WEEK_GRID_DENSITY_TEXT = {
+  label: "Densidad de la grilla",
+  normal: "Normal",
+  compact: "Compacta",
+} as const;
+
 export const DAY_LABELS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"] as const;
 
 export const STATE_BUTTON_VARIANT: Record<AvailabilityBlockState, "outline" | "default"> = {
@@ -23,8 +37,6 @@ export const STATE_LABELS_ES: Record<AvailabilityBlockState, string> = {
 
 export const SELECTED_BLOCK_CLASSES = "border-accent bg-accent text-primary-foreground ring-2 ring-accent ring-offset-2 hover:bg-accent hover:text-primary-foreground";
 
-export const SELECTED_LEGEND_LABEL = "Tu selección";
-
 export const BLOCK_STATE_TEXT: Record<AvailabilityBlockState, string> = {
   free: "Libre",
   confirmed: "Cita",
@@ -35,5 +47,3 @@ export const WEEK_GRID_LEGEND = {
   confirmed: "Cita confirmada",
   freeSlot: "Horario libre",
 } as const;
-
-export const EMPTY_DAY_LABEL = "Sin bloques";

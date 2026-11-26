@@ -1,3 +1,5 @@
+import { makeMentorsRepository } from './fixtures/mentor-directory-search.fixture.js';
+import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { SEED_SKILLS_CATALOG } from '../../skills/seeds/skills-catalog.seed.js';
@@ -5,7 +7,6 @@ import type { UserSkillService } from '../../skills/services/user-skill.service.
 import { SEED_TECHNICAL_AREAS } from '../../technical-areas/constants/seed-technical-areas.constants.js';
 import { SKILL_TO_TECHNICAL_AREA } from '../constants/skill-to-technical-area.catalog.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
-import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorAffinityService } from '../services/mentor-affinity.service.js';
 import { MentorsService } from '../services/mentors.service.js';
 
@@ -43,7 +44,9 @@ function makeContext(
 ) {
   const getProfessionalSkills = vi.fn().mockResolvedValue(
     skills.map(({ name, isCustom = false }, index) => ({
-      id: `skill-${index}`, name, isCustom,
+      id: `skill-${index}`,
+      name,
+      isCustom,
     })),
   );
   const areaFindMany = vi
@@ -77,17 +80,23 @@ function makeContext(
   });
   const userCount = vi.fn();
   const queryRaw = vi.fn().mockResolvedValue(candidates);
-  const repository = new MentorsRepository({
+  const repository = makeMentorsRepository({
     $queryRaw: queryRaw,
     technicalArea: { findMany: areaFindMany },
     user: { findMany: userFindMany, count: userCount },
   } as unknown as PrismaService);
-  const userSkillService = { getProfessionalSkills } as unknown as UserSkillService;
-  const affinityService = new MentorAffinityService(repository, userSkillService);
+  const userSkillService = {
+    getProfessionalSkills,
+  } as unknown as UserSkillService;
+  const affinityService = new MentorAffinityService(
+    repository,
+    userSkillService,
+  );
   const service = new MentorsService(
     repository,
     new MentorMapper(),
     userSkillService,
+    {} as MentorProfileSuggestionsService,
     affinityService,
   );
   return {
@@ -112,35 +121,51 @@ describe('MentorAffinityService', () => {
     ['Machine Learning', 'Datos'],
     ['Docker', 'Cloud'],
     ['Kubernetes', 'Cloud'],
-  ])('calcula afinidad de %s con %s usando los IDs del catálogo consultado', async (name, area) => {
-    const context = makeContext([{ name }], []);
-    context.areaFindMany.mockResolvedValue([{ id: 'database-area-id', name: area }]);
+  ])(
+    'calcula afinidad de %s con %s usando los IDs del catálogo consultado',
+    async (name, area) => {
+      const context = makeContext([{ name }], []);
+      context.areaFindMany.mockResolvedValue([
+        { id: 'database-area-id', name: area },
+      ]);
 
-    const result = await context.affinityService.findUserAreaIds('any-user');
+      const result = await context.affinityService.findUserAreaIds('any-user');
 
-    expect(result).toEqual({ status: 'ready', areaIds: new Set(['database-area-id']) });
-    expect(context.areaFindMany).toHaveBeenCalledExactlyOnceWith({
-      where: { name: { in: [area] } }, select: { id: true, name: true },
-    });
-  });
+      expect(result).toEqual({
+        status: 'ready',
+        areaIds: new Set(['database-area-id']),
+      });
+      expect(context.areaFindMany).toHaveBeenCalledExactlyOnceWith({
+        where: { name: { in: [area] } },
+        select: { id: true, name: true },
+      });
+    },
+  );
 
   it('conserva el fallback si el catálogo técnico no está cargado', async () => {
     const context = makeContext([{ name: 'Python' }], []);
     context.areaFindMany.mockResolvedValue([]);
     context.userCount.mockResolvedValue(0);
 
-    await expect(context.service.findDirectory(filters, 'user')).resolves.toMatchObject({
-      items: [], effectiveSort: 'default', affinityStatus: 'unmapped_skills',
+    await expect(
+      context.service.findDirectory(filters, 'user'),
+    ).resolves.toMatchObject({
+      items: [],
+      effectiveSort: 'default',
+      affinityStatus: 'unmapped_skills',
     });
   });
 
   it('desempata por nombre, apellido e ID cuando hay coincidencias', async () => {
-    const context = makeContext([{ name: 'NestJS' }], [
-      mentor('z', 'Ana', 'Rojas', ['Backend']),
-      mentor('c', 'Beto', 'Paz', ['Backend']),
-      mentor('b', 'Ana', 'Paz', ['Backend']),
-      mentor('a', 'Ana', 'Paz', ['Backend']),
-    ]);
+    const context = makeContext(
+      [{ name: 'NestJS' }],
+      [
+        mentor('z', 'Ana', 'Rojas', ['Backend']),
+        mentor('c', 'Beto', 'Paz', ['Backend']),
+        mentor('b', 'Ana', 'Paz', ['Backend']),
+        mentor('a', 'Ana', 'Paz', ['Backend']),
+      ],
+    );
 
     const result = await context.service.findDirectory(filters, 'user');
     expect(result.items.map(({ id }) => id)).toEqual(['a', 'b', 'z', 'c']);
@@ -148,7 +173,11 @@ describe('MentorAffinityService', () => {
 
   it('usa únicamente nombres oficiales de habilidades y áreas técnicas', () => {
     const catalogNames = new Set(SEED_SKILLS_CATALOG.map(({ name }) => name));
-    expect(Object.keys(SKILL_TO_TECHNICAL_AREA).every((name) => catalogNames.has(name))).toBe(true);
+    expect(
+      Object.keys(SKILL_TO_TECHNICAL_AREA).every((name) =>
+        catalogNames.has(name),
+      ),
+    ).toBe(true);
     expect(
       Object.values(SKILL_TO_TECHNICAL_AREA).every((name) => areaIds.has(name)),
     ).toBe(true);
@@ -162,7 +191,13 @@ describe('MentorAffinityService', () => {
     expect(empty.areaFindMany).not.toHaveBeenCalled();
 
     const unknown = makeContext(
-      [{ name: 'Desconocida' }, { name: 'Git' }, { name: 'NestJS', isCustom: true }, { name: 'toString' }, { name: '__proto__' }],
+      [
+        { name: 'Desconocida' },
+        { name: 'Git' },
+        { name: 'NestJS', isCustom: true },
+        { name: 'toString' },
+        { name: '__proto__' },
+      ],
       [],
     );
     expect(
@@ -197,7 +232,9 @@ describe('MentorAffinityService', () => {
       affinityStatus: 'ready',
       totalItems: 3,
     });
-    expect(context.getProfessionalSkills).toHaveBeenCalledExactlyOnceWith('session-user');
+    expect(context.getProfessionalSkills).toHaveBeenCalledExactlyOnceWith(
+      'session-user',
+    );
   });
 
   it('deduplica varias habilidades de una misma área y áreas repetidas del mentor', async () => {
@@ -312,7 +349,13 @@ describe('MentorAffinityService', () => {
       [mentor('a', 'Ana', 'Rojas', ['Backend'])],
     );
     const result = await context.service.findDirectory(
-      { ...filters, search: 'Ana Rojas', area: 'Backend', orientation: 'Orientación técnica', available: true },
+      {
+        ...filters,
+        search: 'Ana Rojas',
+        area: 'Backend',
+        orientation: 'Orientación técnica',
+        available: true,
+      },
       'user-1',
     );
     expect(result.items).toHaveLength(1);
@@ -320,13 +363,42 @@ describe('MentorAffinityService', () => {
     const detailsQuery = context.userFindMany.mock.calls[0][0];
     expect(candidateQuery.sql).toContain('u.is_active = true');
     expect(candidateQuery.sql).toContain('u.is_available_for_mentoring = true');
-    expect(candidateQuery.sql.match(/strpos\(/g)).toHaveLength(4);
-    expect(candidateQuery.values).toEqual(expect.arrayContaining(['Backend', 'Orientación técnica', 'Ana', 'Rojas']));
+    // Each search term can match a name, professional text, or specialty.
+    for (const field of [
+      'u.first_name',
+      'u.last_name',
+      'u.headline',
+      'u.about_me',
+      'we.position',
+      'we.description',
+      's.name',
+      'ta.name',
+    ]) {
+      expect(candidateQuery.sql).toContain(field);
+    }
+    expect(candidateQuery.sql).not.toContain('Ana');
+    expect(candidateQuery.sql).not.toContain('Rojas');
+    expect(candidateQuery.values).toEqual(
+      expect.arrayContaining([
+        'Backend',
+        'Orientación técnica',
+        'Ana',
+        'Rojas',
+      ]),
+    );
     expect(context.queryRaw.mock.calls[1][0].values.at(-1)).toEqual(['a']);
     expect(detailsQuery.where).toMatchObject({
-      isActive: true, isAvailableForMentoring: true, id: { in: ['a'] },
-      mentorTechnicalAreas: { some: { technicalArea: { name: 'Backend' } } },
-      mentorOrientationTypes: { some: { orientationType: { name: 'Orientación técnica', isActive: true } } },
+      isActive: true,
+      isAvailableForMentoring: true,
+      id: { in: ['a'] },
+      mentorTechnicalAreas: {
+        some: { technicalArea: { name: { in: ['Backend'] } } },
+      },
+      mentorOrientationTypes: {
+        some: {
+          orientationType: { name: 'Orientación técnica', isActive: true },
+        },
+      },
     });
     expect(candidateQuery.sql).not.toContain('educations');
     expect(candidateQuery.sql).not.toContain('photo_url');

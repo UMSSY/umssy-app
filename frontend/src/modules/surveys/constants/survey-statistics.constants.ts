@@ -1,13 +1,5 @@
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 
-export const SURVEY_STATISTICS_SUMMARY_SKELETONS = 4;
-export const SURVEY_STATISTICS_QUESTION_SKELETONS = 2;
-export const SURVEY_PDF_FEEDBACK_DURATION_MS = 4000;
-
-export const SURVEY_PERIOD_FILTER_LABEL = "Gestión académica";
-export const SURVEY_PERIOD_FILTER_ALL_LABEL = "Todos";
-export const SURVEY_PERIOD_FILTER_HINT = "Semestre en que se recibieron las respuestas";
-
 export const SURVEY_STATISTICS_TEXT = {
   pageTitle: "Analíticas de la encuesta",
   loadingDescription: "Obteniendo resultados de la encuesta...",
@@ -23,8 +15,6 @@ export const SURVEY_TREND_LABELS = {
   down: "Tendencia a la baja",
   neutral: "Tendencia estable",
 } as const;
-
-export const SURVEY_TREND_PREFIX = "Tendencia:";
 
 export const SURVEY_TREND_ICONS = { up: TrendingUp, down: TrendingDown, neutral: Minus } as const;
 

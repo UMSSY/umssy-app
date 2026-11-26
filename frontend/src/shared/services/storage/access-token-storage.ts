@@ -1,46 +1,137 @@
-import { readLocalStorage, writeLocalStorage } from "./browser-local-storage";
+import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
+import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
+import { readIndexedDb, removeIndexedDb } from './browser-indexed-db';
+import { offlinePassesKey } from '@/shared/constants/offline-passes.constants';
+import { claimOfflinePasses, endOfflinePassesSession, readOfflinePassesOwner } from './offline-passes-owner';
 import {
-  readSessionStorage,
-  removeSessionStorage,
-  writeSessionStorage,
-} from "./browser-session-storage";
+  clearCookieSessionState,
+  getCookieSessionSubject,
+  registerBearerTokenClearer,
+  setCookieSessionSubject,
+} from './cookie-session-state';
 
-const ACCESS_TOKEN_STORAGE_KEY = "accessToken";
-const LOGOUT_KEY = "umssy-session-logout";
-const SESSION_LOGOUT_KEY = "sessionLogoutVersion";
+let token: string | null = null;
+let ready = false;
+let revision = 0;
+let loading: Promise<void> | null = null;
+let writes: Promise<unknown> = Promise.resolve();
+const listeners = new Set<() => void>();
+let channel: BroadcastChannel | null = null;
+const emit = () => {
+  for (const listener of listeners) listener();
+};
+const clearOfflinePassesOfOtherUser = async (userId: string | null) => {
+  const owner = await readOfflinePassesOwner();
+  if (owner && owner !== userId) await endOfflinePassesSession(owner);
+};
 
-function logoutVersion(): string {
-  return readLocalStorage(LOGOUT_KEY) ?? '';
+registerBearerTokenClearer(() => {
+  revision++;
+  token = null;
+  ready = true;
+  loading = null;
+  emit();
+});
+
+export function isAccessTokenReady(): boolean {
+  return ready;
+}
+export function initializeAccessTokenStorage(): Promise<void> {
+  if (ready) return Promise.resolve();
+  if (loading) return loading;
+  const currentRevision = revision;
+  loading = readIndexedDb<unknown>(ACCESS_TOKEN_STORAGE_KEY)
+    .then(async (legacyToken) => {
+      const legacyUser = readAccessTokenSubject(legacyToken);
+      if (!legacyUser || revision !== currentRevision) return;
+      const owner = await readOfflinePassesOwner();
+      const copy = await readIndexedDb<{ userId?: unknown; passes?: unknown }>(offlinePassesKey(legacyUser));
+      if (!owner && revision === currentRevision && copy?.userId === legacyUser && Array.isArray(copy.passes))
+        await claimOfflinePasses(legacyUser);
+    })
+    .catch(() => {})
+    .then(() => removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {}))
+    .finally(() => {
+      if (revision !== currentRevision) return;
+      ready = true;
+      loading = null;
+      emit();
+    });
+  return loading;
 }
 
-export function saveAccessToken(accessToken: string): boolean {
-  const isSaved = writeSessionStorage(ACCESS_TOKEN_STORAGE_KEY, accessToken);
-  if (isSaved) writeSessionStorage(SESSION_LOGOUT_KEY, logoutVersion());
-  if (isSaved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
-  return isSaved;
+export async function saveAccessToken(value: string): Promise<boolean> {
+  const nextOwner = readAccessTokenSubject(value);
+  revision++;
+  token = value;
+  ready = true;
+  setCookieSessionSubject(nextOwner);
+  emit();
+  channel?.postMessage('changed');
+  const operation = writes.then(async () => {
+    await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {});
+    await clearOfflinePassesOfOtherUser(nextOwner);
+  });
+  writes = operation.catch(() => {});
+  try {
+    await operation;
+  } catch {
+  }
+  return true;
 }
 
 export function getAccessToken(): string | null {
-  const token = readSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
-  if (token && typeof window !== "undefined" && (readSessionStorage(SESSION_LOGOUT_KEY) ?? '') !== logoutVersion()) return null;
   return token;
 }
 
+export const getAuthToken = getAccessToken;
+
+export async function waitForAccessTokenWrites(): Promise<void> {
+  await writes;
+}
+
 export function clearAccessToken(): boolean {
-  const hadToken = Boolean(getAccessToken());
-  const isRemoved = removeSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
-  if (hadToken && isRemoved && typeof window !== "undefined") {
-    try { writeLocalStorage(LOGOUT_KEY, crypto.randomUUID()); } catch { /* Logout must still finish if UUID generation is unavailable. */ }
-  }
-  if (isRemoved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
-  return isRemoved;
+  const previousUser = readAccessTokenSubject(token) ?? getCookieSessionSubject();
+  const logoutRevision = ++revision;
+  token = null;
+  ready = true;
+  loading = null;
+  clearCookieSessionState();
+  emit();
+  const operation = writes.then(async () => {
+    await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {});
+    const owner = previousUser ?? (revision === logoutRevision ? await readOfflinePassesOwner() : null);
+    if (owner) await endOfflinePassesSession(owner);
+  });
+  writes = operation.catch(() => {});
+  void operation.then(() => channel?.postMessage('changed')).catch(() => {});
+  return true;
 }
 
 export function subscribeAccessToken(onChange: () => void): () => void {
-  window.addEventListener("access-token-change", onChange);
-  window.addEventListener("storage", onChange);
+  listeners.add(onChange);
+  if (
+    typeof window !== 'undefined' &&
+    typeof BroadcastChannel !== 'undefined' &&
+    !channel
+  ) {
+    channel = new BroadcastChannel('umssy-session');
+    channel.onmessage = () => {
+      revision++;
+      token = null;
+      ready = false;
+      loading = null;
+      clearCookieSessionState();
+      emit();
+      void initializeAccessTokenStorage();
+    };
+  }
+  void initializeAccessTokenStorage();
   return () => {
-    window.removeEventListener("access-token-change", onChange);
-    window.removeEventListener("storage", onChange);
+    listeners.delete(onChange);
+    if (!listeners.size) {
+      channel?.close();
+      channel = null;
+    }
   };
 }

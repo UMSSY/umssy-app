@@ -35,8 +35,6 @@ export class ConnectionRequestRepository {
     });
   }
 
-  
-
   async findSentByUser(senderId: string) {
     return this.prisma.connectionRequest.findMany({
       where: { senderId },
@@ -112,22 +110,19 @@ export class ConnectionRequestRepository {
   }
 
   async findAcceptedByUser(userId: string) {
-  return this.prisma.connectionRequest.findMany({
-    where: {
-      OR: [
-        { senderId: userId },
-        { receiverId: userId },
-      ],
-      status: {
-        title: 'ACCEPTED',
+    return this.prisma.connectionRequest.findMany({
+      where: {
+        OR: [{ senderId: userId }, { receiverId: userId }],
+        status: {
+          title: 'ACCEPTED',
+        },
       },
-    },
-    include: {
-      status: true,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-  });
-}
+      include: {
+        status: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+  }
 }

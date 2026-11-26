@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { USER_SKILL_SOURCES } from '../../skills/constants/user-skill.constants.js';
 import { NLP_PROCESSING_STATUSES } from '../constants/nlp-processing.constants.js';
@@ -12,7 +11,9 @@ import type { ProfileSkillRow } from '../types/profile-skill-row.type.js';
 import { parseEvidenceRefs } from '../utils/parse-evidence-refs.js';
 import { validateSkillName } from '../utils/validate-skill-name.js';
 
-const STATUSES: ReadonlySet<string> = new Set(Object.values(NLP_PROCESSING_STATUSES));
+const STATUSES: ReadonlySet<string> = new Set(
+  Object.values(NLP_PROCESSING_STATUSES),
+);
 
 @Injectable()
 export class ProfileSkillsRadarMapper {
@@ -64,18 +65,18 @@ export class ProfileSkillsRadarMapper {
     const evidenceRefs = parseEvidenceRefs(row.evidenceRefs);
     if (isNlp && evidenceRefs.length === 0) return [];
 
-    return [{
-      id: row.skillId,
-      text: nameCheck.name,
-      name: nameCheck.name,
-      source: isNlp
-        ? USER_SKILL_SOURCES.nlp
-        : USER_SKILL_SOURCES.manual,
-      areaId: row.skill.areaId,
-      verificationStatus: row.verificationStatus,
-      isHighRelevance: isCurrent && row.isHighRelevance,
-      evidenceRefs,
-    }];
+    return [
+      {
+        id: row.skillId,
+        text: nameCheck.name,
+        name: nameCheck.name,
+        source: isNlp ? USER_SKILL_SOURCES.nlp : USER_SKILL_SOURCES.manual,
+        areaId: row.skill.areaId,
+        verificationStatus: row.verificationStatus,
+        isHighRelevance: isCurrent && row.isHighRelevance,
+        evidenceRefs,
+      },
+    ];
   }
 
   private toStatus(value: string | undefined): NlpProcessingStatus {

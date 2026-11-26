@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { AxiosError } from "axios";
 import { onlineManager, QueryClient } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
@@ -19,9 +21,9 @@ function renderPublishHook() {
 }
 
 describe("usePublishJobOffer", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {
@@ -100,7 +102,7 @@ describe("usePublishJobOffer", () => {
   });
 
   it("no llama al backend si no hay empresa asociada a la sesión", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+    await saveAccessToken(buildSessionToken("titulado"));
     const { result } = renderPublishHook();
 
     await act(() => result.current.submit(VALID_CONDITIONS));
@@ -132,5 +134,19 @@ describe("usePublishJobOffer", () => {
     expect(jobOffersService.publish).not.toHaveBeenCalled();
     await waitFor(() => expect(result.current.status).toBe("success"));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: JOB_OFFERS_QUERY_KEYS.company(COMPANY_ID) });
+  });
+
+  it("incluye la fecha de cierre en el payload cuando se envía", async () => {
+    vi.mocked(jobOffersService.publish).mockResolvedValue(CREATED);
+    const { result } = renderPublishHook();
+    const closingDate = new Date(2026, 11, 15);
+
+    await act(() => result.current.submit(VALID_CONDITIONS, closingDate));
+
+    expect(jobOffersService.publish).toHaveBeenCalledWith(
+      COMPANY_ID,
+      toJobOfferPayload(VALID_CONDITIONS, closingDate),
+    );
+    expect(vi.mocked(jobOffersService.publish).mock.calls[0][1].expiresAt).toBe("2026-12-16T03:59:00.000Z");
   });
 });

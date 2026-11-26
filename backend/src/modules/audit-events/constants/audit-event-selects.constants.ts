@@ -19,7 +19,15 @@ export const AUDIT_EVENT_LIST_SELECT = {
   evidenceFile: AUDIT_EVIDENCE_SELECT,
 } satisfies Prisma.AuditEventSelect;
 
-export const AUDIT_EVENT_ORDER = [{ occurredAt: 'desc' }, { number: 'desc' }] satisfies Prisma.AuditEventOrderByWithRelationInput[];
+export const AUDIT_EVENT_DETAIL_SELECT = {
+  ...AUDIT_EVENT_LIST_SELECT,
+  applicantCareer: true,
+} satisfies Prisma.AuditEventSelect;
+
+export const AUDIT_EVENT_ORDER = [
+  { occurredAt: 'desc' },
+  { number: 'desc' },
+] satisfies Prisma.AuditEventOrderByWithRelationInput[];
 
 export const AUDIT_TIMELINE_SELECT = {
   id: true,
@@ -30,4 +38,7 @@ export const AUDIT_TIMELINE_SELECT = {
   action: { select: { title: true } },
 } satisfies Prisma.AuditEventSelect;
 
-export const AUDIT_TIMELINE_ORDER = [{ occurredAt: 'asc' }, { number: 'asc' }] satisfies Prisma.AuditEventOrderByWithRelationInput[];
+export const AUDIT_TIMELINE_ORDER = [
+  { occurredAt: 'asc' },
+  { number: 'asc' },
+] satisfies Prisma.AuditEventOrderByWithRelationInput[];

@@ -1,10 +1,16 @@
-import type { DocumentCorrectionContext, DocumentCorrectionSnapshot } from '../types/document-correction.types.js';
+import type {
+  DocumentCorrectionContext,
+  DocumentCorrectionSnapshot,
+} from '../types/document-correction.types.js';
 import type { FileMetadata } from '../../files/types/file.types.js';
 
-export const CORRECTION_TEST_SECRET = 'document-correction-test-key-not-a-production-secret';
+export const CORRECTION_TEST_SECRET =
+  'document-correction-test-key-not-a-production-secret';
 export const CORRECTION_TEST_CODE = 'SOL-2026-0139';
 
-export function correctionSnapshot(overrides: Partial<DocumentCorrectionSnapshot> = {}): DocumentCorrectionSnapshot {
+export function correctionSnapshot(
+  overrides: Partial<DocumentCorrectionSnapshot> = {},
+): DocumentCorrectionSnapshot {
   return {
     id: 'request-1',
     requestCode: CORRECTION_TEST_CODE,
@@ -20,7 +26,9 @@ export function correctionSnapshot(overrides: Partial<DocumentCorrectionSnapshot
   };
 }
 
-export function correctionContext(overrides: Partial<DocumentCorrectionContext> = {}): DocumentCorrectionContext {
+export function correctionContext(
+  overrides: Partial<DocumentCorrectionContext> = {},
+): DocumentCorrectionContext {
   return {
     accessRequestId: 'request-1',
     requestCode: CORRECTION_TEST_CODE,
@@ -32,7 +40,12 @@ export function correctionContext(overrides: Partial<DocumentCorrectionContext> 
 
 export function correctedFile(): FileMetadata {
   return {
-    id: 'file-new', name: 'titulo-corregido', extension: 'pdf', mimeType: 'application/pdf', size: 8,
-    createdAt: new Date('2026-10-28T13:00:00.000Z'), updatedAt: new Date('2026-10-28T13:00:00.000Z'),
+    id: 'file-new',
+    name: 'titulo-corregido',
+    extension: 'pdf',
+    mimeType: 'application/pdf',
+    size: 8,
+    createdAt: new Date('2026-10-28T13:00:00.000Z'),
+    updatedAt: new Date('2026-10-28T13:00:00.000Z'),
   };
 }

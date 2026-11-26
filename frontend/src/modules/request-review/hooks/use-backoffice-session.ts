@@ -4,23 +4,26 @@ import { useEffect, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { buildLoginUrl, endSession } from "@/modules/auth";
-import { BACKOFFICE_ROLE, LOGIN_PATH } from "../constants/request-review.constants";
+
+import { hasCookieSession, subscribeCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { getSessionToken } from "../utils/session";
 import type { BackofficeSessionState } from "../types/backoffice-session.types";
 
-const subscribe = () => () => undefined;
-
-function readSession(hasAdministrativeRole: boolean): BackofficeSessionState {
+function readSession(hasAdministrativeRole: boolean, isAuthenticated: boolean): BackofficeSessionState {
   const token = getSessionToken();
-  if (!token) return "login";
+  if (!token && !isAuthenticated && !hasCookieSession()) return "login";
   return hasAdministrativeRole ? "allowed" : "forbidden";
 }
 
 export function useBackofficeSession() {
   const router = useRouter();
   const pathname = usePathname();
-  const { roles, isLoading } = useAuth();
-  const state = useSyncExternalStore<BackofficeSessionState>(subscribe, () => isLoading ? "checking" : readSession(roles.includes(BACKOFFICE_ROLE)), () => "checking");
+  const { roles, isLoading, isAuthenticated } = useAuth();
+  const state = useSyncExternalStore<BackofficeSessionState>(
+    subscribeCookieSession,
+    () => (isLoading ? "checking" : readSession(roles.includes("administrativo"), Boolean(isAuthenticated))),
+    () => "checking",
+  );
 
   useEffect(() => {
     if (state === "login") {
@@ -32,7 +35,7 @@ export function useBackofficeSession() {
 
   function logout() {
     endSession();
-    router.replace(LOGIN_PATH);
+    router.replace("/login");
   }
 
   return { state, logout };

@@ -11,7 +11,10 @@ function build() {
     findFirst: vi.fn().mockResolvedValue(null),
     findUnique: vi.fn().mockResolvedValue(null),
   };
-  return { auditEvent, repository: new AuditEventsRepository({ auditEvent } as any) };
+  return {
+    auditEvent,
+    repository: new AuditEventsRepository({ auditEvent } as any),
+  };
 }
 
 describe('AuditEventsRepository: listado y evidencia', () => {
@@ -20,7 +23,11 @@ describe('AuditEventsRepository: listado y evidencia', () => {
     auditEvent.findMany.mockResolvedValue([{ id: 'evt-1' }]);
     auditEvent.count.mockResolvedValue(11);
 
-    const result = await repository.findPage({ filters: { action: 'rejected' }, skip: 10, take: 10 });
+    const result = await repository.findPage({
+      filters: { action: 'rejected' },
+      skip: 10,
+      take: 10,
+    });
 
     const args = auditEvent.findMany.mock.calls[0][0];
     expect(args.where).toEqual({ AND: [{ action: { title: 'rejected' } }] });
@@ -34,20 +41,29 @@ describe('AuditEventsRepository: listado y evidencia', () => {
 
   it('findPage sin filtros devuelve una colección vacía con total cero', async () => {
     const { repository } = build();
-    await expect(repository.findPage({ filters: {}, skip: 0, take: 10 })).resolves.toEqual({ rows: [], total: 0 });
+    await expect(
+      repository.findPage({ filters: {}, skip: 0, take: 10 }),
+    ).resolves.toEqual({ rows: [], total: 0 });
   });
 
   it('findResponsibles devuelve una entrada por persona y avisa si hay eventos del Sistema', async () => {
     const { auditEvent, repository } = build();
-    auditEvent.findMany.mockResolvedValue([{ actorId: UUID, actorName: 'Carla Montaño' }]);
+    auditEvent.findMany.mockResolvedValue([
+      { actorId: UUID, actorName: 'Carla Montaño' },
+    ]);
     auditEvent.findFirst.mockResolvedValue({ id: 'evt-9' });
 
     await expect(repository.findResponsibles()).resolves.toEqual({
       people: [{ actorId: UUID, actorName: 'Carla Montaño' }],
       hasSystemEvents: true,
     });
-    expect(auditEvent.findMany.mock.calls[0][0]).toMatchObject({ where: { actorId: { not: null } }, distinct: ['actorId'] });
-    expect(auditEvent.findFirst.mock.calls[0][0].where).toEqual({ actorRole: 'sistema' });
+    expect(auditEvent.findMany.mock.calls[0][0]).toMatchObject({
+      where: { actorId: { not: null } },
+      distinct: ['actorId'],
+    });
+    expect(auditEvent.findFirst.mock.calls[0][0].where).toEqual({
+      actorRole: 'sistema',
+    });
   });
 
   it('findEvidenceReference solo lee la referencia al archivo', async () => {
@@ -55,6 +71,9 @@ describe('AuditEventsRepository: listado y evidencia', () => {
 
     await repository.findEvidenceReference('evt-1');
 
-    expect(auditEvent.findUnique).toHaveBeenCalledWith({ where: { id: 'evt-1' }, select: { id: true, evidenceFileId: true } });
+    expect(auditEvent.findUnique).toHaveBeenCalledWith({
+      where: { id: 'evt-1' },
+      select: { id: true, evidenceFileId: true },
+    });
   });
 });

@@ -1,4 +1,10 @@
+import { ApplicationStatus } from '../types/applications.types.js';
+import {
+  APPLICATION_DECISION_CONTEXT_SELECT,
+  RECRUITMENT_APPLICATION_SELECT,
+} from '../constants/recruitment-application-select.constants.js';
 import { Injectable } from '@nestjs/common';
+import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
@@ -30,7 +36,12 @@ export class ApplicationsRepository {
         appliedAt: true,
         status: { select: { title: true } },
         jobOffer: {
-          select: { title: true, company: { select: { title: true } } },
+          select: {
+            title: true,
+            expiresAt: true,
+            status: { select: { title: true } },
+            company: { select: { title: true } },
+          },
         },
       },
     });
@@ -40,6 +51,47 @@ export class ApplicationsRepository {
     return this.prisma.jobApplication.findUnique({
       where: { id },
       select: { id: true, userId: true, status: { select: { title: true } } },
+    });
+  }
+
+  findApplicationForChat(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        status: { select: { title: true } },
+        jobOffer: {
+          select: {
+            id: true,
+            title: true,
+            companyId: true,
+            company: { select: { id: true, title: true } },
+          },
+        },
+      },
+    });
+  }
+
+  reactivateApplication(id: string, userId: string, now: Date) {
+    return this.prisma.$transaction(async (tx) => {
+      const status = await tx.jobApplicationStatus.findUniqueOrThrow({
+        where: { title: ApplicationStatus.IN_REVIEW },
+        select: { id: true },
+      });
+
+      return tx.jobApplication.updateMany({
+        where: {
+          id,
+          userId,
+          status: { title: ApplicationStatus.WITHDRAWN },
+          jobOffer: {
+            status: { title: JobOfferStatus.PUBLISHED },
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+        },
+        data: { statusId: status.id, appliedAt: now },
+      });
     });
   }
 
@@ -54,5 +106,39 @@ export class ApplicationsRepository {
         data: { statusId: status.id },
       });
     });
+  }
+  findRecruitmentApplicationsByUser(userId: string) {
+    return this.prisma.jobApplication.findMany({
+      where: { userId },
+      orderBy: { appliedAt: 'desc' },
+      select: RECRUITMENT_APPLICATION_SELECT,
+    });
+  }
+  findRecruitmentApplicants(jobId: string) {
+    return this.prisma.jobApplication.findMany({
+      where: { jobOfferId: jobId, status: { title: { not: ApplicationStatus.WITHDRAWN } } },
+      orderBy: { appliedAt: 'desc' },
+      select: RECRUITMENT_APPLICATION_SELECT,
+    });
+  }
+  findRecruitmentApplication(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: RECRUITMENT_APPLICATION_SELECT,
+    });
+  }
+  findApplicationDecisionContext(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: APPLICATION_DECISION_CONTEXT_SELECT,
+    });
+  }
+  recordRecruiterDecision(applicationId: string, target: string) {
+    return this.prisma.$queryRaw<{ id: string }[]>`
+      UPDATE job_applications a SET status_id=target_status.id,updated_at=now()
+      FROM job_application_statuses target_status
+      WHERE a.id=${applicationId}::uuid AND target_status.title=${target}
+      AND a.status_id IN (SELECT id FROM job_application_statuses WHERE title IN ('En revisión','Entrevista'))
+      RETURNING a.id`;
   }
 }

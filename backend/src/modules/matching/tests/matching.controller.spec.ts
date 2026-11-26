@@ -9,10 +9,12 @@ const EXPERIENCE_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 
 describe('MatchingController', () => {
   it('protege el controlador con JwtAuthGuard', () => {
-    expect(Reflect.getMetadata(GUARDS_METADATA, MatchingController)).toEqual([JwtAuthGuard]);
+    expect(Reflect.getMetadata(GUARDS_METADATA, MatchingController)).toEqual([
+      JwtAuthGuard,
+    ]);
   });
 
-    it('delega la vista previa al servicio con el usuario, id y texto recibidos', async () => {
+  it('delega la vista previa al servicio con el usuario, id y texto recibidos', async () => {
     const response = {
       experienceId: EXPERIENCE_ID,
       skills: [{ id: 'a1', name: 'Python' }],
@@ -66,9 +68,17 @@ describe('MatchingController', () => {
     });
   });
   it('delega el analisis al servicio con el usuario autenticado, el id de la ruta y el texto del body', async () => {
-    const response = { experienceId: EXPERIENCE_ID, skills: [], processingTimeMs: 3 };
-    const matchingService = { analyzeExperience: vi.fn().mockResolvedValue(response) };
-    const controller = new MatchingController(matchingService as unknown as MatchingService);
+    const response = {
+      experienceId: EXPERIENCE_ID,
+      skills: [],
+      processingTimeMs: 3,
+    };
+    const matchingService = {
+      analyzeExperience: vi.fn().mockResolvedValue(response),
+    };
+    const controller = new MatchingController(
+      matchingService as unknown as MatchingService,
+    );
 
     const result = await controller.analyzeExperience(
       USER_ID,
@@ -85,13 +95,21 @@ describe('MatchingController', () => {
 
   it('pasa el texto nulo al servicio sin modificarlo', async () => {
     const matchingService = {
-      analyzeExperience: vi
-        .fn()
-        .mockResolvedValue({ experienceId: EXPERIENCE_ID, skills: [], processingTimeMs: 0 }),
+      analyzeExperience: vi.fn().mockResolvedValue({
+        experienceId: EXPERIENCE_ID,
+        skills: [],
+        processingTimeMs: 0,
+      }),
     };
-    const controller = new MatchingController(matchingService as unknown as MatchingService);
+    const controller = new MatchingController(
+      matchingService as unknown as MatchingService,
+    );
 
-    await controller.analyzeExperience(USER_ID, { id: EXPERIENCE_ID }, { text: null });
+    await controller.analyzeExperience(
+      USER_ID,
+      { id: EXPERIENCE_ID },
+      { text: null },
+    );
 
     expect(matchingService.analyzeExperience).toHaveBeenCalledWith(USER_ID, {
       experienceId: EXPERIENCE_ID,

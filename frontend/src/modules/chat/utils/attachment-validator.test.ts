@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from "@/shared/constants/file-upload.constants";
 import { describe, it, expect } from 'vitest';
 import {
   validateAttachmentFile,
@@ -5,11 +6,7 @@ import {
   isAllowedImage,
   isAllowedPdf,
 } from './attachment-validator';
-import {
-  ATTACHMENT_ERROR_MESSAGES,
-  MAX_IMAGE_SIZE_BYTES,
-  MAX_PDF_SIZE_BYTES,
-} from '../constants/attachment.constants';
+import { ATTACHMENT_ERROR_MESSAGES, MAX_IMAGE_SIZE_BYTES } from '../constants/attachment.constants';
 
 describe('attachment-validator (HU-11 Task 3)', () => {
   const createFile = (name: string, size: number, type: string) => {
@@ -50,7 +47,7 @@ describe('attachment-validator (HU-11 Task 3)', () => {
 
   describe('validación de documentos PDF', () => {
     it('acepta documentos PDF de hasta 10 MB', () => {
-      const file = createFile('documento.pdf', MAX_PDF_SIZE_BYTES, 'application/pdf');
+      const file = createFile('documento.pdf', MAX_FILE_UPLOAD_SIZE_BYTES, 'application/pdf');
       const result = validateAttachmentFile(file);
       expect(result.valid).toBe(true);
       if (result.valid) {
@@ -59,7 +56,7 @@ describe('attachment-validator (HU-11 Task 3)', () => {
     });
 
     it('rechaza documentos PDF que superan los 10 MB con el mensaje exacto acordado', () => {
-      const file = createFile('libro.pdf', MAX_PDF_SIZE_BYTES + 1, 'application/pdf');
+      const file = createFile('libro.pdf', MAX_FILE_UPLOAD_SIZE_BYTES + 1, 'application/pdf');
       const result = validateAttachmentFile(file);
       expect(result.valid).toBe(false);
       if (!result.valid) {
@@ -122,4 +119,3 @@ describe('attachment-validator (HU-11 Task 3)', () => {
     });
   });
 });
-

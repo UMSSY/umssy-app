@@ -1,4 +1,5 @@
 "use client";
+import type { MentorGuidanceTypesProps } from "../../types/mentor-guidance-types-props.types";
 
 import { useState } from "react";
 import { Compass } from "lucide-react";
@@ -8,12 +9,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group";
-
-import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
-
-type MentorGuidanceTypesProps = {
-  orientationTypes: OrientationTypeResponse[];
-};
 
 export function MentorGuidanceTypes({
   orientationTypes,
@@ -29,13 +24,13 @@ export function MentorGuidanceTypes({
           <CardTitle
             role="heading"
             aria-level={2}
-            className="flex items-center gap-2 text-xl font-bold text-ink"
+            className="flex items-center gap-2 font-tight text-[22px] font-semibold text-accent"
           >
             <Compass
               className="size-5 shrink-0 text-accent"
               aria-hidden="true"
             />
-            Tipos de orientación
+            ¿En qué puedo orientarte?
           </CardTitle>
         </CardHeader>
 
@@ -58,13 +53,13 @@ export function MentorGuidanceTypes({
         <CardTitle
           role="heading"
           aria-level={2}
-          className="flex items-center gap-2 text-xl font-bold text-ink"
+          className="flex items-center gap-2 font-tight text-[22px] font-semibold text-accent"
         >
           <Compass
             className="size-5 shrink-0 text-accent"
             aria-hidden="true"
           />
-          Tipos de orientación
+          ¿En qué puedo orientarte?
         </CardTitle>
       </CardHeader>
 

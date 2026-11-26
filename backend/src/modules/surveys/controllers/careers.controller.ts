@@ -15,7 +15,9 @@ export class CareersController {
   constructor(private readonly careersService: CareersService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lista las carreras disponibles para dirigir una encuesta' })
+  @ApiOperation({
+    summary: 'Lista las carreras disponibles para dirigir una encuesta',
+  })
   @ApiOkResponse({ description: 'Carreras ordenadas alfabéticamente' })
   list(): Promise<CareerResponse[]> {
     return this.careersService.listCareers();

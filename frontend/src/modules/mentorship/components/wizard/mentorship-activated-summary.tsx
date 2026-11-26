@@ -1,3 +1,4 @@
+import type { MentorshipActivatedSummaryProps } from "../../types/mentorship-activated-summary-props.types";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button-variants";
 import {
@@ -7,11 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-type MentorshipActivatedSummaryProps = {
-  technicalAreaNames: string[];
-  orientationLabels: string[];
-};
 
 export function MentorshipActivatedSummary({
   technicalAreaNames,

@@ -1,7 +1,7 @@
 import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
 import { HIGH_AFFINITY_THRESHOLD } from "../constants/job-matching.constants";
 import type { JobFeedFilters } from "../types/job-feed-filters.types";
-import type { RecommendedJob } from "../types/job-matching.types";
+import type { RecommendedJob } from "../types/recommended-job.types";
 
 function matchesSearch(job: RecommendedJob, search: string): boolean {
   const term = normalizeSearchText(search);
@@ -28,5 +28,9 @@ export function filterRecommendedJobs(
 }
 
 export function hasActiveFilters(filters: JobFeedFilters): boolean {
-  return filters.search.trim() !== "" || filters.modality !== null || filters.onlyHighAffinity;
+  return (
+    filters.search.trim() !== "" ||
+    filters.modality !== null ||
+    filters.onlyHighAffinity
+  );
 }

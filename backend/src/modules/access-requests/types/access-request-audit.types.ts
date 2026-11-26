@@ -12,4 +12,7 @@ export interface AccessRequestAuditSource {
 }
 
 // Se ejecuta dentro de la transacción del cambio: si falla, el cambio también se revierte
-export type AccessRequestAuditHook = (source: AccessRequestAuditSource, tx: Prisma.TransactionClient) => Promise<unknown>;
+export type AccessRequestAuditHook = (
+  source: AccessRequestAuditSource,
+  tx: Prisma.TransactionClient,
+) => Promise<unknown>;

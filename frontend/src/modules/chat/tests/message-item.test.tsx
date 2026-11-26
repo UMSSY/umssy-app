@@ -126,7 +126,7 @@ describe("MessageItem Component (HU-11 Task 4)", () => {
         fileName: "propuesta_proyecto.pdf",
         mimeType: "application/pdf",
         fileSize: 245 * 1024,
-        url: "/api/chat/attachments/att-pdf-1/download",
+        url: "/api/chat/attachments/att-pdf-1/file",
         type: "PDF",
       },
     };
@@ -156,7 +156,7 @@ describe("MessageItem Component (HU-11 Task 4)", () => {
         fileName: "oferta.pdf",
         mimeType: "application/pdf",
         fileSize: 1024 * 100,
-        url: "/api/chat/attachments/att-pdf-2/download",
+        url: "/api/chat/attachments/att-pdf-2/file",
         type: "PDF",
       },
     };

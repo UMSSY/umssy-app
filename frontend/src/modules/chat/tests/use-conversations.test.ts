@@ -103,6 +103,31 @@ describe('useConversations Hook', () => {
     expect(result.current.conversations[0].lastMessage?.content).toBe('Nuevo mensaje');
   });
 
+  it('no vuelve a estado de carga durante un refetch en segundo plano', async () => {
+    const getSpy = vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
+
+    const { result } = renderHook(() => useConversations());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    act(() => {
+      result.current.handleSelectConversation(mockList[1]);
+    });
+
+    getSpy.mockReturnValue(new Promise<Conversation[]>(() => {}));
+
+    act(() => {
+      result.current.retryConversations();
+    });
+
+    await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(2));
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.conversations.length).toBe(2);
+    expect(result.current.selectedConversation?.id).toBe('c2');
+  });
+
   it('debe manejar error si falla la peticion al servicio', async () => {
     vi.spyOn(chatApi, 'getConversations').mockRejectedValue(new Error('Network error'));
 
@@ -160,7 +185,6 @@ describe('useConversations Hook', () => {
   expect(result.current.selectedId).toBe(existing.id);
   expect(spy).not.toHaveBeenCalled();
 
-  // No duplicados
   const matches = result.current.conversations.filter(
     (c) => c.contact?.id === existing.contact.id
   );
@@ -206,12 +230,10 @@ const spy = vi
   const { result } = renderHook(() => useConversations());
   await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-  // primera llamada
   act(() => {
     result.current.startConversationWithContact(buildUser({ id: 'u-extra-1' }));
   });
 
-  // ignorar seguna llamada
   await act(async () => {
     await result.current.startConversationWithContact(buildUser({ id: 'u-extra-2' }));
   });
@@ -227,5 +249,34 @@ const spy = vi
     updatedAt: '',
   });
 });
-});
 
+it('abre la conversacion de un contexto y la reutiliza en la siguiente apertura', async () => {
+  vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
+  vi.spyOn(chatApi, 'markConversationAsRead').mockResolvedValue(undefined);
+  const contextual = {
+    id: 'c-app',
+    contact: { id: 'u-app', fullName: 'Postulante', avatarUrl: null, isOnline: false },
+    lastMessage: null,
+    unreadCount: 0,
+    updatedAt: '2026-11-20T10:00:00Z',
+    contextType: 'POSTULACION',
+    contextId: 'app-1',
+  };
+  const create = vi.spyOn(chatApi, 'getOrCreateConversation').mockResolvedValue(contextual);
+  const context = { contextType: 'POSTULACION', contextId: 'app-1' };
+
+  const { result } = renderHook(() => useConversations());
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+  await act(async () => {
+    await result.current.openContextualConversation('u-app', context);
+  });
+  await act(async () => {
+    await result.current.openContextualConversation('u-app', context);
+  });
+
+  expect(create).toHaveBeenCalledTimes(1);
+  expect(result.current.selectedId).toBe('c-app');
+  expect(result.current.conversations.filter((c) => c.id === 'c-app')).toHaveLength(1);
+});
+});

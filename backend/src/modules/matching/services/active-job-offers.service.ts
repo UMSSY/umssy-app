@@ -3,9 +3,7 @@ import { JobOffersService } from '../../job-offers/services/job-offers.service.j
 
 @Injectable()
 export class ActiveJobOffersService {
-  constructor(
-    private readonly jobOffersService: JobOffersService,
-  ) {}
+  constructor(private readonly jobOffersService: JobOffersService) {}
 
   async findAll() {
     return this.jobOffersService.listPublished();

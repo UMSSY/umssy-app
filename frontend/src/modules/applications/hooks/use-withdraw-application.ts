@@ -18,8 +18,13 @@ export function useWithdrawApplication() {
     },
   });
 
+  const retryWithdraw = () => {
+    if (mutation.variables) mutation.mutate(mutation.variables);
+  };
+
   return {
     withdraw: mutation.mutate,
+    retryWithdraw,
     withdrawingId: mutation.isPending ? (mutation.variables ?? null) : null,
     hasWithdrawError: mutation.isError,
   };

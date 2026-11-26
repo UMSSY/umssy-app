@@ -77,70 +77,103 @@ function fixture(
   }));
 
   const tx = {
-    $executeRaw: vi.fn(
-      async (strings: TemplateStringsArray, ...values: unknown[]) => {
-        if (
-          strings
-            .join(' ')
-            .includes('INSERT INTO mentor_participation_sanctions')
-        ) {
-          policySanctions.push({
-            id: randomUUID(),
-            userId: values[0] as string,
-            startedAt: values[2] as Date,
-            endsAt: values[3] as Date,
-          });
-        }
-        if (strings.join(' ').includes('INSERT INTO mentor_intake_attempts')) {
-          policyAttempts.push({
-            id: values[0] as string,
-            userId: values[1] as string,
-            operation: values[2] as string,
-            key: values[3] as string,
-            payloadHash: values[4] as string,
-            occurredAt: values[5] as Date,
-            counted: values[6] as boolean,
-            outcome: JSON.parse(values[8] as string),
-          });
-        }
-        return 0;
-      },
-    ),
+    mentorIntakeAttempt: {
+      findUnique: vi.fn(
+        async ({
+          where,
+        }: {
+          where: {
+            userId_operation_idempotencyKey: {
+              userId: string;
+              operation: string;
+              idempotencyKey: string;
+            };
+          };
+        }) => {
+          const key = where.userId_operation_idempotencyKey;
+          const row = policyAttempts.find(
+            (item) =>
+              item.userId === key.userId &&
+              item.operation === key.operation &&
+              item.key === key.idempotencyKey,
+          );
+          return row
+            ? { payloadHash: row.payloadHash, responseData: row.outcome }
+            : null;
+        },
+      ),
+      count: vi.fn(
+        async ({
+          where,
+        }: {
+          where: { userId: string; occurredAt: { gt: Date; lte: Date } };
+        }) =>
+          policyAttempts.filter(
+            (row) =>
+              row.userId === where.userId &&
+              row.counted &&
+              row.occurredAt > where.occurredAt.gt &&
+              row.occurredAt <= where.occurredAt.lte,
+          ).length,
+      ),
+      createMany: vi.fn(
+        async ({
+          data,
+        }: {
+          data: {
+            id: string;
+            userId: string;
+            operation: string;
+            idempotencyKey: string;
+            payloadHash: string;
+            occurredAt: Date;
+            counted: boolean;
+            responseData: unknown;
+          }[];
+        }) => {
+          for (const row of data)
+            policyAttempts.push({
+              ...row,
+              key: row.idempotencyKey,
+              outcome: row.responseData,
+            });
+          return { count: data.length };
+        },
+      ),
+    },
+    mentorParticipationSanction: {
+      findFirst: vi.fn(
+        async ({
+          where,
+        }: {
+          where: { userId: string; endsAt: { gt: Date } };
+        }) =>
+          policySanctions
+            .filter(
+              (row) =>
+                row.userId === where.userId && row.endsAt > where.endsAt.gt,
+            )
+            .sort((a, b) => b.endsAt.getTime() - a.endsAt.getTime())[0] ?? null,
+      ),
+      create: vi.fn(
+        async ({
+          data,
+        }: {
+          data: { userId: string; startedAt: Date; endsAt: Date };
+        }) => {
+          const row = { id: randomUUID(), ...data };
+          policySanctions.push(row);
+          return { id: row.id };
+        },
+      ),
+    },
+    $executeRaw: vi.fn().mockResolvedValue(0),
     $queryRaw: vi.fn(
       async (strings: TemplateStringsArray, ...values: unknown[]) => {
         const sql = strings.join(' ');
 
         if (sql.trim() === 'SELECT clock_timestamp() AS now')
           return [{ now: new Date() }];
-        if (sql.includes('payload_hash AS'))
-          return policyAttempts.filter(
-            (row) =>
-              row.userId === values[0] &&
-              row.operation === values[1] &&
-              row.key === values[2],
-          );
-        if (
-          sql.includes(
-            'SELECT count(*)::int AS count FROM mentor_intake_attempts',
-          )
-        )
-          return [
-            {
-              count: policyAttempts.filter(
-                (row) =>
-                  row.counted &&
-                  row.userId === values[0] &&
-                  row.occurredAt.getTime() >
-                    (values[1] as Date).getTime() - 86400000,
-              ).length,
-            },
-          ];
-        if (sql.includes('SELECT ends_at AS'))
-          return policySanctions.filter(
-            (row) =>
-              row.userId === values[0] && row.endsAt > (values[1] as Date),
-          );
-
         if (sql.includes('pg_advisory_xact_lock')) {
           return [];
         }
@@ -172,17 +205,6 @@ function fixture(
             }),
           ];
         }
-        if (sql.includes('UPDATE mentor_participation_requests')) {
-          if (!options.pending) return [];
-          return [
-            await update({
-              where: { id: request.id },
-              data: sql.includes("status = 'CANCELLED'")
-                ? { status: 'CANCELLED' }
-                : preferences,
-            }),
-          ];
-        }
         if (sql.includes('FROM mentor_participation_requests')) {
           const found = await findFirst();
           return found ? [found] : [];
@@ -204,6 +226,20 @@ function fixture(
       findFirst,
       create,
       update,
+      updateManyAndReturn: vi.fn(
+        async ({
+          where,
+          data,
+        }: {
+          where: { userId: string; status: string };
+          data: { status: string };
+        }) =>
+          options.pending &&
+          where.userId === request.userId &&
+          where.status === request.status
+            ? [{ ...request, ...data }]
+            : [],
+      ),
     },
   };
 
@@ -213,6 +249,7 @@ function fixture(
     $transaction: transaction,
     mentorParticipationRequest: {
       findFirst,
+      findMany: vi.fn().mockResolvedValue([]),
     },
   } as unknown as PrismaService;
 
@@ -291,11 +328,13 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
   });
 
   it('consulta la solicitud del usuario autenticado', async () => {
-    const { service, findFirst } = fixture({
+    const { service, findFirst, tx } = fixture({
       pending: true,
     });
 
     await service.findMyRequest('user-1');
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
+    expect(tx.$queryRaw).not.toHaveBeenCalled();
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {
@@ -323,18 +362,25 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
   });
 
   it('cancela una solicitud sin eliminar el historial', async () => {
-    const { service, update } = fixture({
-      pending: true,
-    });
+    const { service, tx, request, update } = fixture({ pending: true });
 
     const result = await service.cancel('user-1');
 
-    expect(result.status).toBe('CANCELLED');
-
-    expect(update).toHaveBeenCalledWith({
-      where: { id: 'request-1' },
+    expect(result).toMatchObject({
+      id: request.id,
+      userId: request.userId,
+      status: 'CANCELLED',
+      queuedAt: request.queuedAt,
+      createdAt: request.createdAt,
+      ...preferences,
+    });
+    expect(
+      tx.mentorParticipationRequest.updateManyAndReturn,
+    ).toHaveBeenCalledExactlyOnceWith({
+      where: { userId: 'user-1', status: 'PENDING' },
       data: { status: 'CANCELLED' },
     });
+    expect(update).not.toHaveBeenCalled();
   });
 
   it('rechaza preferencias inexistentes', async () => {

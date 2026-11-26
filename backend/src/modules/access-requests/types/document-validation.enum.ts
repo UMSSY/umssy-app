@@ -5,7 +5,8 @@ export const VALIDATION_RESULT = {
   AUTO_REJECTED: 'auto_rejected',
 } as const;
 
-export type ValidationResult = (typeof VALIDATION_RESULT)[keyof typeof VALIDATION_RESULT];
+export type ValidationResult =
+  (typeof VALIDATION_RESULT)[keyof typeof VALIDATION_RESULT];
 
 export const FIELD_RESULT = {
   MATCH: 'match',
@@ -23,4 +24,5 @@ export const VALIDATION_FIELD = {
   SIS_CODE: 'sisCode',
 } as const;
 
-export type ValidationField = (typeof VALIDATION_FIELD)[keyof typeof VALIDATION_FIELD];
+export type ValidationField =
+  (typeof VALIDATION_FIELD)[keyof typeof VALIDATION_FIELD];

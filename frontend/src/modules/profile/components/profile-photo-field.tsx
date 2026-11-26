@@ -10,6 +10,7 @@ import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 import { ProfileAvatar } from "./profile-avatar";
 
 export function ProfilePhotoField({
+  idPrefix = "",
   photoUrl,
   previewUrl,
   isUploading = false,
@@ -51,7 +52,7 @@ export function ProfilePhotoField({
         </p>
         <Input
           ref={inputRef}
-          id="profilePhoto"
+          id={`${idPrefix}profilePhoto`}
           type="file"
           accept={PHOTO_ACCEPT}
           aria-label="Seleccionar fotografía de perfil"
@@ -72,8 +73,8 @@ export function ProfilePhotoField({
               </Button>
               <Button
                 type="button"
-                variant="outline"
-                className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+                variant="cancel"
+                size="lg"
                 disabled={isBusy}
                 onClick={onCancelPhoto}
               >

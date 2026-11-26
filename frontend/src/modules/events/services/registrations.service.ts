@@ -1,16 +1,26 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import type { PassData } from '../types/pass-data.types';
 export type { PassData } from '../types/pass-data.types';
-import { registrationsService as registrationApi } from '@/modules/registrations';
+import { registrationsService as registrationApi, parseRegistrationSessions } from '@/modules/event-registrations';
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { hasCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { readRecord, readString, readNullableString } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { apiClient } from '@/shared/services/api-client';
 import { parseProposalSupportResponse } from '../utils/proposal-support-response';
 import type { ProposalSupportResponse } from '../types/proposal-support-response.types';
+import { saveOfflinePass } from './offline-passes.service';
+import type { FinishedHistoryPage } from '../types/finished-history-page.types';
+import { toFinishedRegistrationItem } from '../utils/to-finished-registration-item';
 
 
 export const registrationsService = {
   getMine: registrationApi.getMine,
+  cancel: registrationApi.cancel,
+  async getFinished(page: number, limit = 10, signal?: AbortSignal, accessToken = getAccessToken()): Promise<FinishedHistoryPage> {
+    const response = await registrationApi.getFinished(page, limit, signal, accessToken);
+    return { ...response, items: response.items.map(toFinishedRegistrationItem) };
+  },
 
   async supportProposal(
     eventId: string,
@@ -20,10 +30,10 @@ export const registrationsService = {
       throw new Error('La URL del backend no está configurada.');
 
     const response = await apiClient.post<unknown>(
-      `/event-registrations/support/${encodeURIComponent(eventId)}`,
+      `/events/${encodeURIComponent(eventId)}/supports`,
       undefined,
       {
-        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : '' },
+        headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' },
         timeout: REQUEST_TIMEOUT_MS,
       },
     );
@@ -31,17 +41,17 @@ export const registrationsService = {
     return parseProposalSupportResponse(response.data, eventId);
   },
 
-  async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken()): Promise<PassData> {
+  async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken(), saveCopy = true): Promise<PassData> {
     const token = accessToken;
-    if (!token)
+    if (!token && !hasCookieSession())
       throw new Error('Debes iniciar sesión para consultar el pase.');
     if (!apiClient.defaults.baseURL)
       throw new Error('La URL del backend no está configurada.');
 
     const response = await apiClient.get(
-      `/event-registrations/passes/${registrationId}`,
+      `/event-registrations/${registrationId}/pass`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        ...(token ? { headers: { Authorization: `${BEARER_PREFIX}${token}` } } : {}),
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       },
@@ -56,7 +66,7 @@ export const registrationsService = {
     if (id !== registrationId || !/^[a-f0-9]{64}$/i.test(qrToken) || status !== 'Confirmada') {
       throw new Error('El pase no contiene una inscripción confirmada con un token QR válido.');
     }
-    return {
+    const pass = {
       id,
       qrToken,
       eventName: readString(event.title),
@@ -65,6 +75,12 @@ export const registrationsService = {
       endTime: readString(event.endTime),
       location: readNullableString(event.location),
       status,
+      ...(event.sessions !== undefined && {
+        sessions: parseRegistrationSessions(event.sessions),
+      }),
     };
+    // A blocked browser store should not prevent showing a valid online pass.
+    if (saveCopy && token) await saveOfflinePass(pass, token, signal).catch(() => {});
+    return pass;
   },
 };

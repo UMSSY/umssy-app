@@ -12,6 +12,9 @@ export function buildRequestValidationException(
   issues: readonly ValidationIssue[],
 ): RequestValidationException {
   return new RequestValidationException(
-    issues.map((issue) => ({ field: formatPath(issue.path), message: issue.message })),
+    issues.map((issue) => ({
+      field: formatPath(issue.path),
+      message: issue.message,
+    })),
   );
 }

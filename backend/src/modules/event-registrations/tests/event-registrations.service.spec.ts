@@ -10,7 +10,12 @@ describe('EventRegistrationsService', () => {
   beforeEach(() => {
     create.mockReset();
     findByUserId.mockReset();
-    service = new EventRegistrationsService(new EventRegistrationsRepository({ eventRegistration: { create } } as never), {} as never);
+    service = new EventRegistrationsService(
+      new EventRegistrationsRepository({
+        eventRegistration: { create },
+      } as never),
+      {} as never,
+    );
     vi.spyOn(service, 'findByUserId').mockImplementation(findByUserId);
   });
 
@@ -24,8 +29,19 @@ describe('EventRegistrationsService', () => {
     });
 
     expect(create).toHaveBeenCalledWith({
-      data: { eventId: 'event-1', userId: 'user-1', statusId: 'status-1', qrToken: expect.stringMatching(/^[a-f0-9]{64}$/) },
-      select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
+      data: {
+        eventId: 'event-1',
+        userId: 'user-1',
+        statusId: 'status-1',
+        qrToken: expect.stringMatching(/^[a-f0-9]{64}$/),
+      },
+      select: {
+        id: true,
+        eventId: true,
+        userId: true,
+        statusId: true,
+        qrToken: true,
+      },
     });
     expect(result.qrToken).toMatch(/^[a-f0-9]{64}$/);
   });
@@ -71,6 +87,7 @@ describe('EventRegistrationsService', () => {
         eventName: 'Taller de NestJS',
         date: new Date('2026-10-20T00:00:00.000Z'),
         location: 'Aula 101',
+        sessions: [],
         status: 'Confirmada',
         registeredAt: '2026-10-18T10:00:00.000Z',
         cancelledAt: null,

@@ -1,8 +1,16 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
+import { CredentialSecurityModule } from './credential-security.module.js';
 import { AuthController } from './controllers/auth.controller.js';
 import { AuthService } from './services/auth.service.js';
+import { GoogleAuthService } from './services/google-auth.service.js';
+import { GoogleLinkTokenService } from './services/google-link-token.service.js';
 import { AuthRepository } from './repositories/auth.repository.js';
+import { PasswordHistoryRepository } from './repositories/password-history.repository.js';
+import { PasswordHistoryService } from './services/password-history.service.js';
+import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
+import { RefreshTokenService } from './services/refresh-token.service.js';
+import { AuthSessionCookieService } from './services/auth-session-cookie.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SessionModule } from '../../common/session/session.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
@@ -10,19 +18,40 @@ import { MailModule } from '../mail/mail.module.js';
 
 @Module({
   imports: [
+    CredentialSecurityModule,
     PrismaModule,
     SessionModule,
     MailModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
-        expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as JwtSignOptions['expiresIn'],
-        algorithm: (process.env.JWT_ALGORITHM || undefined) as JwtSignOptions['algorithm'],
+        expiresIn: (process.env.JWT_EXPIRES_IN ||
+          '8h') as JwtSignOptions['expiresIn'],
+        algorithm: (process.env.JWT_ALGORITHM ||
+          undefined) as JwtSignOptions['algorithm'],
       },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtAuthGuard],
-  exports: [AuthService, JwtModule, JwtAuthGuard, SessionModule],
+  providers: [
+    AuthService,
+    GoogleAuthService,
+    GoogleLinkTokenService,
+    AuthRepository,
+    PasswordHistoryRepository,
+    PasswordHistoryService,
+    RefreshTokenService,
+    RefreshTokenRepository,
+    AuthSessionCookieService,
+    JwtAuthGuard,
+  ],
+  exports: [
+    AuthService,
+    AuthSessionCookieService,
+    GoogleAuthService,
+    JwtModule,
+    JwtAuthGuard,
+    SessionModule,
+  ],
 })
 export class AuthModule {}

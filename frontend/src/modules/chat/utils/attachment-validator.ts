@@ -1,12 +1,5 @@
-import {
-  ALLOWED_IMAGE_EXTENSIONS,
-  ALLOWED_IMAGE_MIME_TYPES,
-  ALLOWED_PDF_EXTENSIONS,
-  ALLOWED_PDF_MIME_TYPES,
-  ATTACHMENT_ERROR_MESSAGES,
-  MAX_IMAGE_SIZE_BYTES,
-  MAX_PDF_SIZE_BYTES,
-} from '../constants/attachment.constants';
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from "@/shared/constants/file-upload.constants";
+import { ALLOWED_IMAGE_EXTENSIONS, ALLOWED_IMAGE_MIME_TYPES, ALLOWED_PDF_EXTENSIONS, ALLOWED_PDF_MIME_TYPES, ATTACHMENT_ERROR_MESSAGES, MAX_IMAGE_SIZE_BYTES } from '../constants/attachment.constants';
 
 export type AttachmentType = 'image' | 'pdf';
 
@@ -58,7 +51,7 @@ export function validateAttachmentFile(file: File): AttachmentValidationResult {
   }
 
   if (isPdf) {
-    if (file.size > MAX_PDF_SIZE_BYTES) {
+    if (file.size > MAX_FILE_UPLOAD_SIZE_BYTES) {
       return {
         valid: false,
         error: ATTACHMENT_ERROR_MESSAGES.PDF_TOO_LARGE,
@@ -81,4 +74,3 @@ export function formatFileSize(bytes: number): string {
   const mb = kb / 1024;
   return `${mb.toFixed(1).replace(/\.0$/, '')} MB`;
 }
-

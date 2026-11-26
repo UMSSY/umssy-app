@@ -8,6 +8,10 @@
       {
         "include": "modules/mail/mjml/**/*.mjml",
         "watchAssets": true
+      },
+      {
+        "include": "modules/*/notification/mjml/**/*.mjml",
+        "watchAssets": true
       }
     ]
   }

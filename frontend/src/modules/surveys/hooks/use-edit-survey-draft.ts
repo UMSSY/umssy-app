@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { SURVEY_EDIT_DRAFT_BASE_STORAGE_KEY, SURVEY_EDIT_DRAFT_STORAGE_KEY } from "../constants/survey-builder.constants";
-import type { RestoredSurveyDraft, SurveyBuilderState } from "../types/survey-builder.types";
+import type { RestoredSurveyDraft } from "../types/restored-survey-draft.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
 import { createSurveyDraftFingerprint } from "../utils/create-survey-draft-fingerprint";
 import { readSurveyDraft } from "../utils/read-survey-draft";
 import { readSurveyStorage, removeSurveyStorage, writeSurveyStorage } from "../utils/survey-draft-storage";

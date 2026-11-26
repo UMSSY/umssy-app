@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { PHONE_MAX_DIGITS, PHONE_MIN_DIGITS } from '../constants/profile.constants.js';
 
 const countDigits = (value: string): number => value.replace(/\D/g, '').length;
 
@@ -10,14 +9,14 @@ export const cityIdSchema = z.uuid();
 export const phoneSchema = z
   .string()
   .trim()
-  .regex(/^\+?[\d\s-]+$/, 'Phone can only contain digits, spaces, hyphens and a leading +')
-  .refine(
-    (value) => {
-      const digits = countDigits(value);
-      return digits >= PHONE_MIN_DIGITS && digits <= PHONE_MAX_DIGITS;
-    },
-    `Phone must have between ${PHONE_MIN_DIGITS} and ${PHONE_MAX_DIGITS} digits`,
-  );
+  .regex(
+    /^\+?[\d\s-]+$/,
+    'Phone can only contain digits, spaces, hyphens and a leading +',
+  )
+  .refine((value) => {
+    const digits = countDigits(value);
+    return digits >= 7 && digits <= 15;
+  }, `Phone must have between 7 and 15 digits`);
 
 export const personalEmailSchema = z.string().trim().pipe(z.email());
 

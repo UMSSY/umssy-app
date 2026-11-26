@@ -1,3 +1,4 @@
+import type { PasswordHistoryService } from '../services/password-history.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../services/auth.service.js';
@@ -7,14 +8,20 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
-  ResetCodeCooldownException,
+  GoogleAccountAlreadyLinkedException,
+  GoogleLinkTokenInvalidException,
 } from '../exceptions/index.js';
 
 describe('AuthService', () => {
   const authRepository = {
     findUserByEmailWithRoles: vi.fn(),
+    findUserByGoogleSubWithRoles: vi.fn(),
+    findGoogleSocialAccountBySub: vi.fn(),
+    linkGoogleAccount: vi.fn(),
     existsByEmail: vi.fn(),
     findUserByEmail: vi.fn(),
+    findUserByIdWithRoles: vi.fn(),
+    hasUnapprovedAccessRequest: vi.fn(),
     createPasswordResetOtp: vi.fn(),
     findLatestOtp: vi.fn(),
     findLatestValidOtp: vi.fn(),
@@ -24,95 +31,191 @@ describe('AuthService', () => {
   };
   const jwtService = { sign: vi.fn() };
   const mailService = { send: vi.fn().mockResolvedValue(undefined) };
+  const refreshTokenService = {
+    revokeAllForUser: vi.fn(),
+  };
+  const passwordHistory = {
+    validateNewPassword: vi.fn().mockResolvedValue('observed-hash'),
+  };
   let service: AuthService;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new AuthService(authRepository as any, jwtService as any, mailService as any);
+    service = new AuthService(
+      authRepository as any,
+      jwtService as any,
+      mailService as any,
+      refreshTokenService as any,
+      passwordHistory as unknown as PasswordHistoryService,
+    );
   });
 
-  it.each([true, false])('existsByEmail delega en el repository y devuelve %s', async (exists) => {
-    authRepository.existsByEmail.mockResolvedValue(exists);
+  it.each([true, false])(
+    'existsByEmail delega en el repository y devuelve %s',
+    async (exists) => {
+      authRepository.existsByEmail.mockResolvedValue(exists);
 
-    await expect(service.existsByEmail('ana@umss.edu.bo')).resolves.toBe(exists);
-    expect(authRepository.existsByEmail).toHaveBeenCalledWith('ana@umss.edu.bo');
-  });
+      await expect(service.existsByEmail('ana@umss.edu.bo')).resolves.toBe(
+        exists,
+      );
+      expect(authRepository.existsByEmail).toHaveBeenCalledWith(
+        'ana@umss.edu.bo',
+      );
+    },
+  );
 
   it('lanza InvalidCredentialsException si el usuario no existe', async () => {
     authRepository.findUserByEmailWithRoles.mockResolvedValue(null);
     await expect(
-      service.login({ email: 'no-existe@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' }),
+      service.login({
+        email: 'no-existe@umss.edu.bo',
+        password: 'Prueba123',
+        roleTag: 'titulado',
+      }),
     ).rejects.toBeInstanceOf(InvalidCredentialsException);
   });
 
   it('lanza InvalidCredentialsException si el usuario no tiene password', async () => {
-    authRepository.findUserByEmailWithRoles.mockResolvedValue({ id: '1', password: null, roles: [] });
+    authRepository.findUserByEmailWithRoles.mockResolvedValue({
+      id: '1',
+      password: null,
+      roles: [],
+    });
     await expect(
-      service.login({ email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' }),
+      service.login({
+        email: 'prueba@umss.edu.bo',
+        password: 'Prueba123',
+        roleTag: 'titulado',
+      }),
     ).rejects.toBeInstanceOf(InvalidCredentialsException);
   });
 
   it('lanza InvalidCredentialsException si la contrasena no coincide', async () => {
     const password = await bcrypt.hash('otra-contrasena', 10);
     authRepository.findUserByEmailWithRoles.mockResolvedValue({
-      id: '1', password, roles: [{ role: { name: 'titulado' } }],
+      id: '1',
+      password,
+      roles: [{ role: { name: 'titulado' } }],
     });
     await expect(
-      service.login({ email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' }),
+      service.login({
+        email: 'prueba@umss.edu.bo',
+        password: 'Prueba123',
+        roleTag: 'titulado',
+      }),
     ).rejects.toBeInstanceOf(InvalidCredentialsException);
   });
 
   it('lanza RoleNotAssignedException si el usuario no tiene el rol solicitado', async () => {
     const password = await bcrypt.hash('Prueba123', 10);
     authRepository.findUserByEmailWithRoles.mockResolvedValue({
-      id: '1', password, roles: [{ role: { name: 'mentor' } }],
+      id: '1',
+      password,
+      roles: [{ role: { name: 'mentor' } }],
     });
     await expect(
-      service.login({ email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' }),
+      service.login({
+        email: 'prueba@umss.edu.bo',
+        password: 'Prueba123',
+        roleTag: 'titulado',
+      }),
     ).rejects.toBeInstanceOf(RoleNotAssignedException);
   });
 
   it('devuelve el accessToken y el roleTag cuando todo es correcto', async () => {
     const password = await bcrypt.hash('Prueba123', 10);
     authRepository.findUserByEmailWithRoles.mockResolvedValue({
-      id: 'user-1', password, roles: [{ role: { name: 'titulado' } }],
+      id: 'user-1',
+      password,
+      roles: [{ role: { name: 'titulado' } }],
     });
     jwtService.sign.mockReturnValue('token-firmado');
 
-    const result = await service.login({ email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' });
+    const result = await service.login({
+      email: 'prueba@umss.edu.bo',
+      password: 'Prueba123',
+      roleTag: 'titulado',
+    });
 
-    expect(result).toEqual({ accessToken: 'token-firmado', roleTag: 'titulado', roles: ['titulado'] });
-    expect(jwtService.sign).toHaveBeenCalledWith({ sub: 'user-1', roleTag: 'titulado', roles: ['titulado'] });
+    expect(result).toEqual({
+      accessToken: 'token-firmado',
+      roleTag: 'titulado',
+      roles: ['titulado'],
+    });
+    expect(jwtService.sign).toHaveBeenCalledWith({
+      sub: 'user-1',
+      roleTag: 'titulado',
+      roles: ['titulado'],
+    });
   });
 
   it('logs in with credentials and includes every assigned role without duplicates', async () => {
     const password = await bcrypt.hash('Prueba123', 4);
     authRepository.findUserByEmailWithRoles.mockResolvedValue({
-      id: 'u-1', isActive: true, password,
-      roles: [{ role: { name: 'mentor' } }, { role: { name: 'titulado' } }, { role: { name: 'mentor' } }],
+      id: 'u-1',
+      isActive: true,
+      password,
+      roles: [
+        { role: { name: 'mentor' } },
+        { role: { name: 'titulado' } },
+        { role: { name: 'mentor' } },
+      ],
     });
     jwtService.sign.mockReturnValue('multi-role-token');
-    await expect(service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' })).resolves.toEqual({
-      accessToken: 'multi-role-token', roleTag: 'titulado', roles: ['titulado', 'mentor'],
+    await expect(
+      service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' }),
+    ).resolves.toEqual({
+      accessToken: 'multi-role-token',
+      roleTag: 'titulado',
+      roles: ['titulado', 'mentor'],
     });
-    expect(jwtService.sign).toHaveBeenCalledWith({ sub: 'u-1', roleTag: 'titulado', roles: ['titulado', 'mentor'] });
+    expect(jwtService.sign).toHaveBeenCalledWith({
+      sub: 'u-1',
+      roleTag: 'titulado',
+      roles: ['titulado', 'mentor'],
+    });
   });
 
   it('rejects an inactive user before issuing a token', async () => {
-    authRepository.findUserByEmailWithRoles.mockResolvedValue({ id: 'u-1', isActive: false, password: 'hash', roles: [] });
-    await expect(service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' })).rejects.toBeInstanceOf(InvalidCredentialsException);
+    authRepository.findUserByEmailWithRoles.mockResolvedValue({
+      id: 'u-1',
+      isActive: false,
+      password: 'hash',
+      roles: [],
+    });
+    await expect(
+      service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' }),
+    ).rejects.toBeInstanceOf(InvalidCredentialsException);
     expect(jwtService.sign).not.toHaveBeenCalled();
   });
 
   it('rejects an account without active roles', async () => {
-    authRepository.findUserByEmailWithRoles.mockResolvedValue({ id: 'u-1', password: await bcrypt.hash('Prueba123', 4), roles: [] });
-    await expect(service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' })).rejects.toBeInstanceOf(RoleNotAssignedException);
+    authRepository.findUserByEmailWithRoles.mockResolvedValue({
+      id: 'u-1',
+      password: await bcrypt.hash('Prueba123', 4),
+      roles: [],
+    });
+    await expect(
+      service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' }),
+    ).rejects.toBeInstanceOf(RoleNotAssignedException);
     expect(jwtService.sign).not.toHaveBeenCalled();
   });
 
   it('returns the verified session roles', () => {
-    expect(service.getSession({ id: 'u-1', email: 'ana@umss.edu.bo', roles: ['titulado', 'mentor'] })).toEqual({
-      id: 'u-1', email: 'ana@umss.edu.bo', roles: ['titulado', 'mentor'],
+    expect(
+      service.getSession({
+        id: 'u-1',
+        email: 'ana@umss.edu.bo',
+        roles: ['titulado', 'mentor'],
+      }),
+    ).toEqual({
+      id: 'u-1',
+      email: 'ana@umss.edu.bo',
+      roles: ['titulado', 'mentor'],
+      company: null,
+      idleTimeoutSeconds: 900,
+      warningSeconds: 180,
+      absoluteExpiresAt: null,
     });
   });
 
@@ -127,16 +230,20 @@ describe('AuthService', () => {
       });
       authRepository.findLatestOtp.mockResolvedValue(null);
 
-      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+      const res = await service.requestPasswordReset({
+        email: 'user@umss.edu',
+      });
 
       expect(res.ok).toBe(true);
-      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
+      expect(res.message).toBe(
+        'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+      );
       expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
       expect(mailService.send).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'user@umss.edu',
           mjml: expect.any(String),
-          values: expect.objectContaining({recipientName: 'Juan Perez'}),
+          values: expect.objectContaining({ recipientName: 'Juan Perez' }),
         }),
       );
     });
@@ -144,10 +251,14 @@ describe('AuthService', () => {
     it('retorna la misma respuesta genérica si el usuario no existe para no filtrar correos', async () => {
       authRepository.findUserByEmail.mockResolvedValue(null);
 
-      const res = await service.requestPasswordReset({ email: 'desconocido@umss.edu' });
+      const res = await service.requestPasswordReset({
+        email: 'desconocido@umss.edu',
+      });
 
       expect(res.ok).toBe(true);
-      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
+      expect(res.message).toBe(
+        'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+      );
       expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
       expect(mailService.send).not.toHaveBeenCalled();
     });
@@ -160,15 +271,19 @@ describe('AuthService', () => {
         lastName: 'Perez',
         isActive: true,
       });
-      // OTP creado hace 30 segundos
+
       authRepository.findLatestOtp.mockResolvedValue({
         id: 'otp-recent',
         createdAt: new Date(Date.now() - 30 * 1000),
       });
 
-      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+      const res = await service.requestPasswordReset({
+        email: 'user@umss.edu',
+      });
       expect(res.ok).toBe(true);
-      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
+      expect(res.message).toBe(
+        'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+      );
       expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
       expect(mailService.send).not.toHaveBeenCalled();
     });
@@ -180,13 +295,15 @@ describe('AuthService', () => {
         lastName: 'Perez',
         isActive: true,
       });
-      // OTP creado hace 130 segundos (más de 2 minutos)
+
       authRepository.findLatestOtp.mockResolvedValue({
         id: 'otp-old',
         createdAt: new Date(Date.now() - 130 * 1000),
       });
 
-      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+      const res = await service.requestPasswordReset({
+        email: 'user@umss.edu',
+      });
 
       expect(res.ok).toBe(true);
       expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
@@ -198,7 +315,10 @@ describe('AuthService', () => {
     it('valida el código correctamente cuando coincide y no ha expirado', async () => {
       const code = '123456';
       const codeHash = await bcrypt.hash(code, 4);
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash,
@@ -206,14 +326,20 @@ describe('AuthService', () => {
         attempts: 0,
       });
 
-      const res = await service.verifyPasswordReset({ email: 'user@umss.edu', code });
+      const res = await service.verifyPasswordReset({
+        email: 'user@umss.edu',
+        code,
+      });
 
       expect(res.ok).toBe(true);
     });
 
     it('lanza InvalidResetCodeException si el código no coincide e incrementa intentos', async () => {
       const codeHash = await bcrypt.hash('654321', 4);
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash,
@@ -221,16 +347,19 @@ describe('AuthService', () => {
         attempts: 0,
       });
 
-      await expect(service.verifyPasswordReset({ email: 'user@umss.edu', code: '123456' })).rejects.toBeInstanceOf(
-        InvalidResetCodeException,
-      );
+      await expect(
+        service.verifyPasswordReset({ email: 'user@umss.edu', code: '123456' }),
+      ).rejects.toBeInstanceOf(InvalidResetCodeException);
       expect(authRepository.incrementOtpAttempts).toHaveBeenCalledWith('otp-1');
     });
 
     it('lanza ExpiredResetCodeException si el código ya expiró', async () => {
       const code = '123456';
       const codeHash = await bcrypt.hash(code, 4);
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash,
@@ -238,13 +367,16 @@ describe('AuthService', () => {
         attempts: 0,
       });
 
-      await expect(service.verifyPasswordReset({ email: 'user@umss.edu', code })).rejects.toBeInstanceOf(
-        ExpiredResetCodeException,
-      );
+      await expect(
+        service.verifyPasswordReset({ email: 'user@umss.edu', code }),
+      ).rejects.toBeInstanceOf(ExpiredResetCodeException);
     });
 
     it('lanza TooManyAttemptsException si ha superado los 5 intentos', async () => {
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash: 'hash',
@@ -252,9 +384,9 @@ describe('AuthService', () => {
         attempts: 5,
       });
 
-      await expect(service.verifyPasswordReset({ email: 'user@umss.edu', code: '123456' })).rejects.toBeInstanceOf(
-        TooManyAttemptsException,
-      );
+      await expect(
+        service.verifyPasswordReset({ email: 'user@umss.edu', code: '123456' }),
+      ).rejects.toBeInstanceOf(TooManyAttemptsException);
     });
   });
 
@@ -262,7 +394,10 @@ describe('AuthService', () => {
     it('hashea la nueva contraseña y actualiza el usuario e invalida el OTP', async () => {
       const code = '123456';
       const codeHash = await bcrypt.hash(code, 4);
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash,
@@ -277,33 +412,45 @@ describe('AuthService', () => {
       });
 
       expect(res.ok).toBe(true);
-      expect(authRepository.updateUserPasswordAndInvalidateOtp).toHaveBeenCalledWith(
-        'u-123',
-        expect.any(String),
-        'otp-1',
-      );
+      expect(
+        authRepository.updateUserPasswordAndInvalidateOtp,
+      ).toHaveBeenCalledWith('u-123', expect.any(String), 'otp-1', 'observed-hash');
     });
 
     it('lanza InvalidResetCodeException si el usuario no existe', async () => {
       authRepository.findUserByEmail.mockResolvedValue(null);
 
       await expect(
-        service.resetPassword({ email: 'inexistente@umss.edu', code: '123456', password: 'Password1' }),
+        service.resetPassword({
+          email: 'inexistente@umss.edu',
+          code: '123456',
+          password: 'Password1',
+        }),
       ).rejects.toBeInstanceOf(InvalidResetCodeException);
     });
 
     it('lanza InvalidResetCodeException si no hay OTP válido para el usuario', async () => {
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue(null);
 
       await expect(
-        service.resetPassword({ email: 'user@umss.edu', code: '123456', password: 'Password1' }),
+        service.resetPassword({
+          email: 'user@umss.edu',
+          code: '123456',
+          password: 'Password1',
+        }),
       ).rejects.toBeInstanceOf(InvalidResetCodeException);
     });
 
     it('lanza InvalidResetCodeException e incrementa intentos si el código no coincide', async () => {
       const codeHash = await bcrypt.hash('654321', 4);
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash,
@@ -312,7 +459,11 @@ describe('AuthService', () => {
       });
 
       await expect(
-        service.resetPassword({ email: 'user@umss.edu', code: '111111', password: 'Password1' }),
+        service.resetPassword({
+          email: 'user@umss.edu',
+          code: '111111',
+          password: 'Password1',
+        }),
       ).rejects.toBeInstanceOf(InvalidResetCodeException);
       expect(authRepository.incrementOtpAttempts).toHaveBeenCalledWith('otp-1');
     });
@@ -320,7 +471,10 @@ describe('AuthService', () => {
     it('lanza ExpiredResetCodeException si el código está vencido al resetear la contraseña', async () => {
       const code = '123456';
       const codeHash = await bcrypt.hash(code, 4);
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash,
@@ -329,12 +483,19 @@ describe('AuthService', () => {
       });
 
       await expect(
-        service.resetPassword({ email: 'user@umss.edu', code, password: 'Password1' }),
+        service.resetPassword({
+          email: 'user@umss.edu',
+          code,
+          password: 'Password1',
+        }),
       ).rejects.toBeInstanceOf(ExpiredResetCodeException);
     });
 
     it('lanza TooManyAttemptsException si ha superado los intentos al resetear la contraseña', async () => {
-      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+      });
       authRepository.findLatestValidOtp.mockResolvedValue({
         id: 'otp-1',
         codeHash: 'hash',
@@ -343,8 +504,470 @@ describe('AuthService', () => {
       });
 
       await expect(
-        service.resetPassword({ email: 'user@umss.edu', code: '123456', password: 'Password1' }),
+        service.resetPassword({
+          email: 'user@umss.edu',
+          code: '123456',
+          password: 'Password1',
+        }),
       ).rejects.toBeInstanceOf(TooManyAttemptsException);
+    });
+  });
+
+  describe('loginWithGoogle', () => {
+    const verifiedGoogle = {
+      email: 'dania@umss.edu',
+      sub: 'google-sub-123',
+      picture: 'https://photo.url',
+    };
+
+    it('1. Usuario activo con rol permitido y sin vincular: pide confirmar la vinculación sin vincular ni emitir sesión', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+
+      const result = await service.loginWithGoogle(verifiedGoogle);
+
+      expect(result).toEqual({
+        requiresLinking: true,
+        claims: {
+          userId: 'u-1',
+          googleSub: 'google-sub-123',
+          email: 'dania@umss.edu',
+          picture: 'https://photo.url',
+        },
+      });
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('1b. Sin foto de Google no incluye picture en los datos de vinculación', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-1',
+        isActive: true,
+        roles: [{ role: { name: 'mentor' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+
+      await expect(
+        service.loginWithGoogle({ email: 'dania@umss.edu', sub: 'sub-1' }),
+      ).resolves.toEqual({
+        requiresLinking: true,
+        claims: { userId: 'u-1', googleSub: 'sub-1', email: 'dania@umss.edu' },
+      });
+    });
+
+    it('2. Usuario no registrado: rechaza el acceso sin crear cuenta automáticamente', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue(null);
+      authRepository.hasUnapprovedAccessRequest.mockResolvedValue(false);
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'noexiste@gmail.com',
+          sub: 'unknown-sub',
+        }),
+      ).rejects.toThrow(
+        'No se encontró una cuenta UMSSY asociada a este correo de Google',
+      );
+
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('2b. Solicitud existente aún no aprobada: informa que la solicitud no fue aprobada', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue(null);
+      authRepository.hasUnapprovedAccessRequest.mockResolvedValue(true);
+
+      const error = await service
+        .loginWithGoogle({ email: 'pendiente@gmail.com', sub: 'pending-sub' })
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(InvalidCredentialsException);
+      expect((error as Error).message).toBe('Tu solicitud aún no fue aprobada');
+      expect(authRepository.hasUnapprovedAccessRequest).toHaveBeenCalledWith(
+        'pendiente@gmail.com',
+      );
+    });
+
+    it('3. Usuario inactivo: rechaza el acceso si la cuenta está deshabilitada', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-inactivo',
+        email: 'inactivo@umss.edu',
+        isActive: false,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'inactivo@umss.edu',
+          sub: 'inactivo-sub',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+    });
+
+    it('4. Usuario con rol no permitido: rechaza acceso a administrativo o empresa', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'administrativo' } }],
+      });
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'admin@umss.edu',
+          sub: 'admin-sub',
+        }),
+      ).rejects.toBeInstanceOf(RoleNotAssignedException);
+    });
+
+    it('8. Inicio de sesión posterior usando la vinculación persistida por Google sub', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'estudiante' } }],
+      });
+      jwtService.sign.mockReturnValue('sub-session-token');
+
+      const result = await service.loginWithGoogle({
+        email: 'dania@umss.edu',
+        sub: 'google-sub-123',
+      });
+
+      expect(authRepository.findUserByGoogleSubWithRoles).toHaveBeenCalledWith(
+        'google-sub-123',
+      );
+      expect(result).toEqual({
+        accessToken: 'sub-session-token',
+        roleTag: 'estudiante',
+        roles: ['estudiante'],
+      });
+    });
+
+    it('9. Error si la identidad de Google ya está vinculada a otro usuario', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-2',
+        email: 'otro@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue({
+        id: 'link-1',
+        userId: 'u-1', // Perteneciente a otro usuario
+      });
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'otro@umss.edu',
+          sub: 'google-sub-belonging-to-u1',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google ya está vinculada a otro usuario.',
+      );
+    });
+  });
+
+  describe('linkGoogle', () => {
+    const authUser = {
+      id: 'u-1',
+      email: 'dania@umss.edu',
+      roles: ['titulado'],
+    };
+
+    it('5. Cuenta Google diferente de la cuenta que se desea vincular: rechaza con 400', async () => {
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'otra_cuenta@gmail.com',
+          sub: 'sub-123',
+        }),
+      ).rejects.toThrow(
+        'La cuenta de Google no coincide con el correo de tu cuenta registrada.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4b. Usuario con rol no permitido no puede vincular cuenta', async () => {
+      const adminUser = {
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        roles: ['administrativo'],
+      };
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'administrativo' } }],
+      });
+
+      await expect(
+        service.linkGoogle(adminUser as any, {
+          email: 'admin@umss.edu',
+          sub: 'sub-admin',
+        }),
+      ).rejects.toBeInstanceOf(RoleNotAssignedException);
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4c. Cuenta no registrada en base de datos: rechaza la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce(null);
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-dania',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google no está registrada en el sistema.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4d. Cuenta inactiva o deshabilitada en base de datos: rechaza la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: false,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-dania',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('6. Identidad Google ya vinculada a otro usuario: lanza excepción y no vincula', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValueOnce({
+        id: 'other-link',
+        userId: 'u-otro-usuario',
+      });
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-belonging-to-other',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google ya está vinculada a otro usuario.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('7. Vinculación exitosa y persistida: guarda en repositorio atómicamente', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValueOnce(null);
+      authRepository.linkGoogleAccount.mockResolvedValueOnce({ id: 'link-1' });
+
+      const result = await service.linkGoogle(authUser as any, {
+        email: 'dania@umss.edu',
+        sub: 'sub-dania',
+        picture: 'https://photo.url',
+      });
+
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledWith(
+        'u-1',
+        'sub-dania',
+        'dania@umss.edu',
+        'https://photo.url',
+      );
+      expect(result).toEqual({
+        ok: true,
+        detail: 'Cuenta vinculada exitosamente.',
+      });
+    });
+  });
+
+  describe('regresión: login Google rechazado no guarda vinculación', () => {
+    beforeEach(() => {
+      authRepository.findUserByGoogleSubWithRoles.mockReset();
+      authRepository.findUserByEmailWithRoles.mockReset();
+      authRepository.findGoogleSocialAccountBySub.mockReset();
+      authRepository.linkGoogleAccount.mockReset();
+      jwtService.sign.mockReset();
+
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+    });
+
+    it.each([
+      {
+        scenario: 'cuenta inactiva',
+        isActive: false,
+        role: 'titulado',
+        requestedRole: undefined,
+        exception: InvalidCredentialsException,
+      },
+      {
+        scenario: 'rol empresa',
+        isActive: true,
+        role: 'empresa',
+        requestedRole: undefined,
+        exception: RoleNotAssignedException,
+      },
+      {
+        scenario: 'rol administrativo',
+        isActive: true,
+        role: 'administrativo',
+        requestedRole: undefined,
+        exception: RoleNotAssignedException,
+      },
+      {
+        scenario: 'rol solicitado no asignado',
+        isActive: true,
+        role: 'titulado',
+        requestedRole: 'mentor',
+        exception: RoleNotAssignedException,
+      },
+    ] as const)(
+      'rechaza $scenario sin vincular ni emitir token',
+      async ({ isActive, role, requestedRole, exception }) => {
+        authRepository.findUserByEmailWithRoles.mockResolvedValue({
+          id: 'google-regression-user',
+          isActive,
+          roles: [{ role: { name: role } }],
+        });
+
+        await expect(
+          service.loginWithGoogle(
+            {
+              email: 'regresion@umssy.test',
+              sub: 'google-regression-sub',
+            },
+            requestedRole,
+          ),
+        ).rejects.toBeInstanceOf(exception);
+
+        expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+        expect(jwtService.sign).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+
+  describe('confirmGoogleLink', () => {
+    const claims = {
+      userId: 'u-1',
+      googleSub: 'google-sub-123',
+      email: 'dania@umss.edu',
+      picture: 'https://photo.url',
+    };
+    const user = (overrides: Record<string, unknown> = {}) => ({
+      id: 'u-1',
+      email: 'dania@umss.edu',
+      isActive: true,
+      roles: [{ role: { name: 'titulado' } }],
+      ...overrides,
+    });
+
+    beforeEach(() => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(user());
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+      authRepository.linkGoogleAccount.mockResolvedValue({});
+      jwtService.sign.mockReturnValue('confirmed-token');
+    });
+
+    it('vincula la cuenta de Google y emite la sesión', async () => {
+      await expect(service.confirmGoogleLink(claims)).resolves.toEqual({
+        accessToken: 'confirmed-token',
+        roleTag: 'titulado',
+        roles: ['titulado'],
+      });
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledWith(
+        'u-1',
+        'google-sub-123',
+        'dania@umss.edu',
+        'https://photo.url',
+      );
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        sub: 'u-1',
+        roleTag: 'titulado',
+        roles: ['titulado'],
+      });
+    });
+
+    it('respeta el rol solicitado cuando está autorizado', async () => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(
+        user({ roles: [{ role: { name: 'titulado' } }, { role: { name: 'mentor' } }] }),
+      );
+      const result = await service.confirmGoogleLink(claims, 'mentor');
+      expect(result.roleTag).toBe('mentor');
+    });
+
+    it('es idempotente si la cuenta ya estaba vinculada al mismo usuario', async () => {
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue({ id: 'l-1', userId: 'u-1' });
+      await expect(service.confirmGoogleLink(claims)).resolves.toMatchObject({ roleTag: 'titulado' });
+    });
+
+    it('responde 409 si el sub de Google ya pertenece a otro usuario y no vincula', async () => {
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue({ id: 'l-1', userId: 'u-2' });
+      const error = await service.confirmGoogleLink(claims).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(GoogleAccountAlreadyLinkedException);
+      expect((error as GoogleAccountAlreadyLinkedException).statusCode).toBe(409);
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['rol empresa', { roles: [{ role: { name: 'empresa' } }] }, RoleNotAssignedException],
+      ['rol administrativo', { roles: [{ role: { name: 'administrativo' } }] }, RoleNotAssignedException],
+      ['cuenta inactiva', { isActive: false }, InvalidCredentialsException],
+    ])('rechaza %s sin vincular ni emitir sesión', async (_label, overrides, exception) => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(user(overrides));
+      await expect(service.confirmGoogleLink(claims)).rejects.toBeInstanceOf(exception);
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un rol solicitado que el usuario no tiene', async () => {
+      await expect(service.confirmGoogleLink(claims, 'mentor')).rejects.toBeInstanceOf(
+        RoleNotAssignedException,
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['usuario inexistente', null],
+      ['correo que ya no coincide', user({ email: 'otro@umss.edu' })],
+    ])('rechaza con token inválido si hay %s', async (_label, found) => {
+      authRepository.findUserByIdWithRoles.mockResolvedValue(found);
+      await expect(service.confirmGoogleLink(claims)).rejects.toBeInstanceOf(
+        GoogleLinkTokenInvalidException,
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('no emite sesión si falla la persistencia de la vinculación', async () => {
+      authRepository.linkGoogleAccount.mockRejectedValue(new Error('Fallo de persistencia'));
+      await expect(service.confirmGoogleLink(claims)).rejects.toThrow('Fallo de persistencia');
+      expect(jwtService.sign).not.toHaveBeenCalled();
     });
   });
 });

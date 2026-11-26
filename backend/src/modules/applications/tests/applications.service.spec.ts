@@ -4,10 +4,14 @@ import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { ApplicationsService } from '../services/applications.service.js';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
+import { UsersService } from '../../users/services/users.service.js';
 import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationNotReactivableException } from '../exceptions/application-not-reactivable.exception.js';
+import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
 
 describe('ApplicationsService (T5.1 & T5.2)', () => {
   let service: ApplicationsService;
@@ -15,7 +19,11 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
     findByUserId: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     withdraw: ReturnType<typeof vi.fn>;
+    reactivateApplication: ReturnType<typeof vi.fn>;
+    findApplicationDecisionContext: ReturnType<typeof vi.fn>;
   };
+  let jobOffersMock: { findOfferSummary: ReturnType<typeof vi.fn> };
+  let usersMock: { findActiveRecruitersByCompany: ReturnType<typeof vi.fn> };
   const matching = { scoresForOffers: vi.fn() };
 
   beforeEach(async () => {
@@ -24,17 +32,22 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
       findByUserId: vi.fn(),
       findById: vi.fn(),
       withdraw: vi.fn().mockResolvedValue({ count: 1 }),
+      reactivateApplication: vi.fn().mockResolvedValue({ count: 1 }),
+      findApplicationDecisionContext: vi.fn(),
     };
+
+    jobOffersMock = { findOfferSummary: vi.fn() };
+
+    usersMock = { findActiveRecruitersByCompany: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApplicationsService,
         ApplicationMapper,
         { provide: JobRecommendationsService, useValue: matching },
-        {
-          provide: ApplicationsRepository,
-          useValue: repositoryMock,
-        },
+        { provide: ApplicationsRepository, useValue: repositoryMock },
+        { provide: JobOffersService, useValue: jobOffersMock },
+        { provide: UsersService, useValue: usersMock },
       ],
     }).compile();
 
@@ -53,6 +66,18 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
       expect(matching.scoresForOffers).not.toHaveBeenCalled();
     });
 
+    it('no oculta errores inesperados del servicio de afinidad', async () => {
+      repositoryMock.findByUserId.mockResolvedValue([
+        { id: 'app-1', jobOfferId: 'offer-1' },
+      ]);
+      matching.scoresForOffers.mockRejectedValue(
+        new Error('fallo en el calculo'),
+      );
+      await expect(
+        service.findMyApplications('user-1', { sortOrder: 'desc' }),
+      ).rejects.toThrow('fallo en el calculo');
+    });
+
     it('debe devolver el contrato del cliente con fechas ISO y afinidad calculada', async () => {
       const mockApps = [
         {
@@ -60,14 +85,24 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           jobOfferId: 'offer-1',
           status: { title: ApplicationStatus.IN_REVIEW },
           appliedAt: new Date('2026-10-29T12:00:00.000Z'),
-          jobOffer: { title: 'Dev', company: { title: 'Empresa A' } },
+          jobOffer: {
+            title: 'Dev',
+            expiresAt: null,
+            status: { title: 'Publicada' },
+            company: { title: 'Empresa A' },
+          },
         },
         {
           id: 'app-2',
           jobOfferId: 'offer-2',
           status: { title: ApplicationStatus.ACCEPTED },
           appliedAt: new Date('2026-10-29T12:00:00.000Z'),
-          jobOffer: { title: 'Dev 2', company: { title: 'Empresa B' } },
+          jobOffer: {
+            title: 'Dev 2',
+            expiresAt: null,
+            status: { title: 'Cerrada' },
+            company: { title: 'Empresa B' },
+          },
         },
       ];
 
@@ -87,6 +122,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
         'offer-1',
         'offer-2',
       ]);
+
       expect(result).toEqual([
         {
           id: 'app-1',
@@ -96,6 +132,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           status: ApplicationStatus.IN_REVIEW,
           affinityPercentage: 85,
           appliedDate: '2026-10-29T12:00:00.000Z',
+          vacancyAvailable: true,
         },
         {
           id: 'app-2',
@@ -105,8 +142,10 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           status: ApplicationStatus.ACCEPTED,
           affinityPercentage: 40,
           appliedDate: '2026-10-29T12:00:00.000Z',
+          vacancyAvailable: false,
         },
       ]);
+
       const sorted = await service.findMyApplications('user-1', {
         sortBy: 'affinity',
         sortOrder: 'asc',
@@ -168,6 +207,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
         service.withdrawApplication('app-1', 'user-1'),
       ).rejects.toThrow(ApplicationNotWithdrawableException);
     });
+
     it('rechaza el retiro si el estado cambió después de consultar la postulación', async () => {
       repositoryMock.findById.mockResolvedValue({
         id: 'app-1',
@@ -178,6 +218,204 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
       await expect(
         service.withdrawApplication('app-1', 'user-1'),
       ).rejects.toThrow(ApplicationNotWithdrawableException);
+    });
+  });
+
+  describe('reactivateApplication', () => {
+    it('reactiva la postulación de su dueño', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+      });
+
+      await expect(
+        service.reactivateApplication('app-1', 'user-1'),
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.reactivateApplication).toHaveBeenCalledWith(
+        'app-1',
+        'user-1',
+        expect.any(Date),
+      );
+    });
+
+    it('lanza ApplicationNotFoundException si no existe', async () => {
+      repositoryMock.findById.mockResolvedValue(null);
+
+      await expect(
+        service.reactivateApplication('app-99', 'user-1'),
+      ).rejects.toThrow(ApplicationNotFoundException);
+      expect(repositoryMock.reactivateApplication).not.toHaveBeenCalled();
+    });
+
+    it('lanza ApplicationForbiddenException si es de otro usuario', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-2',
+      });
+
+      await expect(
+        service.reactivateApplication('app-1', 'user-1'),
+      ).rejects.toThrow(ApplicationForbiddenException);
+      expect(repositoryMock.reactivateApplication).not.toHaveBeenCalled();
+    });
+
+    it('lanza ApplicationNotReactivableException con estado 409 si ya no se puede reactivar', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+      });
+      repositoryMock.reactivateApplication.mockResolvedValue({ count: 0 });
+
+      const error: unknown = await service
+        .reactivateApplication('app-1', 'user-1')
+        .catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ApplicationNotReactivableException);
+      expect(error).toMatchObject({
+        statusCode: 409,
+        code: 'APPLICATION_NOT_REACTIVABLE',
+      });
+      expect(error).toHaveProperty(
+        'message',
+        'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
+      );
+    });
+  });
+
+  describe('findApplicationDecisionContext', () => {
+    it('compone el contexto con datos de la vacante obtenidos de JobOffersService', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+        jobOfferId: 'job-1',
+        status: { title: ApplicationStatus.INTERVIEW },
+      });
+      jobOffersMock.findOfferSummary.mockResolvedValue({
+        id: 'job-1',
+        title: 'Dev Backend',
+        companyId: 'company-1',
+        companyName: 'Empresa A',
+      });
+
+      await expect(
+        service.findApplicationDecisionContext('app-1'),
+      ).resolves.toEqual({
+        id: 'app-1',
+        userId: 'user-1',
+        statusTitle: ApplicationStatus.INTERVIEW,
+        jobOfferId: 'job-1',
+        companyId: 'company-1',
+        jobTitle: 'Dev Backend',
+        companyName: 'Empresa A',
+      });
+      expect(jobOffersMock.findOfferSummary).toHaveBeenCalledWith('job-1');
+    });
+
+    it('retorna null si la postulación no existe sin consultar la vacante', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue(null);
+
+      await expect(
+        service.findApplicationDecisionContext('missing'),
+      ).resolves.toBeNull();
+      expect(jobOffersMock.findOfferSummary).not.toHaveBeenCalled();
+    });
+
+    it('retorna null si la vacante ya no existe', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+        jobOfferId: 'job-1',
+        status: { title: ApplicationStatus.INTERVIEW },
+      });
+      jobOffersMock.findOfferSummary.mockResolvedValue(null);
+
+      await expect(
+        service.findApplicationDecisionContext('app-1'),
+      ).resolves.toBeNull();
+    });
+  });
+
+  describe('getApplicationContact', () => {
+    const offer = {
+      id: 'job-1',
+      title: 'Dev Backend',
+      companyId: 'company-1',
+      companyName: 'Empresa A',
+    };
+
+    function mockApplication(statusTitle: string, userId = 'user-1') {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue({
+        id: 'app-1',
+        userId,
+        jobOfferId: 'job-1',
+        status: { title: statusTitle },
+      });
+      jobOffersMock.findOfferSummary.mockResolvedValue(offer);
+    }
+
+    it('compone la respuesta con la vacante y los reclutadores del dominio de usuarios', async () => {
+      mockApplication(ApplicationStatus.IN_REVIEW);
+      usersMock.findActiveRecruitersByCompany.mockResolvedValue([
+        { id: 'rec-1', firstName: 'Ana', lastName: 'Rojas' },
+        { id: 'rec-2', firstName: 'Luis', lastName: 'Vera' },
+      ]);
+
+      const result = await service.getApplicationContact('app-1', 'user-1');
+
+      expect(usersMock.findActiveRecruitersByCompany).toHaveBeenCalledWith(
+        'company-1',
+      );
+      expect(result).toEqual({
+        applicationId: 'app-1',
+        jobOfferId: 'job-1',
+        vacancyTitle: 'Dev Backend',
+        companyId: 'company-1',
+        companyName: 'Empresa A',
+        recruiters: [
+          { id: 'rec-1', fullName: 'Ana Rojas' },
+          { id: 'rec-2', fullName: 'Luis Vera' },
+        ],
+      });
+    });
+
+    it('responde con lista vacía de reclutadores cuando la empresa no tiene ninguno activo', async () => {
+      mockApplication(ApplicationStatus.ACCEPTED);
+      usersMock.findActiveRecruitersByCompany.mockResolvedValue([]);
+
+      const result = await service.getApplicationContact('app-1', 'user-1');
+
+      expect(result.recruiters).toEqual([]);
+    });
+
+    it('lanza not found si la postulación no existe', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue(null);
+
+      await expect(
+        service.getApplicationContact('missing', 'user-1'),
+      ).rejects.toBeInstanceOf(ApplicationNotFoundException);
+      expect(usersMock.findActiveRecruitersByCompany).not.toHaveBeenCalled();
+    });
+
+    it('lanza not found si la postulación pertenece a otro usuario', async () => {
+      mockApplication(ApplicationStatus.IN_REVIEW, 'user-2');
+
+      await expect(
+        service.getApplicationContact('app-1', 'user-1'),
+      ).rejects.toBeInstanceOf(ApplicationNotFoundException);
+      expect(usersMock.findActiveRecruitersByCompany).not.toHaveBeenCalled();
+    });
+
+    it('restringe el contacto cuando la postulación está retirada o rechazada', async () => {
+      mockApplication(ApplicationStatus.WITHDRAWN);
+      await expect(
+        service.getApplicationContact('app-1', 'user-1'),
+      ).rejects.toBeInstanceOf(ApplicationContactRestrictedException);
+
+      mockApplication(ApplicationStatus.REJECTED);
+      await expect(
+        service.getApplicationContact('app-1', 'user-1'),
+      ).rejects.toBeInstanceOf(ApplicationContactRestrictedException);
+      expect(usersMock.findActiveRecruitersByCompany).not.toHaveBeenCalled();
     });
   });
 });

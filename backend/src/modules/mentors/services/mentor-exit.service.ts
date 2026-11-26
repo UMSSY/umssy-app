@@ -9,13 +9,16 @@ export class MentorExitService {
   constructor(private readonly repository: MentorExitRepository) {}
 
   async leave(userId: string): Promise<MentorExitResponse> {
-    const hasEnded = await this.repository.deactivate(userId, (state) => this.canDeactivate(state));
+    const hasEnded = await this.repository.deactivate(userId, (state) =>
+      this.canDeactivate(state),
+    );
     return { id: userId, status: 'ENDED', alreadyEnded: !hasEnded };
   }
 
   private canDeactivate(state: MentorExitState): boolean {
     if (!state.hasActiveRole) return false;
-    if (state.hasFutureAppointments) throw new MentorExitAppointmentsException();
+    if (state.hasFutureAppointments)
+      throw new MentorExitAppointmentsException();
     return true;
   }
 }

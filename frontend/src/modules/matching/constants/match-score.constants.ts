@@ -1,1 +1,0 @@
-export const MATCH_SCORE_LABEL = "Afinidad";

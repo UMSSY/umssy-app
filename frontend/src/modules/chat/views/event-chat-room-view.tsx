@@ -6,7 +6,11 @@ import { useEventRoom } from "../hooks/use-event-room";
 import { useChatConnection } from "../hooks/use-chat-connection";
 import { useMessages } from "../hooks/use-messages";
 import { useSendEventRoomMessage } from "../hooks/use-event-room-message";
+import { useConversationVisibility } from "../hooks/use-conversation-visibility";
 import { getCurrentSessionUserId } from "../services/chat-api";
+import { Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { EventChatRoomViewProps } from "../types/event-chat-room-view-props.types";
 
@@ -35,6 +39,8 @@ export function EventChatRoomView({
   );
 
   useChatConnection(conversationId);
+
+  useConversationVisibility(conversationId);
 
   const { send: sendMessage, isSending, sendError, clearError } =
     useSendEventRoomMessage(conversationId);
@@ -103,6 +109,15 @@ export function EventChatRoomView({
     );
   }
 
+  const roomInfo = (
+    <EventRoomInfoPanel
+      groupName={room.name}
+      createdAt={room.createdAt}
+      participants={participants}
+      currentUserId={currentUserId}
+    />
+  );
+
   return (
     <div className={cn("flex h-full min-h-0 flex-col")}>
       <header className={cn("shrink-0 border-b border-border bg-surface px-4 py-3")}>
@@ -110,6 +125,18 @@ export function EventChatRoomView({
           groupName={room.name}
           participantCount={participantCount}
         />
+        <Dialog>
+          <DialogTrigger
+            render={<Button variant="ghost" size="icon" className="size-11 shrink-0 lg:hidden" />}
+            aria-label="Información del grupo"
+          >
+            <Info />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle className="sr-only">Información del grupo</DialogTitle>
+            {roomInfo}
+          </DialogContent>
+        </Dialog>
       </header>
 
       <main className={cn("flex min-w-0 flex-1 overflow-hidden lg:flex-row")}>
@@ -149,13 +176,8 @@ export function EventChatRoomView({
           />
         </section>
 
-        <aside className={cn("hidden flex-col border-l border-border bg-surface p-4 lg:flex lg:w-80")}>
-          <EventRoomInfoPanel
-            groupName={room.name}
-            createdAt={room.createdAt}
-            participants={participants}
-            currentUserId={currentUserId}
-          />
+        <aside className={cn("hidden shrink-0 flex-col overflow-y-auto border-l border-border bg-surface p-4 lg:flex lg:w-80")}>
+          {roomInfo}
         </aside>
       </main>
     </div>

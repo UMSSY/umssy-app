@@ -4,7 +4,7 @@ import { DetectedSkillsPanel } from "./detected-skills-panel";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FeedbackMessage, SectionCard } from "@/modules/profile";
+import { FeedbackMessage, SectionCard, useProfileCompletionRequest } from "@/modules/profile";
 import { useSkills } from "../hooks/use-skills";
 import { PENDING_SKILL_ID_PREFIX } from "../constants/skills.constants";
 import type { SkillItem } from "../types/skill-item.types";
@@ -14,6 +14,11 @@ import { SkillPickerDialog } from "./skill-picker-dialog";
 export function SkillsProfileSection() {
   const skills = useSkills();
   const [isAdding, setIsAdding] = useState(false);
+  useProfileCompletionRequest(
+    'skills',
+    !skills.isLoading && !skills.hasLoadError && !skills.isSaving,
+    () => setIsAdding(true),
+  );
 
   const selectedSkills = skills.selectedSkills;
 

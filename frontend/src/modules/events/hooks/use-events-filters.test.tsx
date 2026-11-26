@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe('useEventsFilters', () => {
-  it('starts with empty search and no category selected', () => {
+  it('starts with empty search, no category and the recommended order', () => {
     const { result } = renderHook(() => useEventsFilters());
 
     expect(result.current.searchInput).toBe('');
@@ -18,7 +18,31 @@ describe('useEventsFilters', () => {
     expect(result.current.filters).toEqual({
       search: '',
       categoryId: null,
+      sort: 'recommended',
     });
+  });
+
+  it('switches to the popular order and back while keeping the category', () => {
+    const { result } = renderHook(() => useEventsFilters());
+
+    act(() => {
+      result.current.setCategoryId('category-1');
+      result.current.setIsPopular(true);
+    });
+
+    expect(result.current.isPopular).toBe(true);
+    expect(result.current.filters).toEqual({
+      search: '',
+      categoryId: 'category-1',
+      sort: 'popular',
+    });
+
+    act(() => {
+      result.current.setIsPopular(false);
+    });
+
+    expect(result.current.filters.sort).toBe('recommended');
+    expect(result.current.filters.categoryId).toBe('category-1');
   });
 
   it('updates the selected category immediately', () => {
@@ -49,5 +73,23 @@ describe('useEventsFilters', () => {
     });
 
     expect(result.current.filters.search).toBe('React');
+  });
+
+  it('requests finished workshops only while the finished filter is active', () => {
+    const { result } = renderHook(() => useEventsFilters());
+
+    act(() => {
+      result.current.setIsFinished(true);
+    });
+
+    expect(result.current.isFinished).toBe(true);
+    expect(result.current.filters.scope).toBe('finished');
+    expect(result.current.filters.statusId).toBeUndefined();
+
+    act(() => {
+      result.current.setIsFinished(false);
+    });
+
+    expect(result.current.filters.scope).toBeUndefined();
   });
 });

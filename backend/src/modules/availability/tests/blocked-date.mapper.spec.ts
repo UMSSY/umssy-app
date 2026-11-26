@@ -25,15 +25,22 @@ describe('BlockedDateMapper', () => {
   });
 
   it('mantiene el motivo en null si no tiene', () => {
-    expect(mapper.toResponse({ ...blockedDate, reason: null }).reason).toBeNull();
+    expect(
+      mapper.toResponse({ ...blockedDate, reason: null }).reason,
+    ).toBeNull();
   });
 
   it('mapea una lista manteniendo el orden', () => {
-    const second = { ...blockedDate, id: 'blocked-2', blockedOn: new Date('2026-10-28T00:00:00.000Z') };
-    expect(mapper.toResponseList([blockedDate, second]).map((item) => item.blockedOn)).toEqual([
-      '2026-10-27',
-      '2026-10-28',
-    ]);
+    const second = {
+      ...blockedDate,
+      id: 'blocked-2',
+      blockedOn: new Date('2026-10-28T00:00:00.000Z'),
+    };
+    expect(
+      mapper
+        .toResponseList([blockedDate, second])
+        .map((item) => item.blockedOn),
+    ).toEqual(['2026-10-27', '2026-10-28']);
   });
 
   it('arma la respuesta de desbloqueo solo con el id', () => {

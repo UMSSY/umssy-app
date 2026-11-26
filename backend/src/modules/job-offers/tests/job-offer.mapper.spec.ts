@@ -50,20 +50,27 @@ describe('JobOfferMapper', () => {
   });
 
   it('no incluye la cantidad de postulantes en la respuesta pública', () => {
-    const { applicantsCount: _applicantsCount, ...expected } = mapper.toResponse(RECORD);
+    const { applicantsCount: _applicantsCount, ...expected } =
+      mapper.toResponse(RECORD);
 
     expect(mapper.toPublishedResponse(RECORD)).toEqual(expected);
-    expect(mapper.toPublishedResponse(RECORD)).not.toHaveProperty('applicantsCount');
+    expect(mapper.toPublishedResponse(RECORD)).not.toHaveProperty(
+      'applicantsCount',
+    );
   });
 
   it('convierte la fecha de vencimiento a texto ISO', () => {
     const expiresAt = new Date('2026-12-31T00:00:00.000Z');
 
-    expect(mapper.toResponse({ ...RECORD, expiresAt }).expiresAt).toBe(expiresAt.toISOString());
+    expect(mapper.toResponse({ ...RECORD, expiresAt }).expiresAt).toBe(
+      expiresAt.toISOString(),
+    );
   });
 
   it('arma la respuesta de una vacante creada', () => {
-    expect(mapper.toCreatedResponse({ id: 'offer-1', createdAt: CREATED_AT })).toEqual({
+    expect(
+      mapper.toCreatedResponse({ id: 'offer-1', createdAt: CREATED_AT }),
+    ).toEqual({
       id: 'offer-1',
       createdAt: CREATED_AT.toISOString(),
     });

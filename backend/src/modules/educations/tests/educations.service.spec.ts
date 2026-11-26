@@ -91,7 +91,10 @@ describe('EducationsService', () => {
 
   it('updates a single field while preserving stored dates', async () => {
     repository.findByIdAndUserId.mockResolvedValue(record);
-    repository.update.mockResolvedValue({ ...record, degree: 'Ingeniería Industrial' });
+    repository.update.mockResolvedValue({
+      ...record,
+      degree: 'Ingeniería Industrial',
+    });
     const response = await service.update(userId, educationId, {
       degree: 'Ingeniería Industrial',
     });
@@ -99,12 +102,17 @@ describe('EducationsService', () => {
       educationId,
       userId,
     );
-    expect(repository.update).toHaveBeenCalledWith(educationId, userId, {
-      degree: 'Ingeniería Industrial',
-    }, {
-      startDate: record.startDate,
-      endDate: record.endDate,
-    });
+    expect(repository.update).toHaveBeenCalledWith(
+      educationId,
+      userId,
+      {
+        degree: 'Ingeniería Industrial',
+      },
+      {
+        startDate: record.startDate,
+        endDate: record.endDate,
+      },
+    );
     expect(response.degree).toBe('Ingeniería Industrial');
     expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
@@ -155,7 +163,9 @@ describe('EducationsService', () => {
   });
 
   it('returns not found when the record disappears before the update', async () => {
-    repository.findByIdAndUserId.mockResolvedValueOnce(record).mockResolvedValueOnce(null);
+    repository.findByIdAndUserId
+      .mockResolvedValueOnce(record)
+      .mockResolvedValueOnce(null);
     repository.update.mockResolvedValue(null);
     await expect(
       service.update(userId, educationId, { degree: 'Ingeniería Industrial' }),
@@ -187,38 +197,65 @@ describe('EducationsService', () => {
     const legacy = { ...record, endDate: null };
     repository.findByIdAndUserId.mockResolvedValue(legacy);
     repository.update.mockResolvedValue({ ...legacy, description: 'Updated' });
-    await expect(service.update(userId, educationId, { description: 'Updated' }))
-      .resolves.toMatchObject({ endDate: null, description: 'Updated' });
-    expect(repository.update).toHaveBeenCalledWith(educationId, userId,
-      { description: 'Updated' }, { startDate: record.startDate, endDate: null });
+    await expect(
+      service.update(userId, educationId, { description: 'Updated' }),
+    ).resolves.toMatchObject({ endDate: null, description: 'Updated' });
+    expect(repository.update).toHaveBeenCalledWith(
+      educationId,
+      userId,
+      { description: 'Updated' },
+      { startDate: record.startDate, endDate: null },
+    );
   });
 
   it('returns a conflict instead of retrying a stale date update', async () => {
-    repository.findByIdAndUserId.mockResolvedValueOnce(record).mockResolvedValueOnce({
-      ...record, endDate: new Date('2022-01-01'),
-    });
+    repository.findByIdAndUserId
+      .mockResolvedValueOnce(record)
+      .mockResolvedValueOnce({
+        ...record,
+        endDate: new Date('2022-01-01'),
+      });
     repository.update.mockResolvedValue(null);
-    await expect(service.update(userId, educationId, { startDate: new Date('2023-01-01') }))
-      .rejects.toBeInstanceOf(EducationUpdateConflictException);
+    await expect(
+      service.update(userId, educationId, {
+        startDate: new Date('2023-01-01'),
+      }),
+    ).rejects.toBeInstanceOf(EducationUpdateConflictException);
     expect(repository.update).toHaveBeenCalledTimes(1);
-    expect(repository.findByIdAndUserId).toHaveBeenLastCalledWith(educationId, userId);
+    expect(repository.findByIdAndUserId).toHaveBeenLastCalledWith(
+      educationId,
+      userId,
+    );
   });
 
   it('cannot merge two individually valid concurrent date edits into an invalid period', async () => {
     let stored = { ...record };
-    repository.findByIdAndUserId.mockImplementation(async () => ({ ...stored }));
-    repository.update.mockImplementation(async (_id, _userId, changes, expectedPeriod) => {
-      if (stored.startDate.getTime() !== expectedPeriod.startDate.getTime()
-        || stored.endDate?.getTime() !== expectedPeriod.endDate?.getTime()) return null;
-      stored = { ...stored, ...changes };
-      return { ...stored };
-    });
+    repository.findByIdAndUserId.mockImplementation(async () => ({
+      ...stored,
+    }));
+    repository.update.mockImplementation(
+      async (_id, _userId, changes, expectedPeriod) => {
+        if (
+          stored.startDate.getTime() !== expectedPeriod.startDate.getTime() ||
+          stored.endDate?.getTime() !== expectedPeriod.endDate?.getTime()
+        )
+          return null;
+        stored = { ...stored, ...changes };
+        return { ...stored };
+      },
+    );
     const results = await Promise.allSettled([
-      service.update(userId, educationId, { startDate: new Date('2023-01-01') }),
+      service.update(userId, educationId, {
+        startDate: new Date('2023-01-01'),
+      }),
       service.update(userId, educationId, { endDate: new Date('2022-01-01') }),
     ]);
-    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
-    expect(results.find((result) => result.status === 'rejected')).toMatchObject({
+    expect(
+      results.filter((result) => result.status === 'fulfilled'),
+    ).toHaveLength(1);
+    expect(
+      results.find((result) => result.status === 'rejected'),
+    ).toMatchObject({
       reason: expect.any(EducationUpdateConflictException),
     });
     expect(stored.endDate! >= stored.startDate).toBe(true);

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   PolarAngleAxis,
@@ -7,23 +7,16 @@ import {
   Radar,
   RadarChart,
   ResponsiveContainer,
-} from "recharts";
+} from 'recharts';
 
-import { Button } from "@/components/ui/button";
-import { getInitials } from "@/shared/utils/get-initials";
+import { Button } from '@/components/ui/button';
+import { getInitials } from '@/shared/utils/get-initials';
 
-import type {
-  ReviewAction,
-  ReviewAffinityArea,
-  ReviewProfile,
-} from "../types/review-queue.types";
-import { ReviewStatusBadge } from "./review-status-badge";
+import type { ReviewAffinityArea } from '../types/review-affinity-area.types';
 
-interface ReviewProfileDetailProps {
-  profile: ReviewProfile | null;
-  localAction: ReviewAction | null;
-  onAction: (action: ReviewAction) => void;
-}
+import { ReviewStatusBadge } from './review-status-badge';
+
+import type { ReviewProfileDetailProps } from '../types/review-profile-detail-props.types';
 
 function ReviewAffinityRadarChart({
   areas,
@@ -36,9 +29,7 @@ function ReviewAffinityRadarChart({
     <section className="rounded-lg border border-border bg-surface p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-sm font-semibold text-ink">
-            Radar de Afinidad
-          </h3>
+          <h3 className="text-sm font-semibold text-ink">Radar de Afinidad</h3>
 
           <p className="mt-1 text-xs text-text-secondary">
             {areas.length} áreas evaluadas
@@ -46,9 +37,7 @@ function ReviewAffinityRadarChart({
         </div>
 
         <div className="text-right">
-          <p className="text-2xl font-bold text-accent">
-            {average.toFixed(2)}
-          </p>
+          <p className="text-2xl font-bold text-accent">{average.toFixed(2)}</p>
 
           <p className="text-xs tracking-widest text-text-secondary uppercase">
             Promedio
@@ -64,7 +53,7 @@ function ReviewAffinityRadarChart({
             <PolarAngleAxis
               dataKey="area"
               tick={{
-                fill: "var(--color-text-secondary)",
+                fill: 'var(--color-text-secondary)',
                 fontSize: 12,
               }}
             />
@@ -75,7 +64,7 @@ function ReviewAffinityRadarChart({
               tickCount={6}
               axisLine={false}
               tick={{
-                fill: "var(--color-text-secondary)",
+                fill: 'var(--color-text-secondary)',
                 fontSize: 9,
               }}
             />
@@ -89,7 +78,7 @@ function ReviewAffinityRadarChart({
               fillOpacity={0.15}
               dot={{
                 r: 4,
-                fill: "var(--color-accent)",
+                fill: 'var(--color-accent)',
                 fillOpacity: 1,
               }}
             />
@@ -98,7 +87,10 @@ function ReviewAffinityRadarChart({
       </div>
 
       <div className="flex items-center gap-2 text-xs text-text-secondary">
-        <span aria-hidden="true" className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15" />
+        <span
+          aria-hidden="true"
+          className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15"
+        />
         Puntaje de afinidad del perfil
       </div>
     </section>
@@ -114,9 +106,7 @@ function ReviewAreaBreakdownPanel({
 }) {
   return (
     <section className="rounded-lg border border-border bg-surface p-5">
-      <h3 className="text-sm font-semibold text-ink">
-        Desglose por Área
-      </h3>
+      <h3 className="text-sm font-semibold text-ink">Desglose por Área</h3>
 
       <p className="mt-1 text-xs text-text-secondary">
         Puntuación obtenida en cada dimensión
@@ -126,18 +116,16 @@ function ReviewAreaBreakdownPanel({
         {areas.map((area) => (
           <li key={area.area}>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span
-                className="size-1.5 rounded-full bg-brand-red"
-              />
+              <span className="size-1.5 rounded-full bg-brand-red" />
 
               <span className="text-ink">{area.area}</span>
 
               <span className="ml-auto text-xs text-text-secondary">
-                {area.nivel}
+                {area.level}
               </span>
 
               <span className="w-8 text-right font-semibold text-ink">
-                {area.puntuacion.toFixed(1)}
+                {area.score.toFixed(1)}
               </span>
             </div>
 
@@ -145,7 +133,7 @@ function ReviewAreaBreakdownPanel({
               <div
                 className="h-full rounded-full bg-brand-red"
                 style={{
-                  width: `${area.puntuacion * 10}%`,
+                  width: `${area.score * 10}%`,
                 }}
               />
             </div>
@@ -193,38 +181,36 @@ export function ReviewProfileDetail({
     );
   }
 
-  const showActions = profile.estado !== "Completado";
+  const canReview = profile.status !== 'Completado';
 
   return (
     <section className="@container/detail bg-surface p-6">
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-start gap-4 border-b border-border pb-5">
           <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-soft text-sm font-semibold text-ink">
-            {getInitials(profile.nombre)}
+            {getInitials(profile.fullName)}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-ink">
-                  {profile.nombre}
+                  {profile.fullName}
                 </h2>
 
                 <p className="mt-1 text-sm text-text-secondary">
-                  {profile.cargoObjetivo}
+                  {profile.targetPosition}
                 </p>
               </div>
 
-              <ReviewStatusBadge status={profile.estado} />
+              <ReviewStatusBadge status={profile.status} />
             </div>
 
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
-              <span>
-                Enviado: {profile.fechaEnvio}
-              </span>
+              <span>Enviado: {profile.submittedAt}</span>
 
               <span className="font-semibold text-ink">
-                Afinidad global: {profile.afinidadGlobal.toFixed(1)}/10
+                Afinidad global: {profile.globalAffinity.toFixed(1)}/10
               </span>
             </div>
           </div>
@@ -233,31 +219,31 @@ export function ReviewProfileDetail({
         <div className="mt-6 grid gap-6 @3xl/detail:grid-cols-2">
           <ReviewAffinityRadarChart
             areas={profile.areas}
-            average={profile.afinidadGlobal}
+            average={profile.globalAffinity}
           />
 
           <ReviewAreaBreakdownPanel
             areas={profile.areas}
-            average={profile.afinidadGlobal}
+            average={profile.globalAffinity}
           />
         </div>
 
-        {showActions && (
+        {canReview && (
           <div className="mt-6 border-t border-border pt-5">
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button
                 type="button"
                 className="flex-1"
-                onClick={() => onAction("approved")}
+                onClick={() => onAction('approved')}
               >
                 Aprobar y publicar radar
               </Button>
 
               <Button
                 type="button"
-                variant="destructive"
+                variant="outline"
                 className="flex-1"
-                onClick={() => onAction("rejected")}
+                onClick={() => onAction('rejected')}
               >
                 Rechazar envío
               </Button>
@@ -267,14 +253,14 @@ export function ReviewProfileDetail({
               <div
                 role="status"
                 className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
-                  localAction === "approved"
-                    ? "border-border bg-surface-soft text-ink"
-                    : "border-border bg-surface-soft text-ink"
+                  localAction === 'approved'
+                    ? 'border-border bg-surface-soft text-ink'
+                    : 'border-border bg-surface-soft text-ink'
                 }`}
               >
-                {localAction === "approved"
-                  ? "Radar aprobado localmente. No se enviaron datos al backend."
-                  : "Envío rechazado localmente. No se modificaron datos persistentes."}
+                {localAction === 'approved'
+                  ? 'Radar aprobado localmente. No se enviaron datos al backend.'
+                  : 'Envío rechazado localmente. No se modificaron datos persistentes.'}
               </div>
             )}
           </div>

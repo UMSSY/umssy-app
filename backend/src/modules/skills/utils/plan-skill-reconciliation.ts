@@ -18,6 +18,7 @@ const sameEvidence = (
 export function planSkillReconciliation(
   rows: readonly ProfileSkillRowResponse[],
   detected: readonly DetectedSkillPayload[],
+  liveSources: ReadonlySet<string> = new Set(),
 ): SkillReconciliationPayload {
   const detectedById = new Map<string, ResolvedDetection>();
   const detectedByName = new Map<string, ResolvedDetection>();
@@ -53,9 +54,7 @@ export function planSkillReconciliation(
   const consumedSkillIds = new Set<string>();
 
   for (const row of rows) {
-    const nameKey = row.skill?.name
-      ? row.skill.name.toLowerCase().trim()
-      : '';
+    const nameKey = row.skill?.name ? row.skill.name.toLowerCase().trim() : '';
 
     const detection =
       detectedById.get(row.skillId) ??
@@ -69,14 +68,28 @@ export function planSkillReconciliation(
     const isApproved =
       row.verificationStatus === USER_SKILL_VERIFICATION_STATUSES.approved;
 
-    if (!detection && !isManualRow && !isApproved) {
+    const currentEvidence = parseEvidenceRefs(row.evidenceRefs);
+    const retainedExperiences = currentEvidence.filter(
+      (ref) =>
+        ref.type === 'work-experience' &&
+        liveSources.has(`${ref.type}:${ref.id}`),
+    );
+    const nextEvidence = sortEvidenceRefs([
+      ...retainedExperiences,
+      ...(detection?.evidenceRefs ?? []),
+    ]);
+
+    if (
+      !detection &&
+      nextEvidence.length === 0 &&
+      !isManualRow &&
+      (!isApproved || row.radarAutoVerified)
+    ) {
       plan.deleteIds.push(row.id);
       continue;
     }
 
-    const nextEvidence = detection?.evidenceRefs ?? [];
     const nextIsHighRelevance = nextEvidence.length > 0;
-    const currentEvidence = parseEvidenceRefs(row.evidenceRefs);
 
     if (
       !sameEvidence(currentEvidence, nextEvidence) ||

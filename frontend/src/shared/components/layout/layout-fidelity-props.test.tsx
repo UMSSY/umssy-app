@@ -8,6 +8,12 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes" }));
 
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
+}));
+
 const ITEMS = [{ label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes" }];
 
 describe("props opcionales del layout compartido", () => {
@@ -27,7 +33,7 @@ describe("props opcionales del layout compartido", () => {
     expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeInTheDocument();
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
-    expect(screen.getByText("Contenido").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
+    expect(screen.getByText("Contenido").parentElement).toHaveClass("px-4", "py-6", "lg:p-8", "xl:px-12", "xl:py-10");
     expect(screen.queryByLabelText(/pendientes/)).toBeNull();
   });
 

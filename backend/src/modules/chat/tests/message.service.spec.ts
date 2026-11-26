@@ -1,3 +1,4 @@
+import { MessageMapper } from '../mappers/message.mapper.js';
 
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { MessageService } from '../services/message.service.js';
@@ -47,19 +48,23 @@ describe('MessageService (group chat)', () => {
     };
 
     messageRepository = {
-      create: vi.fn().mockImplementation(async (data: {
-        conversationId: string;
-        senderId: string;
-        content: string;
-        sentAt: Date;
-      }) => ({
-        id: 'message-1',
-        conversationId: data.conversationId,
-        senderId: data.senderId,
-        content: data.content,
-        sentAt: data.sentAt,
-        createdAt: data.sentAt,
-      })),
+      create: vi
+        .fn()
+        .mockImplementation(
+          async (data: {
+            conversationId: string;
+            senderId: string;
+            content: string;
+            sentAt: Date;
+          }) => ({
+            id: 'message-1',
+            conversationId: data.conversationId,
+            senderId: data.senderId,
+            content: data.content,
+            sentAt: data.sentAt,
+            createdAt: data.sentAt,
+          }),
+        ),
     };
 
     messageStatusService = {
@@ -81,6 +86,7 @@ describe('MessageService (group chat)', () => {
       messageStatusService as unknown as MessageStatusService,
       blockService,
       chatRolePolicyService,
+      new MessageMapper(),
     );
   });
 

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   StreamableFile,
@@ -31,18 +32,29 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
+  APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
   APPOINTMENT_MESSAGES,
   APPOINTMENT_RESPONSE_SCHEMA,
+  CANCEL_APPOINTMENT_DOCS,
   CREATE_APPOINTMENT_DOCS,
   FIND_APPOINTMENT_DOCS,
   FIND_COUNTERPART_PHOTO_DOCS,
   FIND_MY_APPOINTMENTS_DOCS,
 } from '../constants/appointment-docs.constants.js';
+import {
+  DEFAULT_MY_APPOINTMENTS_PAGE,
+  DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
+  MAX_MY_APPOINTMENTS_PAGE_SIZE,
+} from '../constants/my-appointments-pagination.constants.js';
+import { MAX_MY_APPOINTMENTS_SEARCH_LENGTH } from '../constants/my-appointments-search.constants.js';
+import { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
 import { AppointmentsService } from '../services/appointments.service.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
+import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
 @Controller('appointments')
@@ -65,17 +77,66 @@ export class AppointmentsController {
     summary: CREATE_APPOINTMENT_DOCS.summary,
     description: CREATE_APPOINTMENT_DOCS.description,
   })
-  @ApiCreatedResponse({ description: CREATE_APPOINTMENT_DOCS.createdDescription })
+  @ApiCreatedResponse({
+    description: CREATE_APPOINTMENT_DOCS.createdDescription,
+  })
   @ApiBadRequestResponse({
     description: CREATE_APPOINTMENT_DOCS.badRequestDescription,
   })
-  @ApiNotFoundResponse({ description: CREATE_APPOINTMENT_DOCS.notFoundDescription })
-  @ApiConflictResponse({ description: CREATE_APPOINTMENT_DOCS.conflictDescription })
+  @ApiNotFoundResponse({
+    description: CREATE_APPOINTMENT_DOCS.notFoundDescription,
+  })
+  @ApiConflictResponse({
+    description: CREATE_APPOINTMENT_DOCS.conflictDescription,
+  })
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: CreateAppointmentDto,
   ): Promise<MyAppointmentResponse> {
     return this.appointmentsService.create(user, body);
+  }
+
+  @Patch(':id/cancel')
+  @Roles('mentor', 'titulado', 'estudiante')
+  @ApiOperation({
+    summary: CANCEL_APPOINTMENT_DOCS.summary,
+    description: CANCEL_APPOINTMENT_DOCS.description,
+  })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: CANCEL_APPOINTMENT_DOCS.idDescription,
+  })
+  @ApiOkResponse({
+    description: CANCEL_APPOINTMENT_DOCS.okDescription,
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'integer', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string' },
+        data: APPOINTMENT_RESPONSE_SCHEMA,
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: CANCEL_APPOINTMENT_DOCS.badRequestDescription,
+  })
+  @ApiForbiddenResponse({
+    description: CANCEL_APPOINTMENT_DOCS.forbiddenDescription,
+  })
+  @ApiNotFoundResponse({
+    description: CANCEL_APPOINTMENT_DOCS.notFoundDescription,
+  })
+  @ApiConflictResponse({
+    description: CANCEL_APPOINTMENT_DOCS.conflictDescription,
+  })
+  cancel(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
+    @Body() body: CancelAppointmentDto,
+  ): Promise<MyAppointmentResponse> {
+    return this.appointmentsService.cancel(user, id, body);
   }
 
   @Get('me')
@@ -90,6 +151,33 @@ export class AppointmentsController {
     description: FIND_MY_APPOINTMENTS_DOCS.scopeDescription,
     schema: { default: 'upcoming' },
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: FIND_MY_APPOINTMENTS_DOCS.pageDescription,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      default: DEFAULT_MY_APPOINTMENTS_PAGE,
+    },
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    description: FIND_MY_APPOINTMENTS_DOCS.pageSizeDescription,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      maximum: MAX_MY_APPOINTMENTS_PAGE_SIZE,
+      default: DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
+    },
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: FIND_MY_APPOINTMENTS_DOCS.searchDescription,
+    schema: { type: 'string', maxLength: MAX_MY_APPOINTMENTS_SEARCH_LENGTH },
+  })
   @ApiBadRequestResponse({
     description: FIND_MY_APPOINTMENTS_DOCS.invalidQueryDescription,
   })
@@ -101,7 +189,18 @@ export class AppointmentsController {
         statusCode: { type: 'integer', example: 200 },
         ok: { type: 'boolean', example: true },
         detail: { type: 'string' },
-        data: { type: 'array', items: APPOINTMENT_RESPONSE_SCHEMA },
+        data: {
+          type: 'object',
+          properties: {
+            items: { type: 'array', items: APPOINTMENT_RESPONSE_SCHEMA },
+            total: { type: 'integer', example: 48 },
+            page: { type: 'integer', example: 1 },
+            pageSize: {
+              type: 'integer',
+              example: DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
+            },
+          },
+        },
       },
     },
   })
@@ -109,13 +208,14 @@ export class AppointmentsController {
     @CurrentUserId() userId: string,
     @Query(new RequestValidationPipe(myAppointmentsQuerySchema))
     query: MyAppointmentsQuery,
-  ): Promise<MyAppointmentResponse[]> {
+  ): Promise<MyAppointmentsPageResponse> {
     return this.appointmentsService.findMine(userId, query);
   }
 
   @Get(':id')
   @ApiOperation({
     summary: FIND_APPOINTMENT_DOCS.summary,
+    description: FIND_APPOINTMENT_DOCS.description,
   })
   @ApiParam({
     name: 'id',
@@ -136,14 +236,14 @@ export class AppointmentsController {
         statusCode: { type: 'integer', example: 200 },
         ok: { type: 'boolean', example: true },
         detail: { type: 'string' },
-        data: APPOINTMENT_RESPONSE_SCHEMA,
+        data: APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
       },
     },
   })
   findOne(
     @CurrentUserId() userId: string,
     @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
-  ): Promise<MyAppointmentResponse> {
+  ): Promise<AppointmentDetailResponse> {
     return this.appointmentsService.findOne(userId, id);
   }
 
@@ -171,7 +271,10 @@ export class AppointmentsController {
     @CurrentUserId() userId: string,
     @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
   ): Promise<StreamableFile> {
-    const photo = await this.appointmentsService.getCounterpartPhoto(userId, id);
+    const photo = await this.appointmentsService.getCounterpartPhoto(
+      userId,
+      id,
+    );
 
     return new StreamableFile(photo.content, {
       type: photo.mimeType,

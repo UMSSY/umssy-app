@@ -1,20 +1,17 @@
-export const MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
 export const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantía"] as const;
 export const INTERNSHIP_CONTRACT_TYPE = "Pasantía";
 export const SALARY_TO_BE_AGREED = "A convenir";
-export const NOT_SPECIFIED_TEXT = "No especificado";
+
 export const FIELD_FOCUS_CLASS = "focus-visible:border-ink focus-visible:ring-ink/20";
 
 export const MAX_TITLE_CHARS = 60;
 export const MAX_LANGUAGES_CHARS = 100;
-export const MAX_CATEGORY_CHARS = 100;
-export const MAX_MAPS_LINK_CHARS = 2048;
+
 export const MAX_DESCRIPTION_CHARS = 3000;
 export const MAX_VACANCIES = 500;
 export const MAX_VACANCY_DIGITS = String(MAX_VACANCIES).length + 1;
-export const MAX_SALARY_DIGITS = 9;
+
 export const MAX_SKILLS = 10;
-export const DESCRIPTION_PREVIEW_CHARS = 125;
 
 export const TITLE_ALLOWED_REGEX = /^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/;
 export const TITLE_DISALLOWED_CHARS_REGEX = /[^a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]/g;
@@ -43,12 +40,24 @@ export const PUBLISH_MESSAGES = {
   session: "Tu sesión no es válida. Inicia sesión nuevamente.",
   noCompany: "No hay una empresa asociada a tu sesión. Inicia sesión como empresa.",
   incompleteForm: "Faltan datos en los pasos anteriores. Vuelve atrás y complétalos.",
+  expirationNotConfirmed:
+    "Elige y confirma una fecha de cierre, o desmarca la opción para publicar sin fecha límite.",
 } as const;
 
 export const SKILLS_CATALOG_MESSAGES = {
   loading: "Cargando habilidades...",
   error: "No se pudo cargar el catálogo de habilidades.",
   retry: "Reintentar",
+} as const;
+
+export const REQUIREMENTS_DETECTION_DEBOUNCE_MS = 500;
+
+export const REQUIREMENTS_SKILLS_TEXT = {
+  allSkillsTitle: "Todas las habilidades",
+  skillsIntro: "Estas son las habilidades que necesita el puesto.",
+  autoSelectHint: "Las detectadas en la descripción se agregan solas; puedes quitarlas o añadir otras.",
+  emptySelection: "Todavía no hay habilidades. Escribe la descripción para detectarlas o usa «Añadir habilidad».",
+  detectionError: "No se pudieron detectar habilidades en este momento. Añádelas manualmente.",
 } as const;
 
 export const SKILL_SEARCH_TEXT = {
@@ -96,43 +105,37 @@ export const EDIT_MESSAGES = {
   error: "No se pudo guardar la edición. Inténtelo más tarde",
 } as const;
 
-export const RECRUITERS_HOME_ROUTE = "/recruiters";
-
 export const PUBLISHED_STATUS = "Publicada";
 
-export const CLOSED_STATUS = "Cerrada";
-export const DELETED_STATUS = "Eliminada";
-export const HISTORY_STATUSES: readonly string[] = [PUBLISHED_STATUS, CLOSED_STATUS, DELETED_STATUS];
-
-export const NEW_JOB_OFFER_ROUTE = "/recruiters/job-offers/new";
+export const HISTORY_STATUSES: readonly string[] = [PUBLISHED_STATUS, "Cerrada", "Eliminada"];
 
 export const STATUS_LABELS: Record<string, string> = {
   [PUBLISHED_STATUS]: "Activa",
-  [CLOSED_STATUS]: "Cerrada",
-  [DELETED_STATUS]: "Eliminada",
+  ["Cerrada"]: "Cerrada",
+  ["Eliminada"]: "Eliminada",
 };
 
 export const STATUS_BADGE_CLASSES: Record<string, string> = {
   [PUBLISHED_STATUS]: "bg-green-100 text-green-800",
-  [CLOSED_STATUS]: "bg-muted text-text-secondary",
-  [DELETED_STATUS]: "bg-destructive/10 text-destructive",
+  ["Cerrada"]: "bg-muted text-text-secondary",
+  ["Eliminada"]: "bg-destructive/10 text-destructive",
 };
 
 export const STATUS_FILTER_OPTIONS = [
   { value: "", label: "Todas" },
   { value: PUBLISHED_STATUS, label: "Activas" },
-  { value: CLOSED_STATUS, label: "Cerradas" },
-  { value: DELETED_STATUS, label: "Eliminadas" },
+  { value: "Cerrada", label: "Cerradas" },
+  { value: "Eliminada", label: "Eliminadas" },
 ] as const;
-
-export const HISTORY_SKELETON_ROWS = 3;
 
 export const VACANCY_LIST_TEXT = {
   published: {
+    title: "Lista de Vacantes",
+    subtitle: "Consulta y administra las vacantes que publicó tu empresa.",
     ariaLabel: "Mis vacantes publicadas",
     loading: "Cargando vacantes...",
     loadError: "No se pudieron cargar tus vacantes.",
-    empty: "Aún no tienes vacantes publicadas",
+    empty: "No se tienen vacantes creadas",
     noMatches: "Ninguna vacante coincide con los filtros.",
     noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
   },
@@ -146,7 +149,10 @@ export const VACANCY_LIST_TEXT = {
   },
 } as const;
 
-export const JOB_OFFERS_PAGE_SIZE = 10;
+export const NO_COMPANY_TEXT = {
+  title: "Tu cuenta aún no está vinculada a una empresa",
+  description: "Por eso no podemos mostrar vacantes. Pide al administrador que vincule tu cuenta con tu empresa.",
+} as const;
 
 export const TOAST_OPTIONS = { position: "top-center", duration: 5000 } as const;
 
@@ -171,6 +177,15 @@ export const REOPEN_JOB_OFFER_TEXT = {
   notReopenable: "La vacante ya no está cerrada, por eso no se puede reabrir.",
 } as const;
 
-export const DEFAULT_COMPANY_ID = "a0000000-0000-4000-8000-000000000001";
-export const DEFAULT_COMPANY_NAME = "TechBolivia S.R.L.";
-export const COMPANY_ROLE_TAG = "empresa";
+export const CLOSE_JOB_OFFER_TEXT = {
+  title: "¿Estás seguro de cerrar esta vacante?",
+  description: "dejará de recibir postulaciones.",
+  cancel: "Cancelar",
+  confirm: "Cerrar",
+  busy: "Cerrando...",
+  success: "La vacante fue cerrada con éxito",
+  error: "No se pudo completar el cierre de la vacante. Inténtalo nuevamente.",
+  network: "Sin conexión a internet. Revisa tu conexión e inténtalo nuevamente.",
+  server: "No se pudo completar el cierre de la vacante. Inténtalo más tarde.",
+  notClosable: "La vacante ya se encuentra cerrada o dejó de estar publicada.",
+} as const;

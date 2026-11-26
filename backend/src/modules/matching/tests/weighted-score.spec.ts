@@ -8,10 +8,8 @@ import {
   type MatchScoreWeights,
 } from '../constants/match-score.constants.js';
 
-
 const met: RequirementState = { name: 'Met', status: 'Cumple' };
 const pending: RequirementState = { name: 'Pending', status: 'Pendiente' };
-
 
 describe('Match score: pruebas de estrés matemático y pesos parametrizables (T3.3)', () => {
   const emptyRequirements = {
@@ -173,7 +171,11 @@ describe('Match score: pruebas de estrés matemático y pesos parametrizables (T
   it('mantiene un puntaje finito con pesos válidos muy grandes', () => {
     expect(
       calculateWeightedScore(
-        { ...emptyRequirements, skills: [met], academicRequirements: [pending] },
+        {
+          ...emptyRequirements,
+          skills: [met],
+          academicRequirements: [pending],
+        },
         { ...MATCH_SCORE_WEIGHTS, skills: 1e308, academicRequirements: 1e308 },
       ),
     ).toBe(50);

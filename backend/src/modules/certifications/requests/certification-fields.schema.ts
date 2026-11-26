@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-import {
-  CERTIFICATION_MIN_ISSUE_DATE,
-  CERTIFICATION_NAME_MAX_LENGTH,
-  CERTIFICATION_VALIDATION_MESSAGES,
-  ISSUING_ORGANIZATION_MAX_LENGTH,
-} from '../constants/certification.constants.js';
+import { CERTIFICATION_VALIDATION_MESSAGES } from '../constants/certification.constants.js';
 
 const BUSINESS_TIMEZONE = 'America/La_Paz';
 
@@ -35,12 +30,12 @@ function todayInBolivia(): string {
 }
 
 export const certificationNameSchema = requiredText().max(
-  CERTIFICATION_NAME_MAX_LENGTH,
+  150,
   CERTIFICATION_VALIDATION_MESSAGES.nameTooLong,
 );
 
 export const issuingOrganizationSchema = requiredText().max(
-  ISSUING_ORGANIZATION_MAX_LENGTH,
+  150,
   CERTIFICATION_VALIDATION_MESSAGES.organizationTooLong,
 );
 
@@ -52,7 +47,7 @@ export const issueDateSchema = z
     error: CERTIFICATION_VALIDATION_MESSAGES.invalidDate,
     abort: true,
   })
-  .refine((value) => value >= CERTIFICATION_MIN_ISSUE_DATE, {
+  .refine((value) => value >= '1950-01-01', {
     error: CERTIFICATION_VALIDATION_MESSAGES.minDate,
     abort: true,
   })

@@ -3,10 +3,7 @@
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { skillsAnalysisService } from "@/modules/matching";
-import {
-  WORK_EXPERIENCE_SKILLS_PREVIEW_DELAY_MS,
-  WORK_EXPERIENCE_SKILLS_PREVIEW_QUERY_KEY,
-} from "../constants/work-experience-skills-preview.constants";
+
 import type { WorkExperienceSkillsPreviewOptions } from "../types/work-experience-skills-preview-options.types";
 
 export function useWorkExperienceSkillsPreview({
@@ -24,13 +21,13 @@ export function useWorkExperienceSkillsPreview({
 
     const timeoutId = window.setTimeout(() => {
       setDebouncedInput({ experienceId, description: text });
-    }, WORK_EXPERIENCE_SKILLS_PREVIEW_DELAY_MS);
+    }, 500);
 
     return () => window.clearTimeout(timeoutId);
   }, [experienceId, text]);
 
   const query = useQuery({
-    queryKey: [WORK_EXPERIENCE_SKILLS_PREVIEW_QUERY_KEY, experienceId, text],
+    queryKey: ["work-experience-skills-preview", experienceId, text],
     queryFn: experienceId && text
       ? () => skillsAnalysisService.previewExperience(experienceId, text)
       : skipToken,

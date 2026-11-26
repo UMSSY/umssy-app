@@ -1,5 +1,5 @@
-import type { Prisma } from "../../../prisma/client.js";
-import { SEED_ORIENTATION_TYPES } from "../constants/seed-orientation-types.constants.js";
+import type { Prisma } from '../../../prisma/client.js';
+import { SEED_ORIENTATION_TYPES } from '../constants/seed-orientation-types.constants.js';
 
 export async function seedOrientationTypes(
   tx: Prisma.TransactionClient,

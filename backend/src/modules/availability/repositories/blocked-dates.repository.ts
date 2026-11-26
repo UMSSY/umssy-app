@@ -35,9 +35,16 @@ export class BlockedDatesRepository {
     return this.prisma.blockedDate.findUnique({ where: { id } });
   }
 
-  findInRange(mentorId: string, fromDay: Date, toDay?: Date): Promise<BlockedDate[]> {
+  findInRange(
+    mentorId: string,
+    fromDay: Date,
+    toDay?: Date,
+  ): Promise<BlockedDate[]> {
     return this.prisma.blockedDate.findMany({
-      where: { mentorId, blockedOn: { gte: fromDay, ...(toDay ? { lte: toDay } : {}) } },
+      where: {
+        mentorId,
+        blockedOn: { gte: fromDay, ...(toDay ? { lte: toDay } : {}) },
+      },
       orderBy: { blockedOn: 'asc' },
     });
   }
@@ -52,7 +59,9 @@ export class BlockedDatesRepository {
       where: {
         mentorId,
         startAt: { gte: from, lt: to },
-        appointments: { some: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } } },
+        appointments: {
+          some: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
+        },
       },
       select: { id: true },
     });

@@ -1,9 +1,6 @@
 import type { SeedUserDefinition } from '../types/seed-user-definition.types.js';
 import type { SeedUserKey } from '../types/seed-user-key.types.js';
 
-export const SEED_PASSWORD = 'Prueba123';
-export const BCRYPT_ROUNDS = 10;
-
 export const SEED_USERS: ReadonlyArray<
   SeedUserDefinition & { key: SeedUserKey }
 > = [
@@ -19,6 +16,27 @@ export const SEED_USERS: ReadonlyArray<
     firstName: 'Usuario',
     lastName: 'Sin Pases',
     email: 'sinpases@umss.edu.bo',
+    roles: ['titulado'],
+  },
+  {
+    key: 'historyGraduate',
+    firstName: 'Usuario',
+    lastName: 'Historial',
+    email: 'historial@umss.edu.bo',
+    roles: ['titulado'],
+  },
+  {
+    key: 'workshopOrganizer',
+    firstName: 'Carla',
+    lastName: 'Montaño Ríos',
+    email: 'carla.montano@umss.edu.bo',
+    roles: ['titulado'],
+  },
+  {
+    key: 'workshopParticipant',
+    firstName: 'Diego',
+    lastName: 'Fernández Aguilar',
+    email: 'diego.fernandez@umss.edu.bo',
     roles: ['titulado'],
   },
   {

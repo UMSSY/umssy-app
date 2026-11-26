@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
@@ -21,9 +23,9 @@ function mockOffers(offers = OFFERS) {
 }
 
 describe("VacancyList en el portal de empresa", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {
@@ -38,10 +40,28 @@ describe("VacancyList en el portal de empresa", () => {
     mockOffers([]);
     renderWithQuery(<VacancyList />);
 
-    expect(await screen.findByText("Aún no tienes vacantes publicadas")).toBeInTheDocument();
+    expect(await screen.findByText("No se tienen vacantes creadas")).toBeInTheDocument();
     const links = screen.getAllByRole("link", { name: "Crear nueva vacante" });
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAttribute("href", "/recruiters/job-offers/new");
+  });
+
+  it("muestra el encabezado Lista de Vacantes con su subtítulo", async () => {
+    mockOffers();
+    renderWithQuery(<VacancyList />);
+
+    expect(await screen.findByRole("heading", { name: "Lista de Vacantes" })).toBeInTheDocument();
+    expect(screen.getByText("Consulta y administra las vacantes que publicó tu empresa.")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Buscar por título de vacante...")).toBeInTheDocument();
+  });
+
+  it("muestra la lupa dentro del buscador y el embudo en Filtrar por", async () => {
+    mockOffers();
+    renderWithQuery(<VacancyList />);
+
+    const search = await screen.findByPlaceholderText("Buscar por título de vacante...");
+    expect(search.parentElement?.querySelector("svg.lucide-search")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /Filtrar por/ }).querySelector("svg.lucide-funnel")).not.toBeNull();
   });
 
   it("muestra esqueletos de carga mientras consulta las vacantes", () => {
@@ -102,7 +122,10 @@ describe("VacancyList en el portal de empresa", () => {
     const user = userEvent.setup();
     mockOffers(
       Array.from({ length: 23 }, (_, index) =>
-        buildJobOffer({ id: `offer-${index + 1}`, title: `Vacante ${index + 1}` }),
+        buildJobOffer({
+          id: `offer-${index + 1}`,
+          title: `Vacante ${index + 1}`,
+        }),
       ),
     );
     renderWithQuery(<VacancyList />);

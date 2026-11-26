@@ -21,7 +21,10 @@ const detected = (id: string, evidenceIds: string[]): NlpDetectedSkill => ({
   name: id,
   source: 'nlp',
   verificationStatus: 'pending',
-  evidenceRefs: evidenceIds.map((evidenceId) => ({ type: 'work-experience', id: evidenceId })),
+  evidenceRefs: evidenceIds.map((evidenceId) => ({
+    type: 'work-experience',
+    id: evidenceId,
+  })),
 });
 
 describe('sortEvidenceRefs', () => {
@@ -62,40 +65,71 @@ describe('parseEvidenceRefs', () => {
 describe('planSkillReconciliation', () => {
   it('creates a row for a new detected skill', () => {
     expect(planSkillReconciliation([], [detected('skill-2', ['w1'])])).toEqual({
-      creates: [{ skillId: 'skill-2', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] }],
+      creates: [
+        {
+          skillId: 'skill-2',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+        },
+      ],
       updates: [],
       deleteIds: [],
     });
   });
 
   it('keeps a manual skill as one row and adds the NLP evidence to it', () => {
-    const plan = planSkillReconciliation([row({})], [detected('skill-1', ['w1'])]);
+    const plan = planSkillReconciliation(
+      [row({})],
+      [detected('skill-1', ['w1'])],
+    );
 
     expect(plan).toEqual({
       creates: [],
-      updates: [{ id: 'row-1', evidenceRefs: [{ type: 'work-experience', id: 'w1' }], isHighRelevance: true }],
+      updates: [
+        {
+          id: 'row-1',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+          isHighRelevance: true,
+        },
+      ],
       deleteIds: [],
     });
   });
 
   it('never deletes a manual skill, even without evidence', () => {
     const plan = planSkillReconciliation(
-      [row({ evidenceRefs: [{ type: 'work-experience', id: 'w1' }], isHighRelevance: true })],
+      [
+        row({
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+          isHighRelevance: true,
+        }),
+      ],
       [],
     );
 
     expect(plan.deleteIds).toEqual([]);
-    expect(plan.updates).toEqual([{ id: 'row-1', evidenceRefs: [], isHighRelevance: false }]);
+    expect(plan.updates).toEqual([
+      { id: 'row-1', evidenceRefs: [], isHighRelevance: false },
+    ]);
   });
 
   it('removes a detected skill whose evidence disappeared', () => {
-    const plan = planSkillReconciliation([row({ source: 'nlp', evidenceRefs: [{ type: 'education', id: 'e1' }] })], []);
+    const plan = planSkillReconciliation(
+      [row({ source: 'nlp', evidenceRefs: [{ type: 'education', id: 'e1' }] })],
+      [],
+    );
     expect(plan).toEqual({ creates: [], updates: [], deleteIds: ['row-1'] });
   });
 
   it('keeps an approved detected skill without evidence', () => {
     const plan = planSkillReconciliation(
-      [row({ source: 'nlp', verificationStatus: 'approved', evidenceRefs: [{ type: 'education', id: 'e1' }], isHighRelevance: true })],
+      [
+        row({
+          source: 'nlp',
+          verificationStatus: 'approved',
+          evidenceRefs: [{ type: 'education', id: 'e1' }],
+          isHighRelevance: true,
+        }),
+      ],
       [],
     );
 
@@ -108,7 +142,13 @@ describe('planSkillReconciliation', () => {
 
   it('changes nothing when the evidence is the same', () => {
     const plan = planSkillReconciliation(
-      [row({ source: 'nlp', evidenceRefs: [{ type: 'work-experience', id: 'w1' }], isHighRelevance: true })],
+      [
+        row({
+          source: 'nlp',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+          isHighRelevance: true,
+        }),
+      ],
       [detected('skill-1', ['w1'])],
     );
 
@@ -148,7 +188,11 @@ describe('planSkillReconciliation', () => {
     expect(plan.creates).toEqual([]);
     expect(plan.deleteIds).toEqual([]);
     expect(plan.updates).toEqual([
-      { id: 'row-1', evidenceRefs: [{ type: 'work-experience', id: 'w1' }], isHighRelevance: true },
+      {
+        id: 'row-1',
+        evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+        isHighRelevance: true,
+      },
     ]);
     expect(manual).toEqual(originalManual);
     expect(nlpSkill).toEqual(originalDetection);
@@ -156,7 +200,13 @@ describe('planSkillReconciliation', () => {
 
   it('updates the evidence of a detected skill when the sources change', () => {
     const plan = planSkillReconciliation(
-      [row({ source: 'nlp', evidenceRefs: [{ type: 'work-experience', id: 'w1' }], isHighRelevance: true })],
+      [
+        row({
+          source: 'nlp',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+          isHighRelevance: true,
+        }),
+      ],
       [detected('skill-1', ['w2', 'w1'])],
     );
 
@@ -173,6 +223,10 @@ describe('planSkillReconciliation', () => {
   });
 
   it('produces an empty plan for a profile without skills or texts', () => {
-    expect(planSkillReconciliation([], [])).toEqual({ creates: [], updates: [], deleteIds: [] });
+    expect(planSkillReconciliation([], [])).toEqual({
+      creates: [],
+      updates: [],
+      deleteIds: [],
+    });
   });
 });

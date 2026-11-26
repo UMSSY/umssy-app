@@ -13,7 +13,11 @@ import { BlockedDatesService } from './services/blocked-dates.service.js';
 
 @Module({
   imports: [AuthModule, MentorsModule],
-  controllers: [AvailabilityController, MentorAvailabilityController, BlockedDatesController],
+  controllers: [
+    AvailabilityController,
+    MentorAvailabilityController,
+    BlockedDatesController,
+  ],
   providers: [
     AvailabilityService,
     AvailabilityRepository,

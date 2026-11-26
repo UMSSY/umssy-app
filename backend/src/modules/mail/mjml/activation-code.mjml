@@ -1,0 +1,9 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Activa tu cuenta</mj-text>
+    <mj-text>Tu solicitud de acceso fue aprobada. Ingresa este código para activar tu cuenta:</mj-text>
+    <mj-text align="center" font-family="Inter Tight, Inter, Arial, sans-serif" font-size="38px" line-height="44px" font-weight="800" letter-spacing="10px" color="#003770" padding="8px 0 16px">{{ code }}</mj-text>
+    <mj-text mj-class="secondary">El código vence en {{ expiresInMinutes }} minutos. Si no solicitaste el acceso, ignora este correo.</mj-text>
+    <mj-button href="{{ activationUrl }}">Activar mi cuenta</mj-button>
+  </mj-column>
+</mj-section>

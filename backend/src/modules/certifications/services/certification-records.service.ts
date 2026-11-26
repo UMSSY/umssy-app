@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
 import type { CreateCertificationRequest } from '../requests/create-certification.request.js';
 import type { UpdateCertificationRequest } from '../requests/update-certification.request.js';
 import type { CertificationRecord } from '../types/certification-record.type.js';
@@ -23,11 +23,18 @@ function metadataOf(
 
 @Injectable()
 export class CertificationRecordsService {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return this.repository.findVerificationSources(userId, context);
+  }
   constructor(
     private readonly repository: CertificationsRepository,
     private readonly audit: RadarAuditService,
     private readonly transactions: TransactionService,
   ) {}
+
+  hasByUserId(userId: string): Promise<boolean> {
+    return this.repository.hasByUserId(userId);
+  }
 
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return this.repository.findPublicationEvidenceIds(userId, context);
@@ -88,5 +95,9 @@ export class CertificationRecordsService {
 
   delete(id: string): Promise<void> {
     return this.repository.delete(id);
+  }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.repository.findRecruitmentEvidence(userId, ids);
   }
 }

@@ -1,4 +1,4 @@
-import type { BuilderQuestion } from "../types/survey-builder.types";
+import type { BuilderQuestion } from "../types/builder-question.types";
 
 const FIELD_TARGETS: Readonly<Record<string, string>> = {
   title: "survey-title",

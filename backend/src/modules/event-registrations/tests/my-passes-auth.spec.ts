@@ -40,14 +40,18 @@ describe('identidad en Mis pases', () => {
           switchToHttp: () => ({ getRequest: () => request }),
         } as unknown as ExecutionContext;
         await guard.canActivate(context);
-        await expect(controller.findMine(request.user!)).resolves.toEqual([]);
+        await expect(
+          controller.findMine(request.user!, { page: 1, limit: 10 }),
+        ).resolves.toEqual([]);
         expect(findMany).toHaveBeenLastCalledWith(
           expect.objectContaining({
             where: {
               userId: sub,
               cancelledAt: null,
               status: { title: 'Confirmada' },
-              event: { status: { title: 'Publicado' } },
+              event: expect.objectContaining({
+                status: { title: 'Publicado' },
+              }),
             },
           }),
         );
@@ -60,7 +64,9 @@ describe('identidad en Mis pases', () => {
     'rejects a missing, inactive or roleless account before reading passes: %s',
     async (user) => {
       const findMany = vi.fn();
-      const moduleRef = await Test.createTestingModule({ imports: [EventRegistrationsModule] })
+      const moduleRef = await Test.createTestingModule({
+        imports: [EventRegistrationsModule],
+      })
         .overrideProvider(PrismaService)
         .useValue({
           eventRegistration: { findMany },
@@ -69,7 +75,8 @@ describe('identidad en Mis pases', () => {
         .compile();
       try {
         vi.spyOn(moduleRef.get(JwtService), 'verifyAsync').mockResolvedValue({
-          sub: 'user-1', roleTag: 'titulado',
+          sub: 'user-1',
+          roleTag: 'titulado',
         });
         const request = {
           headers: { authorization: 'Bearer valid-token' },
@@ -77,8 +84,9 @@ describe('identidad en Mis pases', () => {
         const context = {
           switchToHttp: () => ({ getRequest: () => request }),
         } as unknown as ExecutionContext;
-        await expect(moduleRef.get(JwtAuthGuard).canActivate(context))
-          .rejects.toMatchObject({ statusCode: 401 });
+        await expect(
+          moduleRef.get(JwtAuthGuard).canActivate(context),
+        ).rejects.toMatchObject({ statusCode: 401 });
         expect(request.user).toBeUndefined();
         expect(findMany).not.toHaveBeenCalled();
       } finally {
@@ -86,5 +94,4 @@ describe('identidad en Mis pases', () => {
       }
     },
   );
-
 });

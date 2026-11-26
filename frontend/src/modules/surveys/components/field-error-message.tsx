@@ -1,6 +1,6 @@
 import { CircleAlert } from "lucide-react";
 import { cn } from "cn";
-import type { FieldErrorMessageProps } from "../types/survey-component-props.types";
+import type { FieldErrorMessageProps } from "../types/field-error-message-props.types";
 
 export function FieldErrorMessage({ id, message, className }: FieldErrorMessageProps) {
   if (!message) return null;

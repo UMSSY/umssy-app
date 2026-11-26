@@ -4,7 +4,7 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { CertificationRecordsService } from '../services/certification-records.service.js';
 import type { CertificationsRepository } from '../repositories/certifications.repository.js';
-import type { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import type { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
 
 const fields = {
   name: 'Certificado',

@@ -11,7 +11,9 @@ import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability
 
 @Injectable()
 export class AvailabilityMapper {
-  toResponse(block: AvailabilityBlockWithAppointments): AvailabilityBlockResponse {
+  toResponse(
+    block: AvailabilityBlockWithAppointments,
+  ): AvailabilityBlockResponse {
     return {
       id: block.id,
       mentorId: block.mentorId,
@@ -23,27 +25,40 @@ export class AvailabilityMapper {
     };
   }
 
-  toResponseList(blocks: AvailabilityBlockWithAppointments[]): AvailabilityBlockResponse[] {
+  toResponseList(
+    blocks: AvailabilityBlockWithAppointments[],
+  ): AvailabilityBlockResponse[] {
     return blocks.map((block) => this.toResponse(block));
   }
 
-  toOwnerResponse(block: AvailabilityBlockWithAppointmentDetail): OwnerAvailabilityBlockResponse {
+  toOwnerResponse(
+    block: AvailabilityBlockWithAppointmentDetail,
+  ): OwnerAvailabilityBlockResponse {
     const [appointment] = block.appointments;
     return {
       ...this.toResponse(block),
-      appointment: appointment ? this.toBlockAppointmentResponse(appointment) : null,
+      appointment: appointment
+        ? this.toBlockAppointmentResponse(appointment)
+        : null,
     };
   }
 
-  toOwnerResponseList(blocks: AvailabilityBlockWithAppointmentDetail[]): OwnerAvailabilityBlockResponse[] {
+  toOwnerResponseList(
+    blocks: AvailabilityBlockWithAppointmentDetail[],
+  ): OwnerAvailabilityBlockResponse[] {
     return blocks.map((block) => this.toOwnerResponse(block));
   }
 
-  toDeletedResponse(block: AvailabilityBlockWithAppointments): DeletedBlockResponse {
+  toDeletedResponse(
+    block: AvailabilityBlockWithAppointments,
+  ): DeletedBlockResponse {
     return { id: block.id };
   }
 
-  toAvailabilityStatusResponse(mentorId: string, isAvailable: boolean): MentorAvailabilityStatusResponse {
+  toAvailabilityStatusResponse(
+    mentorId: string,
+    isAvailable: boolean,
+  ): MentorAvailabilityStatusResponse {
     return { mentorId, isAvailable };
   }
 
@@ -53,14 +68,22 @@ export class AvailabilityMapper {
     const { student } = appointment;
     return {
       id: appointment.id,
-      counterpart: { id: student.id, fullName: `${student.firstName} ${student.lastName}`.trim(), role: 'student' },
+      counterpart: {
+        id: student.id,
+        fullName: `${student.firstName} ${student.lastName}`.trim(),
+        role: 'student',
+      },
       orientationType: appointment.orientationType,
     };
   }
 
-  private toState(block: AvailabilityBlockWithAppointments): AvailabilityBlockState {
+  private toState(
+    block: AvailabilityBlockWithAppointments,
+  ): AvailabilityBlockState {
     const hasActiveAppointment = block.appointments.some((appointment) =>
-      ACTIVE_APPOINTMENT_STATUSES.some((status) => status === appointment.status.title),
+      ACTIVE_APPOINTMENT_STATUSES.some(
+        (status) => status === appointment.status.title,
+      ),
     );
     return hasActiveAppointment ? 'confirmed' : 'free';
   }

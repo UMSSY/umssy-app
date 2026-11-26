@@ -12,7 +12,6 @@ describe('UserPresenceService', () => {
       findByUserIds: vi.fn().mockResolvedValue([]),
     };
 
-
     repository = mockRepository as unknown as UserPresenceRepository;
     service = new UserPresenceService(repository);
   });

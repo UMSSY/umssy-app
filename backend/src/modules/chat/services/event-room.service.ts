@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 
 import { EventRegistrationsService } from '../../event-registrations/services/event-registrations.service.js';
@@ -31,12 +30,11 @@ export class EventRoomService {
 
     const now = new Date();
 
-    const conversationId =
-      await this.conversationRepository.upsertByEventId(
-        pass.event.id,
-        userId,
-        now,
-      );
+    const conversationId = await this.conversationRepository.upsertByEventId(
+      pass.event.id,
+      userId,
+      now,
+    );
 
     const conversation =
       await this.conversationRepository.findById(conversationId);

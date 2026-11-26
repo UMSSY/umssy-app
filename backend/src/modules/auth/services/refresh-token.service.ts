@@ -1,0 +1,250 @@
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'node:crypto';
+import { SessionService } from '../../../common/services/session.service.js';
+import { UnauthorizedSessionException } from '../../../common/exceptions/unauthorized-session.exception.js';
+import { UserInactiveException } from '../../../common/exceptions/user-inactive.exception.js';
+import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
+import {
+  REFRESH_REVOCATION_REASONS,
+  type RefreshRevocationReason,
+} from '../constants/refresh-token.constants.js';
+import {
+  SESSION_IDLE_MS,
+  SESSION_MAX_MS,
+} from '../constants/session.constants.js';
+import {
+  PasswordChangedException,
+  RefreshInvalidException,
+  SessionExpiredException,
+  SessionRevokedException,
+} from '../exceptions/index.js';
+import { RefreshTokenRepository } from '../repositories/refresh-token.repository.js';
+import type { NewRefreshToken } from '../types/new-refresh-token.types.js';
+import {
+  computeSlidingExpiry,
+  evaluateRefreshToken,
+} from '../utils/evaluate-refresh-token.js';
+import {
+  generateRefreshToken,
+  hashRefreshToken,
+} from '../utils/refresh-token.util.js';
+import type { IssuedRefreshToken } from '../types/issued-refresh-token.types.js';
+import type { RotatedSession } from '../types/rotated-session.types.js';
+import type { StartedSession } from '../types/started-session.types.js';
+
+export type { IssuedRefreshToken, RotatedSession, StartedSession };
+
+@Injectable()
+export class RefreshTokenService {
+  constructor(
+    private readonly refreshTokens: RefreshTokenRepository,
+    private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
+  ) {}
+
+  async startFromLogin(
+    accessToken: string,
+    userAgent?: string,
+  ): Promise<StartedSession> {
+    const payload = this.jwtService.decode<{
+      sub?: unknown;
+      roleTag?: unknown;
+      roles?: unknown;
+      exp?: unknown;
+    } | null>(accessToken);
+    if (
+      typeof payload?.sub !== 'string' ||
+      typeof payload.roleTag !== 'string'
+    ) {
+      throw new UnauthorizedSessionException();
+    }
+
+    const now = new Date();
+    const familyId = randomUUID();
+    const refresh = await this.persist(
+      {
+        userId: payload.sub,
+        familyId,
+        roleTag: payload.roleTag,
+        absoluteExpiresAt: new Date(now.getTime() + SESSION_MAX_MS),
+        userAgent,
+      },
+      now,
+    );
+
+    const remainingSeconds =
+      typeof payload.exp === 'number'
+        ? Math.max(1, Math.floor(payload.exp - now.getTime() / 1000))
+        : Math.floor(SESSION_MAX_MS / 1000);
+    const sessionAccessToken = this.jwtService.sign(
+      {
+        sub: payload.sub,
+        roleTag: payload.roleTag,
+        roles: payload.roles,
+        sid: familyId,
+      },
+      { expiresIn: remainingSeconds },
+    );
+
+    return {
+      ...refresh,
+      accessToken: sessionAccessToken,
+      accessMaxAgeMs: remainingSeconds * 1000,
+    };
+  }
+
+  async rotate(
+    rawToken: string | undefined,
+    userAgent?: string,
+  ): Promise<RotatedSession> {
+    if (!rawToken) throw new RefreshInvalidException();
+
+    const current = await this.refreshTokens.findByHash(
+      hashRefreshToken(rawToken),
+    );
+    if (!current) throw new RefreshInvalidException();
+
+    const now = new Date();
+    const verdict = evaluateRefreshToken(current, now);
+    if (verdict.outcome === 'revoked') {
+      throw verdict.code === 'PASSWORD_CHANGED'
+        ? new PasswordChangedException()
+        : new SessionRevokedException();
+    }
+    if (verdict.outcome === 'reuse') {
+      await this.revokeFamily(current.familyId, 'reuseDetected');
+      throw new SessionRevokedException();
+    }
+    if (verdict.outcome === 'expired') throw new SessionExpiredException();
+
+    let user: AuthenticatedUser;
+    try {
+      user = await this.sessionService.getAuthenticatedUser(current.userId);
+    } catch (error) {
+      if (
+        error instanceof UserInactiveException ||
+        error instanceof UnauthorizedSessionException
+      ) {
+        await this.revokeFamily(current.familyId, 'userInactive');
+        throw new SessionRevokedException();
+      }
+      throw error;
+    }
+    if (!user.roles.includes(current.roleTag)) {
+      await this.revokeFamily(current.familyId, 'roleRemoved');
+      throw new SessionRevokedException();
+    }
+
+    const next = this.buildNextToken(
+      {
+        userId: current.userId,
+        familyId: current.familyId,
+        roleTag: current.roleTag,
+        absoluteExpiresAt: current.absoluteExpiresAt,
+        userAgent,
+      },
+      now,
+    );
+    const rotated = await this.refreshTokens.rotate(current.id, next.data);
+    if (!rotated) {
+      await this.revokeFamily(current.familyId, 'reuseDetected');
+      throw new SessionRevokedException();
+    }
+
+    const accessTtlSeconds = Math.max(
+      1,
+      Math.floor(
+        Math.min(
+          SESSION_IDLE_MS,
+          current.absoluteExpiresAt.getTime() - now.getTime(),
+        ) / 1000,
+      ),
+    );
+    const accessToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        roleTag: current.roleTag,
+        roles: user.roles,
+        sid: current.familyId,
+      },
+      { expiresIn: accessTtlSeconds },
+    );
+
+    return {
+      accessToken,
+      accessMaxAgeMs: accessTtlSeconds * 1000,
+      refreshToken: next.token,
+      refreshMaxAgeMs: next.maxAgeMs,
+      roleTag: current.roleTag,
+      roles: user.roles,
+    };
+  }
+
+  async revokeByToken(rawToken: string | undefined): Promise<void> {
+    if (!rawToken) return;
+    const current = await this.refreshTokens.findByHash(
+      hashRefreshToken(rawToken),
+    );
+    if (current) await this.revokeFamily(current.familyId, 'logout');
+  }
+
+  async getAbsoluteExpiry(rawToken: string | undefined): Promise<Date | null> {
+    if (!rawToken) return null;
+    const current = await this.refreshTokens.findByHash(
+      hashRefreshToken(rawToken),
+    );
+    if (!current || current.revokedAt) return null;
+    return current.absoluteExpiresAt;
+  }
+
+  private async persist(
+    base: Omit<NewRefreshToken, 'tokenHash' | 'expiresAt' | 'userAgent'> & {
+      userAgent?: string;
+    },
+    now: Date,
+  ): Promise<IssuedRefreshToken> {
+    const next = this.buildNextToken(base, now);
+    await this.refreshTokens.create(next.data);
+    return { refreshToken: next.token, refreshMaxAgeMs: next.maxAgeMs };
+  }
+
+  private buildNextToken(
+    base: Omit<NewRefreshToken, 'tokenHash' | 'expiresAt' | 'userAgent'> & {
+      userAgent?: string;
+    },
+    now: Date,
+  ): { token: string; maxAgeMs: number; data: NewRefreshToken } {
+    const { token, tokenHash } = generateRefreshToken();
+    const expiresAt = computeSlidingExpiry(
+      now,
+      base.absoluteExpiresAt,
+      SESSION_IDLE_MS,
+    );
+    return {
+      token,
+      maxAgeMs: expiresAt.getTime() - now.getTime(),
+      data: {
+        ...base,
+        tokenHash,
+        expiresAt,
+        userAgent: base.userAgent?.slice(0, 255) ?? null,
+      },
+    };
+  }
+
+  private revokeFamily(
+    familyId: string,
+    reason: keyof typeof REFRESH_REVOCATION_REASONS,
+  ) {
+    const value: RefreshRevocationReason = REFRESH_REVOCATION_REASONS[reason];
+    return this.refreshTokens.revokeFamily(familyId, value);
+  }
+
+  revokeAllForUser(userId: string) {
+    return this.refreshTokens.revokeAllForUser(
+      userId,
+      REFRESH_REVOCATION_REASONS.passwordChanged,
+    );
+  }
+}

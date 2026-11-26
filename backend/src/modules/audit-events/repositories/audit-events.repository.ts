@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import {
+  AUDIT_EVENT_DETAIL_SELECT,
   AUDIT_EVENT_LIST_SELECT,
   AUDIT_EVENT_ORDER,
   AUDIT_TIMELINE_ORDER,
@@ -19,22 +20,34 @@ export class AuditEventsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   create(input: RecordAuditEventInput, client: AuditClient = this.prisma) {
-    const { accessRequestId, action, actor, evidenceFileId, ...snapshot } = input;
+    const { accessRequestId, action, actor, evidenceFileId, ...snapshot } =
+      input;
     return client.auditEvent.create({
       data: {
         ...snapshot,
         actorName: actor.name,
         actorRole: actor.role,
         accessRequest: { connect: { id: accessRequestId } },
-        action: { connectOrCreate: { where: { title: action }, create: { title: action } } },
+        action: {
+          connectOrCreate: {
+            where: { title: action },
+            create: { title: action },
+          },
+        },
         ...(actor.id && { actor: { connect: { id: actor.id } } }),
-        ...(evidenceFileId && { evidenceFile: { connect: { id: evidenceFileId } } }),
+        ...(evidenceFileId && {
+          evidenceFile: { connect: { id: evidenceFileId } },
+        }),
       },
       select: { id: true },
     });
   }
 
-  async findPage(params: { filters: AuditEventFilters; skip: number; take: number }) {
+  async findPage(params: {
+    filters: AuditEventFilters;
+    skip: number;
+    take: number;
+  }) {
     const where = buildAuditEventsWhere(params.filters);
     const [rows, total] = await Promise.all([
       this.prisma.auditEvent.findMany({
@@ -49,7 +62,11 @@ export class AuditEventsRepository {
     return { rows, total };
   }
 
-  findBatch(params: { filters: AuditEventFilters; skip: number; take: number }) {
+  findBatch(params: {
+    filters: AuditEventFilters;
+    skip: number;
+    take: number;
+  }) {
     return this.prisma.auditEvent.findMany({
       where: buildAuditEventsWhere(params.filters),
       orderBy: AUDIT_EVENT_ORDER,
@@ -67,13 +84,26 @@ export class AuditEventsRepository {
         orderBy: [{ actorId: 'asc' }, { occurredAt: 'desc' }],
         select: { actorId: true, actorName: true },
       }),
-      this.prisma.auditEvent.findFirst({ where: { actorRole: AUDIT_ACTOR_ROLE.SYSTEM }, select: { id: true } }),
+      this.prisma.auditEvent.findFirst({
+        where: { actorRole: AUDIT_ACTOR_ROLE.SYSTEM },
+        select: { id: true },
+      }),
     ]);
     return { people, hasSystemEvents: systemEvent !== null };
   }
 
+  findDetailById(id: string) {
+    return this.prisma.auditEvent.findUnique({
+      where: { id },
+      select: AUDIT_EVENT_DETAIL_SELECT,
+    });
+  }
+
   findEvidenceReference(id: string) {
-    return this.prisma.auditEvent.findUnique({ where: { id }, select: { id: true, evidenceFileId: true } });
+    return this.prisma.auditEvent.findUnique({
+      where: { id },
+      select: { id: true, evidenceFileId: true },
+    });
   }
 
   findTimeline(accessRequestId: string) {
@@ -81,6 +111,13 @@ export class AuditEventsRepository {
       where: { accessRequestId },
       orderBy: AUDIT_TIMELINE_ORDER,
       select: AUDIT_TIMELINE_SELECT,
+    });
+  }
+
+  findTimelineOwner(id: string) {
+    return this.prisma.auditEvent.findUnique({
+      where: { id },
+      select: { id: true, accessRequestId: true, requestCode: true },
     });
   }
 }

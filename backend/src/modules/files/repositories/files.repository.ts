@@ -1,3 +1,4 @@
+import { RECORD_NOT_FOUND_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
@@ -40,11 +41,17 @@ export class FilesRepository {
   }
 
   findMetadataById(id: string) {
-    return this.prisma.file.findUnique({ where: { id }, select: FILE_METADATA_SELECT });
+    return this.prisma.file.findUnique({
+      where: { id },
+      select: FILE_METADATA_SELECT,
+    });
   }
 
   findContentById(id: string) {
-    return this.prisma.file.findUnique({ where: { id }, select: FILE_CONTENT_SELECT });
+    return this.prisma.file.findUnique({
+      where: { id },
+      select: FILE_CONTENT_SELECT,
+    });
   }
 
   async delete(id: string) {
@@ -52,7 +59,10 @@ export class FilesRepository {
       // select evita leer content (hasta 10 MB) solo para descartarlo
       await this.prisma.file.delete({ where: { id }, select: { id: true } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         throw new FileNotFoundException();
       }
       throw error;

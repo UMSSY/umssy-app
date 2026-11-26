@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 
 import { UserNotFoundException } from '../exceptions/index.js';
@@ -64,12 +63,12 @@ export class ConversationMapper {
       createdAt: (
         conversation.createdAt ?? conversation.updatedAt
       ).toISOString(),
-      participants: this.toEventParticipants(
-        conversation.participants ?? [],
-      ),
+      participants: this.toEventParticipants(conversation.participants ?? []),
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount: 0,
       isBlockedByMe: false,
+      contextType: 'EVENTO',
+      contextId: conversation.event.id,
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }
@@ -82,6 +81,7 @@ export class ConversationMapper {
     isBlockedByMe: boolean;
     academicTitle: string | null;
     skills: string[];
+    contextTitle?: string | null;
   }): ConversationResponse {
     const {
       conversation,
@@ -91,6 +91,7 @@ export class ConversationMapper {
       isBlockedByMe,
       academicTitle,
       skills,
+      contextTitle = null,
     } = params;
 
     const avatarUrl = this.toAvatarUrl(contact.photoUrl);
@@ -112,6 +113,9 @@ export class ConversationMapper {
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount,
       isBlockedByMe,
+      contextType: conversation.contextType ?? null,
+      contextId: conversation.contextId ?? null,
+      contextTitle,
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }

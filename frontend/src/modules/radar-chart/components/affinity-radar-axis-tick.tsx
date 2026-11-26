@@ -1,11 +1,13 @@
-"use client";
+'use client';
 
-import type { KeyboardEvent } from "react";
-import { Text } from "recharts";
-import type { AffinityRadarAxisTickProps } from "../types/radar-profile-components.types";
+import type { KeyboardEvent } from 'react';
+import { Text } from 'recharts';
+import { cn } from '@/lib/utils';
+import type { AffinityRadarAxisTickProps } from '../types/affinity-radar-axis-tick-props.types';
 
 export function AffinityRadarAxisTick({
   area,
+  highlighted,
   x,
   y,
   textAnchor,
@@ -18,9 +20,13 @@ export function AffinityRadarAxisTick({
       y={y}
       textAnchor={textAnchor}
       verticalAnchor={verticalAnchor}
-      width={84}
+      width={76}
+      lineHeight={13}
       fontSize={11}
-      className="fill-ink-soft text-[11px] font-semibold sm:text-sm"
+      className={cn(
+        'text-[11px] font-semibold sm:text-sm',
+        highlighted ? 'fill-accent underline' : 'fill-ink-soft',
+      )}
     >
       {area.name}
     </Text>
@@ -31,7 +37,7 @@ export function AffinityRadarAxisTick({
   }
 
   function handleKeyDown(event: KeyboardEvent<SVGGElement>) {
-    if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
 
     event.preventDefault();
     onAreaClick?.(area.id);
@@ -46,6 +52,7 @@ export function AffinityRadarAxisTick({
       onKeyDown={handleKeyDown}
       className="cursor-pointer outline-none hover:[&_text]:fill-accent focus-visible:[&_text]:fill-accent focus-visible:[&_text]:underline [&_text]:motion-safe:transition-colors"
     >
+      <circle cx={x} cy={y} r={24} fill="transparent" />
       {label}
     </g>
   );

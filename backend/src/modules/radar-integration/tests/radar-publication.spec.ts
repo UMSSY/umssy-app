@@ -1,0 +1,538 @@
+import type { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
+import { RadarIntegrationService } from '../services/radar-integration.service.js';
+import { RadarPublicationService } from '../services/radar-publication.service.js';
+import { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
+import type { RadarPublicationEvidenceService } from '../services/radar-publication-evidence.service.js';
+import { RadarPublicationRepository } from '../repositories/radar-publication.repository.js';
+import type { RadarCvService } from '../services/radar-cv.service.js';
+import type { RadarReviewService } from '../services/radar-review.service.js';
+import type { RadarNotificationsService } from '../services/radar-notifications.service.js';
+import { emptyScores, scoreVerifiedSkills } from '../utils/radar-scoring.js';
+
+const userId = '11111111-1111-4111-8111-111111111111';
+const skill = (
+  id: string,
+  source = 'nlp',
+  evidenceRefs: unknown = [{ type: 'work-experience', id: 'own-experience' }],
+  areaId: string | null = 'qa',
+) => ({
+  skillId: id,
+  source,
+  evidenceRefs,
+  isHighRelevance: source === 'nlp',
+  skill: { name: id, areaId },
+});
+const snapshot = (revision: number | null = 2) => ({
+  id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  user_id: userId,
+  version: 4,
+  source_revision: revision,
+  rubric_version: 'epic3-provisional-1',
+  fingerprint: 'previous',
+  scores: { ...emptyScores(), qa: 1.5 },
+  evidence: { qa: [{ id: 'verified', name: 'verified' }] },
+  skills: [
+    {
+      id: 'verified',
+      name: 'verified',
+      areaId: 'qa',
+      isHighRelevance: true,
+      evidenceRefs: [{ type: 'work-experience', id: 'own-experience' }],
+    },
+  ],
+  average_score: '0.25',
+  created_at: new Date('2026-10-26T12:00:00Z'),
+});
+
+function setup() {
+  const state = {
+    status: 'ready',
+    inputRevision: 2,
+    processedRevision: 2,
+    dictionaryVersion: '1',
+  };
+  const rows = [snapshot()];
+  const db = {
+    $queryRaw: vi.fn(),
+    $executeRaw: vi.fn(async () => 1),
+    userSkill: {
+      findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
+    },
+    workExperience: {
+      findMany: vi.fn().mockResolvedValue([{ id: 'own-experience' }]),
+    },
+    education: {
+      findMany: vi.fn().mockResolvedValue([{ id: 'own-education' }]),
+    },
+    certification: {
+      findMany: vi.fn().mockResolvedValue([{ id: 'own-certification' }]),
+    },
+    profileSkillProcessingState: {
+      findUnique: vi.fn().mockResolvedValue(state),
+    },
+    $transaction: vi.fn(),
+  };
+  const insertions: unknown[][] = [];
+  db.$queryRaw.mockImplementation(
+    async (strings: TemplateStringsArray, ...values: unknown[]) => {
+      const sql = strings.join('');
+      if (sql.includes('pg_advisory')) return [{ locked: 1 }];
+      if (sql.includes('FROM profile_skill_processing_states'))
+        return [
+          {
+            input_revision: state.inputRevision,
+            processed_revision: state.processedRevision,
+            status: state.status,
+          },
+        ];
+      if (sql.includes('COUNT(*)')) return [{ count: 0n }];
+      if (sql.includes('FROM radar_cv_evidence'))
+        return [
+          {
+            cv_id: 'approved-cv',
+            review_status: 'approved',
+            extraction_status: 'ready',
+          },
+          {
+            cv_id: 'pending-cv',
+            review_status: 'pending',
+            extraction_status: 'ready',
+          },
+          {
+            cv_id: 'extracting-cv',
+            review_status: 'approved',
+            extraction_status: 'pending',
+          },
+          {
+            cv_id: 'rejected-cv',
+            review_status: 'rejected',
+            extraction_status: 'ready',
+          },
+        ];
+      if (sql.includes('FROM radar_score_snapshots')) return rows;
+      if (sql.includes('INSERT INTO radar_score_snapshots')) {
+        insertions.push(values);
+        return [
+          {
+            ...snapshot(),
+            id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+          },
+        ];
+      }
+      if (sql.includes('FROM radar_audit_events')) return [];
+      throw new Error('Unexpected database operation');
+    },
+  );
+  db.$transaction.mockImplementation(async (operation) => operation(db));
+  const nlp = {
+    analyzeNow: vi.fn().mockResolvedValue({ status: 'ready' }),
+    getProcessingState: vi.fn(() =>
+      db.profileSkillProcessingState.findUnique(),
+    ),
+    readLockedRevision: vi.fn(async () => ({
+      input_revision: state.inputRevision,
+      processed_revision: state.processedRevision,
+      status: state.status,
+    })),
+  };
+  const events = new ProfileSkillsEvents();
+  const readEvidence = async () =>
+    Promise.all([
+        db.userSkill.findMany(),
+        db.$queryRaw`SELECT cv_id,review_status,extraction_status FROM radar_cv_evidence`,
+        db.workExperience.findMany(),
+        db.education.findMany(),
+        db.certification.findMany(),
+      ]);
+  const evidence = {
+    countPendingPublicationSkills: () => db.userSkill.count(),
+    read: readEvidence,
+    readSimulation: readEvidence,
+  };
+  const notifications = {
+    notify: vi.fn().mockResolvedValue({ inAppCount: 1 }),
+  };
+  const publication = new RadarPublicationService(
+    new RadarPublicationRepository(db as unknown as PrismaService),
+    new RadarPublicationMapper(),
+    evidence as unknown as RadarPublicationEvidenceService,
+    nlp as unknown as ProfileSkillsAnalysisService,
+    notifications as unknown as NotificationsService,
+  );
+  const service = new RadarIntegrationService(
+    nlp as unknown as ProfileSkillsAnalysisService,
+    events,
+    publication,
+    {} as RadarCvService,
+    {} as RadarReviewService,
+    {} as RadarNotificationsService,
+  );
+  return { service, db, state, rows, insertions, nlp, events, notifications };
+}
+
+describe('Radar simulation eligibility', () => {
+  it.each([
+    ['normal skill with valid evidence', 'work-experience', 'own-experience', false, false],
+    ['high relevance with valid evidence', 'work-experience', 'own-experience', true, true],
+    ['approved CV extracted successfully', 'cv', 'approved-cv', true, true],
+    ['CV awaiting approval', 'cv', 'pending-cv', true, false],
+    ['CV awaiting extraction', 'cv', 'extracting-cv', true, false],
+    ['rejected CV', 'cv', 'rejected-cv', true, false],
+    ['nonexistent source', 'work-experience', 'missing', true, false],
+  ])('matches official relevance for %s', async (_case, type, id, isHighRelevance, expected) => {
+    const { service, db, insertions, notifications } = setup();
+    const candidate = { ...skill('candidate', 'nlp', [{ type, id }]), isHighRelevance };
+    db.userSkill.findMany.mockResolvedValueOnce([
+      { ...candidate, verificationStatus: 'pending' },
+      { ...skill('recently-approved'), verificationStatus: 'approved' },
+      { ...skill('rejected'), verificationStatus: 'rejected' },
+    ]);
+
+    await expect(service.simulationEligibility(userId)).resolves.toEqual({
+      approved: [{ id: 'recently-approved', name: 'recently-approved' }],
+      highRelevanceSkillIds: expected ? ['candidate'] : [],
+    });
+    expect(db.$executeRaw).not.toHaveBeenCalled();
+    expect(insertions).toHaveLength(0);
+    expect(notifications.notify).not.toHaveBeenCalled();
+
+    db.userSkill.findMany.mockResolvedValueOnce([candidate]);
+    const published = await service.recalculate(userId, null);
+    expect(published?.skills.some((item) => item.isHighRelevance)).toBe(expected);
+  });
+
+  it('withholds bonuses while analysis is out of date', async () => {
+    const { service, state, db } = setup();
+    state.processedRevision = state.inputRevision - 1;
+    db.userSkill.findMany.mockResolvedValueOnce([
+      { ...skill('candidate'), verificationStatus: 'pending' },
+    ]);
+    await expect(service.simulationEligibility(userId)).resolves.toEqual({
+      approved: [],
+      highRelevanceSkillIds: [],
+    });
+  });
+});
+
+describe('Radar publication consistency', () => {
+  it('reads NLP under the publication lock with the same transaction', async () => {
+    const { service, db, nlp } = setup();
+    await service.recalculate(userId, null);
+    expect(nlp.readLockedRevision).toHaveBeenCalledWith(userId, { client: db });
+    expect(db.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      nlp.readLockedRevision.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('notifies after commit and retains the snapshot when delivery fails', async () => {
+    const { service, db, notifications, insertions } = setup();
+    notifications.notify.mockImplementation(async () => {
+      expect(db.$transaction.mock.settledResults[0]?.type).toBe('fulfilled');
+      throw new Error('Delivery unavailable');
+    });
+    await expect(service.recalculate(userId, userId)).resolves.toMatchObject({
+      version: 4,
+    });
+    expect(insertions).toHaveLength(1);
+    expect(notifications.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientIds: [userId],
+        type: 'RADAR_PUBLISHED',
+        payload: {
+          radarVersion: '4',
+          publishedAt: '2026-10-26T12:00:00.000Z',
+        },
+        groupKey: 'radar:bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        actionUrl:
+          '/profile/radar?snapshot=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      }),
+    );
+  });
+
+  it('aborts publication when the owner service cannot read the revision', async () => {
+    const { service, db, nlp, insertions } = setup();
+    nlp.readLockedRevision.mockRejectedValueOnce(new Error('NLP unavailable'));
+    await expect(service.recalculate(userId, null)).rejects.toThrow(
+      'NLP unavailable',
+    );
+    expect(insertions).toEqual([]);
+    expect(db.userSkill.findMany).not.toHaveBeenCalled();
+  });
+
+  it('publishes only current owned evidence, excluding pending CVs and orphaned approvals', async () => {
+    const { service, db, insertions } = setup();
+    db.userSkill.findMany.mockResolvedValue([
+      skill('manual', 'manual', []),
+      skill('experience', 'nlp', [
+        { type: 'work-experience', id: 'own-experience' },
+        { type: 'education', id: 'own-education' },
+      ]),
+      skill('education', 'nlp', [{ type: 'education', id: 'own-education' }]),
+      skill('certification', 'nlp', [
+        { type: 'certification', id: 'own-certification' },
+      ]),
+      skill('approved-cv', 'nlp', [{ type: 'cv', id: 'approved-cv' }]),
+      skill('pending-cv', 'nlp', [{ type: 'cv', id: 'pending-cv' }]),
+      skill('foreign', 'nlp', [
+        { type: 'work-experience', id: 'foreign-experience' },
+      ]),
+      skill('invalid-manual-reference', 'manual', [
+        { type: 'work-experience', id: 'foreign-experience' },
+      ]),
+      skill('orphan', 'nlp', []),
+      skill('unclassified', 'manual', [], null),
+      skill('malformed', 'nlp', [
+        null,
+        42,
+        { type: 'cv' },
+        { type: 2, id: 'approved-cv' },
+        { type: 'cv', id: 2 },
+        { type: 'unknown', id: 'unknown' },
+      ]),
+      skill('missing-refs', 'nlp', null),
+    ]);
+    await service.recalculate(userId, null);
+    expect(insertions).toHaveLength(1);
+    const accepted = JSON.parse(db.$executeRaw.mock.calls[0][3] as string)
+      .skills as { id: string }[];
+    expect(accepted.map((row) => row.id)).toEqual([
+      'manual',
+      'experience',
+      'education',
+      'certification',
+      'approved-cv',
+      'invalid-manual-reference',
+    ]);
+  });
+
+  it('does not publish a result received for an obsolete source revision', async () => {
+    const { service, insertions, db } = setup();
+    await expect(
+      service.recalculate(userId, null, {
+        userId,
+        inputRevision: 1,
+        resultVersion: 1,
+      }),
+    ).resolves.toBeNull();
+    expect(insertions).toEqual([]);
+    expect(db.$executeRaw).not.toHaveBeenCalled();
+  });
+
+  it('keeps the publication version when a newer revision has identical evidence', async () => {
+    const { service, rows, db, insertions } = setup();
+    const accepted = [
+      {
+        id: 'verified',
+        name: 'verified',
+        areaId: 'qa',
+        isHighRelevance: true,
+        evidenceRefs: [{ type: 'work-experience', id: 'own-experience' }],
+      },
+    ];
+    rows[0].fingerprint = scoreVerifiedSkills(accepted).fingerprint;
+    db.userSkill.findMany.mockResolvedValue([skill('verified')]);
+    const result = await service.recalculate(userId, null);
+    expect(result?.version).toBe(4);
+    expect(result?.sourceRevision).toBe(2);
+    expect(insertions).toEqual([]);
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
+  });
+
+  it('refuses to score a pending NLP revision and persists a recoverable failure', async () => {
+    const { service, state, rows, db, insertions } = setup();
+    state.status = 'pending';
+    const previous = structuredClone(rows);
+    await expect(service.recalculate(userId, null)).rejects.toThrow(
+      'El análisis del perfil aún no está actualizado.',
+    );
+    expect(rows).toEqual(previous);
+    expect(insertions).toEqual([]);
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
+    expect(db.$executeRaw).toHaveBeenCalled();
+  });
+
+  it('does not create a notification when NLP analysis has failed', async () => {
+    const { service, state, db } = setup();
+
+    state.status = 'error';
+
+    await expect(service.recalculate(userId, null)).rejects.toThrow();
+
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
+  });
+
+  it('does not hide the original publication failure if saving its error state also fails', async () => {
+    const { service, db } = setup();
+    db.$transaction.mockRejectedValueOnce(new Error('snapshot failed'));
+    db.$executeRaw.mockRejectedValueOnce(new Error('error persistence failed'));
+    await expect(service.recalculate(userId, null)).rejects.toThrow(
+      'snapshot failed',
+    );
+  });
+
+  it('subscribes on initialization, awaits processing and unsubscribes on destruction', async () => {
+    const { service, events } = setup();
+    const recalculate = vi
+      .spyOn(service, 'recalculate')
+      .mockResolvedValue(null);
+    service.onModuleInit();
+    const publication = { userId, inputRevision: 2, resultVersion: 1 };
+    await events.published(publication);
+    expect(recalculate).toHaveBeenCalledWith(userId, null, publication);
+    service.onModuleDestroy();
+    await events.published(publication);
+    expect(recalculate).toHaveBeenCalledOnce();
+  });
+
+  it('retries NLP before publishing and rejects a failed analysis', async () => {
+    const { service, nlp } = setup();
+    const recalculate = vi
+      .spyOn(service, 'recalculate')
+      .mockResolvedValue(null);
+    vi.spyOn(service, 'myRadar').mockResolvedValue({
+      marker: 'current',
+    } as never);
+    await expect(service.retry(userId)).resolves.toEqual({ marker: 'current' });
+    expect(nlp.analyzeNow).toHaveBeenCalledWith(userId);
+    expect(recalculate).toHaveBeenCalledWith(userId, userId);
+    nlp.analyzeNow.mockResolvedValueOnce({ status: 'error' });
+    await expect(service.retry(userId)).rejects.toThrow(
+      'El análisis sigue pendiente o falló',
+    );
+    expect(recalculate).toHaveBeenCalledOnce();
+  });
+});
+
+describe('Published radar processing states', () => {
+  it.each([
+    [2, 'error'],
+    [1, 'ready'],
+  ])(
+    'reports a failed attempt only for its own source revision %s',
+    async (revision, status) => {
+      const { service, db, rows } = setup();
+      db.userSkill.count.mockResolvedValue(3);
+      db.$queryRaw
+        .mockResolvedValueOnce(rows)
+        .mockResolvedValueOnce([{ count: 1n }])
+        .mockResolvedValueOnce([
+          { source_revision: revision, status: 'error' },
+        ]);
+      const result = await service.myRadar(userId);
+      expect(result.processingStatus).toBe(status);
+      expect(result.pending).toBe(3);
+      expect(result.hasPending).toBe(true);
+    },
+  );
+
+  it('compares only persisted publication averages', async () => {
+    const { service, rows } = setup();
+    rows.push({ ...snapshot(1), version: 3, average_score: '0.10' });
+    expect((await service.myRadar(userId)).variation).toBe(0.15);
+  });
+
+  it.each([
+    ['current', 'ready', 2, 2, 'ready'],
+    ['new source', 'pending', 3, 2, 'pending'],
+    ['failed NLP', 'error', 3, 2, 'error'],
+    ['unprocessed source', 'ready', 3, 2, 'pending'],
+  ])(
+    'reports %s without replacing the last valid publication',
+    async (_label, status, inputRevision, processedRevision, expected) => {
+      const { service, state } = setup();
+      Object.assign(state, { status, inputRevision, processedRevision });
+      const result = await service.myRadar(userId);
+      expect(result.processingStatus).toBe(expected);
+      expect(result.version).toBe(4);
+      expect(result.scores.qa).toBe(1.5);
+    },
+  );
+
+  it('reports a legacy publication as pending until its revision is initialized', async () => {
+    const { service, rows } = setup();
+    rows[0] = snapshot(null);
+    expect((await service.myRadar(userId)).processingStatus).toBe('pending');
+  });
+
+  it('returns all zero axes for a new owner without stored state', async () => {
+    const { service, db, rows } = setup();
+    rows.length = 0;
+    db.profileSkillProcessingState.findUnique.mockResolvedValueOnce(
+      null as never,
+    );
+    const result = await service.myRadar(userId);
+    expect(result).toMatchObject({
+      status: 'empty',
+      processingStatus: 'ready',
+      version: 0,
+      pending: 0,
+    });
+    expect(result.scores).toEqual(emptyScores());
+    expect(result.skills).toEqual([]);
+  });
+});
+
+describe('published radar comparison', () => {
+  it('returns the two published snapshots while a newer revision is pending', () => {
+    const current = snapshot();
+    const previous = {
+      ...snapshot(),
+      version: 3,
+      created_at: new Date('2026-10-20T12:00:00Z'),
+      scores: { ...emptyScores(), qa: 3 },
+    };
+    const result = new RadarPublicationMapper().myRadar(userId, {
+      snapshots: [current, previous],
+      pendingDocs: [],
+      pendingSkills: 0,
+      attempts: [],
+      state: {
+        status: 'pending',
+        inputRevision: 3,
+        processedRevision: 2,
+        dictionaryVersion: '1',
+      },
+    });
+    expect(result.version).toBe(4);
+    expect(result.scores.qa).toBe(1.5);
+    expect(result.previous).toEqual({
+      version: 3,
+      updatedAt: previous.created_at,
+      scores: previous.scores,
+    });
+    expect(result.processingStatus).toBe('pending');
+  });
+
+  it('does not invent a previous publication', () => {
+    const mapper = new RadarPublicationMapper();
+    const state = {
+      pendingDocs: [],
+      pendingSkills: 0,
+      attempts: [],
+      state: null,
+    };
+    expect(
+      mapper.myRadar(userId, { ...state, snapshots: [snapshot()] }).previous,
+    ).toBeNull();
+    const empty = mapper.myRadar(userId, { ...state, snapshots: [] });
+    expect(empty.previous).toBeNull();
+    expect(empty.version).toBe(0);
+  });
+});

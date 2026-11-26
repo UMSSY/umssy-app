@@ -6,8 +6,8 @@ import {
   getCandidatesForVacancy,
   getVacancies,
   getVacancyById,
-} from "../services/matching.service";
-import type { CandidateWithMatch } from "../types/matching-types";
+} from "../services/matching-demo.service";
+import type { CandidateWithMatch } from "../types/candidate-with-match.types";
 
 const vacancies = getVacancies();
 const axes = getAffinityAxes();
@@ -59,14 +59,18 @@ export function useMatching() {
     const discardedCandidate = candidates.find((c) => c.id === pendingDiscardId);
     setDiscardedIds((prev) => new Set(prev).add(pendingDiscardId));
     setActionFeedback(
-      discardedCandidate ? `${discardedCandidate.name} fue marcado como descartado.` : null
+      discardedCandidate
+        ? `${discardedCandidate.name} fue marcado como descartado.`
+        : null,
     );
     setPendingDiscardId(null);
   }
 
   function confirmSchedule(name: string, date: string, time: string) {
     const displayDate = date.split("-").reverse().join("/");
-    setActionFeedback(`Entrevista con ${name} propuesta para el ${displayDate} a las ${time}.`);
+    setActionFeedback(
+      `Entrevista con ${name} propuesta para el ${displayDate} a las ${time}.`,
+    );
   }
 
   return {
@@ -88,5 +92,3 @@ export function useMatching() {
     axes,
   };
 }
-
-export type UseMatchingReturn = ReturnType<typeof useMatching>;

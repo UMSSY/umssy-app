@@ -2,17 +2,25 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCookieSession } from '@/shared/hooks/use-cookie-session';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
 import { radarIntegrationApi } from '../services/radar-integration.service';
 import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import type { IntegrationRadar } from '../types/radar-integration.types';
 import type { RadarBridgeView } from '../types/radar-bridge.types';
 
-export const RADAR_PERSONAL_QUERY_KEY = ['radar-integration', 'me'] as const;
+import { RADAR_PERSONAL_QUERY_KEY } from '../constants/radar-query-keys.constants';
+export { RADAR_PERSONAL_QUERY_KEY } from '../constants/radar-query-keys.constants';
+
+function readRadarSession(): string | null {
+  return getAccessToken() ?? (hasCookieSession() ? 'cookie' : null);
+}
 
 export function useLiveRadar() {
   const queryClient = useQueryClient();
-  const session = getAccessToken();
+  const cookieSession = useCookieSession();
+  const session = getAccessToken() ?? (cookieSession ? 'cookie' : null);
 
   const query = useQuery<IntegrationRadar>({
     queryKey: RADAR_PERSONAL_QUERY_KEY,
@@ -20,39 +28,51 @@ export function useLiveRadar() {
     retry: false,
     queryFn: async () => {
       let published = await radarIntegrationApi.me();
-      if (session !== getAccessToken()) throw new Error('La sesión cambió durante la consulta.');
+      if (session !== readRadarSession())
+        throw new Error('La sesión cambió durante la consulta.');
 
-      if (published.version > 0 && published.sourceRevision === null && published.processingStatus !== 'error') {
+      if (
+        published.version > 0 &&
+        published.sourceRevision === null &&
+        published.processingStatus !== 'error'
+      ) {
         try {
           published = await radarIntegrationApi.recalculate();
         } catch {
           published = await radarIntegrationApi.me();
         }
       }
-      if (session !== getAccessToken()) throw new Error('La sesión cambió durante la consulta.');
+      if (session !== readRadarSession())
+        throw new Error('La sesión cambió durante la consulta.');
       return published;
     },
-    refetchInterval: query =>
-      query.state.data?.processingStatus === 'pending' || query.state.data?.hasPending ? 1500 : false,
-   structuralSharing: (previous, next) => {
-    const anterior = previous as IntegrationRadar | undefined;
-    const actual = next as IntegrationRadar;
+    refetchInterval: (query) =>
+      query.state.data?.processingStatus === 'pending' ||
+      query.state.data?.hasPending
+        ? 1500
+        : false,
+    structuralSharing: (previous, next) => {
+      const previousRadar = previous as IntegrationRadar | undefined;
+      const nextRadar = next as IntegrationRadar;
 
-      return anterior && actual.version < anterior.version
-      ? anterior
-      : actual;
-   },
+      return previousRadar && nextRadar.version < previousRadar.version
+        ? previousRadar
+        : nextRadar;
+    },
   });
 
   const recalculate = useMutation({
     mutationFn: async () => {
       const updated = await radarIntegrationApi.recalculate();
-      if (session !== getAccessToken()) throw new Error('La sesión cambió durante el recálculo.');
+      if (session !== readRadarSession())
+        throw new Error('La sesión cambió durante el recálculo.');
       return updated;
     },
-    onSuccess: updated => {
-      queryClient.setQueryData<IntegrationRadar>(RADAR_PERSONAL_QUERY_KEY, previous =>
-        previous && previous.version > updated.version ? previous : updated,
+    onSuccess: (updated) => {
+      queryClient.setQueryData<IntegrationRadar>(
+        RADAR_PERSONAL_QUERY_KEY,
+        (previous) =>
+          previous && previous.version > updated.version ? previous : updated,
       );
     },
   });
@@ -60,9 +80,12 @@ export function useLiveRadar() {
   const data = useMemo<RadarBridgeView | null>(() => {
     if (!query.data) return null;
     const published = mapPublishedRadar(query.data);
-    const status: RadarBridgeView['status'] = query.data.processingStatus === 'error'
-      ? 'error'
-      : query.data.processingStatus === 'pending' || query.data.hasPending ? 'pending' : 'ready';
+    const status: RadarBridgeView['status'] =
+      query.data.processingStatus === 'error'
+        ? 'error'
+        : query.data.processingStatus === 'pending' || query.data.hasPending
+          ? 'pending'
+          : 'ready';
     return {
       ...published,
       status,
@@ -98,6 +121,7 @@ export function useLiveRadar() {
     loading: Boolean(session) && query.isPending,
     error,
     variation: query.data?.variation ?? null,
+    previous: query.data?.previous ?? null,
     refresh,
     retry,
     retrying: recalculate.isPending,

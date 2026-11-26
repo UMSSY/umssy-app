@@ -1,9 +1,12 @@
 import { Button as TestButton } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { AffinityAxisId } from "../types/matching-types";
+import type { AffinityAxisId } from "../types/affinity-axis-id.types";
 import { AFFINITY_AXES } from "../data/matching.data";
-import { getCandidatesForVacancy, getVacancyById } from "../services/matching.service";
+import {
+  getCandidatesForVacancy,
+  getVacancyById,
+} from "../services/matching-demo.service";
 import { CandidateDetailPanel } from "./candidate-detail-panel";
 
 vi.mock("./radar-chart", () => ({
@@ -24,25 +27,29 @@ const lucia = candidates.find((candidate) => candidate.id === "cand-lucia-flores
 const carlos = candidates.find((candidate) => candidate.id === "cand-carlos-mendoza")!;
 
 function renderPanel(candidate: typeof lucia) {
-  return <CandidateDetailPanel
-    key={candidate.id}
-    candidate={candidate}
-    vacancy={vacancy}
-    axes={AFFINITY_AXES}
-    pendingDiscardId={null}
-    onRequestDiscard={noop}
-    onConfirmDiscard={noop}
-    onCancelDiscard={noop}
-    onConfirmSchedule={noop}
-    actionFeedback={null}
-  />;
+  return (
+    <CandidateDetailPanel
+      key={candidate.id}
+      candidate={candidate}
+      vacancy={vacancy}
+      axes={AFFINITY_AXES}
+      pendingDiscardId={null}
+      onRequestDiscard={noop}
+      onConfirmDiscard={noop}
+      onCancelDiscard={noop}
+      onConfirmSchedule={noop}
+      actionFeedback={null}
+    />
+  );
 }
 
 describe("Integración HU3 → HU4", () => {
   it("abre detalle del candidato y área, cambia de eje y lo cierra sin retirar las brechas", () => {
     render(renderPanel(lucia));
     fireEvent.click(screen.getByRole("button", { name: "Seleccionar Data/AI" }));
-    const detail = screen.getByRole("region", { name: `Evidencias de ${lucia.name}` });
+    const detail = screen.getByRole("region", {
+      name: `Evidencias de ${lucia.name}`,
+    });
     expect(within(detail).getByText("Machine learning con Python")).toBeInTheDocument();
     expect(screen.getByText("Brecha por área")).toBeInTheDocument();
 
@@ -51,7 +58,9 @@ describe("Integración HU3 → HU4", () => {
     expect(within(detail).getByRole("heading", { name: "Cloud/DevOps" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
-    expect(screen.queryByRole("region", { name: `Evidencias de ${lucia.name}` })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: `Evidencias de ${lucia.name}` }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Brecha por área")).toBeInTheDocument();
   });
 

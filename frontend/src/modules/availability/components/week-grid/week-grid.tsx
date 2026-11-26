@@ -4,21 +4,10 @@ import { Button } from "@/components/ui/button";
 import { formatBlockRange, toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
-import {
-  BLOCK_STATE_TEXT,
-  DAY_LABELS,
-  HOUR_HEIGHT_PX,
-  STICKY_GAP_PX,
-  SELECTED_BLOCK_CLASSES,
-  SELECTED_LEGEND_LABEL,
-  STATE_BUTTON_CLASSES,
-  STATE_BUTTON_VARIANT,
-  STATE_LABELS_ES,
-  WEEK_GRID_END_HOUR,
-  WEEK_GRID_LEGEND,
-  WEEK_GRID_START_HOUR,
-} from "../../constants/week-grid.constants";
+import { BLOCK_STATE_TEXT, DAY_LABELS, HOUR_HEIGHT_PX_BY_DENSITY, SELECTED_BLOCK_CLASSES, STATE_BUTTON_CLASSES, STATE_BUTTON_VARIANT, STATE_LABELS_ES, WEEK_GRID_LEGEND } from "../../constants/week-grid.constants";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
+import type { BlockDraftSlot } from "../../types/block-draft-slot.types";
+import { BLOCK_RANGE_TEXT } from "../../constants/availability.constants";
 import type { WeekGridProps } from "../../types/week-grid-props.types";
 import {
   getBlockVerticalPosition,
@@ -33,24 +22,32 @@ export function WeekGrid({
   blocks,
   weekRange,
   variant,
-  startHour = WEEK_GRID_START_HOUR,
-  endHour = WEEK_GRID_END_HOUR,
+  startHour = 7,
+  endHour = 22,
   blockedDates = [],
   onSelectDate,
   selectedBlockId,
   onSelectBlock,
   onEditBlock,
   stickyOffset = 0,
+  density = "normal",
+  draftBlocks = [],
 }: WeekGridProps) {
+  const hourHeightPx = HOUR_HEIGHT_PX_BY_DENSITY[density];
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
-  const gridHeightPx = hours.length * HOUR_HEIGHT_PX;
-  const stickyTop = { top: `calc(var(--spacing-app-header) + ${STICKY_GAP_PX + stickyOffset}px)` };
+  const gridHeightPx = hours.length * hourHeightPx;
+  const stickyTop = { top: `calc(var(--spacing-app-header) + ${16 + stickyOffset}px)` };
 
   const dayDates = getWeekDayDates(weekRange);
   const blocksByDay: AvailabilityBlock[][] = Array.from({ length: 7 }, () => []);
   for (const block of blocks) {
     const dayIndex = getWeekDayIndex(block.startAt, weekRange);
     if (dayIndex !== null) blocksByDay[dayIndex].push(block);
+  }
+  const draftsByDay: BlockDraftSlot[][] = Array.from({ length: 7 }, () => []);
+  for (const draft of draftBlocks) {
+    const dayIndex = getWeekDayIndex(draft.startAt, weekRange);
+    if (dayIndex !== null) draftsByDay[dayIndex].push(draft);
   }
 
   function handleBlockClick(block: AvailabilityBlock) {
@@ -60,11 +57,11 @@ export function WeekGrid({
   }
 
   return (
-    <section aria-label="Disponibilidad semanal">
+    <section aria-label="Disponibilidad semanal" className="@container/week">
       <div
         className={cn(
           "hidden overflow-clip rounded-lg border border-border",
-          "md:grid md:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
+          "@min-[44rem]/week:grid @min-[44rem]/week:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
         )}
       >
         <div aria-hidden="true">
@@ -74,7 +71,7 @@ export function WeekGrid({
               <li
                 key={h}
                 className="absolute right-2 text-xs text-muted-foreground"
-                style={{ top: (h - startHour) * HOUR_HEIGHT_PX + 4 }}
+                style={{ top: (h - startHour) * hourHeightPx + 4 }}
               >
                 <time dateTime={`${String(h).padStart(2, "0")}:00`}>
                   {String(h).padStart(2, "0")}:00
@@ -105,7 +102,7 @@ export function WeekGrid({
                     key={h}
                     aria-hidden="true"
                     className="absolute w-full border-t border-border"
-                    style={{ top: (h - startHour) * HOUR_HEIGHT_PX }}
+                    style={{ top: (h - startHour) * hourHeightPx }}
                   />
                 ))}
 
@@ -121,7 +118,8 @@ export function WeekGrid({
                       block.startAt,
                       block.endAt,
                       startHour,
-                      endHour
+                      endHour,
+                      hourHeightPx
                     );
                     if (heightPx <= 0) return null;
 
@@ -143,6 +141,7 @@ export function WeekGrid({
                           onClick={() => handleBlockClick(block)}
                           className={cn(
                             "size-full flex-col items-start justify-start gap-0 overflow-hidden rounded-md px-1.5 py-0.5 text-left text-xs leading-[15px] font-semibold",
+                            density === "compact" && "justify-center py-0 leading-none",
                             STATE_BUTTON_CLASSES[block.state],
                             isSelected && SELECTED_BLOCK_CLASSES
                           )}
@@ -150,9 +149,28 @@ export function WeekGrid({
                           aria-label={`${stateLabel}, ${timeRange}`}
                           title={`${BLOCK_STATE_TEXT[block.state]} · ${formatBlockRange(block.startAt, block.endAt)}`}
                         >
-                          <span className="w-full truncate">{BLOCK_STATE_TEXT[block.state]}</span>
+                          {density === "normal" && (
+                            <span className="w-full truncate">{BLOCK_STATE_TEXT[block.state]}</span>
+                          )}
                           <span className="w-full truncate font-normal">{startTime}</span>
                         </Button>
+                      </li>
+                    );
+                  })}
+                  {draftsByDay[dayIndex].map((draft) => {
+                    const { topPx, heightPx } = getBlockVerticalPosition(draft.startAt, draft.endAt, startHour, endHour, hourHeightPx);
+                    const draftRange = `${toBoliviaTime(draft.startAt).time} – ${toBoliviaTime(draft.endAt).time}`;
+                    return (
+                      <li
+                        key={`draft-${draft.startAt}`}
+                        data-testid="draft-block"
+                        className="pointer-events-none absolute inset-x-1 py-px"
+                        style={{ top: topPx, height: heightPx }}
+                      >
+                        <div className="size-full overflow-hidden rounded-md border border-dashed border-primary bg-primary/10 px-1.5 py-0.5 text-xs leading-[15px] text-primary">
+                          <p className="truncate font-bold">{draftRange}</p>
+                          <p className="truncate font-medium">{BLOCK_RANGE_TEXT.draftLabel}</p>
+                        </div>
                       </li>
                     );
                   })}
@@ -190,7 +208,7 @@ export function WeekGrid({
               aria-hidden="true"
               className={cn("inline-block h-3 w-4 rounded-sm", SELECTED_BLOCK_CLASSES)}
             />
-            {SELECTED_LEGEND_LABEL}
+            {"Tu selección"}
           </li>
         ) : (
           <li className="flex items-center gap-2">

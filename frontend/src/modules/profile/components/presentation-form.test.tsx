@@ -1,11 +1,16 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_PRESENTATION_VALUES } from "../config/profile-form-defaults.config";
 import { PROFILE_VALIDATION_MESSAGES } from "../constants/profile-validation.constants";
 import type { PresentationValues } from "../types/presentation-values.types";
 import { PresentationForm } from "./presentation-form";
+
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 const SAVED_VALUES: PresentationValues = {
   headline: "Desarrolladora web junior",
@@ -27,6 +32,32 @@ function renderForm(initialValues = EMPTY_PRESENTATION_VALUES, isSaving = false)
 describe("PresentationForm", () => {
   afterEach(() => {
     cleanup();
+  });
+
+  it("keeps guide labels and validation descriptions attached to their own fields", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <>
+        <section aria-label="Formulario habitual">
+          <PresentationForm initialValues={SAVED_VALUES} serverErrors={{ headline: "Revisa el titular habitual." }} onSubmit={vi.fn()} />
+        </section>
+        <section aria-label="Formulario de la guía">
+          <PresentationForm idPrefix="profile-guide-" saveLabel="Guardar cambios" initialValues={SAVED_VALUES} serverErrors={{ headline: "Revisa el titular de la guía." }} onSubmit={vi.fn()} />
+        </section>
+      </>,
+    );
+    const normal = within(screen.getByRole("region", { name: "Formulario habitual" }));
+    const guide = within(screen.getByRole("region", { name: "Formulario de la guía" }));
+    expect(guide.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument();
+    expect(normal.getByLabelText(/Titular profesional/)).toHaveAttribute("id", "headline");
+    expect(guide.getByLabelText(/Titular profesional/)).toHaveAttribute("id", "profile-guide-headline");
+    expect(normal.getByLabelText(/Titular profesional/)).toHaveAccessibleDescription("Revisa el titular habitual.");
+    expect(guide.getByLabelText(/Titular profesional/)).toHaveAccessibleDescription("Revisa el titular de la guía.");
+    expect(guide.getByLabelText(/Acerca de/)).toHaveAttribute("id", "profile-guide-aboutMe");
+    await user.click(guide.getByText("Titular profesional"));
+    expect(guide.getByLabelText(/Titular profesional/)).toHaveFocus();
+    const ids = [...container.querySelectorAll("[id]")].map((element) => element.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("renders focused inputs without a duplicate preview", () => {

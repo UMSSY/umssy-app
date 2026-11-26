@@ -5,7 +5,9 @@ import { SessionRepository } from '../repositories/session.repository.js';
 describe('SessionRepository', () => {
   it('selects only session fields and filters inactive users and role assignments', async () => {
     const findFirst = vi.fn().mockResolvedValue(null);
-    const repository = new SessionRepository({ user: { findFirst } } as unknown as PrismaService);
+    const repository = new SessionRepository({
+      user: { findFirst },
+    } as unknown as PrismaService);
 
     await expect(repository.findActiveUserById('user-1')).resolves.toBeNull();
     expect(findFirst).toHaveBeenCalledExactlyOnceWith({
@@ -13,6 +15,7 @@ describe('SessionRepository', () => {
       select: {
         id: true,
         email: true,
+        company: { select: { id: true, title: true } },
         roles: {
           where: { deletedAt: null, startAt: { lte: expect.any(Date) } },
           select: { role: { select: { name: true } } },
@@ -23,7 +26,9 @@ describe('SessionRepository', () => {
 
   it('selects user session data with active flag for authentication', async () => {
     const findFirst = vi.fn().mockResolvedValue(null);
-    const repository = new SessionRepository({ user: { findFirst } } as unknown as PrismaService);
+    const repository = new SessionRepository({
+      user: { findFirst },
+    } as unknown as PrismaService);
 
     await expect(repository.findUserById('user-1')).resolves.toBeNull();
     expect(findFirst).toHaveBeenCalledExactlyOnceWith({
@@ -31,12 +36,28 @@ describe('SessionRepository', () => {
       select: {
         id: true,
         email: true,
+        company: { select: { id: true, title: true } },
         isActive: true,
         roles: {
           where: { deletedAt: null, startAt: { lte: expect.any(Date) } },
           select: { role: { select: { name: true } } },
         },
       },
+    });
+  });
+
+  it('looks for any revoked refresh token of the session family', async () => {
+    const findFirst = vi.fn().mockResolvedValue({ revokedReason: 'logout' });
+    const repository = new SessionRepository({
+      refreshToken: { findFirst },
+    } as unknown as PrismaService);
+
+    await expect(repository.findRevokedSession('family-1')).resolves.toEqual({
+      revokedReason: 'logout',
+    });
+    expect(findFirst).toHaveBeenCalledExactlyOnceWith({
+      where: { familyId: 'family-1', revokedAt: { not: null } },
+      select: { revokedReason: true },
     });
   });
 });

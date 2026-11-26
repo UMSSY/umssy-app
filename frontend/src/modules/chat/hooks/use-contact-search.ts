@@ -1,12 +1,13 @@
 "use client";
 
+import { MIN_SEARCH_CHARS } from "@/modules/chat/constants/contact-search.constants";
+
 import { useQuery } from "@tanstack/react-query";
 
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { searchUsers } from "../services/chat-api";
 import { getChatHttpStatus } from "../utils/chat-action-error";
 
-const MIN_SEARCH_CHARS = 2;
 const DEBOUNCE_MS = 300;
 
 export function useContactSearch(

@@ -1,5 +1,5 @@
 export interface ProfileSkillEvidenceRef {
-  type: "work-experience" | "education" | "certification" | "cv";
+  type: "work-experience" | "education" | "presentation" | "certification" | "cv";
   id: string;
 }
 

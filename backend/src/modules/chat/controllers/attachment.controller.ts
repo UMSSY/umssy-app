@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Optional,
   Param,
   ParseUUIDPipe,
   Post,
@@ -27,16 +28,14 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import {
-  ATTACHMENT_FIELD_NAME,
-  MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
-} from '../constants/attachment.constants.js';
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { AttachmentUploadInterceptor } from '../interceptors/attachment-upload.interceptor.js';
 import {
   sendAttachmentMessageSchema,
   type SendAttachmentMessageDto,
 } from '../requests/send-attachment-message.schema.js';
 import { AttachmentService } from '../services/attachment.service.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
 
 @ApiTags('Chat')
@@ -46,10 +45,16 @@ import type { AttachmentResponse } from '../responses/attachment.response.js';
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class AttachmentController {
-  constructor(private readonly attachmentService: AttachmentService) {}
+  constructor(
+    private readonly attachmentService: AttachmentService,
+    @Optional()
+    private readonly chatGateway?: ChatGateway,
+  ) {}
 
-  @Post('messages/attachment')
-  @ApiOperation({ summary: 'Enviar mensaje con archivo adjunto (JPG, PNG o PDF)' })
+  @Post('attachments')
+  @ApiOperation({
+    summary: 'Enviar mensaje con archivo adjunto (JPG, PNG o PDF)',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -70,50 +75,53 @@ export class AttachmentController {
       required: ['file', 'conversationId'],
     },
   })
-  @ApiResponse({ status: 201, description: 'Mensaje con archivo adjunto enviado correctamente' })
-  @ApiResponse({ status: 400, description: 'Archivo inválido o tamaño excedido' })
+  @ApiResponse({
+    status: 201,
+    description: 'Mensaje con archivo adjunto enviado correctamente',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Archivo inválido o tamaño excedido',
+  })
   @ApiResponse({ status: 403, description: 'No pertenece a la conversación' })
   @ApiResponse({ status: 404, description: 'Conversación no encontrada' })
   @UseInterceptors(
     AttachmentUploadInterceptor,
-    FileInterceptor(ATTACHMENT_FIELD_NAME, {
+    FileInterceptor('file', {
       limits: {
-        fileSize: MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
+        fileSize: MAX_FILE_UPLOAD_SIZE_BYTES,
       },
     }),
   )
-  uploadAndSend(
+  async uploadAndSend(
     @CurrentUserId() userId: string,
     @UploadedFile() file: MulterFile | undefined,
     @Body(new ZodValidationPipe(sendAttachmentMessageSchema))
     body: SendAttachmentMessageDto,
   ) {
-    return this.attachmentService.uploadAndSend(userId, file, body);
+    const result = await this.attachmentService.uploadAndSend(
+      userId,
+      file,
+      body,
+    );
+    this.chatGateway?.broadcastMessage(result);
+    return result;
   }
 
-  @Post('attachments')
-  @UseInterceptors(
-    AttachmentUploadInterceptor,
-    FileInterceptor(ATTACHMENT_FIELD_NAME, {
-      limits: {
-        fileSize: MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
-      },
-    }),
-  )
-  uploadAndSendAlias(
-    @CurrentUserId() userId: string,
-    @UploadedFile() file: MulterFile | undefined,
-    @Body(new ZodValidationPipe(sendAttachmentMessageSchema))
-    body: SendAttachmentMessageDto,
-  ) {
-    return this.attachmentService.uploadAndSend(userId, file, body);
-  }
-
-  @Get('attachments/:id/download')
-  @ApiOperation({ summary: 'Descargar archivo adjunto con control de acceso por conversación' })
-  @ApiParam({ name: 'id', format: 'uuid', description: 'ID del archivo adjunto' })
+  @Get('attachments/:id/file')
+  @ApiOperation({
+    summary: 'Descargar archivo adjunto con control de acceso por conversación',
+  })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: 'ID del archivo adjunto',
+  })
   @ApiResponse({ status: 200, description: 'Stream binario del archivo' })
-  @ApiResponse({ status: 403, description: 'No pertenece a la conversación del archivo' })
+  @ApiResponse({
+    status: 403,
+    description: 'No pertenece a la conversación del archivo',
+  })
   @ApiResponse({ status: 404, description: 'Archivo adjunto no encontrado' })
   async download(
     @CurrentUserId() userId: string,
@@ -130,7 +138,11 @@ export class AttachmentController {
 
   @Get('attachments/:id')
   @ApiOperation({ summary: 'Obtener metadatos de un archivo adjunto' })
-  @ApiParam({ name: 'id', format: 'uuid', description: 'ID del archivo adjunto' })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: 'ID del archivo adjunto',
+  })
   @ApiResponse({ status: 200, description: 'Metadatos del archivo adjunto' })
   @ApiResponse({ status: 404, description: 'Archivo adjunto no encontrado' })
   async getById(

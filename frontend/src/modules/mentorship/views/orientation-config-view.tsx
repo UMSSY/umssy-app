@@ -1,11 +1,15 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { PageHeading } from "@/shared/components/layout";
-import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { DiscardChangesDialog } from '../components/preview/discard-changes-dialog';
+import { PageHeading } from '@/shared/components/layout';
+import { Label } from '@/components/ui/label';
+import { AlertCircle, Eye, X } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,38 +19,72 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useOrientationConfig } from "../hooks/use-orientation-config";
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+
+import { useOrientationConfig } from '../hooks/use-orientation-config';
+import { useMentorProfileDraft } from '../hooks/use-mentor-profile-draft';
+import { useCurrentUserId } from '../hooks/use-current-user-id';
+import { MentorProfilePreview } from '../components/preview/mentor-profile-preview';
+import { useTechnicalAreas } from '@/modules/mentor-participation';
+import {
+  PROFILE_CHANGES_SAVED_MESSAGE,
+  PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
+  PROFILE_SELECTION_REQUIRED_MESSAGE,
+} from '../constants/profile-changes-messages.constants';
 
 export function OrientationConfigView() {
-  const { orientationTypes, savedIds, isLoading, isSaving, hasLoadError, isMentorActive, retry, save } = useOrientationConfig();
-  const [draftIds, setSelectedIds] = useState<string[] | null>(null);
+  const {
+    orientationTypes,
+    savedIds,
+    isLoading,
+    isSaving,
+    hasLoadError,
+    isMentorActive,
+    retry,
+    save,
+  } = useOrientationConfig();
+
+  const {
+    areas,
+    savedIds: savedTechnicalAreaIds,
+    isLoading: isTechnicalAreasLoading,
+    hasLoadError: hasTechnicalAreasLoadError,
+    hasAccessError: hasTechnicalAreasAccessError,
+  } = useTechnicalAreas();
+
+  const router = useRouter();
+  const { currentUserId } = useCurrentUserId();
+
+  const {
+    orientationTypeIds: draftIds,
+    technicalAreaIds: draftTechnicalAreaIds,
+    setOrientationTypeIds: setSelectedIds,
+    clearOrientationTypeIds,
+    clearAllDrafts,
+  } = useMentorProfileDraft();
+
   const selectedIds = draftIds ?? savedIds;
-  const [showToast, setShowToast] = useState(false);
+
+  const selectedTechnicalIds = draftTechnicalAreaIds ?? savedTechnicalAreaIds;
+
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!showToast) return;
-
-    const timer = window.setTimeout(() => setShowToast(false), 4000);
-    return () => window.clearTimeout(timer);
-  }, [showToast]);
 
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
-    setShowToast(false);
+
     setSelectedIds((previous) =>
       (previous ?? savedIds).includes(id)
         ? (previous ?? savedIds).filter((item) => item !== id)
@@ -54,30 +92,80 @@ export function OrientationConfigView() {
     );
   };
 
+  const handleRequestSave = () => {
+    if (selectedIds.length === 0) {
+      setErrorMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      return;
+    }
+    setIsConfirmDialogOpen(true);
+  };
+
   const handleSave = async () => {
     if (selectedIds.length === 0) {
-      setErrorMessage(
-        "Debe seleccionar al menos un tipo de orientación antes de guardar.",
-      );
+      setErrorMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      setIsConfirmDialogOpen(false);
       return;
     }
 
-    setShowToast(false);
     const idsToSave = [...selectedIds];
+
     try {
       await save(idsToSave);
+      clearOrientationTypeIds();
       setErrorMessage(null);
-      setShowToast(true);
+      toast.success(PROFILE_CHANGES_SAVED_MESSAGE);
     } catch {
-      setErrorMessage(
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      );
+      setErrorMessage(PROFILE_CHANGES_SAVE_ERROR_MESSAGE);
     } finally {
       setIsConfirmDialogOpen(false);
     }
   };
 
-  const hasChanges = selectedIds.length !== savedIds.length || selectedIds.some((id) => !savedIds.includes(id));
+  const hasChanges =
+    selectedIds.length !== savedIds.length ||
+    selectedIds.some((id) => !savedIds.includes(id));
+
+  const isSaveDisabled =
+    isSaving || hasLoadError || (!hasChanges && selectedIds.length > 0);
+
+  const handleCancel = () => {
+    if (hasChanges) {
+      setIsDiscardDialogOpen(true);
+      return;
+    }
+    router.push('/mentors/participation');
+  };
+
+  const handleConfirmDiscard = () => {
+    clearAllDrafts();
+    setErrorMessage(null);
+    setIsDiscardDialogOpen(false);
+    router.push('/mentors/participation');
+  };
+
+  const canOpenPreview =
+    Boolean(currentUserId) &&
+    isMentorActive &&
+    !isLoading &&
+    !hasLoadError &&
+    !isTechnicalAreasLoading &&
+    !hasTechnicalAreasLoadError &&
+    !hasTechnicalAreasAccessError;
+
+  if (isPreviewOpen && currentUserId && canOpenPreview) {
+    return (
+      <MentorProfilePreview
+        mentorId={currentUserId}
+        technicalAreas={areas.filter((area) =>
+          selectedTechnicalIds.includes(area.id),
+        )}
+        orientationTypes={orientationTypes.filter((orientation) =>
+          selectedIds.includes(orientation.id),
+        )}
+        onBack={() => setIsPreviewOpen(false)}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -125,7 +213,7 @@ export function OrientationConfigView() {
               href="/mentorship"
               className={buttonVariants({
                 className:
-                  "h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0",
+                  'h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0',
               })}
             >
               Activar participación como mentor
@@ -140,8 +228,10 @@ export function OrientationConfigView() {
     <main className="min-h-full w-full bg-background">
       <div className="flex w-full flex-col">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-
-          <PageHeading title="Editar tipos de orientación" description="Selecciona los tipos de orientación que deseas brindar." />
+          <PageHeading
+            title="Editar tipos de orientación"
+            description="Selecciona los tipos de orientación que deseas brindar."
+          />
 
           <Card className="w-full max-w-none gap-6 rounded-lg border border-border bg-white py-0 shadow-none ring-0">
             <CardContent className="flex flex-col gap-6 px-4 pt-4 sm:px-8 sm:pt-8">
@@ -177,13 +267,14 @@ export function OrientationConfigView() {
                     return (
                       <Label
                         key={option.id}
-                        className={`group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${
+                        className={cn(
+                          'group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors',
                           !isSelected
-                            ? "border-transparent bg-surface-soft/50 hover:bg-interaction"
+                            ? 'border-transparent bg-surface-soft/50 hover:bg-interaction'
                             : isSaved
-                              ? "border-border bg-surface-soft/50"
-                              : "border-accent bg-interaction/50"
-                        }`}
+                              ? 'border-border bg-surface-soft/50'
+                              : 'border-accent bg-interaction/50',
+                        )}
                       >
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
                           <span
@@ -208,13 +299,14 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className={`size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                            className={cn(
+                              'size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4',
                               !isSelected
-                                ? ""
+                                ? ''
                                 : isSaved
-                                  ? "data-checked:bg-accent"
-                                  : "data-checked:bg-accent"
-                            }`}
+                                  ? 'data-checked:bg-accent'
+                                  : 'data-checked:bg-accent',
+                            )}
                           />
                         </div>
                       </Label>
@@ -223,25 +315,40 @@ export function OrientationConfigView() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
-              <Link
-                href="/mentors/participation"
-                onClick={(event) => { if (hasChanges) { event.preventDefault(); setIsDiscardDialogOpen(true); } }}
-                className={buttonVariants({
-                  className:
-                    "h-10 rounded-lg bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-interaction active:translate-y-0",
-                })}
-              >
-                Volver
-              </Link>
+
+            <CardFooter className="mx-4 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Button
                 type="button"
-                onClick={() => setIsConfirmDialogOpen(true)}
-                disabled={!hasChanges || selectedIds.length === 0 || isSaving || hasLoadError}
-                className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+                variant="cancel"
+                onClick={handleCancel}
+                disabled={isSaving}
+                className="h-10 gap-2 rounded-lg px-6 text-sm font-semibold"
               >
-                {isSaving ? "Guardando..." : "Guardar cambios"}
+                <X size={16} />
+                Cancelar
               </Button>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsPreviewOpen(true)}
+                  disabled={!canOpenPreview}
+                  className="h-10 gap-2 rounded-lg px-5"
+                >
+                  <Eye size={16} />
+                  Vista previa
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={handleRequestSave}
+                  disabled={isSaveDisabled}
+                  className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         </div>
@@ -276,59 +383,17 @@ export function OrientationConfigView() {
               disabled={isSaving}
               className="h-10 bg-accent px-6 text-sm font-semibold text-accent-foreground hover:bg-brand-hover"
             >
-              {isSaving ? "Guardando..." : "Sí, guardar cambios"}
+              {isSaving ? 'Guardando...' : 'Sí, guardar cambios'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
+      <DiscardChangesDialog
         open={isDiscardDialogOpen}
-        onOpenChange={(open) => {
-          if (!isSaving) setIsDiscardDialogOpen(open);
-        }}
-      >
-        <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-none ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="font-tight text-2xl font-bold text-ink">
-              ¿Descartar cambios?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="mt-2 text-base text-text-secondary">
-              Tienes cambios sin guardar. Si vuelves a tu participación, se perderán.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
-            <AlertDialogCancel
-              type="button"
-              disabled={isSaving}
-              className="h-10 border-border-strong bg-surface px-6 text-sm font-semibold text-ink hover:bg-surface-soft"
-            >
-              Seguir editando
-            </AlertDialogCancel>
-            <AlertDialogAction
-              nativeButton={false}
-              type="button"
-              render={<Link href="/mentors/participation" />}
-              disabled={isSaving}
-              className="h-10 bg-critical-action px-6 text-sm font-semibold text-critical-action-foreground hover:bg-brand-hover"
-            >
-              Descartar cambios
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {showToast && (
-        <Alert
-          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-3 rounded-lg border-2 border-green-600 bg-green-50 px-6 py-3 text-green-950 shadow-md sm:right-8 sm:bottom-8 sm:left-auto"
-          role="status"
-        >
-          <CheckCircle2 size={24} className="shrink-0 text-green-700" />
-          <span className="text-base font-medium">
-            Tipos de orientación actualizados correctamente
-          </span>
-        </Alert>
-      )}
+        onCancel={() => setIsDiscardDialogOpen(false)}
+        onConfirm={handleConfirmDiscard}
+      />
     </main>
   );
 }

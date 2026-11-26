@@ -18,7 +18,13 @@ const MINUTE = 60_000;
 const CODE = '482719';
 const CODE_HASH = bcrypt.hashSync(CODE, 4);
 const EMAIL = 'ana@umss.test';
-const REQUEST = { id: 'req-1', firstName: 'Ana', lastName: 'Pérez', email: EMAIL, phone: '71234567' };
+const REQUEST = {
+  id: 'req-1',
+  firstName: 'Ana',
+  lastName: 'Pérez',
+  email: EMAIL,
+  phone: '71234567',
+};
 
 function otpRow(overrides: Record<string, unknown> = {}) {
   return {
@@ -33,8 +39,20 @@ function otpRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function build(options: { request?: unknown; otp?: unknown; userExists?: boolean; resends?: number } = {}) {
-  const { request = REQUEST, otp = otpRow(), userExists = false, resends = 0 } = options;
+function build(
+  options: {
+    request?: unknown;
+    otp?: unknown;
+    userExists?: boolean;
+    resends?: number;
+  } = {},
+) {
+  const {
+    request = REQUEST,
+    otp = otpRow(),
+    userExists = false,
+    resends = 0,
+  } = options;
   const activationRepository = {
     findApprovedRequestByEmail: vi.fn().mockResolvedValue(request),
     userExistsByEmail: vi.fn().mockResolvedValue(userExists),
@@ -48,7 +66,11 @@ function build(options: { request?: unknown; otp?: unknown; userExists?: boolean
     countResendsSince: vi.fn().mockResolvedValue(resends),
   };
   const otpService = { issueFor: vi.fn().mockResolvedValue(true) };
-  const session = { accessToken: 'jwt', roleTag: 'titulado', roles: ['titulado'] };
+  const session = {
+    accessToken: 'jwt',
+    roleTag: 'titulado',
+    roles: ['titulado'],
+  };
   const authService = { login: vi.fn().mockResolvedValue(session) };
   const mail = { sendAccountActivated: vi.fn().mockResolvedValue(undefined) };
   const service = new AccountActivationService(
@@ -58,14 +80,25 @@ function build(options: { request?: unknown; otp?: unknown; userExists?: boolean
     authService as any,
     mail as any,
   );
-  return { activationRepository, otpRepository, otpService, authService, mail, session, service };
+  return {
+    activationRepository,
+    otpRepository,
+    otpService,
+    authService,
+    mail,
+    session,
+    service,
+  };
 }
 
 afterEach(() => vi.restoreAllMocks());
 
 describe('AccountActivationService.getStatus', () => {
   it('con un código vigente informa vencimiento, espera de reenvío y contadores', async () => {
-    const { service, otpRepository } = build({ otp: otpRow({ attempts: 2 }), resends: 1 });
+    const { service, otpRepository } = build({
+      otp: otpRow({ attempts: 2 }),
+      resends: 1,
+    });
 
     const status = await service.getStatus(EMAIL, NOW);
 
@@ -77,17 +110,25 @@ describe('AccountActivationService.getStatus', () => {
       resendsRemaining: 2,
       remainingAttempts: 3,
     });
-    expect(otpRepository.countResendsSince).toHaveBeenCalledWith('req-1', new Date('2026-10-05T11:00:00.000Z'));
+    expect(otpRepository.countResendsSince).toHaveBeenCalledWith(
+      'req-1',
+      new Date('2026-10-05T11:00:00.000Z'),
+    );
   });
 
   it('marca el código como vencido cuando ya pasó su hora', async () => {
     const { service } = build({ otp: otpRow({ expiresAt: NOW }) });
-    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({ state: 'expired' });
+    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({
+      state: 'expired',
+    });
   });
 
   it('marca bloqueo por intentos aunque el código también esté invalidado', async () => {
     const { service } = build({ otp: otpRow({ attempts: 5, expiresAt: NOW }) });
-    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({ state: 'locked', remainingAttempts: 0 });
+    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({
+      state: 'locked',
+      remainingAttempts: 0,
+    });
   });
 
   it('sin ningún código informa no_code y permite reenviar de inmediato', async () => {
@@ -101,7 +142,9 @@ describe('AccountActivationService.getStatus', () => {
 
   it('no deja reenvíos cuando ya se usaron los 3 de la hora', async () => {
     const { service } = build({ resends: 3 });
-    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({ resendsRemaining: 0 });
+    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({
+      resendsRemaining: 0,
+    });
   });
 
   it('informa cuenta activada si el código ya se usó', async () => {
@@ -115,12 +158,16 @@ describe('AccountActivationService.getStatus', () => {
 
   it('informa cuenta activada si ya existe un usuario con ese correo', async () => {
     const { service } = build({ userExists: true });
-    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({ state: 'activated' });
+    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({
+      state: 'activated',
+    });
   });
 
   it('responde 404 cuando el correo no tiene una solicitud aprobada', async () => {
     const { service } = build({ request: null });
-    await expect(service.getStatus(EMAIL, NOW)).rejects.toBeInstanceOf(ActivationRequestNotFoundException);
+    await expect(service.getStatus(EMAIL, NOW)).rejects.toBeInstanceOf(
+      ActivationRequestNotFoundException,
+    );
   });
 });
 
@@ -128,7 +175,10 @@ describe('AccountActivationService.verify', () => {
   it('acepta el código correcto sin gastar intentos', async () => {
     const { service, otpRepository } = build();
 
-    await expect(service.verify(EMAIL, CODE, NOW)).resolves.toEqual({ valid: true, expiresAt: '2026-10-05T12:05:00.000Z' });
+    await expect(service.verify(EMAIL, CODE, NOW)).resolves.toEqual({
+      valid: true,
+      expiresAt: '2026-10-05T12:05:00.000Z',
+    });
     expect(otpRepository.reserveAttempt).toHaveBeenCalledWith('otp-1', NOW);
     expect(otpRepository.releaseAttempt).toHaveBeenCalledWith('otp-1');
   });
@@ -151,42 +201,61 @@ describe('AccountActivationService.verify', () => {
     const { service, otpRepository } = build({ otp: otpRow({ attempts: 4 }) });
     otpRepository.reserveAttempt.mockResolvedValue({ attempts: 5 });
 
-    await expect(service.verify(EMAIL, '000000', NOW)).rejects.toBeInstanceOf(ActivationAttemptsExceededException);
+    await expect(service.verify(EMAIL, '000000', NOW)).rejects.toBeInstanceOf(
+      ActivationAttemptsExceededException,
+    );
     expect(otpRepository.invalidate).toHaveBeenCalledWith('otp-1', NOW);
   });
 
   it('un código ya bloqueado no se vuelve a comparar ni suma intentos', async () => {
-    const { service, otpRepository } = build({ otp: otpRow({ attempts: 5, expiresAt: NOW }) });
+    const { service, otpRepository } = build({
+      otp: otpRow({ attempts: 5, expiresAt: NOW }),
+    });
 
-    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationAttemptsExceededException);
+    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(
+      ActivationAttemptsExceededException,
+    );
     expect(otpRepository.reserveAttempt).not.toHaveBeenCalled();
   });
 
   it('rechaza un código vencido aunque coincida', async () => {
-    const { service, otpRepository } = build({ otp: otpRow({ expiresAt: new Date(NOW.getTime() - 1) }) });
+    const { service, otpRepository } = build({
+      otp: otpRow({ expiresAt: new Date(NOW.getTime() - 1) }),
+    });
 
-    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationCodeExpiredException);
+    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(
+      ActivationCodeExpiredException,
+    );
     expect(otpRepository.reserveAttempt).not.toHaveBeenCalled();
   });
 
   it('sin ningún código emitido pide solicitar uno nuevo', async () => {
     const { service } = build({ otp: null });
-    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationCodeExpiredException);
+    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(
+      ActivationCodeExpiredException,
+    );
   });
 
   it('si la cuenta ya fue activada responde 409', async () => {
     const { service } = build({ otp: otpRow({ usedAt: NOW }) });
     const result = service.verify(EMAIL, CODE, NOW);
 
-    await expect(result).rejects.toBeInstanceOf(AccountAlreadyActivatedException);
-    await expect(result).rejects.toMatchObject({ statusCode: 409, data: { reason: 'already_activated' } });
+    await expect(result).rejects.toBeInstanceOf(
+      AccountAlreadyActivatedException,
+    );
+    await expect(result).rejects.toMatchObject({
+      statusCode: 409,
+      data: { reason: 'already_activated' },
+    });
   });
 
   it('si no se puede reservar el intento responde bloqueado sin comparar el código', async () => {
     const { service, otpRepository } = build();
     otpRepository.reserveAttempt.mockResolvedValue(null);
 
-    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationAttemptsExceededException);
+    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(
+      ActivationAttemptsExceededException,
+    );
     expect(otpRepository.releaseAttempt).not.toHaveBeenCalled();
   });
 
@@ -194,77 +263,112 @@ describe('AccountActivationService.verify', () => {
     const { service, otpRepository } = build();
     let attempts = 0;
     // Simula el UPDATE condicional de la base: revisar y sumar ocurre en un solo paso
-    otpRepository.reserveAttempt.mockImplementation(async () => (attempts < 5 ? { attempts: ++attempts } : null));
-
-    const results = await Promise.allSettled(
-      Array.from({ length: 12 }, (_, index) => service.verify(EMAIL, String(100000 + index), NOW)),
+    otpRepository.reserveAttempt.mockImplementation(async () =>
+      attempts < 5 ? { attempts: ++attempts } : null,
     );
 
-    const reasons = results.map((result) => (result.status === 'rejected' ? result.reason : null));
+    const results = await Promise.allSettled(
+      Array.from({ length: 12 }, (_, index) =>
+        service.verify(EMAIL, String(100000 + index), NOW),
+      ),
+    );
+
+    const reasons = results.map((result) =>
+      result.status === 'rejected' ? result.reason : null,
+    );
     expect(attempts).toBe(5);
-    expect(reasons.filter((reason) => reason instanceof InvalidActivationCodeException)).toHaveLength(4);
-    expect(reasons.filter((reason) => reason instanceof ActivationAttemptsExceededException)).toHaveLength(8);
+    expect(
+      reasons.filter(
+        (reason) => reason instanceof InvalidActivationCodeException,
+      ),
+    ).toHaveLength(4);
+    expect(
+      reasons.filter(
+        (reason) => reason instanceof ActivationAttemptsExceededException,
+      ),
+    ).toHaveLength(8);
     expect(otpRepository.invalidate).toHaveBeenCalledOnce();
   });
 
   it('responde 404 cuando el correo no tiene una solicitud aprobada', async () => {
     const { service } = build({ request: null });
-    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationRequestNotFoundException);
+    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(
+      ActivationRequestNotFoundException,
+    );
   });
 });
 
 describe('AccountActivationService.activate', () => {
   it('crea el usuario con la contraseña cifrada, avisa por correo y devuelve la sesión', async () => {
-    const { service, activationRepository, authService, mail, session } = build();
+    const { service, activationRepository, authService, mail, session } =
+      build();
 
-    await expect(service.activate(EMAIL, CODE, 'Jackson2026', NOW)).resolves.toBe(session);
+    await expect(
+      service.activate(EMAIL, CODE, 'Jackson2026', NOW),
+    ).resolves.toBe(session);
 
-    const [otpId, user, usedAt] = activationRepository.createUserAndConsumeOtp.mock.calls[0];
+    const [otpId, user, usedAt] =
+      activationRepository.createUserAndConsumeOtp.mock.calls[0];
     expect(otpId).toBe('otp-1');
     expect(usedAt).toBe(NOW);
-    expect(user).toMatchObject({ accessRequestId: 'req-1', firstName: 'Ana', lastName: 'Pérez', email: EMAIL, phone: '71234567' });
+    expect(user).toMatchObject({
+      accessRequestId: 'req-1',
+      firstName: 'Ana',
+      lastName: 'Pérez',
+      email: EMAIL,
+      phone: '71234567',
+    });
     expect(user.passwordHash).not.toBe('Jackson2026');
     expect(await bcrypt.compare('Jackson2026', user.passwordHash)).toBe(true);
     expect(mail.sendAccountActivated).toHaveBeenCalledWith(EMAIL, 'Ana');
-    expect(authService.login).toHaveBeenCalledWith({ email: EMAIL, password: 'Jackson2026' });
+    expect(authService.login).toHaveBeenCalledWith({
+      email: EMAIL,
+      password: 'Jackson2026',
+    });
   });
 
   it('con un código incorrecto no crea ningún usuario', async () => {
     const { service, activationRepository, authService } = build();
 
-    await expect(service.activate(EMAIL, '000000', 'Jackson2026', NOW)).rejects.toBeInstanceOf(
-      InvalidActivationCodeException,
-    );
+    await expect(
+      service.activate(EMAIL, '000000', 'Jackson2026', NOW),
+    ).rejects.toBeInstanceOf(InvalidActivationCodeException);
     expect(activationRepository.createUserAndConsumeOtp).not.toHaveBeenCalled();
     expect(authService.login).not.toHaveBeenCalled();
   });
 
   it('si el código se consumió en otro envío simultáneo responde que ya fue activada', async () => {
     const { service, activationRepository, authService, mail } = build();
-    activationRepository.createUserAndConsumeOtp.mockResolvedValue('already_used');
-
-    await expect(service.activate(EMAIL, CODE, 'Jackson2026', NOW)).rejects.toBeInstanceOf(
-      AccountAlreadyActivatedException,
+    activationRepository.createUserAndConsumeOtp.mockResolvedValue(
+      'already_used',
     );
+
+    await expect(
+      service.activate(EMAIL, CODE, 'Jackson2026', NOW),
+    ).rejects.toBeInstanceOf(AccountAlreadyActivatedException);
     expect(mail.sendAccountActivated).not.toHaveBeenCalled();
     expect(authService.login).not.toHaveBeenCalled();
   });
 
   it('si falla el correo de confirmación la cuenta queda activada y la sesión se devuelve igual', async () => {
     const { service, mail, session } = build();
-    const logError = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    const logError = vi
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
     mail.sendAccountActivated.mockRejectedValue(new Error('smtp caído'));
 
-    await expect(service.activate(EMAIL, CODE, 'Jackson2026', NOW)).resolves.toBe(session);
+    await expect(
+      service.activate(EMAIL, CODE, 'Jackson2026', NOW),
+    ).resolves.toBe(session);
     expect(logError).toHaveBeenCalledOnce();
   });
 
   it('con una cuenta ya activada no vuelve a crear usuario', async () => {
     const { service, activationRepository } = build({ userExists: true });
 
-    await expect(service.activate(EMAIL, CODE, 'Jackson2026', NOW)).rejects.toBeInstanceOf(
-      AccountAlreadyActivatedException,
-    );
+    await expect(
+      service.activate(EMAIL, CODE, 'Jackson2026', NOW),
+    ).rejects.toBeInstanceOf(AccountAlreadyActivatedException);
     expect(activationRepository.createUserAndConsumeOtp).not.toHaveBeenCalled();
   });
 });
@@ -285,12 +389,16 @@ describe('AccountActivationService.resend', () => {
   it('permite reenviar cuando todavía no se emitió ningún código', async () => {
     const { service, otpService } = build({ otp: null });
 
-    await expect(service.resend(EMAIL, NOW)).resolves.toMatchObject({ resendsRemaining: 2 });
+    await expect(service.resend(EMAIL, NOW)).resolves.toMatchObject({
+      resendsRemaining: 2,
+    });
     expect(otpService.issueFor).toHaveBeenCalledOnce();
   });
 
   it('exige esperar 60 segundos desde el último código e indica cuánto falta', async () => {
-    const { service, otpService } = build({ otp: otpRow({ createdAt: new Date(NOW.getTime() - 30_000) }) });
+    const { service, otpService } = build({
+      otp: otpRow({ createdAt: new Date(NOW.getTime() - 30_000) }),
+    });
     const result = service.resend(EMAIL, NOW);
 
     await expect(result).rejects.toBeInstanceOf(ResendTooSoonException);
@@ -313,21 +421,30 @@ describe('AccountActivationService.resend', () => {
   });
 
   it('prioriza el límite por hora sobre la espera de 60 segundos', async () => {
-    const { service } = build({ resends: 3, otp: otpRow({ createdAt: new Date(NOW.getTime() - 10_000) }) });
-    await expect(service.resend(EMAIL, NOW)).rejects.toBeInstanceOf(ResendLimitExceededException);
+    const { service } = build({
+      resends: 3,
+      otp: otpRow({ createdAt: new Date(NOW.getTime() - 10_000) }),
+    });
+    await expect(service.resend(EMAIL, NOW)).rejects.toBeInstanceOf(
+      ResendLimitExceededException,
+    );
   });
 
   it('si el correo no sale responde 502', async () => {
     const { service, otpService } = build();
     otpService.issueFor.mockResolvedValue(false);
 
-    await expect(service.resend(EMAIL, NOW)).rejects.toBeInstanceOf(ActivationCodeNotSentException);
+    await expect(service.resend(EMAIL, NOW)).rejects.toBeInstanceOf(
+      ActivationCodeNotSentException,
+    );
   });
 
   it('no reenvía a una cuenta ya activada', async () => {
     const { service, otpService } = build({ otp: otpRow({ usedAt: NOW }) });
 
-    await expect(service.resend(EMAIL, NOW)).rejects.toBeInstanceOf(AccountAlreadyActivatedException);
+    await expect(service.resend(EMAIL, NOW)).rejects.toBeInstanceOf(
+      AccountAlreadyActivatedException,
+    );
     expect(otpService.issueFor).not.toHaveBeenCalled();
   });
 });

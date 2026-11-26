@@ -16,8 +16,6 @@ const validBody = {
 const createPipe = new RequestValidationPipe(createCertificationSchema);
 const updatePipe = new RequestValidationPipe(updateCertificationSchema);
 
-
-
 function todayInBolivia(): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: BUSINESS_TIMEZONE,
@@ -27,13 +25,17 @@ function todayInBolivia(): string {
 function tomorrowInBolivia(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return new Intl.DateTimeFormat('en-CA', { timeZone: BUSINESS_TIMEZONE }).format(d);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: BUSINESS_TIMEZONE,
+  }).format(d);
 }
 
 function yesterdayInBolivia(): string {
   const d = new Date();
   d.setDate(d.getDate() - 1);
-  return new Intl.DateTimeFormat('en-CA', { timeZone: BUSINESS_TIMEZONE }).format(d);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: BUSINESS_TIMEZONE,
+  }).format(d);
 }
 
 describe('Certification validation messages', () => {
@@ -106,11 +108,20 @@ describe('Certification validation messages', () => {
       'name',
       'issuingOrganization',
     ]);
-    expect(issues?.every((issue) => issue.message === CERTIFICATION_VALIDATION_MESSAGES.required)).toBe(true);
+    expect(
+      issues?.every(
+        (issue) => issue.message === CERTIFICATION_VALIDATION_MESSAGES.required,
+      ),
+    ).toBe(true);
   });
 
   it('reports a single message for an invalid date', () => {
-    for (const issueDate of ['not-a-date', '2025-02-30', '10/05/2024', '2024-5-1']) {
+    for (const issueDate of [
+      'not-a-date',
+      '2025-02-30',
+      '10/05/2024',
+      '2024-5-1',
+    ]) {
       const issues = createCertificationSchema.safeParse({
         ...validBody,
         issueDate,

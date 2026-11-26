@@ -1,9 +1,10 @@
+import { RadarConsentsModule } from '../radar-integration/radar-consents.module.js';
 import { CompanyJobApplicantsController } from './controllers/company-job-applicants.controller.js';
 import { JobApplicationsController } from './controllers/job-applications.controller.js';
 import { CompanyJobApplicantsService } from './services/company-job-applicants.service.js';
 import { JobApplicationsService } from './services/job-applications.service.js';
 import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { EducationsModule } from '../educations/educations.module.js';
@@ -18,24 +19,32 @@ import { SkillsClassifierService } from './services/skills-classifier.service.js
 import { VacancyRankingService } from './services/vacancy-ranking.service.js';
 import { WeightedScoreService } from './services/weighted-score.service.js';
 import { ActiveJobOffersService } from './services/active-job-offers.service.js';
-import { ExperienceSkillsRepository } from './repositories/experience-skills.repository.js';
+import { ExperienceSkillsService } from './services/experience-skills.service.js';
 import { JobMatchController } from './controllers/job-match.controller.js';
-import { JobMatchRepository } from './repositories/job-match.repository.js';
+import { JobMatchSourceService } from './services/job-match-source.service.js';
 import { JobMatchService } from './services/job-match.service.js';
 import { VacancyScoringService } from './services/vacancy-scoring.service.js';
 import { CandidateProfileService } from './services/candidate-profile.service.js';
 import { JobApplicationMapper } from './mappers/job-application.mapper.js';
 import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
 import { JobRecommendationsService } from './services/job-recommendations.service.js';
+import { RequirementsController } from './controllers/requirements.controller.js'; 
+import { JobAlertPreferencesController } from './controllers/job-alert-preferences.controller.js';
+import { JobAlertPreferencesRepository } from './repositories/job-alert-preferences.repository.js';
+import { JobAlertPreferencesService } from './services/job-alert-preferences.service.js';
+import { JobAlertRecipientsService } from './services/job-alert-recipients.service.js';
+import { UsersModule } from '../users/users.module.js';
 
 @Module({
   imports: [
+    RadarConsentsModule,
     PrismaModule,
     JwtAuthModule,
     SkillsModule,
-    JobOffersModule,
+    forwardRef(() => JobOffersModule),
     EducationsModule,
     WorkExperienceModule,
+    UsersModule,
   ],
   controllers: [
     MatchingController,
@@ -43,6 +52,8 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     JobApplicationsController,
     JobRecommendationsController,
     CompanyJobApplicantsController,
+    RequirementsController,
+    JobAlertPreferencesController,
   ],
   providers: [
     JobApplicationsService,
@@ -56,14 +67,18 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
-    ExperienceSkillsRepository,
-    JobMatchRepository,
+    ExperienceSkillsService,
+    JobMatchSourceService,
     VacancyScoringService,
     JobMatchService,
     CandidateProfileService,
     JobRecommendationsService,
+    JobAlertPreferencesRepository,
+    JobAlertPreferencesService,
+    JobAlertRecipientsService,
   ],
   exports: [
+    JobApplicationsService,
     JobRecommendationsService,
     MatchingService,
     ActiveJobOffersService,
@@ -72,6 +87,8 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
+    JobAlertPreferencesService,
+    JobAlertRecipientsService,
   ],
 })
 export class MatchingModule {}
