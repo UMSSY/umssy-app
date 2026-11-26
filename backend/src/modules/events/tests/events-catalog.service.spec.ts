@@ -34,11 +34,14 @@ function buildRecord(
   };
 }
 
+const ACTIVE_VISIBILITY = { status: { title: 'Publicado' } };
+
 describe('EventsCatalogService', () => {
   let eventsService: {
     findAll: ReturnType<typeof vi.fn>;
     findAndCount: ReturnType<typeof vi.fn>;
     expireOverdueProposals: ReturnType<typeof vi.fn>;
+    getCatalogVisibilityFilter: ReturnType<typeof vi.fn>;
   };
   let signals: { findByUserId: ReturnType<typeof vi.fn> };
   let service: EventsCatalogService;
@@ -48,6 +51,7 @@ describe('EventsCatalogService', () => {
       findAll: vi.fn().mockResolvedValue({ data: { items: [] } }),
       findAndCount: vi.fn(),
       expireOverdueProposals: vi.fn().mockResolvedValue(0),
+      getCatalogVisibilityFilter: vi.fn().mockReturnValue(ACTIVE_VISIBILITY),
     };
     signals = { findByUserId: vi.fn() };
     service = new EventsCatalogService(
@@ -96,7 +100,11 @@ describe('EventsCatalogService', () => {
       includeProposals: true,
       search: 'taller',
       userId: 'user-1',
+      visibility: ACTIVE_VISIBILITY,
     });
+    expect(eventsService.getCatalogVisibilityFilter).toHaveBeenCalledWith(
+      expect.objectContaining({ includeProposals: true }),
+    );
     expect(result.data.items.map(({ id }) => id)).toEqual(['b', 'd', 'c']);
     expect(result.data.total).toBe(4);
     expect(result.data.totalPages).toBe(2);
@@ -116,7 +124,9 @@ describe('EventsCatalogService', () => {
     });
 
     expect(eventsService.findAndCount).toHaveBeenCalledWith(
-      expect.objectContaining({ statusId: '6f9619ff-8b86-4011-b42d-00c04fc964ff' }),
+      expect.objectContaining({
+        statusId: '6f9619ff-8b86-4011-b42d-00c04fc964ff',
+      }),
     );
     expect(result.data.items.map(({ id }) => id)).toEqual(['a']);
     expect(result.offset).toBe(2);
@@ -190,5 +200,41 @@ describe('EventsCatalogService', () => {
       expect(secondPage.data.items.map(({ id }) => id)).toEqual(['other']);
       expect(secondPage.data.total).toBe(3);
     });
+  });
+
+  it('lists finished workshops by date even when a ranking is requested', async () => {
+    for (const sort of ['popular', 'recommended'] as const) {
+      eventsService.findAll.mockClear();
+      await service.findAll(
+        { page: 1, limit: 10, sort, scope: 'finished' },
+        'user-1',
+      );
+      expect(eventsService.findAll).toHaveBeenCalledWith(
+        { page: 1, limit: 10, sort, scope: 'finished' },
+        'user-1',
+      );
+    }
+    expect(eventsService.findAndCount).not.toHaveBeenCalled();
+    expect(signals.findByUserId).not.toHaveBeenCalled();
+  });
+
+  it('ranks the exact status when statusId and finished scope are both present', async () => {
+    eventsService.findAndCount.mockResolvedValue({
+      items: [buildRecord('older', 1), buildRecord('popular', 8)],
+      total: 2,
+    });
+    const result = await service.findAll({
+      page: 1,
+      limit: 10,
+      statusId: 'status-1',
+      scope: 'finished',
+      sort: 'popular',
+    });
+
+    expect(result.data.items.map(({ id }) => id)).toEqual(['popular', 'older']);
+    expect(eventsService.findAll).not.toHaveBeenCalled();
+    expect(eventsService.getCatalogVisibilityFilter).toHaveBeenCalledWith(
+      expect.objectContaining({ statusId: 'status-1', scope: 'finished' }),
+    );
   });
 });

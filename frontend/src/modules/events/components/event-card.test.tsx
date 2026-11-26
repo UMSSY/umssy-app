@@ -1,6 +1,6 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   calculateEventCapacityStatus,
   formatEventDate,
@@ -26,8 +26,13 @@ const MOCK_EVENT: EventItem = {
   modalityId: 'c1c1c1c1-0001-4000-8000-000000000001',
 };
 
+beforeEach(() => {
+  vi.useFakeTimers({ now: new Date('2026-10-01T12:00:00.000Z'), toFake: ['Date'] });
+});
+
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
 });
 
 describe("EventCard y utilidades de formato", () => {
@@ -249,5 +254,41 @@ describe("EventCard y utilidades de formato", () => {
     expect(screen.getByText(formatEventDate(MOCK_EVENT.eventDate))).toBeInTheDocument();
     expect(screen.getByText('09:00 - 13:00 hrs')).toBeInTheDocument();
     expect(screen.queryByText(/sesiones/)).not.toBeInTheDocument();
+  });
+
+  it('marca como finalizado un taller cuya última sesión ya terminó', () => {
+    vi.setSystemTime(new Date('2026-12-06T12:00:00.000Z'));
+    render(
+      <EventCard
+        event={{
+          ...MOCK_EVENT,
+          status: 'Publicado',
+          sessions: [
+            { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+            { id: 's2', startsAt: '2026-12-05T13:00:00.000Z', endsAt: '2026-12-05T15:00:00.000Z', location: null },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByText('Finalizado')).toBeInTheDocument();
+    expect(screen.queryByText('Publicada')).not.toBeInTheDocument();
+  });
+
+  it('no marca como finalizado un taller con sesiones pendientes', () => {
+    vi.setSystemTime(new Date('2026-12-03T12:00:00.000Z'));
+    render(
+      <EventCard
+        event={{
+          ...MOCK_EVENT,
+          status: 'Publicado',
+          sessions: [
+            { id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null },
+            { id: 's2', startsAt: '2026-12-05T13:00:00.000Z', endsAt: '2026-12-05T15:00:00.000Z', location: null },
+          ],
+        }}
+      />,
+    );
+    expect(screen.queryByText('Finalizado')).not.toBeInTheDocument();
+    expect(screen.getByText('Publicada')).toBeInTheDocument();
   });
 });
