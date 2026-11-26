@@ -113,7 +113,9 @@ export class EventsRepository {
 
     const where: Prisma.EventWhereInput = {
       ...(categoryId !== undefined && { categoryId }),
-      ...(statusId !== undefined
+      ...(payload.visibility !== undefined
+        ? payload.visibility
+        : statusId !== undefined
         ? { statusId }
         : {
             status: {
@@ -134,7 +136,9 @@ export class EventsRepository {
       this.prisma.event.findMany({
         select: buildSelect(userId),
         where,
-        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
+        orderBy: payload.newestFirst
+          ? [{ eventDate: 'desc' }, { startTime: 'desc' }, { id: 'asc' }]
+          : [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
         skip,
         take,
       }),

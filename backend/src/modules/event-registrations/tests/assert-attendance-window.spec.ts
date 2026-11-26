@@ -9,7 +9,7 @@ const schedule = {
 
 describe('assertAttendanceWindow', () => {
   it.each([
-    '2026-11-16T12:00:00.000Z',
+    '2026-11-16T13:30:00.000Z',
     '2026-11-16T13:59:59.999Z',
     '2026-11-16T14:00:00.000Z',
     '2026-11-16T14:59:59.999Z',
@@ -20,7 +20,7 @@ describe('assertAttendanceWindow', () => {
   });
 
   it.each([
-    '2026-11-16T11:59:59.999Z',
+    '2026-11-16T13:29:59.999Z',
     '2026-11-16T15:00:00.000Z',
     '2026-11-17T14:30:00.000Z',
     '2026-11-15T14:30:00.000Z',
@@ -33,22 +33,22 @@ describe('assertAttendanceWindow', () => {
     );
   });
 
-  it('allows the two-hour window to begin on the preceding local calendar day', () => {
+  it('allows the 30-minute window to begin on the preceding local calendar day', () => {
     const nearMidnight = {
       eventDate: new Date('2026-11-17T00:00:00.000Z'),
-      startTime: new Date('1970-01-01T00:30:00.000Z'),
+      startTime: new Date('1970-01-01T00:15:00.000Z'),
       endTime: new Date('1970-01-01T01:30:00.000Z'),
     };
     expect(() =>
       assertAttendanceWindow(
         nearMidnight,
-        new Date('2026-11-17T02:29:59.999Z'),
+        new Date('2026-11-17T03:44:59.999Z'),
       ),
     ).toThrowError(expect.objectContaining({ statusCode: 409 }));
     expect(() =>
       assertAttendanceWindow(
         nearMidnight,
-        new Date('2026-11-17T02:30:00.000Z'),
+        new Date('2026-11-17T03:45:00.000Z'),
       ),
     ).not.toThrow();
     expect(() =>
