@@ -1,0 +1,17 @@
+export const COMPANY_PROFILE_LABELS = {
+  pageTitle: "Perfil de empresa",
+  pageSubtitle: "Información institucional y de contacto de tu empresa.",
+  logoAlt: "Logo de la empresa",
+  contactTitle: "Contacto",
+  cityLabel: "Ciudad",
+  phoneLabel: "Teléfono",
+  emailLabel: "Correo institucional",
+  aboutTitle: "Acerca de la empresa",
+  emptyDescription: "Sin descripción registrada.",
+  websiteTitle: "Sitio web",
+  emptyValue: "No registrado",
+  loadingAriaLabel: "Cargando información del perfil de la empresa",
+  errorMessage: "No se pudo cargar la información del perfil. Inténtalo más tarde.",
+  noCompanyMessage: "Tu cuenta no tiene una empresa asignada.",
+  retryButton: "Reintentar",
+} as const;
