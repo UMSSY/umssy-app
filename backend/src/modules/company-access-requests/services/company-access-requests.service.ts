@@ -53,8 +53,12 @@ export class CompanyAccessRequestsService {
   }
 
   async create(dto: CreateCompanyAccessRequestDto) {
-    const { existingCompany, existingUser, activeRequest } =
-      await this.repository.findDuplicates(dto.companyName, dto.email);
+    const { existingCompany, existingUser, activeRequest, existingUsername } =
+      await this.repository.findDuplicates(
+          dto.companyName,
+          dto.email,
+          dto.username,
+        );
 
     if (existingCompany) {
       throw new CompanyRegistrationConflictException(
@@ -72,6 +76,12 @@ export class CompanyAccessRequestsService {
       throw new CompanyRegistrationConflictException(
         `Ya existe una solicitud activa o en revisión para "${activeRequest.companyName}" con el correo "${activeRequest.email}".`,
         'activeRequest',
+      );
+    }
+    if (existingUsername) {
+      throw new CompanyRegistrationConflictException(
+        `El nombre de usuario "${dto.username}" no está disponible.`,
+        'username',
       );
     }
 

@@ -58,6 +58,21 @@ sequenceDiagram
 - **Notification Pipeline**: Administrative resolution emails (`COMPANY_ACCESS_REQUEST_APPROVED`, `COMPANY_ACCESS_REQUEST_OBSERVED`, `COMPANY_ACCESS_REQUEST_REJECTED`) are validated via Zod schemas and rendered from MJML templates under `backend/src/modules/company-access-requests/notification/`, then dispatched exclusively through `NotificationsService.notify()`.
 - **OpenAPI Specifications**: All 20 controller endpoints declare unique `operationId`s (`companyAccessRequests_*`), parameter/query/body schemas, security requirements for backoffice routes, and multipart upload limits (`2 MB` for logos; `10 MB` for supporting documents).
 
+## Name Uniqueness Checks
+
+`POST /company-access-requests` rejects a draft with `409 COMPANY_REGISTRATION_CONFLICT` when the company name or the username is already taken. Comparisons ignore letter case, leading and trailing spaces and repeated inner spaces (`normalizeRegistrationName`); accents are kept.
+
+| `data.field` | What is compared | Blocks when |
+| --- | --- | --- |
+| `companyName` | `companies.title` | any match |
+| `activeRequest` | `company_access_requests.company_name` or the request email | the other request is `PENDING`, `IN_REVIEW`, `OBSERVED` or `APPROVED` |
+| `email` | `users.email` | any match |
+| `username` | `users.first_name` of accounts with the `empresa` role (not soft-deleted), and `company_access_requests.username` | the request is `PENDING`, `IN_REVIEW`, `OBSERVED` or `APPROVED` |
+
+`DRAFT`, `REJECTED` and cancelled requests do not hold a name. The approved account stores the username in `users.first_name` and the company name in `users.last_name`; activation only sets the password and `is_active`, so the checks run when the draft is created, not at activation.
+
+**Known limit:** there is no unique index (no schema or migration change was approved), so the check is not atomic. Two simultaneous requests with the same name or username can both pass it. Reviewers should keep checking duplicates when resolving a request.
+
 ## Sprint History
 
 ### Sprint 3

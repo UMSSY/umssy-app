@@ -102,6 +102,51 @@ describe('CompanyAccessRequestsService', () => {
       await expect(service.create(dto)).rejects.toThrow(CompanyRegistrationConflictException);
     });
 
+    it('rechaza con 409 y el campo username cuando el nombre de usuario no está disponible', async () => {
+      repository.findDuplicates.mockResolvedValue({
+        existingCompany: null,
+        existingUser: null,
+        activeRequest: null,
+        existingUsername: { source: 'user' },
+      });
+
+      const error = await service.create(dto).catch((cause: unknown) => cause);
+
+      expect(error).toBeInstanceOf(CompanyRegistrationConflictException);
+      expect(error).toMatchObject({
+        statusCode: 409,
+        code: 'COMPANY_REGISTRATION_CONFLICT',
+        field: 'username',
+        message: 'El nombre de usuario "acme_user" no está disponible.',
+      });
+      expect(repository.createDraft).not.toHaveBeenCalled();
+    });
+
+    it('prioriza el conflicto de la empresa sobre el del usuario', async () => {
+      repository.findDuplicates.mockResolvedValue({
+        existingCompany: { id: 'comp-1' },
+        existingUser: null,
+        activeRequest: null,
+        existingUsername: { source: 'request' },
+      });
+
+      await expect(service.create(dto)).rejects.toMatchObject({ field: 'companyName' });
+    });
+
+    it('consulta los duplicados con el nombre de la empresa, el correo y el usuario', async () => {
+      repository.findDuplicates.mockResolvedValue({
+        existingCompany: null,
+        existingUser: null,
+        activeRequest: null,
+        existingUsername: null,
+      });
+      repository.createDraft.mockResolvedValue({ id: 'req-1' });
+
+      await service.create(dto);
+
+      expect(repository.findDuplicates).toHaveBeenCalledWith('Acme Corp', 'acme@test.com', 'acme_user');
+    });
+
     it('crea borrador exitosamente si no hay conflictos', async () => {
       repository.findDuplicates.mockResolvedValue({
         existingCompany: null,
