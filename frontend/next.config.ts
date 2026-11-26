@@ -9,19 +9,27 @@ const LOCAL_CONNECT_SOURCES = [
   "ws://127.0.0.1:8080",
 ];
 
+type AppEnv = "local" | "dev" | "prod";
+
 interface CspEnvironment {
   nodeEnv?: string;
+  appEnv?: string;
   apiUrl?: string;
 }
 
-function resolveApiUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_API_URL_LOCAL ||
-    process.env.NEXT_PUBLIC_API_URL_DEV ||
-    process.env.NEXT_PUBLIC_API_URL_PROD ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:8080"
-  );
+const DEFAULT_API_URL = "http://localhost:8080";
+
+function resolveAppEnv(): string {
+  return process.env.NEXT_PUBLIC_APP_ENV || "local";
+}
+
+function resolveApiUrl(appEnv: string): string {
+  const urls: Record<AppEnv, string | undefined> = {
+    local: process.env.NEXT_PUBLIC_API_URL_LOCAL,
+    dev: process.env.NEXT_PUBLIC_API_URL_DEV,
+    prod: process.env.NEXT_PUBLIC_API_URL_PROD,
+  };
+  return urls[appEnv as AppEnv] || DEFAULT_API_URL;
 }
 
 function parseApiOrigin(apiUrl: string): { origin: string; socketOrigin: string; isLocal: boolean } | null {
@@ -39,12 +47,13 @@ function parseApiOrigin(apiUrl: string): { origin: string; socketOrigin: string;
 
 export function buildCspHeader({
   nodeEnv = process.env.NODE_ENV,
-  apiUrl = resolveApiUrl(),
+  appEnv = resolveAppEnv(),
+  apiUrl = resolveApiUrl(appEnv),
 }: CspEnvironment = {}): string {
   const isProduction = nodeEnv === "production";
   const api = parseApiOrigin(apiUrl);
   const apiSources = api ? [api.origin, api.socketOrigin] : [];
-  const allowLocalhost = !isProduction || Boolean(api?.isLocal);
+  const allowLocalhost = !isProduction || appEnv === "local" || Boolean(api?.isLocal);
 
   const scriptSources = ["'self'", ...(isProduction ? [] : ["'unsafe-eval'"]), "'unsafe-inline'"];
   const connectSources = ["'self'", ...apiSources, ...(allowLocalhost ? LOCAL_CONNECT_SOURCES : [])];
