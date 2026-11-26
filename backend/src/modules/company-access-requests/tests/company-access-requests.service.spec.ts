@@ -4,6 +4,9 @@ import { CompanyAccessRequestsService } from '../services/company-access-request
 import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
 import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 
+const PNG_BYTES = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+const JPG_BYTES = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]);
+
 describe('CompanyAccessRequestsService', () => {
   let service: CompanyAccessRequestsService;
 
@@ -45,13 +48,19 @@ describe('CompanyAccessRequestsService', () => {
     notify: vi.fn(),
   };
 
+  const correctionAuthorization = {
+    issueFor: vi.fn(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    correctionAuthorization.issueFor.mockReturnValue(`ccr1.${'A'.repeat(43)}`);
     service = new CompanyAccessRequestsService(
       repository as any,
       filesService as any,
       companyOcr as any,
       notificationsService as any,
+      correctionAuthorization as any,
     );
   });
 
@@ -102,6 +111,51 @@ describe('CompanyAccessRequestsService', () => {
       await expect(service.create(dto)).rejects.toThrow(CompanyRegistrationConflictException);
     });
 
+    it('rechaza con 409 y el campo username cuando el nombre de usuario no está disponible', async () => {
+      repository.findDuplicates.mockResolvedValue({
+        existingCompany: null,
+        existingUser: null,
+        activeRequest: null,
+        existingUsername: { source: 'user' },
+      });
+
+      const error = await service.create(dto).catch((cause: unknown) => cause);
+
+      expect(error).toBeInstanceOf(CompanyRegistrationConflictException);
+      expect(error).toMatchObject({
+        statusCode: 409,
+        code: 'COMPANY_REGISTRATION_CONFLICT',
+        field: 'username',
+        message: 'El nombre de usuario "acme_user" no está disponible.',
+      });
+      expect(repository.createDraft).not.toHaveBeenCalled();
+    });
+
+    it('prioriza el conflicto de la empresa sobre el del usuario', async () => {
+      repository.findDuplicates.mockResolvedValue({
+        existingCompany: { id: 'comp-1' },
+        existingUser: null,
+        activeRequest: null,
+        existingUsername: { source: 'request' },
+      });
+
+      await expect(service.create(dto)).rejects.toMatchObject({ field: 'companyName' });
+    });
+
+    it('consulta los duplicados con el nombre de la empresa, el correo y el usuario', async () => {
+      repository.findDuplicates.mockResolvedValue({
+        existingCompany: null,
+        existingUser: null,
+        activeRequest: null,
+        existingUsername: null,
+      });
+      repository.createDraft.mockResolvedValue({ id: 'req-1' });
+
+      await service.create(dto);
+
+      expect(repository.findDuplicates).toHaveBeenCalledWith('Acme Corp', 'acme@test.com', 'acme_user');
+    });
+
     it('crea borrador exitosamente si no hay conflictos', async () => {
       repository.findDuplicates.mockResolvedValue({
         existingCompany: null,
@@ -127,10 +181,56 @@ describe('CompanyAccessRequestsService', () => {
       await expect(service.attachLogo('req-1', file)).rejects.toThrow(BadRequestException);
     });
 
+    it.each(['image/webp', 'image/svg+xml', 'image/gif'])('rechaza el logo %s con el mensaje PNG o JPG', async (mimetype) => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      const file = { mimetype, buffer: PNG_BYTES, originalname: 'logo' } as any;
+      await expect(service.attachLogo('req-1', file)).rejects.toThrow('El logo debe estar en formato PNG o JPG');
+      expect(filesService.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un logo cuyo contenido no es PNG ni JPG aunque el tipo declarado lo sea', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      const pdfAsPng = { mimetype: 'image/png', buffer: Buffer.from('%PDF-1.7 contenido'), originalname: 'logo.png' } as any;
+      const webpAsJpg = { mimetype: 'image/jpeg', buffer: Buffer.from('RIFF....WEBPVP8 '), originalname: 'logo.jpg' } as any;
+      await expect(service.attachLogo('req-1', pdfAsPng)).rejects.toThrow('El logo debe estar en formato PNG o JPG');
+      await expect(service.attachLogo('req-1', webpAsJpg)).rejects.toThrow('El logo debe estar en formato PNG o JPG');
+      expect(filesService.create).not.toHaveBeenCalled();
+    });
+
+    it('elimina el logo anterior al reemplazarlo por uno nuevo', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      filesService.create.mockResolvedValue({ id: 'file-logo-new' });
+      repository.setLogo.mockResolvedValue('file-logo-old');
+      const file = { mimetype: 'image/png', buffer: PNG_BYTES, originalname: 'logo.png' } as any;
+
+      await service.attachLogo('req-1', file);
+
+      expect(filesService.delete).toHaveBeenCalledWith('file-logo-old');
+    });
+
+    it('no elimina nada si el logo anterior es el mismo archivo', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      filesService.create.mockResolvedValue({ id: 'file-logo-1' });
+      repository.setLogo.mockResolvedValue('file-logo-1');
+      const file = { mimetype: 'image/png', buffer: PNG_BYTES, originalname: 'logo.png' } as any;
+
+      await service.attachLogo('req-1', file);
+
+      expect(filesService.delete).not.toHaveBeenCalled();
+    });
+
+    it('acepta un logo JPG con firma real', async () => {
+      repository.findById.mockResolvedValue({ id: 'req-1', status: { title: 'DRAFT' } });
+      filesService.create.mockResolvedValue({ id: 'file-logo-2' });
+      repository.setLogo.mockResolvedValue(null);
+      const file = { mimetype: 'image/jpeg', buffer: JPG_BYTES, originalname: 'logo.jpg' } as any;
+      await expect(service.attachLogo('req-1', file)).resolves.toEqual({ id: 'req-1', logoFileId: 'file-logo-2' });
+    });
+
     it('guarda y adjunta logo exitosamente', async () => {
       const file = {
         mimetype: 'image/png',
-        buffer: Buffer.from('data'),
+        buffer: PNG_BYTES,
         originalname: 'logo.png',
         size: 100,
       } as any;

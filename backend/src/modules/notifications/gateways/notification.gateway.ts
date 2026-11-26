@@ -43,6 +43,9 @@ export class NotificationGateway
         if (!token) return next(new Error('unauthorized'));
 
         const payload = await this.jwtService.verifyAsync(token);
+        if (payload.sid !== undefined) {
+          await this.sessionService.assertSessionActive(payload.sid);
+        }
         const user = await this.sessionService.getAuthenticatedUser(payload.sub);
 
         if (!user) return next(new Error('unauthorized'));

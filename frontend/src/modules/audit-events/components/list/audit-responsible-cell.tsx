@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { Cpu } from "lucide-react";
 import { getInitials } from "@/shared/utils/get-initials";
 import { AUDIT_ROLE_LABELS } from "../../constants/audit-actions.constants";
@@ -6,6 +7,7 @@ import type { AuditResponsibleCellProps } from "../../types/audit-responsible-ce
 
 export function AuditResponsibleCell({
   responsible,
+  emphasizeName = false,
 }: AuditResponsibleCellProps) {
   const name = responsible.name.trim() || EMPTY_VALUE;
   const isSystem = responsible.role === "sistema";
@@ -23,7 +25,14 @@ export function AuditResponsibleCell({
         )}
       </span>
       <div className="flex min-w-0 flex-col">
-        <span className="font-semibold wrap-break-word text-ink">{name}</span>
+        <span
+          className={cn(
+            "wrap-break-word text-ink",
+            emphasizeName ? "font-bold" : "font-semibold",
+          )}
+        >
+          {name}
+        </span>
         <span className="text-[12.5px] text-text-secondary">
           {AUDIT_ROLE_LABELS[responsible.role] ?? EMPTY_VALUE}
         </span>

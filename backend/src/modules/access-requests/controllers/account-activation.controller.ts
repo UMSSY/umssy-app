@@ -64,11 +64,12 @@ export class AccountActivationController {
       body.password,
     );
     if (response && this.sessionCookies) {
-      await this.sessionCookies.issueLoginCookies(
+      const accessToken = await this.sessionCookies.issueLoginCookies(
         response,
         result.accessToken,
         userAgent,
       );
+      return { ...result, accessToken };
     }
     return result;
   }
