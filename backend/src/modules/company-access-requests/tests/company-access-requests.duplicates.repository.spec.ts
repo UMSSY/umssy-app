@@ -91,4 +91,24 @@ describe('CompanyAccessRequestsRepository.findDuplicates', () => {
       existingUsername: { source: 'user' },
     });
   });
+
+  it('excluye la propia solicitud de las consultas de solicitudes cuando se indica', async () => {
+    await repository.findDuplicates('Acme Corp', 'acme@test.com', 'acme_user', 'request-own-id');
+
+    const requestQueries = calls.filter((call) => call.sql.includes('FROM company_access_requests'));
+    expect(requestQueries).toHaveLength(2);
+    for (const query of requestQueries) {
+      expect(query.sql).toContain('r.id <> ');
+      expect(query.values).toContain('request-own-id');
+    }
+  });
+
+  it('sin solicitud propia usa un identificador nulo que no coincide con ninguna', async () => {
+    await repository.findDuplicates('Acme Corp', 'acme@test.com', 'acme_user');
+
+    const requestQueries = calls.filter((call) => call.sql.includes('FROM company_access_requests'));
+    for (const query of requestQueries) {
+      expect(query.values).toContain('00000000-0000-0000-0000-000000000000');
+    }
+  });
 });

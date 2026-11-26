@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import type { UploadedDocumentFile } from '../../access-requests/types/uploaded-file.types.js';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -30,6 +31,7 @@ import {
   ApiProduces,
   ApiQuery,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
@@ -75,6 +77,12 @@ import {
   type UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
 import { CompanyAccessRequestsService } from '../services/company-access-requests.service.js';
+import { COMPANY_PUBLIC_REQUEST_LIMITS } from '../constants/company-document-correction.constants.js';
+import { CompanyRequestThrottlerGuard } from '../guards/company-request-throttler.guard.js';
+import {
+  companyRequestCodeParamsSchema,
+  type CompanyRequestCodeParams,
+} from '../requests/company-request-code.schema.js';
 
 interface BinaryResponse {
   set: (headers: Record<string, string>) => unknown;
@@ -237,11 +245,18 @@ export class CompanyAccessRequestsController {
   }
 
   @Get('company-access-requests/status/:code')
+  @UseGuards(CompanyRequestThrottlerGuard)
+  @Throttle({
+    default: {
+      limit: COMPANY_PUBLIC_REQUEST_LIMITS.status,
+      ttl: COMPANY_PUBLIC_REQUEST_LIMITS.windowMs,
+    },
+  })
   @ApiOperation({
     operationId: 'companyAccessRequests_getPublicStatus',
     summary: 'Consultar estado público de solicitud empresarial',
     description:
-      'Permite al postulante consultar el estado actual y motivo de rechazo de una solicitud mediante su código y correo.',
+      'Permite al postulante consultar el estado actual y el motivo de la observación o del rechazo de una solicitud mediante su código y correo. Limitado a 20 consultas cada 15 minutos por IP y código (contador en memoria de una sola instancia).',
   })
   @ApiParam(COMPANY_REQUEST_CODE_PARAM)
   @ApiQuery({
@@ -261,14 +276,32 @@ export class CompanyAccessRequestsController {
         submittedAt: { type: 'string', format: 'date-time', nullable: true },
         reviewedAt: { type: 'string', format: 'date-time', nullable: true },
         rejectionReason: { type: 'string', nullable: true },
+        reason: {
+          type: 'string',
+          nullable: true,
+          description: 'Motivo vigente de la observación o del rechazo.',
+        },
+        canResubmit: {
+          type: 'boolean',
+          description:
+            'Verdadero si la solicitud está observada o rechazada y admite un documento nuevo.',
+        },
       },
     },
   })
   @ApiNotFoundResponse({
     description: 'No se encontró ninguna solicitud con ese código y correo.',
   })
-  getStatus(@Param('code') code: string, @Query('email') email: string) {
-    return this.companyRequestsService.getStatus(code, email ?? '');
+  @ApiBadRequestResponse({ description: 'El código no tiene el formato EMP-AAAA-NNNN.' })
+  @ApiTooManyRequestsResponse({
+    description: 'Se superó el límite de consultas para esa IP y código.',
+  })
+  getStatus(
+    @Param(new ZodValidationPipe(companyRequestCodeParamsSchema))
+    params: CompanyRequestCodeParams,
+    @Query('email') email: string,
+  ) {
+    return this.companyRequestsService.getStatus(params.code, email ?? '');
   }
 
   @Get('company-access-requests/activation-status')
