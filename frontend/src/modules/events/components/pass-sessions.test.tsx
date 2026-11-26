@@ -1,5 +1,5 @@
 import "@/shared/testing/indexed-db.mock";
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery } from '@/shared/testing/render-with-query';
 import { saveAccessToken, clearAccessToken } from '@/shared/services/storage/access-token-storage';
@@ -87,5 +87,44 @@ describe('Multi-session passes', () => {
     );
     expect(screen.queryByText(/Sesión \d de/)).not.toBeInTheDocument();
     expect(screen.getByText('09:00 AM - 12:00 PM')).toBeInTheDocument();
+  });
+
+  it('moves the pass card to the next session without reloading', () => {
+    vi.useRealTimers();
+    vi.useFakeTimers({
+      now: new Date('2026-11-28T11:40:00.000Z'), // 07:40 en Bolivia, durante la sesión 1.
+      toFake: ['Date', 'setTimeout', 'clearTimeout'],
+    });
+    const reviewSessions = [
+      { id: 'r1', startsAt: '2026-11-28T11:35:00.000Z', endsAt: '2026-11-28T11:45:00.000Z', location: null },
+      { id: 'r2', startsAt: '2026-11-28T11:50:00.000Z', endsAt: '2026-11-28T11:58:00.000Z', location: null },
+    ];
+    render(
+      <PassCard
+        title="React avanzado"
+        date="2026-11-28"
+        startTime="07:35"
+        endTime="07:45"
+        status="Confirmada"
+        location="Laboratorio 2"
+        registrationId="pass-review"
+        sessions={reviewSessions}
+      />,
+    );
+    expect(screen.getByText('Sesión 1 de 2')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(6 * 60 * 1000); // 07:46, entre la sesión 1 y la 2.
+    });
+    expect(screen.getByText('Sesión 2 de 2')).toBeInTheDocument();
+    expect(screen.getByText('En curso')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(4 * 60 * 1000); // 07:50, empieza la sesión 2.
+    });
+    act(() => {
+      vi.advanceTimersByTime(9 * 60 * 1000); // 07:59, después de la última sesión.
+    });
+    expect(screen.getByText('Finalizado')).toBeInTheDocument();
   });
 });
