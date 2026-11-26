@@ -1,13 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useCurrentCompany } from "@/modules/job-offers";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { companyProfileService } from "../services/company-profile.service";
 import type { CompanyProfileStatus } from "../types/company-profile-status.types";
 
 export function useCompanyProfile() {
-  const { company, roles, isLoading } = useAuth();
-  const companyId = roles.includes("empresa") ? (company?.id ?? null) : null;
+  const { isLoading } = useAuth();
+  const companyId = useCurrentCompany().id;
 
   const query = useQuery({
     queryKey: ["company-profile", companyId],
