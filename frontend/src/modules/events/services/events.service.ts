@@ -58,6 +58,7 @@ export const eventsService = {
       params.categoryId ?? '',
       params.statusId ?? '',
       ...(params.sort ? [params.sort] : []),
+      ...(params.scope ? [params.scope] : []),
     ]);
     return withOfflineSessionCopy(
       'events:' + copyKey,

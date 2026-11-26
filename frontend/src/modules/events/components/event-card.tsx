@@ -1,7 +1,7 @@
 'use client';
 
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Check, Clock } from 'lucide-react';
+import { Calendar, CalendarCheck, Check, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -111,6 +111,12 @@ export function EventCard({
           {displayStatus === "expired" && (
             <span className="rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">
               Vencido
+            </span>
+          )}
+          {displayStatus === "finished" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">
+              <CalendarCheck className="size-3.5" aria-hidden="true" />
+              Finalizado
             </span>
           )}
           {displayStatus === "full" && isFull && (
