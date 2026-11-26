@@ -1,15 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { JobOfferStatus } from '../types/job-offer.enum.js';
 import { JOB_MATCH_SELECT } from '../constants/job-match.constants.js';
 import type { JobOfferMatchRecord } from '../types/job-match-record.types.js';
-
-function publishedWhere(now: Date) {
-  return {
-    status: { title: JobOfferStatus.PUBLISHED },
-    OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-  };
-}
+import { buildPublishedJobOfferWhere } from '../utils/build-published-job-offer-where.js';
 
 @Injectable()
 export class JobOfferMatchRepository {
@@ -20,14 +13,14 @@ export class JobOfferMatchRepository {
     now: Date,
   ): Promise<JobOfferMatchRecord | null> {
     return this.prisma.jobOffer.findFirst({
-      where: { id: jobOfferId, ...publishedWhere(now) },
+      where: { id: jobOfferId, ...buildPublishedJobOfferWhere(now) },
       select: JOB_MATCH_SELECT,
     });
   }
 
   findPublished(now: Date): Promise<JobOfferMatchRecord[]> {
     return this.prisma.jobOffer.findMany({
-      where: publishedWhere(now),
+      where: buildPublishedJobOfferWhere(now),
       orderBy: { createdAt: 'desc' },
       select: JOB_MATCH_SELECT,
     });

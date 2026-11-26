@@ -10,7 +10,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
   return (
     <article className="flex min-w-0 flex-col rounded-lg border border-border bg-surface p-6">
       {company.sector ? (
-        <p className="mb-3 text-xs font-semibold tracking-wide text-text-secondary uppercase">{company.sector}</p>
+        <p className="mb-3 text-xs font-semibold tracking-wide wrap-anywhere text-text-secondary uppercase">{company.sector}</p>
       ) : null}
       <div className="flex items-center gap-4">
         <Avatar className="size-12 rounded-md after:rounded-md">
@@ -30,7 +30,6 @@ export function CompanyCard({ company }: CompanyCardProps) {
       </p>
       <Link
         href="/vacancies"
-        aria-label={`${FEATURED_COMPANIES_LABELS.viewVacancies} de ${company.name}`}
         className="group mt-6 flex cursor-pointer items-center justify-between rounded-sm border-t border-border pt-4 text-sm font-semibold text-accent transition-colors hover:text-accent/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         {FEATURED_COMPANIES_LABELS.viewVacancies}

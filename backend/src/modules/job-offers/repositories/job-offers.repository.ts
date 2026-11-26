@@ -17,6 +17,7 @@ import type {
   JobOfferRecord,
 } from '../types/job-offer-record.type.js';
 import { buildCompanyJobOffersQuery } from '../utils/build-company-job-offers-query.js';
+import { buildPublishedJobOfferWhere } from '../utils/build-published-job-offer-where.js';
 
 @Injectable()
 export class JobOffersRepository {
@@ -115,10 +116,7 @@ export class JobOffersRepository {
 
   findPublished(now: Date): Promise<JobOfferRecord[]> {
     return this.prisma.jobOffer.findMany({
-      where: {
-        status: { title: JobOfferStatus.PUBLISHED },
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-      },
+      where: buildPublishedJobOfferWhere(now),
       orderBy: { publishedAt: 'desc' },
       select: JOB_OFFER_SELECT,
     });
@@ -127,10 +125,7 @@ export class JobOffersRepository {
   countActiveByCompany(now: Date) {
     return this.prisma.jobOffer.groupBy({
       by: ['companyId'],
-      where: {
-        status: { title: JobOfferStatus.PUBLISHED },
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-      },
+      where: buildPublishedJobOfferWhere(now),
       _count: { _all: true },
     });
   }
