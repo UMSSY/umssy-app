@@ -133,7 +133,12 @@ describe('RefreshTokenService', () => {
         }),
       );
       expect(jwtService.sign).toHaveBeenCalledWith(
-        { sub: 'user-1', roleTag: 'titulado', roles: ['titulado', 'mentor'] },
+        {
+          sub: 'user-1',
+          roleTag: 'titulado',
+          roles: ['titulado', 'mentor'],
+          sid: 'family-1',
+        },
         { expiresIn: 900 },
       );
       expect(session.accessToken).toBe('new-access');
@@ -302,5 +307,91 @@ describe('RefreshTokenService', () => {
 
       expect(repository.revokeFamily).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('RefreshTokenService: sesión en el access token', () => {
+  const repository = {
+    create: vi.fn(),
+    findByHash: vi.fn(),
+    rotate: vi.fn(),
+    revokeFamily: vi.fn(),
+  };
+  const jwtService = { decode: vi.fn(), sign: vi.fn() };
+  const sessionService = { getAuthenticatedUser: vi.fn() };
+  let service: RefreshTokenService;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    repository.create.mockResolvedValue(undefined);
+    jwtService.sign.mockReturnValue('session-token');
+    service = new RefreshTokenService(
+      repository as any,
+      jwtService as any,
+      sessionService as any,
+    );
+  });
+
+  it('startFromLogin emite un access token nuevo con la familia como sid y el vencimiento restante', async () => {
+    const exp = NOW.getTime() / 1000 + 8 * 3600;
+    jwtService.decode.mockReturnValue({
+      sub: 'user-1',
+      roleTag: 'titulado',
+      roles: ['titulado', 'mentor'],
+      exp,
+    });
+
+    const session = await service.startFromLogin('legacy-access', 'Mozilla/5.0');
+
+    const saved = repository.create.mock.calls[0]?.[0];
+    expect(jwtService.sign).toHaveBeenCalledWith(
+      {
+        sub: 'user-1',
+        roleTag: 'titulado',
+        roles: ['titulado', 'mentor'],
+        sid: saved.familyId,
+      },
+      { expiresIn: 8 * 3600 },
+    );
+    expect(session).toMatchObject({
+      accessToken: 'session-token',
+      accessMaxAgeMs: 8 * HOUR,
+      refreshMaxAgeMs: 15 * MINUTE,
+    });
+  });
+
+  it('startFromLogin usa el tope absoluto de la sesión cuando el token no trae vencimiento', async () => {
+    jwtService.decode.mockReturnValue({ sub: 'user-1', roleTag: 'titulado' });
+
+    await service.startFromLogin('legacy-access');
+
+    expect(jwtService.sign).toHaveBeenCalledWith(
+      expect.objectContaining({ sid: expect.any(String) }),
+      { expiresIn: 8 * 3600 },
+    );
+  });
+
+  it('startFromLogin nunca emite un vencimiento menor a un segundo', async () => {
+    jwtService.decode.mockReturnValue({
+      sub: 'user-1',
+      roleTag: 'titulado',
+      exp: NOW.getTime() / 1000 - 30,
+    });
+
+    await service.startFromLogin('legacy-access');
+
+    expect(jwtService.sign).toHaveBeenCalledWith(expect.any(Object), { expiresIn: 1 });
+  });
+
+  it('cada inicio de sesión crea una familia distinta', async () => {
+    jwtService.decode.mockReturnValue({ sub: 'user-1', roleTag: 'titulado' });
+
+    await service.startFromLogin('a');
+    await service.startFromLogin('b');
+
+    const [first, second] = repository.create.mock.calls.map((call) => call[0].familyId);
+    expect(first).not.toBe(second);
   });
 });

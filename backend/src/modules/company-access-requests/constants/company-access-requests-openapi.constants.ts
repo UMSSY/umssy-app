@@ -127,7 +127,7 @@ const buildMultipartBody = (description: string) => ({
 });
 
 export const UPLOAD_LOGO_MULTIPART_BODY = buildMultipartBody(
-  'Archivo de imagen del logo (PNG, JPG, WEBP o SVG). Tamaño máximo permitido: 2 MB.',
+  'Archivo de imagen del logo (PNG o JPG). Tamaño máximo permitido: 2 MB.',
 );
 
 export const UPLOAD_DOCUMENT_MULTIPART_BODY = buildMultipartBody(

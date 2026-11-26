@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import type { UploadedDocumentFile } from '../../access-requests/types/uploaded-file.types.js';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -30,6 +31,7 @@ import {
   ApiProduces,
   ApiQuery,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
@@ -75,6 +77,12 @@ import {
   type UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
 import { CompanyAccessRequestsService } from '../services/company-access-requests.service.js';
+import { COMPANY_PUBLIC_REQUEST_LIMITS } from '../constants/company-document-correction.constants.js';
+import { CompanyRequestThrottlerGuard } from '../guards/company-request-throttler.guard.js';
+import {
+  companyRequestCodeParamsSchema,
+  type CompanyRequestCodeParams,
+} from '../requests/company-request-code.schema.js';
 
 interface BinaryResponse {
   set: (headers: Record<string, string>) => unknown;
@@ -133,9 +141,13 @@ export class CompanyAccessRequestsController {
     description: 'Borrador creado correctamente.',
     schema: { type: 'object', properties: { id: { type: 'string', format: 'uuid' } } },
   })
-  @ApiBadRequestResponse({ description: 'Datos de entrada inválidos.' })
+  @ApiBadRequestResponse({
+    description:
+      'Datos de entrada que no cumplen las reglas oficiales: nombre de empresa de 4 a 30 caracteres, descripción de 10 a 500, sitio web obligatorio, celular boliviano de 8 dígitos y usuario de 4 a 20 caracteres que empieza con una letra.',
+  })
   @ApiConflictResponse({
-    description: 'Ya existe una empresa, cuenta o solicitud activa equivalente.',
+    description:
+      'Conflicto de registro (COMPANY_REGISTRATION_CONFLICT). `data.field` indica el motivo: `companyName` (empresa ya registrada), `email` (correo ya usado), `activeRequest` (solicitud pendiente, en revisión, observada o aprobada con el mismo nombre o correo) o `username` (nombre de usuario no disponible, sin distinguir mayúsculas ni espacios sobrantes).',
   })
   create(
     @Body(new ZodValidationPipe(createCompanyAccessRequestSchema))
@@ -152,7 +164,7 @@ export class CompanyAccessRequestsController {
     operationId: 'companyAccessRequests_attachLogo',
     summary: 'Adjuntar logotipo al borrador de empresa',
     description:
-      'Sube un logotipo empresarial en formato PNG, JPG, WEBP o SVG con límite máximo de 2 MB para un borrador existente.',
+      'Sube un logotipo empresarial en formato PNG o JPG con límite máximo de 2 MB para un borrador existente.',
   })
   @ApiCompanyRequestUuidParam()
   @ApiConsumes('multipart/form-data')
@@ -233,11 +245,18 @@ export class CompanyAccessRequestsController {
   }
 
   @Get('company-access-requests/status/:code')
+  @UseGuards(CompanyRequestThrottlerGuard)
+  @Throttle({
+    default: {
+      limit: COMPANY_PUBLIC_REQUEST_LIMITS.status,
+      ttl: COMPANY_PUBLIC_REQUEST_LIMITS.windowMs,
+    },
+  })
   @ApiOperation({
     operationId: 'companyAccessRequests_getPublicStatus',
     summary: 'Consultar estado público de solicitud empresarial',
     description:
-      'Permite al postulante consultar el estado actual y motivo de rechazo de una solicitud mediante su código y correo.',
+      'Permite al postulante consultar el estado actual y el motivo de la observación o del rechazo de una solicitud mediante su código y correo. Limitado a 20 consultas cada 15 minutos por IP y código (contador en memoria de una sola instancia).',
   })
   @ApiParam(COMPANY_REQUEST_CODE_PARAM)
   @ApiQuery({
@@ -257,14 +276,32 @@ export class CompanyAccessRequestsController {
         submittedAt: { type: 'string', format: 'date-time', nullable: true },
         reviewedAt: { type: 'string', format: 'date-time', nullable: true },
         rejectionReason: { type: 'string', nullable: true },
+        reason: {
+          type: 'string',
+          nullable: true,
+          description: 'Motivo vigente de la observación o del rechazo.',
+        },
+        canResubmit: {
+          type: 'boolean',
+          description:
+            'Verdadero si la solicitud está observada o rechazada y admite un documento nuevo.',
+        },
       },
     },
   })
   @ApiNotFoundResponse({
     description: 'No se encontró ninguna solicitud con ese código y correo.',
   })
-  getStatus(@Param('code') code: string, @Query('email') email: string) {
-    return this.companyRequestsService.getStatus(code, email ?? '');
+  @ApiBadRequestResponse({ description: 'El código no tiene el formato EMP-AAAA-NNNN.' })
+  @ApiTooManyRequestsResponse({
+    description: 'Se superó el límite de consultas para esa IP y código.',
+  })
+  getStatus(
+    @Param(new ZodValidationPipe(companyRequestCodeParamsSchema))
+    params: CompanyRequestCodeParams,
+    @Query('email') email: string,
+  ) {
+    return this.companyRequestsService.getStatus(params.code, email ?? '');
   }
 
   @Get('company-access-requests/activation-status')
@@ -364,7 +401,7 @@ export class CompanyAccessRequestsController {
       'Devuelve la imagen binaria del logotipo almacenado para una empresa ya aprobada en el sistema.',
   })
   @ApiParam(COMPANY_ID_PARAM)
-  @ApiProduces('image/png', 'image/jpeg', 'image/webp', 'image/svg+xml')
+  @ApiProduces('image/png', 'image/jpeg')
   @ApiOkResponse(BINARY_FILE_OK_RESPONSE)
   @ApiBadRequestResponse({ description: 'El identificador de empresa no es un UUID válido.' })
   @ApiNotFoundResponse({ description: 'Logo de empresa no encontrado.' })
@@ -480,7 +517,7 @@ export class CompanyAccessRequestsController {
       'Devuelve el archivo de imagen del logotipo vinculado a la solicitud o a la empresa aprobada. Solo disponible para el rol administrativo.',
   })
   @ApiCompanyRequestUuidParam()
-  @ApiProduces('image/png', 'image/jpeg', 'image/webp', 'image/svg+xml')
+  @ApiProduces('image/png', 'image/jpeg')
   @ApiOkResponse(BINARY_FILE_OK_RESPONSE)
   @ApiNotFoundResponse({
     description: 'La solicitud no existe o la empresa no adjuntó un logotipo.',

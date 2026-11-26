@@ -7,6 +7,55 @@ function build() {
   return { user, repository: new AuthRepository({ user } as any, {} as PasswordHistoryRepository) };
 }
 
+describe('AuthRepository (vinculación de Google)', () => {
+  function buildPrisma() {
+    const prisma = {
+      user: { findUnique: vi.fn() },
+      accessRequest: { findFirst: vi.fn() },
+    };
+    return { prisma, repository: new AuthRepository(prisma as never, {} as never) };
+  }
+
+  it('findUserByIdWithRoles selecciona correo, estado y roles activos', async () => {
+    const { prisma, repository } = buildPrisma();
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await repository.findUserByIdWithRoles('u-1');
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 'u-1' },
+      select: {
+        id: true,
+        email: true,
+        isActive: true,
+        roles: {
+          where: { deletedAt: null, startAt: { lte: expect.any(Date) } },
+          select: { role: { select: { name: true } } },
+        },
+      },
+    });
+  });
+
+  it.each([
+    [{ id: 'r-1' }, true],
+    [null, false],
+  ])('hasUnapprovedAccessRequest busca solicitudes enviadas y no aprobadas (%o -> %s)', async (found, expected) => {
+    const { prisma, repository } = buildPrisma();
+    prisma.accessRequest.findFirst.mockResolvedValue(found);
+
+    await expect(repository.hasUnapprovedAccessRequest('Ana@UMSS.edu.bo')).resolves.toBe(expected);
+
+    expect(prisma.accessRequest.findFirst).toHaveBeenCalledWith({
+      where: {
+        email: { equals: 'Ana@UMSS.edu.bo', mode: 'insensitive' },
+        submittedAt: { not: null },
+        status: { title: { not: 'approved' } },
+      },
+      select: { id: true },
+    });
+  });
+});
+
 describe('AuthRepository', () => {
   it('findUserByEmailWithRoles busca por correo e selecciona solo campos de autenticación y roles activos', async () => {
     const { user, repository } = build();
