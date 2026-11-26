@@ -4,6 +4,7 @@ import { formatBoliviaDate } from "@/shared/utils/date-time";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
 import { ApplicationActions } from "./application-actions";
+import { VacancyClosedBadge } from "./vacancy-closed-badge";
 
 const HEADER_CELL_CLASS = "first:rounded-l-lg last:rounded-r-lg";
 
@@ -35,6 +36,7 @@ export function ApplicationsTable({
             <TableCell className={CARD_CELL_CLASS}>
               <p className="font-semibold text-ink">{application.vacancyTitle}</p>
               <p className="text-sm text-text-secondary">{application.companyName}</p>
+              {application.vacancyAvailable ? null : <VacancyClosedBadge className="mt-1" />}
             </TableCell>
             <TableCell className={cn(CARD_CELL_CLASS, "text-center text-text-secondary")}>
               {application.affinityPercentage}%

@@ -14,4 +14,5 @@ export interface ApplicationItemResponse {
   affinityPercentage: number;
   status: string;
   appliedDate: string;
+  vacancyAvailable: boolean;
 }
