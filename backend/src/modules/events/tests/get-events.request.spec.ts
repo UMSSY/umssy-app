@@ -91,4 +91,10 @@ describe('GetEventsSchema sort', () => {
   it('rejects an unknown sort option', () => {
     expect(GetEventsSchema.safeParse({ sort: 'date' }).success).toBe(false);
   });
+
+  it('accepts the finished scope and rejects unknown scopes', () => {
+    expect(GetEventsSchema.parse({ scope: 'finished' }).scope).toBe('finished');
+    expect(GetEventsSchema.parse({}).scope).toBeUndefined();
+    expect(GetEventsSchema.safeParse({ scope: 'past' }).success).toBe(false);
+  });
 });
