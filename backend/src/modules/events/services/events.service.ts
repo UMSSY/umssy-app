@@ -4,6 +4,7 @@ import type { FinishedEventThreshold } from '../types/finished-event-threshold.t
 import {
   FINISHED_STATUS_TITLE,
   PUBLISHED_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
 } from '../constants/events.constants.js';
 import { getScheduleEnd } from '../utils/event-session-schedule.js';
 import { Injectable } from '@nestjs/common';
@@ -84,6 +85,19 @@ export class EventsService {
     };
   }
 
+  getCatalogVisibilityFilter(
+    payload: Pick<GetEventsPayload, 'statusId' | 'includeProposals' | 'scope'>,
+    now: Date = new Date(),
+  ): Prisma.EventWhereInput {
+    if (payload.statusId !== undefined) return { statusId: payload.statusId };
+    if (payload.scope === 'finished') return this.getFinishedEventFilter(now);
+    const active = this.getActiveRegistrationEventFilter(now);
+    if (!payload.includeProposals) return active;
+    return {
+      OR: [active, { status: { title: { in: VOTING_STATUS_TITLES } } }],
+    };
+  }
+
   // Un taller con sesiones finaliza al terminar su última sesión; sin sesiones se usa la fecha original.
   getFinishedEventFilter(now: Date = new Date()): Prisma.EventWhereInput {
     const threshold = this.getFinishedEventThreshold(now);
@@ -139,6 +153,9 @@ export class EventsService {
       userId,
       skip: offset,
       take: limit,
+      visibility: this.getCatalogVisibilityFilter(payload),
+      ...(payload.scope === 'finished' &&
+        payload.statusId === undefined && { newestFirst: true }),
     });
 
     return mapEventsToListResponse(items, total, page, limit);

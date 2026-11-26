@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import {
+  EVENT_CATALOG_SCOPES,
   EVENT_SORT_OPTIONS,
   MAX_PAGE_SIZE,
   MAX_SEARCH_LENGTH,
@@ -22,6 +23,7 @@ export const GetEventsSchema = z.object({
     .optional(),
   statusId: z.guid({ message: 'statusId debe ser un UUID válido' }).optional(),
   sort: z.enum(EVENT_SORT_OPTIONS).optional(),
+  scope: z.enum(EVENT_CATALOG_SCOPES).optional(),
   search: z
     .string()
     .trim()
