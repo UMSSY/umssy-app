@@ -8,6 +8,7 @@ const seedHistoryScenarioEvents = vi.fn();
 const seedEventRegistrations = vi.fn();
 const seedHistoryScenarioRegistrations = vi.fn();
 const seedAttendanceQaFixtures = vi.fn();
+const seedMultisessionScenarios = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
 const seedJobOffers = vi.fn();
@@ -52,6 +53,10 @@ vi.mock(
       seedAttendanceQaFixtures(...args),
   }),
 );
+vi.mock('../../modules/events/seeds/multisession-scenarios.seed.js', () => ({
+  seedMultisessionScenarios: (...args: unknown[]) =>
+    seedMultisessionScenarios(...args),
+}));
 vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
   seedTechnicalAreas: (...args: unknown[]) => seedTechnicalAreas(...args),
 }));
@@ -80,6 +85,8 @@ function setupSeeds() {
       eventGraduate: user('e1'),
       emptyGraduate: user('e2'),
       historyGraduate: user('h1'),
+      workshopOrganizer: user('w1'),
+      workshopParticipant: user('w2'),
       mentorA: user('m1'),
       mentorB: user('m2'),
       graduate: user('g1'),
@@ -126,7 +133,7 @@ describe('runSeed', () => {
 
     const summary = await runSeed(client as never);
 
-    expect(client.$transaction).toHaveBeenCalledTimes(13);
+    expect(client.$transaction).toHaveBeenCalledTimes(14);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
     expect(seedJobOffers).toHaveBeenCalledWith(tx);
@@ -145,6 +152,10 @@ describe('runSeed', () => {
       expect.any(Date),
     );
     expect(seedAttendanceQaFixtures).toHaveBeenCalledWith(tx, expect.any(Date));
+    expect(seedMultisessionScenarios).toHaveBeenCalledWith(tx, {
+      organizerId: 'w1',
+      participantId: 'w2',
+    });
     expect(seedAvailability).toHaveBeenCalledWith(
       tx,
       expect.objectContaining({
@@ -159,7 +170,7 @@ describe('runSeed', () => {
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 3,
-      users: 12,
+      users: 14,
       userRoles: 7,
       blocks: 58,
       appointments: 53,
