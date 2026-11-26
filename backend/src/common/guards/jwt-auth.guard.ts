@@ -4,7 +4,9 @@ import { SessionService } from '../services/session.service.js';
 import { ROLE_NAMES } from '../enums/roles.enum.js';
 import { SAFE_HTTP_METHODS } from '../constants/auth.constants.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
+import { SessionRevokedException } from '../exceptions/session-revoked.exception.js';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
+import { UserInactiveException } from '../exceptions/user-inactive.exception.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
 import { parseCorsOrigins } from '../utils/cors-origins.js';
@@ -57,7 +59,22 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedSessionException();
     }
 
-    request.user = await this.sessionService.getAuthenticatedUser(payload.sub);
+    // TODO: exigir sid cuando expiren los tokens emitidos antes de incluirlo
+    const hasSessionId = payload.sid !== undefined;
+    if (hasSessionId) {
+      await this.sessionService.assertSessionActive(payload.sid);
+    }
+
+    try {
+      request.user = await this.sessionService.getAuthenticatedUser(
+        payload.sub,
+      );
+    } catch (error) {
+      if (hasSessionId && error instanceof UserInactiveException) {
+        throw new SessionRevokedException();
+      }
+      throw error;
+    }
 
     return true;
   }

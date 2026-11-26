@@ -80,6 +80,8 @@ describe('session cookie over HTTP', () => {
     });
     authService.getAccessTokenMaxAgeMs.mockReturnValue(3_600_000);
     refreshTokens.startFromLogin.mockResolvedValue({
+      accessToken: token,
+      accessMaxAgeMs: 3_600_000,
       refreshToken: 'refresh-1',
       refreshMaxAgeMs: 900_000,
     });

@@ -54,6 +54,15 @@ sequenceDiagram
   end
 ```
 
+## Per-Request Session Revocation
+
+Every access token issued by login, Google login, account activation and refresh rotation carries a `sid` claim: the id of its refresh-token family (`refresh_tokens.family_id`). `JwtAuthGuard` and the chat and notification socket handshakes call `SessionService.assertSessionActive(sid)` on every request, which runs one indexed query (`family_id = $1 AND revoked_at IS NOT NULL`) and answers `401` with `SESSION_REVOKED` (or `PASSWORD_CHANGED` when the family was revoked by a password reset). The frontend already turns both codes into the "Tu sesión se cerró" screen.
+
+- A family is revoked by logout, refresh-token reuse, inactive user, removed role and password reset (which revokes every family of the user; recovery is unauthenticated, so no session survives it).
+- With a `sid`, an inactive user also answers `401 SESSION_REVOKED`; tokens without `sid` keep the previous `403 USER_INACTIVE`.
+- **Transitional:** access tokens issued before this change have no `sid` and are accepted until they expire (at most `JWT_EXPIRES_IN`, 8 hours by default), so nobody is signed out on deploy. A `TODO` in `JwtAuthGuard` marks where to require it.
+- `Authorization: Bearer` keeps priority over the cookie. Revocation is shared between browser tabs of the same browser through the cookie and the existing `BroadcastChannel`; other devices find out on their next request.
+
 ## Architecture Notes
 
 ### Backend (`backend/src/modules/auth`)

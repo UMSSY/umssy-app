@@ -11,9 +11,12 @@ import {
 
 function buildRefreshTokens() {
   return {
-    startFromLogin: vi
-      .fn()
-      .mockResolvedValue({ refreshToken: 'refresh', refreshMaxAgeMs: 900_000 }),
+    startFromLogin: vi.fn().mockResolvedValue({
+      accessToken: 'token',
+      accessMaxAgeMs: 60_000,
+      refreshToken: 'refresh',
+      refreshMaxAgeMs: 900_000,
+    }),
     rotate: vi.fn(),
     revokeByToken: vi.fn().mockResolvedValue(undefined),
     getAbsoluteExpiry: vi.fn().mockResolvedValue(null),
@@ -80,7 +83,6 @@ describe('AuthController', () => {
 
     await controller.login({} as any, response as any);
 
-    expect(authService.getAccessTokenMaxAgeMs).toHaveBeenCalledWith('token');
     expect(response.cookie).toHaveBeenCalledWith(
       'umssy_access',
       'token',
@@ -315,6 +317,12 @@ describe('AuthController', () => {
         getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(900_000),
       };
       const refresh = buildRefreshTokens();
+      refresh.startFromLogin.mockResolvedValue({
+        accessToken: 'google-access-token',
+        accessMaxAgeMs: 900_000,
+        refreshToken: 'refresh',
+        refreshMaxAgeMs: 900_000,
+      });
       const controller = buildController(authService, refresh, googleAuth);
       const response = { cookie: vi.fn() };
 
