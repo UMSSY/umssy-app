@@ -44,7 +44,7 @@ export function VerificationDashboard({
       {unread.length > 0 && (
         <div
           role="status"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface-soft p-3"
+          className="flex flex-col items-start justify-between gap-3 rounded-lg bg-surface-soft p-3 sm:flex-row sm:items-center"
         >
           <span className="min-w-0 [overflow-wrap:anywhere]">
             {unread[0].filename} · {verificationLabels[unread[0].status]}
@@ -52,7 +52,7 @@ export function VerificationDashboard({
               ? ' · ' + unread.length + ' resultados nuevos'
               : ''}
           </span>
-          <Button variant="outline" onClick={() => void acknowledge(unread[0])}>
+          <Button variant="outline" className="w-full shrink-0 sm:w-auto" onClick={() => void acknowledge(unread[0])}>
             Entendido
           </Button>
         </div>
@@ -79,9 +79,7 @@ export function VerificationDashboard({
                   className="block h-auto min-w-0 flex-1 text-left whitespace-normal"
                   onClick={() => setSelected(d.id)}
                 >
-                  <strong className="block [overflow-wrap:anywhere]">
-                    {d.filename}
-                  </strong>
+                  <strong className="block [overflow-wrap:anywhere]">{d.filename}</strong>
                   <small>
                     {formatFileSize(d.sizeBytes)} ·{' '}
                     {formatUploadDate(new Date(d.createdAt))}
@@ -120,10 +118,7 @@ export function VerificationDashboard({
         <section className="space-y-4 rounded-xl border bg-surface p-4">
           <VerificationFlow doc={chosen} />
           <div className="flex justify-center">
-            <Button
-              className="h-auto max-w-full whitespace-normal"
-              onClick={() => setHistoryOpen(true)}
-            >
+            <Button className="h-auto w-full max-w-full whitespace-normal sm:w-auto" onClick={() => setHistoryOpen(true)}>
               <Bell size={18} /> Ver historial de verificaciones
             </Button>
           </div>
@@ -145,9 +140,7 @@ export function VerificationDashboard({
                 >
                   <FileText aria-hidden="true" className="text-primary" />
                   <span className="min-w-0">
-                    <strong className="block [overflow-wrap:anywhere]">
-                      {d.filename}
-                    </strong>
+                    <strong className="block [overflow-wrap:anywhere]">{d.filename}</strong>
                     <small>
                       {d.mime.split('/').at(-1)?.toUpperCase()} ·{' '}
                       {formatFileSize(d.sizeBytes)}

@@ -12,13 +12,14 @@ export function MessagingUiProvider({ children }: MessagingUiProviderProps) {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [launcherId, setLauncherId] = useState<string | null>(null);
   const setDraft = useCallback((conversationId: string, content: string) => {
     setDrafts((current) => ({ ...current, [conversationId]: content }));
   }, []);
   const clearSubmittedDraft = useCallback((conversationId: string, submittedContent: string) => {
     setDrafts((current) => current[conversationId] === submittedContent ? { ...current, [conversationId]: "" } : current);
   }, []);
-  const value = useMemo(() => ({ selectedId, setSelectedId, drafts, setDraft, clearSubmittedDraft, isSending, setIsSending, isPanelOpen, setIsPanelOpen }), [selectedId, drafts, setDraft, clearSubmittedDraft, isSending, isPanelOpen]);
+  const value = useMemo(() => ({ selectedId, setSelectedId, drafts, setDraft, clearSubmittedDraft, isSending, setIsSending, isPanelOpen, setIsPanelOpen, launcherId, setLauncherId }), [selectedId, drafts, setDraft, clearSubmittedDraft, isSending, isPanelOpen, launcherId]);
   return <MessagingUiContext value={value}>{children}</MessagingUiContext>;
 }
 

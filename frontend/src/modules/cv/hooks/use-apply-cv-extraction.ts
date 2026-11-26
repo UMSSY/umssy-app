@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useInvalidateProfileCompleteness, type ProfileResponse } from "@/modules/profile";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 import { CV_APPLY_INVALIDATED_QUERY_KEYS } from "../constants/cv-apply.constants";
 import type { CvApplyReport } from "../types/cv-apply-report.types";
+import type { CvApplyRequest } from "../types/cv-apply-request.types";
 import type { CvApplyResult } from "../types/cv-apply-result.types";
-import type { CvApplyTask } from "../types/cv-apply-task.types";
-import type { CvExtraction } from "../types/cv-extraction.types";
-import type { CvExtractionSelection } from "../types/cv-extraction-selection.types";
 import { buildCvApplyReport } from "../utils/build-cv-apply-report";
 import { buildCvApplyTasks } from "../utils/build-cv-apply-tasks";
+import { loadCvExistingRecords } from "../utils/load-cv-existing-records";
+import { matchCvExtractionRecords } from "../utils/match-cv-extraction-records";
 import { runCvApplyTasks } from "../utils/run-cv-apply-tasks";
 
 export function useApplyCvExtraction() {
@@ -18,7 +18,12 @@ export function useApplyCvExtraction() {
   const invalidateCompleteness = useInvalidateProfileCompleteness();
   const [report, setReport] = useState<CvApplyReport | null>(null);
   const mutation = useMutation({
-    mutationFn: (tasks: CvApplyTask[]) => runCvApplyTasks(tasks),
+    mutationFn: async ({ extraction, selection, profile, resolveEducationNames }: CvApplyRequest) => {
+      const needsExistingRecords = selection.education.length > 0 || selection.experience.length > 0;
+      const existing = needsExistingRecords ? await loadCvExistingRecords(queryClient) : null;
+      const matches = existing ? matchCvExtractionRecords(extraction, existing, resolveEducationNames) : null;
+      return runCvApplyTasks(buildCvApplyTasks(extraction, selection, profile, matches));
+    },
     onSuccess: async (results) => {
       setReport(buildCvApplyReport(results));
       if (!results.some(({ isApplied }) => isApplied)) return;
@@ -32,11 +37,7 @@ export function useApplyCvExtraction() {
   return {
     report,
     isApplying: mutation.isPending,
-    apply: (
-      extraction: CvExtraction,
-      selection: CvExtractionSelection,
-      profile: ProfileResponse | null,
-    ): Promise<CvApplyResult[]> => mutation.mutateAsync(buildCvApplyTasks(extraction, selection, profile)),
+    apply: (request: CvApplyRequest): Promise<CvApplyResult[]> => mutation.mutateAsync(request),
     reset: () => {
       mutation.reset();
       setReport(null);

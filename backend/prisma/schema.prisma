@@ -88,7 +88,9 @@ model City {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  users User[]
+  users                 User[]
+  companyProfiles       CompanyProfile[]
+  companyAccessRequests CompanyAccessRequest[]
 
   @@map("cities")
 }
@@ -100,7 +102,10 @@ model Company {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  recruiters User[]
+  recruiters            User[]
+  profile               CompanyProfile?
+  logo                  CompanyLogo?
+  approvedAccessRequest CompanyAccessRequest?
 
   workExperiences    WorkExperience[]
   jobOffers          JobOffer[]
@@ -139,6 +144,7 @@ model User {
   certifications       Certification[]
   cvFiles              UserCvFile[]
   skillProcessingState ProfileSkillProcessingState?
+  refreshTokens        RefreshToken[]
 
   mentorTechnicalAreas   MentorTechnicalArea[]
   mentorOrientationTypes MentorOrientationType[]
@@ -176,6 +182,7 @@ model User {
   sentRequests         ConnectionRequest[]       @relation("SentConnectionRequests")
   receivedRequests     ConnectionRequest[]       @relation("ReceivedConnectionRequests")
   passwordResetOtps    PasswordResetOtp[]
+  passwordHistories    PasswordHistory[]
   auditEvents          AuditEvent[]              @relation("AuditEventActor")
   revertedValidations  DocumentValidation[]      @relation("DocumentValidationRevertedBy")
   jobApplications      JobApplication[]
@@ -194,9 +201,13 @@ model User {
 
   notificationPreferences NotificationPreference?
   jobOfferNotificationPreference JobOfferNotificationPreference?
-  receivedNotifications   Notification[]           @relation("ReceivedNotifications")
-  triggeredNotifications  Notification[]           @relation("TriggeredNotifications")
+  receivedNotifications Notification[] @relation("ReceivedNotifications")
+  triggeredNotifications Notification[] @relation("TriggeredNotifications")
   pushSubscriptions       PushSubscription[]
+  openedCompanyRequests   CompanyAccessRequest[]  @relation("CompanyRequestOpenedBy")
+  reviewedCompanyRequests CompanyAccessRequest[]  @relation("CompanyRequestReviewedBy")
+  approvedCompanyAccount  CompanyAccessRequest?   @relation("ApprovedCompanyRecruiter")
+
   @@index([cityId])
   @@index([companyId])
   @@map("users")
@@ -781,6 +792,7 @@ model JobOffer {
   @@index([modalityId])
   @@index([contractTypeId])
   @@index([statusId])
+  @@index([statusId, expiresAt])
   @@map("job_offers")
 }
 
@@ -837,7 +849,8 @@ model AccessRequestStatus {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  accessRequests AccessRequest[]
+  accessRequests        AccessRequest[]
+  companyAccessRequests CompanyAccessRequest[]
 
   @@map("access_request_statuses")
 }
@@ -849,7 +862,8 @@ model AccessRequestDocumentType {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  accessRequests AccessRequest[]
+  accessRequests        AccessRequest[]
+  companyAccessRequests CompanyAccessRequest[]
 
   @@map("access_request_document_types")
 }
@@ -864,8 +878,10 @@ model File {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  accessRequest AccessRequest?
-  auditEvents   AuditEvent[]   @relation("AuditEventEvidence")
+  accessRequest          AccessRequest?
+  auditEvents            AuditEvent[]          @relation("AuditEventEvidence")
+  companyRequestDocument CompanyAccessRequest? @relation("CompanyRequestDocument")
+  companyRequestLogo     CompanyAccessRequest? @relation("CompanyRequestLogo")
 
   @@map("files")
 }
@@ -1173,6 +1189,19 @@ model UserPresence {
   @@map("user_presences")
 }
 
+model PasswordHistory {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
+  @@map("password_histories")
+}
+
 model PasswordResetOtp {
   id        String    @id @default(uuid()) @db.Uuid
   userId    String    @map("user_id") @db.Uuid
@@ -1221,9 +1250,9 @@ model JobApplication {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  jobOffer     JobOffer               @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
-  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status       JobApplicationStatus   @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  jobOffer     JobOffer                 @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       JobApplicationStatus     @relation(fields: [statusId], references: [id], onDelete: Restrict)
   radarConsent RadarApplicationConsent?
 
   @@unique([jobOfferId, userId])
@@ -1756,13 +1785,13 @@ model UserPortfolioProject {
 }
 
 model NotificationType {
-  id          String   @id @default(uuid()) @db.Uuid
-  code        String   @unique @db.VarChar(50)
-  name        String   @db.VarChar(100)
-  sendsPush   Boolean  @default(false) @map("sends_push")
-  sendsEmail  Boolean  @default(false) @map("sends_email")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id         String   @id @default(uuid()) @db.Uuid
+  code       String   @unique @db.VarChar(50)
+  name       String   @db.VarChar(100)
+  sendsPush  Boolean  @default(false) @map("sends_push")
+  sendsEmail Boolean  @default(false) @map("sends_email")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   notifications Notification[]
 
@@ -1770,17 +1799,17 @@ model NotificationType {
 }
 
 model Notification {
-  id          String   @id @default(uuid()) @db.Uuid
-  recipientId String   @map("recipient_id") @db.Uuid
-  actorId     String?  @map("actor_id") @db.Uuid
-  typeId      String   @map("type_id") @db.Uuid
-  title       String   @db.VarChar(120)
-  body        String   @db.VarChar(255)
-  link        String   @db.VarChar(500)
-  groupKey    String?  @map("group_key") @db.VarChar(100)
+  id          String    @id @default(uuid()) @db.Uuid
+  recipientId String    @map("recipient_id") @db.Uuid
+  actorId     String?   @map("actor_id") @db.Uuid
+  typeId      String    @map("type_id") @db.Uuid
+  title       String    @db.VarChar(120)
+  body        String    @db.VarChar(255)
+  link        String    @db.VarChar(500)
+  groupKey    String?   @map("group_key") @db.VarChar(100)
   readAt      DateTime? @map("read_at") @db.Timestamptz(6)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   recipient User             @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
   actor     User?            @relation("TriggeredNotifications", fields: [actorId], references: [id], onDelete: SetNull)
@@ -1794,20 +1823,43 @@ model Notification {
 }
 
 model PushSubscription {
-  id         String   @id @default(uuid()) @db.Uuid
-  userId     String   @map("user_id") @db.Uuid
-  endpoint   String   @unique @db.VarChar(500)
-  p256dh     String   @db.VarChar(255)
-  auth       String   @db.VarChar(255)
-  userAgent  String?  @map("user_agent") @db.VarChar(255)
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  endpoint   String    @unique @db.VarChar(500)
+  p256dh     String    @db.VarChar(255)
+  auth       String    @db.VarChar(255)
+  userAgent  String?   @map("user_agent") @db.VarChar(255)
   lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(6)
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+model RefreshToken {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  familyId          String    @map("family_id") @db.Uuid
+  roleTag           String    @map("role_tag") @db.VarChar(30)
+  tokenHash         String    @unique @map("token_hash") @db.VarChar(64)
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz(6)
+  absoluteExpiresAt DateTime  @map("absolute_expires_at") @db.Timestamptz(6)
+  usedAt            DateTime? @map("used_at") @db.Timestamptz(6)
+  revokedAt         DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedReason     String?   @map("revoked_reason") @db.VarChar(30)
+  userAgent         String?   @map("user_agent") @db.VarChar(255)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
 }
 
 model NotificationPreference {
@@ -1823,6 +1875,104 @@ model NotificationPreference {
   @@map("notification_preferences")
 }
 
+model CompanyProfile {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @unique @map("company_id") @db.Uuid
+  sector     String   @db.VarChar(100)
+  email      String   @unique @db.VarChar(150)
+  phone      String   @db.VarChar(20)
+  websiteUrl String   @map("website_url") @db.VarChar(255)
+  cityId     String   @map("city_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  city    City    @relation(fields: [cityId], references: [id], onDelete: Restrict)
+
+  @@index([cityId])
+  @@map("company_profiles")
+}
+
+model CompanyLogo {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @unique @map("company_id") @db.Uuid
+  fileName   String   @map("file_name") @db.VarChar(255)
+  mimeType   String   @map("mime_type") @db.VarChar(50)
+  sizeBytes  Int      @map("size_bytes")
+  data       Bytes
+  uploadedAt DateTime @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_logos")
+}
+
+model CompanyAccessRequest {
+  id                String    @id @default(uuid()) @db.Uuid
+  requestCode       String?   @unique @map("request_code") @db.VarChar(20)
+  companyName       String    @map("company_name") @db.VarChar(100)
+  description       String    @db.Text
+  sector            String    @db.VarChar(100)
+  email             String    @db.VarChar(150)
+  phone             String    @db.VarChar(20)
+  websiteUrl        String    @map("website_url") @db.VarChar(255)
+  cityId            String    @map("city_id") @db.Uuid
+  username          String    @db.VarChar(100)
+  statusId          String    @map("status_id") @db.Uuid
+  documentFileId    String?   @unique @map("document_file_id") @db.Uuid
+  logoFileId        String?   @unique @map("logo_file_id") @db.Uuid
+  ocrMatchScore     Int?      @map("ocr_match_score") @db.SmallInt
+  ocrFieldResults   Json?     @map("ocr_field_results")
+  submittedAt       DateTime? @map("submitted_at") @db.Timestamptz(6)
+  openedById        String?   @map("opened_by_id") @db.Uuid
+  openedAt          DateTime? @map("opened_at") @db.Timestamptz(6)
+  reviewedById      String?   @map("reviewed_by_id") @db.Uuid
+  reviewedAt        DateTime? @map("reviewed_at") @db.Timestamptz(6)
+  rejectionReason   String?   @map("rejection_reason") @db.VarChar(500)
+  approvedCompanyId String?   @unique @map("approved_company_id") @db.Uuid
+  approvedUserId    String?   @unique @map("approved_user_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  city            City                @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  status          AccessRequestStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  documentFile    File?               @relation("CompanyRequestDocument", fields: [documentFileId], references: [id], onDelete: SetNull)
+  logoFile        File?               @relation("CompanyRequestLogo", fields: [logoFileId], references: [id], onDelete: SetNull)
+  openedBy        User?               @relation("CompanyRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
+  reviewedBy      User?               @relation("CompanyRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  approvedCompany Company?            @relation(fields: [approvedCompanyId], references: [id], onDelete: SetNull)
+  approvedUser    User?               @relation("ApprovedCompanyRecruiter", fields: [approvedUserId], references: [id], onDelete: SetNull)
+
+  activationOtps              CompanyActivationOtp[]
+  accessRequestDocumentType   AccessRequestDocumentType? @relation(fields: [accessRequestDocumentTypeId], references: [id])
+  accessRequestDocumentTypeId String?                    @map("access_request_document_type_id") @db.Uuid
+
+  @@index([statusId])
+  @@index([cityId])
+  @@index([email])
+  @@index([accessRequestDocumentTypeId])
+  @@index([openedById])
+  @@index([reviewedById])
+  @@map("company_access_requests")
+}
+
+model CompanyActivationOtp {
+  id                     String    @id @default(uuid()) @db.Uuid
+  companyAccessRequestId String    @map("company_access_request_id") @db.Uuid
+  codeHash               String    @map("code_hash") @db.VarChar(255)
+  expiresAt              DateTime  @map("expires_at") @db.Timestamptz(6)
+  attempts               Int       @default(0)
+  usedAt                 DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  companyAccessRequest CompanyAccessRequest @relation(fields: [companyAccessRequestId], references: [id], onDelete: Cascade)
+
+  @@index([companyAccessRequestId])
+  @@map("company_activation_otps")
+}
 model JobAlertMode {
   id          String   @id @default(uuid()) @db.Uuid
   title       String   @unique @db.VarChar(30)

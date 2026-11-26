@@ -1,99 +1,79 @@
-# Auth
+# Auth Module
 
-## Purpose
+## Overview
 
-The `auth` module starts and ends the user's session in the frontend (`frontend/src/modules/auth`) and keeps the access token shared by every module (`frontend/src/shared/services/storage/access-token-storage.ts`). This document describes how the session keeps working without a connection.
+The **Auth Module** provides authentication, cookie-first session management, Google OAuth verification/linking, refresh token rotation with replay detection, password recovery via OTP, password history enforcement, and cross-tab session inactivity protection across backend (`NestJS`) and frontend (`Next.js`).
 
-## Offline session
+Browser clients authenticate through **HttpOnly cookies** (`umssy_access`, `umssy_refresh`) paired with a lightweight session presence indicator (`umssy_has_session`), while API clients can also send standard `Authorization: Bearer <jwt>` headers. Sign-in and password recovery use institutional primary buttons with the shared button shape, and signing out uses a standard neutral confirmation.
 
-The offline session lets a user who prepared offline access read the data they downloaded when the browser has no connection. Every copy belongs to a user (`userId`, the `sub` of the access token), never to the token itself:
+## API Endpoints
 
-- the session, workshops and categories can be read offline only while a valid token is in memory, so they are not available after the PWA reopens without one;
-- the passes have their own read through the owner persisted in IndexedDB, so they can be opened after reopening the PWA without a token.
+| Method | Route                          | Auth             | Description                                                                        |
+| ------ | ------------------------------ | ---------------- | ---------------------------------------------------------------------------------- |
+| `GET`  | `/auth/session`                | JWT / Cookie     | Returns active session identity, roles, optional company info, and idle/abs limits |
+| `POST` | `/auth/login`                  | Public           | Authenticates credentials, issues session cookies (`umssy_access`, `umssy_refresh`) |
+| `POST` | `/auth/google/login`           | Public           | Verifies Google ID token and establishes an authenticated cookie session           |
+| `POST` | `/auth/google/link`            | JWT / Cookie     | Links a Google account to the authenticated user                                   |
+| `POST` | `/auth/refresh`                | Cookie / Body    | Rotates refresh token family, rejects reused tokens, sets rotated cookies & returns session credentials |
+| `POST` | `/auth/logout`                 | Public / Session | Revokes active refresh token family and clears session cookies                     |
+| `POST` | `/auth/forgot-password/request`| Public           | Dispatches password recovery OTP with credential rate-limit enforcement             |
+| `POST` | `/auth/forgot-password/verify` | Public           | Verifies recovery OTP code and attempt limits                                      |
+| `POST` | `/auth/forgot-password/reset`  | Public           | Resets password, checks recent password history, and revokes active refresh chains |
 
-### Where it is stored
+Account activation (`POST /account-activation`) also sets `umssy_access` and `umssy_refresh` via `AuthSessionCookieService`.
 
-Copies live in the IndexedDB database `umssy-business-data`, store `drafts`. The pending pass removals live in `localStorage`.
-
-| Key | Content | Written by |
-| --- | --- | --- |
-| `umssy:session-draft:offline:<key>` | `{ userId, data }` with the last online response. `<key>` is `auth-session`, `event-categories`, `events:<filters>` or `event:<id>` | `withOfflineSessionCopy` |
-| `offline-passes:owner` | `userId` of the offline session that owns the pass copy on this device | `claimOfflinePasses` |
-| `offline-passes:<userId>` | `{ userId, savedAt, passes }` with the QR of the user's confirmed passes | `saveOfflinePass`, `prepareOfflinePasses` |
-| `offline-passes:pending-removals:<userId>` (`localStorage`) | Ids of cancelled passes whose local copy could not be removed | `removeOfflinePassOrDefer` |
-
-The `umssy_session=1` cookie only marks that a session exists. No copy stores a token.
-
-### How the copy is saved
-
-- While online, `withOfflineSessionCopy` calls the API and stores `{ userId, data }` only if the in-memory token is still the token that made the request, so a late response from another session is never stored.
-- Pass copies are written through `updateSessionOfflinePasses`, which claims the copy for the user of the in-memory token and writes it in the same IndexedDB transaction that checks the owner.
-- From the offline preparation (`prepareOfflineAccess`), the session (`GET /auth/session`), workshops, passes and the app shell are downloaded together with `requireStorage`. If any copy cannot be stored, or the session changes meanwhile, the preparation fails and can be retried. It is cancelled after 60 seconds.
-
-### How the copy is recovered
-
-- When `navigator.onLine` is `false`, `withOfflineSessionCopy` returns the data only if the in-memory token is the token of the request and its `userId` matches the copy. Otherwise it throws `Conéctate para descargar estos datos.`
-- `loadSessionOfflinePasses` reads the passes:
-  - with a token, the copy must belong to that token's user;
-  - without a token (the PWA reopened with cookie-based auth), it reads the owner and its copy in one IndexedDB transaction, so a read never returns a copy whose session already ended;
-  - it keeps only valid passes and hides the pending removals.
-- Copies saved before this change are kept: a session copy in the `{ token, data }` format is accepted when its token is the current in-memory token and is rewritten as `{ userId, data }`; a pass copy without `offline-passes:owner` is adopted by the user of the current session.
-
-### How the copy is invalidated
-
-`OfflinePassesSessionSync`, mounted in `providers.tsx`, listens to the access token. `offline-passes:owner` is the persisted offline session: ending it and removing that user's copy happen in one IndexedDB transaction, and only for the user whose session ended.
-
-The passes stop being shown only once that transaction commits. If it fails (for example, IndexedDB is blocked, full or unavailable), it is rolled back as a whole: neither the owner nor the copy is removed, the error is not retried, and the saved passes stay readable offline on that device. They are removed by the next session change that completes: another user's login replaces them, and a later logout that commits removes them.
-
-| Event | Effect |
-| --- | --- |
-| Logout or `401` (token changes from a value to `null`) | `endOfflinePassesSession` removes the owner and that user's pass copy in one transaction, only if that user still owns the device, and then its pending removals. A copy saved by another account meanwhile is kept. If the transaction fails, nothing is removed and the passes stay readable offline until the next session change that completes. `endSession` also removes every `umssy:session-draft:` copy |
-| Login of the same user | Keeps the copy |
-| Login of another user | `claimOfflinePasses` sets the new owner and removes the previous user's passes in one transaction |
-| The PWA reopens without a token | Nothing changes: there is no transition from a token, so the passes stay readable for the owner |
-| Another tab changes the session | The `umssy-session` `BroadcastChannel` makes every tab discard its in-memory token; the listener applies the same rules |
-| Cancelled pass | The pass is removed from the local copy. If IndexedDB fails, it stays pending, is hidden, and is removed on the next read without repeating the `DELETE` |
-
-### Sequence diagram
+## Session Lifecycle & Refresh Rotation
 
 ```mermaid
 sequenceDiagram
-  actor U as User
-  participant V as View
-  participant S as OfflinePassesSessionSync
-  participant P as offline-passes-store
-  participant DB as IndexedDB (umssy-business-data)
-  participant API as Backend
+  autonumber
+  participant Browser
+  participant ApiClient as Frontend ApiClient
+  participant AuthCtrl as AuthController
+  participant RefreshSvc as RefreshTokenService
+  participant DB as PostgreSQL
 
-  Note over U,API: Online: prepare offline access
-  U->>V: Opens the app with a session
-  V->>P: updateSessionOfflinePasses(token)
-  P->>DB: transaction: check owner, write offline-passes:<userId>
-  V->>API: GET /event-registrations/me and /pass
-  API-->>V: confirmed passes and QR
-
-  Note over U,API: Offline: recover the passes
-  U->>V: Opens /offline/passes without a token
-  V->>P: loadSessionOfflinePasses(null)
-  P->>DB: transaction: read owner + offline-passes:<owner>
-  alt the owner still holds the copy
-    P-->>V: saved passes and QR
-  else the session ended
-    P-->>V: no copy
+  Browser->>ApiClient: Protected API request
+  ApiClient->>AuthCtrl: Request (withCredentials: true, umssy_access cookie)
+  alt Access cookie expired (401)
+    AuthCtrl-->>ApiClient: 401 Unauthorized
+    ApiClient->>AuthCtrl: Single-flight POST /auth/refresh (umssy_refresh cookie)
+    AuthCtrl->>RefreshSvc: Validate and rotate refresh token
+    RefreshSvc->>DB: Check token_hash, used_at, revoked_at, absolute_expires_at
+    alt Replay detected (used_at set)
+      RefreshSvc->>DB: Revoke entire family_id
+      AuthCtrl-->>ApiClient: 401 REFRESH_INVALID (clear session cookies)
+      ApiClient-->>Browser: Broadcast SESSION_CLOSED across tabs
+    else Valid token within absolute cap
+      RefreshSvc->>DB: Mark old token used & store replacement hash
+      AuthCtrl-->>ApiClient: 200 OK { accessToken, roleTag, roles } + rotated cookies
+      ApiClient->>ApiClient: Apply refreshed credential before resolving success
+      ApiClient->>AuthCtrl: Retry original request cleanly (stale Bearer suppressed)
+      AuthCtrl-->>Browser: 200 OK
+    end
   end
-
-  Note over U,API: Logout or 401
-  U->>V: Logout
-  V->>S: token becomes null
-  S->>DB: transaction: remove owner + offline-passes:<userId> (only that user)
 ```
+
+## Architecture Notes
+
+### Backend (`backend/src/modules/auth`)
+- **Cookie & Bearer Extraction**: REST guards and shared WebSocket gateways (`chat`, `notifications`) extract credentials from `Authorization: Bearer` headers or the `umssy_access` cookie using shared `extractSocketAccessToken` and `SOCKET_CORS_CONFIG`.
+- **Single Source Session Timing**: `/auth/session` emits `idleTimeoutSeconds`, `warningSeconds`, and `absoluteExpiresAt` computed from the active refresh family.
+- **Security Controls**: Credential attempt tracking enforces per-account temporary cooldowns on login and OTP recovery; `PasswordHistory` prevents reusing recent password hashes.
+
+### Frontend (`frontend/src/modules/auth` & `frontend/src/shared`)
+- **Cookie-First Hydration & Session State**: When client storage starts without an in-memory credential or local cookie marker, `SessionGate` invokes `AuthProvider.hydrateSession()` (`GET /auth/session`) before redirecting to `/login`, ensuring browser reloads preserve active `HttpOnly` cookie sessions. `AuthProvider` passes server-computed inactivity limits directly as props to `SessionInactivityGuard`.
+- **Unified Single-Flight Refresh**: Auto-refresh, interactive "Seguir conectado" renewal (`useSessionInactivity`), and `apiClient` 401 recovery converge on one shared single-flight refresh operation (`executeSharedRefresh` / `authService.refreshSession`) that applies the refreshed credential before reporting success. If renewal fails, `useSessionInactivity` keeps the warning modal open so the user can retry or close the session.
+- **Responsive Warning Dialog**: `SessionTimeoutModal` constrains height via `max-h-editor-dialog overflow-y-auto` so warning text and action buttons remain reachable on low-height mobile landscape screens.
+- **UI & Logout Standards**: Login and password recovery use institutional primary buttons (`bg-primary`, without legacy `.institutional-button`), and signing out uses neutral action styling.
+- **Browser Storage Discipline**: Non-sensitive session user identity for offline/idempotency isolation is persisted in IndexedDB (`umssy:session:current-user-id`), never `sessionStorage`; JWT secrets are never written to `localStorage` or `IndexedDB`.
+- **Cross-Tab Synchronization**: `useSessionInactivity` synchronizes user activity across open tabs via throttled `BroadcastChannel` (`ACTIVITY` events) and `localStorage` (`umssy_last_activity_at` + `storage` listener), preventing premature timeout and dismissing warning modals when another tab is active. Session termination (`SESSION_CLOSED`) logs out all open tabs in lockstep.
+
+See the [Prisma schema](../../backend/prisma/schema.prisma) for the model definitions and the [database README](../../backend/prisma/README.md) for database relationships.
 
 ## Sprint History
 
 ### Sprint 3
-
-- Offline session:
-  - The session, workshops, categories and passes are kept in IndexedDB as copies tied to the user, not to the token. The passes can be opened after reopening the PWA without a token; the other copies need a valid token in memory.
-  - Logout or `401` ends the offline session and removes only that user's passes in one transaction. Another user's login removes the previous passes.
-  - Copies saved in the previous format are migrated instead of discarded.
-  - A cancelled pass whose local copy cannot be removed is hidden and its cleanup is retried later.
+- Unified browser authentication around `HttpOnly` session cookies (`umssy_access`, `umssy_refresh`), WebSocket cookie authentication, single-flight refresh rotation retry in `apiClient`, and IndexedDB session identity isolation.
+- Added `AuthProvider.hydrateSession()` probe in `SessionGate` for reload persistence, unified `/auth/refresh` credential application across API retries and `useSessionInactivity`, kept the inactivity warning modal open on refresh failure, and constrained `SessionTimeoutModal` height for landscape viewports.
+- Added cross-tab inactivity synchronization via `BroadcastChannel` and `localStorage` (`umssy_last_activity_at`), removed duplicate `/auth/session` polling in `SessionInactivityGuard`, and normalized credential cooldown error handling.

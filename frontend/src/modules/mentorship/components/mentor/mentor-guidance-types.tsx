@@ -24,7 +24,7 @@ export function MentorGuidanceTypes({
           <CardTitle
             role="heading"
             aria-level={2}
-            className="flex items-center gap-2 [font-family:Georgia,serif] text-[22px] font-semibold text-accent"
+            className="flex items-center gap-2 font-tight text-[22px] font-semibold text-accent"
           >
             <Compass
               className="size-5 shrink-0 text-accent"
@@ -53,7 +53,7 @@ export function MentorGuidanceTypes({
         <CardTitle
           role="heading"
           aria-level={2}
-          className="flex items-center gap-2 [font-family:Georgia,serif] text-[22px] font-semibold text-accent"
+          className="flex items-center gap-2 font-tight text-[22px] font-semibold text-accent"
         >
           <Compass
             className="size-5 shrink-0 text-accent"

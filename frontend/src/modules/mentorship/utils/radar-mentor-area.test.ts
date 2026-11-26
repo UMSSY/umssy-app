@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart";
 import { resolveRadarMentorAreas } from "./radar-mentor-area";
 
 describe("Correspondencia con el catálogo de mentorías", () => {

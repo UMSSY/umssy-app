@@ -12,16 +12,16 @@ export function ProfileGuideWelcome({
   onLater,
 }: ProfileGuideWelcomeProps) {
   return (
-    <div className="grid items-center gap-6 p-6 sm:p-10 md:grid-cols-2">
-      <div className="flex justify-center rounded-2xl bg-interaction p-4">
+    <div className="grid min-w-0 grid-cols-1 items-center gap-5 p-4 sm:p-8 md:grid-cols-2 md:gap-6 md:p-10">
+      <div className="flex min-w-0 justify-center rounded-2xl bg-interaction p-3 sm:p-4">
         <ProfileGuideWelcomeHero />
       </div>
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-6 wrap-anywhere">
         <div className="space-y-3">
           <p className="text-sm font-semibold text-app-header">
             Guía de perfil
           </p>
-          <DialogTitle className="font-heading text-3xl font-bold text-ink">
+          <DialogTitle className="font-heading text-2xl font-bold text-ink sm:text-3xl">
             ¡Hola, {firstName}!
           </DialogTitle>
           <h2 className="text-xl font-semibold text-app-header">

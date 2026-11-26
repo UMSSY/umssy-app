@@ -1,4 +1,4 @@
-import { radarSkillPoints } from '../../radar-integration/utils/radar-scoring.js';
+import { radarSkillPoints } from '../../../common/radar/radar-skill-rubric.js';
 import { Injectable } from '@nestjs/common';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';

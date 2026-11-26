@@ -33,7 +33,7 @@ export function ChatOptionsMenu({
             type="button"
             variant="ghost"
             size="icon"
-            className="rounded-lg text-text-secondary hover:bg-surface-soft hover:text-ink"
+            className="size-11 rounded-lg text-text-secondary hover:bg-surface-soft hover:text-ink md:size-10"
           />
         }
       >
@@ -47,7 +47,6 @@ export function ChatOptionsMenu({
         ) : (
           <DropdownMenuItem
             data-testid="chat-option-block"
-            variant="destructive"
             onClick={onBlockSelect}
           >
             Bloquear usuario

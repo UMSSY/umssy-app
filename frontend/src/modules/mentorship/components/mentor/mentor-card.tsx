@@ -28,13 +28,13 @@ export function MentorCard({
 
   return (
     <Card
-      className="relative h-full min-w-0 gap-4 rounded-none border border-border bg-surface py-[22px] shadow-none ring-0"
+      className="relative h-full min-w-0 gap-3 rounded-lg border border-border bg-surface py-4 shadow-none ring-0 sm:gap-4 sm:rounded-none sm:py-[22px]"
       aria-labelledby={`mentor-${mentor.id}`}
     >
-      <CardContent className="flex flex-1 flex-col gap-3 px-[22px]">
+      <CardContent className="flex flex-1 flex-col gap-3 px-4 sm:px-[22px]">
         <div className="flex flex-col items-start gap-2">
-          <div className="flex w-full min-w-0 flex-col items-start gap-5">
-            <Avatar className="size-[58px] shrink-0">
+          <div className="flex w-full min-w-0 items-center gap-3 sm:flex-col sm:items-start sm:gap-5">
+            <Avatar className="size-12 shrink-0 sm:size-[58px]">
               {mentor.photoUrl ? (
                 <AvatarImage
                   src={mentor.photoUrl}
@@ -42,13 +42,13 @@ export function MentorCard({
                   className="object-cover"
                 />
               ) : null}
-              <AvatarFallback className="bg-[#d5e6ef] text-sm font-semibold text-accent">{getInitials(mentor.fullName)}</AvatarFallback>
+              <AvatarFallback className="bg-accent/10 text-sm font-semibold text-accent">{getInitials(mentor.fullName)}</AvatarFallback>
             </Avatar>
 
             <div className="min-w-0 flex-1">
               <h2
                 id={`mentor-${mentor.id}`}
-                className="[font-family:Georgia,serif] text-[20px] leading-6 font-semibold [overflow-wrap:anywhere] text-accent"
+                className="font-tight text-[20px] leading-6 font-semibold [overflow-wrap:anywhere] text-accent"
               >
                 {mentor.fullName}
               </h2>
@@ -73,13 +73,13 @@ export function MentorCard({
                 variant="outline"
                 aria-current={highlightAvailability ? 'true' : undefined}
                 className={cn(
-                  "absolute top-[22px] right-[22px] border-transparent bg-transparent px-0 text-[10px] whitespace-nowrap text-[#246448]",
+                  "border-transparent bg-transparent px-0 text-xs text-success sm:absolute sm:top-[22px] sm:right-[22px] sm:text-[10px]",
                   highlightAvailability && "font-semibold",
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className="size-1.5 rounded-full bg-[#3b9e70]"
+                  className="size-1.5 rounded-full bg-success"
                 />
                 Disponible para mentoría
               </Badge>
@@ -143,12 +143,12 @@ export function MentorCard({
         </div>
       </CardContent>
 
-      <CardFooter className="mx-[22px] mt-auto border-t border-border bg-surface px-0 pt-4">
+      <CardFooter className="mx-4 mt-auto border-t border-border bg-surface px-0 pt-4 sm:mx-[22px]">
         <Link
           href={profileHref}
           className={buttonVariants({
             variant: "outline",
-            className: "h-[38px] w-full gap-3 rounded-none border-accent! bg-surface text-xs text-accent hover:bg-accent hover:text-accent-foreground",
+            className: "h-11 w-full gap-3 sm:h-[38px] rounded-none border-accent! bg-surface text-xs text-accent hover:bg-accent hover:text-accent-foreground",
           })}
           aria-label={
             isOwnProfile

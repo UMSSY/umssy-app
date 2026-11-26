@@ -1,4 +1,6 @@
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { clearSharedLastActivity } from "@/shared/services/storage/session-activity-storage";
+import { clearCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
 import { clearSessionDrafts } from "./clear-session-drafts";
 import { clearSessionMarker, setSessionMarker } from "./session-cookie";
 
@@ -12,5 +14,7 @@ export async function startSession(accessToken: string): Promise<void> {
 export function endSession(): void {
   void clearSessionDrafts();
   clearAccessToken();
+  clearCurrentSessionUserId();
+  clearSharedLastActivity();
   clearSessionMarker();
 }

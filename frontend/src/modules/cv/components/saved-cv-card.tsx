@@ -25,7 +25,7 @@ export function SavedCvCard({
 
   if (isLoading) {
     return (
-      <SectionCard title="CVs guardados">
+      <SectionCard title="CVs guardados" className="min-w-0">
         <div aria-busy="true" className="flex flex-col gap-3">
           <Skeleton className="h-5 w-2/3" />
           <Skeleton className="h-4 w-1/2" />
@@ -37,7 +37,7 @@ export function SavedCvCard({
 
   if (loadError && items.length === 0) {
     return (
-      <SectionCard title="CVs guardados">
+      <SectionCard title="CVs guardados" className="min-w-0">
         <div className="flex flex-col items-start gap-3">
           <p role="alert" className="text-sm text-danger">
             {loadError}
@@ -63,7 +63,7 @@ export function SavedCvCard({
 
   if (items.length === 0) {
     return (
-      <SectionCard title="CVs guardados">
+      <SectionCard title="CVs guardados" className="min-w-0">
         <p className="text-sm text-text-secondary">
           Al confirmar la carga, el archivo se mostrará aquí.
         </p>
@@ -75,6 +75,7 @@ export function SavedCvCard({
     <SectionCard
       title="CVs guardados"
       description="El CV más reciente es el vigente en tu perfil."
+      className="min-w-0"
     >
       <ul aria-label="CVs recientes">
         {items.map((cv) => (
@@ -96,7 +97,7 @@ export function SavedCvCard({
           <Button
             type="button"
             variant="outline"
-            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
             disabled={isBusy || isAutofilling}
             onClick={onAutofill}
           >
@@ -114,7 +115,7 @@ export function SavedCvCard({
           <Button
             type="button"
             variant="outline"
-            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            className="h-10 w-full border-border-strong px-4 text-sm text-ink hover:bg-surface-soft sm:w-auto"
             onClick={onOpenHistory}
           >
             <History aria-hidden="true" className="size-4" />

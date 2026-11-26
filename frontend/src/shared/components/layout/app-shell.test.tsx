@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MOBILE_MEDIA_QUERY } from "@/shared/constants/viewport.constants";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { AppShell } from "./app-shell";
 
@@ -73,5 +74,29 @@ describe("AppShell", () => {
     fireEvent.click(openButton);
     expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toHaveFocus();
     expect(sidebar?.getAttribute("data-state")).toBe("expanded");
+  });
+
+  it("closes the mobile drawer with its close button", async () => {
+    vi.mocked(window.matchMedia).mockImplementation((query) => ({
+      matches: query === MOBILE_MEDIA_QUERY,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+    render(<AppShell>Contenido</AppShell>);
+
+    const toggle = screen.getByRole("button", { name: "Abrir menú" });
+    fireEvent.click(toggle);
+    const drawer = await screen.findByRole("dialog", { name: "Menú de navegación" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(within(drawer).getByRole("button", { name: "Cerrar barra lateral" }));
+
+    await waitFor(() => expect(drawer).not.toBeInTheDocument());
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 });

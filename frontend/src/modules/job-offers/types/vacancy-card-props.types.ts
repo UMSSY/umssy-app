@@ -5,5 +5,6 @@ export interface VacancyCardProps {
   onDetails: (id: string) => void;
   showStatus?: boolean;
   onReopen?: (id: string) => void;
+  onClose?: (offer: JobOffer) => void;
   onDelete?: (offer: JobOffer) => void;
 }

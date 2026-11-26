@@ -14,6 +14,8 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import { MentorNotFoundException } from '../exceptions/mentor-not-found.exception.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
+import { MentorDirectorySearchService } from '../services/mentor-directory-search.service.js';
+import { mentorDirectorySearch } from './fixtures/mentor-directory-search.fixture.js';
 import { MentorsService } from '../services/mentors.service.js';
 
 type Candidate = NonNullable<
@@ -45,6 +47,7 @@ describe('Mentores similares', () => {
     const module = await Test.createTestingModule({
       providers: [
         { provide: PrismaService, useValue: { user: { findFirst, findMany } } },
+        { provide: MentorDirectorySearchService, useValue: mentorDirectorySearch },
         MentorsRepository,
       ],
     }).compile();

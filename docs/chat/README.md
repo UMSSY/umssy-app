@@ -132,11 +132,18 @@ sequenceDiagram
 | Uses      | events                                        | Event room name for group notifications                       |
 | Used by   | notifications (frontend)                      | `getActiveConversationId()` to skip the toast of the open chat |
 
+## Action styling
+
+Blocking is a moderation action with a confirmation dialog. Its controls use neutral styling and the dismissal action uses the shared Cancel treatment.
+
 ## Sprint History
 
 ### Sprint 3
 
+- Compact chat headers show up to two lines of the contact or group name. The contact profile and group information show the full name. The subtitle truncates within its column.
 - Conversation selection from links is driven by the navigation state (`useSearchParams`); the `app:navigate` event and the `popstate` listener were removed.
 - The open conversation is exposed through the typed `getActiveConversationId()` contract instead of a global `window` property.
 - Handled `conversationId` and `tab` parameters are removed from the URL, so repeated links to the same conversation work.
 - `visibility:changed` reports the open conversation so the backend does not notify a recipient who is reading it.
+- Another screen opens a conversation in the side panel through `useOpenContextualChat` (exported by the module): it reuses the conversation of the same context or creates it, keeps it in the chat's own conversations cache, selects it and opens the panel. The caller can pass the contact's professional headline, which the room header shows as the subtitle, and register its button as the launcher. The chat's own deep link to a context conversation uses the same lookup and cache update; each caller only decides what to open afterwards. Closing the panel returns the focus to that button, and the back arrow closes the panel instead of showing the list. A new application conversation shows the start of the conversation and today's date, and the input starts empty.
+- On narrow screens, the event chat header opens group information and participants through the **Información del grupo** button. From the large breakpoint, this information appears beside the conversation.

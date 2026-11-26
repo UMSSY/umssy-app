@@ -1,0 +1,1 @@
+export const RADAR_TOUCH_TARGET_SIZE = 48;

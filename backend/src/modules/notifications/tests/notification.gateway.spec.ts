@@ -72,6 +72,37 @@ describe('NotificationGateway', () => {
     expect(mockServer.use).toHaveBeenCalledTimes(1);
   });
 
+  it('autentica el socket desde la cookie umssy_access cuando no se envía token en auth', async () => {
+    gateway.afterInit(mockServer as unknown as NotificationGateway['server']);
+    const middleware = mockServer.use.mock.calls[0][0] as (
+      socket: Record<string, unknown>,
+      next: (err?: Error) => void,
+    ) => Promise<void>;
+
+    const mockSocket = {
+      handshake: {
+        auth: {},
+        headers: { cookie: 'umssy_access=cookie-notif-jwt' },
+      },
+      data: {} as Record<string, unknown>,
+    };
+    const mockNext = vi.fn();
+    mockJwtService.verifyAsync.mockResolvedValue({ sub: 'user-notif-1' });
+    mockSessionService.getAuthenticatedUser.mockResolvedValue({
+      id: 'user-notif-1',
+      roles: ['titulado'],
+    });
+
+    await middleware(mockSocket, mockNext);
+
+    expect(mockJwtService.verifyAsync).toHaveBeenCalledWith('cookie-notif-jwt');
+    expect(mockNext).toHaveBeenCalledWith();
+    expect(mockSocket.data.user).toEqual({
+      id: 'user-notif-1',
+      roles: ['titulado'],
+    });
+  });
+
   it('registra la visibilidad reportada por el cliente', () => {
     gateway.handleVisibilityChanged(createClient(), { visible: true });
 

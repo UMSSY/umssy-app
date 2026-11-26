@@ -6,6 +6,11 @@ import {
   readIndexedDbByPrefix,
   updateIndexedDb,
 } from '@/shared/services/storage/browser-indexed-db';
+import {
+  getCookieSessionSubject,
+  hasCookieSession,
+} from '@/shared/services/storage/cookie-session-state';
+import { readCurrentSessionUserId } from '@/shared/services/storage/session-user-id-storage';
 
 import type { RadarReviewKind as ReviewKind } from '../types/radar-review-kind.types';
 import type { RadarReviewDecision as ReviewDecision } from '../types/radar-review-decision.types';
@@ -14,25 +19,31 @@ import type { PendingReviewOperation } from '../types/pending-review-operation.t
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function currentSubject(): string {
+async function currentSubject(): Promise<string> {
   try {
     const payload = getAccessToken()?.split('.')[1];
-    if (!payload) throw new Error('Sesión no disponible');
+    if (payload) {
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded: unknown = JSON.parse(atob(normalized));
 
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded: unknown = JSON.parse(atob(normalized));
-
-    if (
-      typeof decoded !== 'object' ||
-      decoded === null ||
-      !('sub' in decoded) ||
-      typeof decoded.sub !== 'string' ||
-      !decoded.sub
-    ) {
-      throw new Error('Identidad de sesión no válida');
+      if (
+        typeof decoded === 'object' &&
+        decoded !== null &&
+        'sub' in decoded &&
+        typeof decoded.sub === 'string' &&
+        decoded.sub
+      ) {
+        return decoded.sub;
+      }
     }
 
-    return decoded.sub;
+    if (hasCookieSession()) {
+      const sessionSubject =
+        getCookieSessionSubject() ?? (await readCurrentSessionUserId());
+      if (sessionSubject) return sessionSubject;
+    }
+
+    throw new Error('Sesión no disponible');
   } catch {
     throw new Error('No se pudo identificar al administrador de la sesión');
   }
@@ -62,7 +73,7 @@ export async function getRadarReviewOperationId(
 ): Promise<string> {
   await initializeAccessTokenStorage();
 
-  const subject = currentSubject();
+  const subject = await currentSubject();
   const key = operationKey(subject, kind, targetId, decision);
   const intent = fingerprint(kind, targetId, decision);
 
@@ -102,7 +113,7 @@ export async function clearRadarReviewOperationId(
 ): Promise<void> {
   await initializeAccessTokenStorage();
 
-  const subject = currentSubject();
+  const subject = await currentSubject();
   const key = operationKey(subject, kind, targetId, decision);
 
   await updateIndexedDb<PendingReviewOperation>(key, (current) =>
@@ -120,7 +131,7 @@ export async function listRadarReviewOperations(): Promise<
 > {
   await initializeAccessTokenStorage();
 
-  const subject = currentSubject();
+  const subject = await currentSubject();
   const prefix = 'hu4:radar-review:' + subject + ':';
   const entries = await readIndexedDbByPrefix<PendingReviewOperation>(prefix);
 

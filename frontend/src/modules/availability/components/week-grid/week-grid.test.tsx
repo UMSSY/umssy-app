@@ -96,8 +96,10 @@ describe("WeekGrid", () => {
   });
 
   it("reparte el ancho en 7 columnas iguales aunque un día tenga contenido más ancho", () => {
-    const { container } = render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
-    expect(container.querySelector(".md\\:grid-cols-\\[3\\.5rem_repeat\\(7\\,minmax\\(0\\,1fr\\)\\)\\]")).not.toBeNull();
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+
+    const grid = screen.getByRole("heading", { name: "LUN 5" }).closest("section")?.parentElement;
+    expect(grid).toHaveClass("@min-[44rem]/week:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]");
   });
 
   it("da a un bloque de 30 minutos la mitad del alto de una hora", () => {
@@ -254,13 +256,13 @@ describe("WeekGrid", () => {
     ).toBeInTheDocument();
   });
 
-  it("muestra la grilla desde md y la lista por día en pantallas chicas", () => {
+  it("muestra la grilla desde 44rem disponibles y la lista por debajo", () => {
     render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
 
     const grid = screen.getByRole("heading", { name: "LUN 5" }).closest("section")?.parentElement;
-    expect(grid).toHaveClass("hidden", "md:grid");
+    expect(grid).toHaveClass("hidden", "@min-[44rem]/week:grid");
     expect(screen.getByRole("heading", { name: "Lunes 5 de octubre" }).closest("ol")).toHaveClass(
-      "md:hidden"
+      "@min-[44rem]/week:hidden"
     );
   });
 
@@ -288,6 +290,31 @@ describe("WeekGrid", () => {
 
     const dayColumn = screen.getByRole("heading", { name: "LUN 5" }).nextElementSibling;
     expect(dayColumn).toHaveStyle({ height: `${15 * COMPACT_HOUR_HEIGHT_PX}px` });
+  });
+
+  it("en densidad compacta, un bloque de 30 minutos con cita deja lugar a su hora en una línea", () => {
+    const shortBlock = makeBlock({
+      id: "6",
+      startAt: "2026-10-09T14:00:00.000Z",
+      endAt: "2026-10-09T14:30:00.000Z",
+      state: "confirmed",
+    });
+    render(<WeekGrid blocks={[shortBlock]} weekRange={WEEK_RANGE} variant="owner" density="compact" />);
+
+    const button = screen.getByRole("button", { name: "confirmada, 10:00 a 10:30" });
+    expect(button).toHaveTextContent("10:00");
+    expect(button).toHaveClass("py-0", "text-xs", "leading-none", "justify-center");
+    expect(button).not.toHaveClass("text-[11px]");
+    expect(button).not.toHaveClass("py-0.5", "leading-[15px]");
+    expect(COMPACT_HOUR_HEIGHT_PX / 2).toBeGreaterThanOrEqual(15);
+  });
+
+  it("en densidad normal, conserva el relleno y el alto de línea de los bloques", () => {
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+
+    const button = screen.getByRole("button", { name: /^confirmada, 17:00/ });
+    expect(button).toHaveClass("py-0.5", "text-xs", "leading-[15px]");
+    expect(button).not.toHaveClass("py-0", "leading-none");
   });
 
   it("en densidad compacta, muestra solo la hora en el bloque, sin el estado", () => {

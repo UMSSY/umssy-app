@@ -12,6 +12,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
+import { SOCKET_CORS_CONFIG } from '../../../common/utils/cors-origins.js';
+import { extractSocketAccessToken } from '../../../common/utils/extract-socket-access-token.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
@@ -28,9 +30,7 @@ import type { MessageResponse } from '../responses/message.response.js';
 @WebSocketGateway({
   namespace: '/chat',
   path: '/api/socket.io',
-  cors: {
-    origin: '*',
-  },
+  cors: SOCKET_CORS_CONFIG,
 })
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -54,7 +54,7 @@ export class ChatGateway
   afterInit(server: Server) {
     server.use(async (socket: Socket, next: (error?: Error) => void) => {
       try {
-        const token = socket.handshake.auth?.token;
+        const token = extractSocketAccessToken(socket.handshake);
         if (!token) {
           return next(new Error('unauthorized'));
         }
@@ -157,13 +157,6 @@ export class ChatGateway
       }
 
       await client.join(body.conversationId);
-      this.chatVisibilityService?.setConversationVisibility(
-        user.id,
-        client.id,
-        body.conversationId,
-        true,
-        true,
-      );
       return { ok: true };
     } catch (error) {
       this.logger.error(

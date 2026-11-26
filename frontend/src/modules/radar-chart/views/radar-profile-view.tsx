@@ -6,9 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
-import { radarIntegrationApi } from '../services/radar-integration.service';
-import { skillsService } from '@/modules/skills/services/skills.service';
+import { useSkillCatalog } from '@/modules/skills';
+import { useRadarSimulationEligibility } from '../hooks/use-radar-simulation-eligibility';
 import { RadarAreaActions } from '../components/radar-area-actions';
 import { SkillSimulationDialog } from '../components/skill-simulation-dialog';
 import { cn } from '@/lib/utils';
@@ -63,20 +62,12 @@ export function RadarProfileView() {
     score: number;
   } | null>(null);
   const [simulationArea, setSimulationArea] = useState<AreaId | null>(null);
-  const simulationCatalog = useQuery({
-    queryKey: ['radar-simulation-catalog', data?.userId],
-    queryFn: skillsService.getCatalog,
-    enabled: simulationArea !== null,
-    staleTime: 5 * 60 * 1000,
-  });
+  const simulationCatalog = useSkillCatalog(simulationArea !== null);
   const [showMentorship, setShowMentorship] = useState(false);
-  const simulationEligibility = useQuery({
-    queryKey: ['radar-simulation-eligibility', data?.userId],
-    queryFn: radarIntegrationApi.simulationEligibility,
-    enabled: simulationArea !== null,
-    refetchInterval: 30_000,
-    retry: false,
-  });
+  const simulationEligibility = useRadarSimulationEligibility(
+    data?.userId,
+    simulationArea !== null,
+  );
   const simulationLoading =
     simulationEligibility.isFetching || simulationCatalog.isFetching;
   const simulationError =
@@ -101,13 +92,15 @@ export function RadarProfileView() {
       : readSessionStorage(comparisonKey) === 'true'
     : false;
   const selectedPanelRef = useRef<HTMLDivElement>(null);
+  const comparisonPanelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!selectedArea || isEvidenceVisible || simulationArea) return;
     const dismissOutside = (event: PointerEvent) => {
       if (
         event.target instanceof Node &&
-        !selectedPanelRef.current?.contains(event.target)
+        !selectedPanelRef.current?.contains(event.target) &&
+        !comparisonPanelRef.current?.contains(event.target)
       ) {
         setSelectedArea(null);
       }
@@ -146,7 +139,7 @@ export function RadarProfileView() {
     <main className="mx-auto flex w-full max-w-[1344px] flex-col gap-6 font-sans">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="[font-family:Georgia,serif] text-[32px] font-semibold text-accent">Radar de afinidad</h1>
+          <h1 className="font-tight text-[32px] font-semibold text-accent">Radar de afinidad</h1>
           <p className="mt-3 text-sm text-text-secondary">Conoce tus fortalezas y encuentra orientación para seguir creciendo.</p>
         </div>
         {data && (
@@ -216,9 +209,9 @@ export function RadarProfileView() {
       ) : null}
       {data ? (
         <>
-          <details className="group order-10 rounded-xl border border-border bg-surface p-5">
-            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
-              <div>
+          <details className="group order-10 rounded-xl border border-border bg-surface p-4 sm:p-5">
+            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:gap-4 [&::-webkit-details-marker]:hidden">
+              <div className="min-w-0">
                 <h2 className="text-lg font-semibold text-ink">
                   Mi perfil profesional
                 </h2>
@@ -226,7 +219,7 @@ export function RadarProfileView() {
                   Competencias y evidencias de tu perfil
                 </p>
               </div>
-              <div className="ml-auto text-right text-xs text-text-secondary">
+              <div className="text-left text-xs text-text-secondary max-sm:order-last max-sm:w-full sm:ml-auto sm:text-right">
                 <p role="status" className="font-semibold text-ink">
                   {data.status === 'ready'
                     ? data.approved.length
@@ -257,9 +250,9 @@ export function RadarProfileView() {
           </details>
           <div
             aria-label="Resumen del perfil"
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4"
           >
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">
                 {data.average.toLocaleString('es-BO', {
                   maximumFractionDigits: 2,
@@ -273,20 +266,20 @@ export function RadarProfileView() {
                   : `${variation >= 0 ? '+' : ''}${variation.toFixed(2)} vs. anterior`}
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">
                 {areas.filter((a) => a.score > 0).length} / 6
               </b>
               <p className="text-xs">Áreas con puntuación</p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">{data.keywordCount}</b>
               <p className="text-xs">Habilidades aprobadas</p>
               <p className="text-xs text-text-secondary">
                 {data.highRelevanceCount} de alta relevancia
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
               <b className="text-2xl">{data.pendingCount}</b>
               <p className="text-xs">Habilidades pendientes</p>
             </div>
@@ -379,6 +372,7 @@ export function RadarProfileView() {
           </div>
           {comparison ? (
             <section
+              ref={comparisonPanelRef}
               aria-label="Comparación de publicaciones"
               className="rounded-lg border border-border bg-surface p-4"
             >

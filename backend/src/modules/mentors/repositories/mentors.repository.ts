@@ -12,6 +12,7 @@ import {
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
 import { MentorIntakeRepository } from './mentor-intake.repository.js';
+import { MentorDirectorySearchService } from '../services/mentor-directory-search.service.js';
 
 import {
   directoryPredicate,
@@ -53,7 +54,10 @@ const similaritySelect = {
 
 @Injectable()
 export class MentorsRepository extends MentorIntakeRepository {
-  constructor(prisma: PrismaService) {
+  constructor(
+    prisma: PrismaService,
+    private readonly directorySearch: MentorDirectorySearchService,
+  ) {
     super(prisma);
   }
 
@@ -134,7 +138,7 @@ export class MentorsRepository extends MentorIntakeRepository {
       const [result] = await this.prisma.$queryRaw<
         { total: bigint }[]
       >(Prisma.sql`
-        SELECT count(*) AS total FROM users u WHERE ${directoryPredicate(filters, now)}`);
+        SELECT count(*) AS total FROM users u WHERE ${directoryPredicate(filters, now, this.directorySearch)}`);
       return Number(result.total);
     }
     return this.prisma.user.count({
@@ -163,7 +167,7 @@ export class MentorsRepository extends MentorIntakeRepository {
         SELECT u.id, u.first_name AS "firstName", u.last_name AS "lastName", u.created_at AS "createdAt",
           COALESCE((SELECT jsonb_agg(jsonb_build_object('technicalAreaId', mta.technical_area_id))
             FROM mentor_technical_areas mta WHERE mta.mentor_id = u.id), '[]'::jsonb) AS "mentorTechnicalAreas"
-        FROM users u WHERE ${directoryPredicate(filters, now)} ORDER BY ${directoryOrder('default')}`);
+        FROM users u WHERE ${directoryPredicate(filters, now, this.directorySearch)} ORDER BY ${directoryOrder('default')}`);
     }
     return this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
@@ -185,7 +189,7 @@ export class MentorsRepository extends MentorIntakeRepository {
   ) {
     if (filters.search.trim()) {
       const matches = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
-        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now)}
+        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now, this.directorySearch)}
           AND u.id = ANY(${ids}::uuid[])`);
       ids = matches.map(({ id }) => id);
     }
@@ -206,7 +210,7 @@ export class MentorsRepository extends MentorIntakeRepository {
   ) {
     if (filters.search.trim()) {
       const ids = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
-        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now)}
+        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now, this.directorySearch)}
         ORDER BY ${directoryOrder(sort)} LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`);
       if (!ids.length) return [];
       const mentors = await this.prisma.user.findMany({
@@ -446,7 +450,7 @@ export class MentorsRepository extends MentorIntakeRepository {
         EXISTS (SELECT 1 FROM work_experiences w WHERE w.user_id = u.id) AS "hasWorkExperience"
       FROM users u
       WHERE u.id = ${userId}::uuid
-        AND ${directoryPredicate({ search: '', available: false }, now)}
+        AND ${directoryPredicate({ search: '', available: false }, now, this.directorySearch)}
     `);
     return rows[0] ?? null;
   }

@@ -184,6 +184,10 @@ Invalid input is rejected before service execution. Authentication/authorization
 
 Existing tests exercise all 16 combinations of missing fields, order, uniqueness, count, mapper metadata, authenticated identity isolation, invalid sessions, active/unavailable and inactive/future roles, error propagation, edits and discarded drafts. The optimized snapshot uses parameterized `Prisma.sql`, photo byte length and two `EXISTS` flags in one coherent read; it does not fetch binaries or certifications. No latency improvement is claimed. Historical coverage and database checks are not a certification of current integration; rerun focused checks after synchronization. Independent participation and suggestions reads must be refreshed together if participation changes between requests.
 
+## Action styling
+
+Opening or dismissing participation dialogs uses neutral action styles. Deactivation is presented as a participation state change.
+
 ## Sprint History
 
 ### Sprint 3
