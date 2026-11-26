@@ -15,10 +15,10 @@ import { UsersModule } from '../users/users.module.js';
   imports: [
     ConfigModule,
     PrismaModule,
-    MatchingModule,
+    forwardRef(() => MatchingModule),
     JwtAuthModule,
     forwardRef(() => NotificationsModule),
-    JobOffersModule,
+    forwardRef(() => JobOffersModule),
     UsersModule,
   ],
   controllers: [ApplicationsController],

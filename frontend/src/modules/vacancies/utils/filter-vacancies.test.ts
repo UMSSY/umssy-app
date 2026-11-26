@@ -7,25 +7,25 @@ const DEVELOPER = buildVacancy({ id: "developer", title: "Desarrollador Backend"
 const VACANCIES = [SCIENTIST, DEVELOPER];
 
 describe("filterVacancies", () => {
-  it.each(["cientifico", "científico", "CIENTÍFICO"])("encuentra la vacante al buscar %s", (search) => {
+  it.each(["cientifico", "científico", "CIENTÍFICO"])("finds the vacancy when searching for %s", (search) => {
     expect(filterVacancies(VACANCIES, search)).toEqual([SCIENTIST]);
   });
 
-  it("ignora las tildes escritas en la búsqueda aunque el dato no las tenga", () => {
+  it("ignores query accents when the stored value has none", () => {
     const vacancy = buildVacancy({ id: "hybrid", modality: "Hibrido" });
     expect(filterVacancies([vacancy], "híbrido")).toEqual([vacancy]);
   });
 
-  it("busca también en empresa y requisitos", () => {
+  it("also searches company names and requirements", () => {
     expect(filterVacancies(VACANCIES, "techbolivia")).toHaveLength(2);
     expect(filterVacancies(VACANCIES, "react")).toHaveLength(2);
   });
 
-  it("devuelve todas las vacantes cuando la búsqueda está vacía", () => {
+  it("returns every vacancy when the query is blank", () => {
     expect(filterVacancies(VACANCIES, "   ")).toEqual(VACANCIES);
   });
 
-  it("devuelve una lista vacía cuando nada coincide", () => {
+  it("returns an empty list when nothing matches", () => {
     expect(filterVacancies(VACANCIES, "enfermería")).toEqual([]);
   });
 });
