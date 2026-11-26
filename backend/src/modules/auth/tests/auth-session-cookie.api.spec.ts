@@ -21,6 +21,7 @@ import { AuthController } from '../controllers/auth.controller.js';
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { GoogleLinkTokenService } from '../services/google-link-token.service.js';
 import { SessionRevokedException } from '../exceptions/index.js';
 
 const FRONTEND_ORIGIN = 'https://front.example.test';
@@ -58,6 +59,7 @@ describe('session cookie over HTTP', () => {
         { provide: AuthService, useValue: authService },
         { provide: RefreshTokenService, useValue: refreshTokens },
         { provide: GoogleAuthService, useValue: { verifyCredential: vi.fn() } },
+        { provide: GoogleLinkTokenService, useValue: { sign: vi.fn(), verify: vi.fn() } },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -80,6 +82,8 @@ describe('session cookie over HTTP', () => {
     });
     authService.getAccessTokenMaxAgeMs.mockReturnValue(3_600_000);
     refreshTokens.startFromLogin.mockResolvedValue({
+      accessToken: token,
+      accessMaxAgeMs: 3_600_000,
       refreshToken: 'refresh-1',
       refreshMaxAgeMs: 900_000,
     });
