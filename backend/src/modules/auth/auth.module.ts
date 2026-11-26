@@ -4,6 +4,7 @@ import { CredentialSecurityModule } from './credential-security.module.js';
 import { AuthController } from './controllers/auth.controller.js';
 import { AuthService } from './services/auth.service.js';
 import { GoogleAuthService } from './services/google-auth.service.js';
+import { GoogleLinkTokenService } from './services/google-link-token.service.js';
 import { AuthRepository } from './repositories/auth.repository.js';
 import { PasswordHistoryRepository } from './repositories/password-history.repository.js';
 import { PasswordHistoryService } from './services/password-history.service.js';
@@ -35,6 +36,7 @@ import { MailModule } from '../mail/mail.module.js';
   providers: [
     AuthService,
     GoogleAuthService,
+    GoogleLinkTokenService,
     AuthRepository,
     PasswordHistoryRepository,
     PasswordHistoryService,

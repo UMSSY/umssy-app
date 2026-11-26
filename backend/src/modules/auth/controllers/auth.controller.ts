@@ -27,6 +27,8 @@ import {
 import type { Request, Response } from 'express';
 import {
   AUTH_GOOGLE_BODY,
+  AUTH_GOOGLE_LINK_CONFIRM_BODY,
+  AUTH_GOOGLE_LOGIN_RESPONSE,
   AUTH_GOOGLE_LINK_OK_RESPONSE,
   AUTH_LOGIN_BODY,
   AUTH_PASSWORD_RESET_BODY,
@@ -55,6 +57,8 @@ import { LoginDto } from '../requests/login.schema.js';
 import { GoogleLoginDto } from '../requests/google-login.schema.js';
 import { GoogleLinkDto } from '../requests/google-link.schema.js';
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { GoogleLinkTokenService } from '../services/google-link-token.service.js';
+import { GoogleLinkConfirmDto } from '../requests/google-link-confirm.schema.js';
 import {
   InvalidCredentialsException,
   MissingGoogleCredentialException,
@@ -76,6 +80,7 @@ export class AuthController {
     private readonly refreshTokens: RefreshTokenService,
     private readonly credentialLimits: CredentialLimitsService,
     private readonly googleAuthService: GoogleAuthService,
+    private readonly googleLinkTokens: GoogleLinkTokenService,
   ) {}
 
   @Get('session')
@@ -134,12 +139,15 @@ export class AuthController {
     operationId: 'auth_googleLogin',
     summary: 'Iniciar sesión con Google OAuth',
     description:
-      'Verifica el token de Google Identity Services y establece cookies HttpOnly de sesión.',
+      'Verifica el token de Google Identity Services. Si la cuenta ya está vinculada establece cookies HttpOnly de sesión; si es una cuenta activa sin vincular responde requiresLinking con un linkToken y no vincula ni abre sesión.',
   })
   @ApiBody(AUTH_GOOGLE_BODY)
-  @ApiCreatedResponse(AUTH_TOKEN_CREATED_RESPONSE)
+  @ApiCreatedResponse(AUTH_GOOGLE_LOGIN_RESPONSE)
   @ApiBadRequestResponse({ description: 'Credencial de Google ausente o inválida.' })
-  @ApiUnauthorizedResponse({ description: 'Token de Google no autorizado.' })
+  @ApiUnauthorizedResponse({
+    description:
+      'Token de Google no autorizado, solicitud aún no aprobada o sin cuenta UMSSY asociada.',
+  })
   @ApiForbiddenResponse({
     description: 'El rol del usuario no permite acceso con Google.',
   })
@@ -161,6 +169,60 @@ export class AuthController {
     return this.credentialLimits.run('login', verifiedUser.email, async () => {
       const result = await this.authService.loginWithGoogle(
         verifiedUser,
+        body.roleTag,
+      );
+
+      if ('requiresLinking' in result) {
+        response.status(HttpStatus.OK);
+        return {
+          requiresLinking: true,
+          linkToken: this.googleLinkTokens.sign(result.claims),
+          email: verifiedUser.email,
+          emailVerified: true,
+        };
+      }
+
+      const session = await this.refreshTokens.startFromLogin(
+        result.accessToken,
+        userAgent,
+      );
+      writeSessionCookies(response, session);
+
+      return { ...result, accessToken: session.accessToken };
+    });
+  }
+
+  @Post('google/link/confirm')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    operationId: 'auth_googleLinkConfirm',
+    summary: 'Confirmar la vinculación de Google',
+    description:
+      'Valida el linkToken de 5 minutos entregado por POST /auth/google/login, vincula la cuenta de Google al usuario y abre la sesión con cookies HttpOnly. Cancelar la vinculación no llama a este endpoint.',
+  })
+  @ApiBody(AUTH_GOOGLE_LINK_CONFIRM_BODY)
+  @ApiOkResponse(AUTH_TOKEN_CREATED_RESPONSE)
+  @ApiUnauthorizedResponse({
+    description:
+      'linkToken vencido o inválido (GOOGLE_LINK_TOKEN_EXPIRED o GOOGLE_LINK_TOKEN_INVALID): vuelve a iniciar con Google.',
+  })
+  @ApiForbiddenResponse({
+    description: 'El rol del usuario no permite acceso con Google.',
+  })
+  @ApiConflictResponse({
+    description: 'La cuenta de Google ya está vinculada a otro usuario.',
+  })
+  @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
+  async googleLinkConfirm(
+    @Body() body: GoogleLinkConfirmDto,
+    @Res({ passthrough: true }) response: Response,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    const claims = this.googleLinkTokens.verify(body.linkToken);
+
+    return this.credentialLimits.run('login', claims.email, async () => {
+      const result = await this.authService.confirmGoogleLink(
+        claims,
         body.roleTag,
       );
       const session = await this.refreshTokens.startFromLogin(
