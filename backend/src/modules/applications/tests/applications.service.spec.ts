@@ -85,14 +85,24 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           jobOfferId: 'offer-1',
           status: { title: ApplicationStatus.IN_REVIEW },
           appliedAt: new Date('2026-10-29T12:00:00.000Z'),
-          jobOffer: { title: 'Dev', company: { title: 'Empresa A' } },
+          jobOffer: {
+            title: 'Dev',
+            expiresAt: null,
+            status: { title: 'Publicada' },
+            company: { title: 'Empresa A' },
+          },
         },
         {
           id: 'app-2',
           jobOfferId: 'offer-2',
           status: { title: ApplicationStatus.ACCEPTED },
           appliedAt: new Date('2026-10-29T12:00:00.000Z'),
-          jobOffer: { title: 'Dev 2', company: { title: 'Empresa B' } },
+          jobOffer: {
+            title: 'Dev 2',
+            expiresAt: null,
+            status: { title: 'Cerrada' },
+            company: { title: 'Empresa B' },
+          },
         },
       ];
 
@@ -122,6 +132,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           status: ApplicationStatus.IN_REVIEW,
           affinityPercentage: 85,
           appliedDate: '2026-10-29T12:00:00.000Z',
+          vacancyAvailable: true,
         },
         {
           id: 'app-2',
@@ -131,6 +142,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           status: ApplicationStatus.ACCEPTED,
           affinityPercentage: 40,
           appliedDate: '2026-10-29T12:00:00.000Z',
+          vacancyAvailable: false,
         },
       ]);
 

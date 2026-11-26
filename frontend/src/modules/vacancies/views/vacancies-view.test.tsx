@@ -85,6 +85,24 @@ describe("VacanciesView", () => {
     expect(await screen.findByRole("link", { name: "Ver detalles de Analista de Datos" })).toBeInTheDocument();
   });
 
+  it("avisa que la vacante ya no está disponible cuando el enlace apunta a una oferta fuera del listado", async () => {
+    renderWithQuery(<VacanciesView initialVacancyId="7a0d4c52-9b1e-4e63-8f0a-5c2d1b3e4f60" />);
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Esta vacante ya no está disponible" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: "Enviar postulación" })).toBeNull();
+  });
+
+  it("no afirma que la vacante no está disponible si el listado no pudo cargarse", async () => {
+    listPublished.mockRejectedValue(new Error("network"));
+    renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
+
+    expect(await screen.findByRole("heading", { name: "No pudimos cargar las vacantes" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByText("Esta vacante ya no está disponible")).toBeNull();
+  });
+
   it("muestra el botón de postular a titulados y estudiantes en el detalle", async () => {
     await setRole("estudiante");
     renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
