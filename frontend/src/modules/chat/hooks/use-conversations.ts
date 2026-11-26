@@ -59,7 +59,7 @@ export function useConversations() {
     [query.data],
   );
 
-  const isLoading = query.isFetching;
+  const isLoading = query.isFetching && query.data === undefined;
   const isError = query.isError && !query.isFetching;
 
   const resolveContextualConversation = useResolveContextualConversation();

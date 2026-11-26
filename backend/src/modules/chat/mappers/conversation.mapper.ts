@@ -81,6 +81,7 @@ export class ConversationMapper {
     isBlockedByMe: boolean;
     academicTitle: string | null;
     skills: string[];
+    contextTitle?: string | null;
   }): ConversationResponse {
     const {
       conversation,
@@ -90,6 +91,7 @@ export class ConversationMapper {
       isBlockedByMe,
       academicTitle,
       skills,
+      contextTitle = null,
     } = params;
 
     const avatarUrl = this.toAvatarUrl(contact.photoUrl);
@@ -113,6 +115,7 @@ export class ConversationMapper {
       isBlockedByMe,
       contextType: conversation.contextType ?? null,
       contextId: conversation.contextId ?? null,
+      contextTitle,
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }
