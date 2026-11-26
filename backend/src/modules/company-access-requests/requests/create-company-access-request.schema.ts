@@ -1,76 +1,71 @@
 import { z } from 'zod';
+import {
+  BOLIVIAN_MOBILE_PATTERN,
+  COMPANY_NAME_CHARACTERS,
+  COMPANY_NAME_CHARACTERS_MESSAGE,
+  COMPANY_NAME_HAS_LETTER_OR_DIGIT,
+  COMPANY_NAME_LENGTH_MESSAGE,
+  DESCRIPTION_LENGTH_MESSAGE,
+  PHONE_MESSAGE,
+  USERNAME_MESSAGE,
+  USERNAME_PATTERN,
+  WEBSITE_INVALID_MESSAGE,
+  WEBSITE_PATTERN,
+  WEBSITE_REQUIRED_MESSAGE,
+} from '../constants/company-registration-rules.constants.js';
+
+const companyNameField = z
+  .string()
+  .trim()
+  .min(4, COMPANY_NAME_LENGTH_MESSAGE)
+  .max(30, COMPANY_NAME_LENGTH_MESSAGE)
+  .regex(COMPANY_NAME_CHARACTERS, COMPANY_NAME_CHARACTERS_MESSAGE)
+  .refine((value) => COMPANY_NAME_HAS_LETTER_OR_DIGIT.test(value), {
+    message: COMPANY_NAME_CHARACTERS_MESSAGE,
+  });
+
+const descriptionField = z
+  .string()
+  .trim()
+  .min(10, DESCRIPTION_LENGTH_MESSAGE)
+  .max(500, DESCRIPTION_LENGTH_MESSAGE);
+
+const websiteUrlField = z
+  .string({ error: WEBSITE_REQUIRED_MESSAGE })
+  .trim()
+  .min(1, WEBSITE_REQUIRED_MESSAGE)
+  .max(255, WEBSITE_INVALID_MESSAGE)
+  .regex(WEBSITE_PATTERN, WEBSITE_INVALID_MESSAGE);
+
+const phoneField = z.string().trim().regex(BOLIVIAN_MOBILE_PATTERN, PHONE_MESSAGE);
+
+const usernameField = z.string().trim().regex(USERNAME_PATTERN, USERNAME_MESSAGE);
 
 export const createCompanyAccessRequestSchema = z.object({
-  companyName: z
-    .string()
-    .trim()
-    .min(2, 'El nombre de la empresa es obligatorio')
-    .max(100),
+  companyName: companyNameField,
   sector: z.string().trim().min(2, 'El rubro es obligatorio').max(100),
   cityId: z.string().uuid('Selecciona una ciudad válida'),
-  description: z
-    .string()
-    .trim()
-    .min(10, 'La descripción debe tener al menos 10 caracteres')
-    .max(1000),
+  description: descriptionField,
   email: z
     .string()
     .trim()
     .toLowerCase()
     .email('Correo electrónico inválido')
     .max(150),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[67]\d{7}$|^[234]\d{6,7}$/, 'Teléfono de Bolivia inválido'),
-  websiteUrl: z.preprocess(
-    (val) => (typeof val === 'string' ? val.trim() : ''),
-    z
-      .string()
-      .max(255)
-      .refine(
-        (val) => val === '' || /^https?:\/\/.+\..+/.test(val),
-        'Ingresa una URL válida (ej. https://www.empresa.com)',
-      ),
-  ),
-  username: z
-    .string()
-    .trim()
-    .min(3, 'El usuario debe tener al menos 3 caracteres')
-    .max(100)
-    .regex(/^[a-zA-Z0-9._-]+$/, 'Solo letras, números, puntos y guiones'),
+  phone: phoneField,
+  websiteUrl: websiteUrlField,
+  username: usernameField,
 });
 
 export const updateCompanyAccessRequestSchema = z.object({
-  companyName: z.string().trim().min(2).max(100).optional(),
+  companyName: companyNameField.optional(),
   sector: z.string().trim().min(2).max(100).optional(),
   cityId: z.string().uuid().optional(),
-  description: z.string().trim().min(10).max(1000).optional(),
+  description: descriptionField.optional(),
   email: z.string().trim().toLowerCase().email().max(150).optional(),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^[67]\d{7}$|^[234]\d{6,7}$/, 'Teléfono de Bolivia inválido')
-    .optional(),
-  websiteUrl: z
-    .preprocess(
-      (val) => (typeof val === 'string' ? val.trim() : ''),
-      z
-        .string()
-        .max(255)
-        .refine(
-          (val) => val === '' || /^https?:\/\/.+\..+/.test(val),
-          'Ingresa una URL válida (ej. https://www.empresa.com)',
-        ),
-    )
-    .optional(),
-  username: z
-    .string()
-    .trim()
-    .min(3)
-    .max(100)
-    .regex(/^[a-zA-Z0-9._-]+$/)
-    .optional(),
+  phone: phoneField.optional(),
+  websiteUrl: websiteUrlField.optional(),
+  username: usernameField.optional(),
 });
 
 export const requestCorrectionSchema = z.object({
