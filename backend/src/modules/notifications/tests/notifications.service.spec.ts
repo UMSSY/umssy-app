@@ -32,6 +32,7 @@ interface MockPushDispatcher {
 
 interface MockMailDispatcher {
   dispatchToUsers: ReturnType<typeof vi.fn>;
+  dispatchToEmails: ReturnType<typeof vi.fn>;
 }
 
 interface MockGateway {
@@ -87,6 +88,9 @@ describe('NotificationsService', () => {
     };
     mockMailDispatcher = {
       dispatchToUsers: vi
+        .fn()
+        .mockResolvedValue({ status: 'sent', deliveries: [] }),
+      dispatchToEmails: vi
         .fn()
         .mockResolvedValue({ status: 'sent', deliveries: [] }),
     };
@@ -659,6 +663,44 @@ describe('NotificationsService', () => {
       expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
       expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
       expect(result.inAppCount).toBe(1);
+    });
+
+    it('envía correo a destinatarios externos vía recipientEmails aunque no existan recipientIds', async () => {
+      const renderMail = vi.fn().mockReturnValue({
+        subject: 'Observaciones en tu solicitud',
+        html: '<p>Corrige el documento</p>',
+        text: 'Corrige el documento',
+      });
+
+      const result = await service.notify({
+        recipientIds: [],
+        recipientEmails: ['empresa@ejemplo.com'],
+        actorId: 'reviewer-1',
+        type: NotificationType.COMPANY_ACCESS_REQUEST_OBSERVED,
+        payload: {
+          companyName: 'Empresa Demo',
+          requestCode: 'EMP-2026-0001',
+          reason: '[DOCUMENTO] Falta sello',
+          requestStatusUrl: 'https://umssy.local/request-access/status',
+        },
+        channels: ['EMAIL'],
+        renderMail,
+      });
+
+      expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
+      expect(mockMailDispatcher.dispatchToEmails).toHaveBeenCalledWith(
+        ['empresa@ejemplo.com'],
+        'Observaciones en solicitud de empresa',
+        'La solicitud de Empresa Demo (EMP-2026-0001) requiere subsanación: [DOCUMENTO] Falta sello',
+        undefined,
+        renderMail,
+      );
+      expect(result).toEqual({
+        inAppCount: 0,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+        deliveries: [],
+      });
     });
   });
 });

@@ -92,6 +92,7 @@ Public navigation and enrollment use non-destructive action colors. Cancelling a
 
 ### Sprint 3
 
+- The landing page and public workshop list share a card grid with one column on phones, two from the small breakpoint and three from the large breakpoint. The public list enables workshop covers. On narrow screens, the detail page stacks the date, time, location and sign-in action.
 - Proposal expiry gained a periodic five-minute backend job independent of catalogue reads.
 - Proposals gained multiple nonoverlapping sessions, while the event's original date and time columns retain the first session. Catalogue ordering gained popularity and profile recommendations.
 - The catalogue gained the `Propuestas vencidas` filter backed by `statusId`. Without a status filter it shows published workshops and, with `includeProposals=true`, proposals still in voting; expired proposals stay outside the general catalogue.

@@ -11,12 +11,12 @@ export function ProfileGuideWelcomeHero({
   return (
     <div
       className={cn(
-        'relative flex aspect-square min-h-80 items-center justify-center overflow-hidden',
+        'relative flex aspect-square w-full max-w-80 items-center justify-center overflow-hidden',
         className,
       )}
     >
       <ProfileGuideRings />
-      <ProfileGuideMascot pose="wave" size="lg" entrance="pop" priority />
+      <ProfileGuideMascot pose="wave" size="lg" entrance="pop" className="aspect-square h-auto max-w-[90%]" priority />
     </div>
   );
 }

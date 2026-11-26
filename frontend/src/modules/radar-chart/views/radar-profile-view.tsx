@@ -92,13 +92,15 @@ export function RadarProfileView() {
       : readSessionStorage(comparisonKey) === 'true'
     : false;
   const selectedPanelRef = useRef<HTMLDivElement>(null);
+  const comparisonPanelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!selectedArea || isEvidenceVisible || simulationArea) return;
     const dismissOutside = (event: PointerEvent) => {
       if (
         event.target instanceof Node &&
-        !selectedPanelRef.current?.contains(event.target)
+        !selectedPanelRef.current?.contains(event.target) &&
+        !comparisonPanelRef.current?.contains(event.target)
       ) {
         setSelectedArea(null);
       }
@@ -370,6 +372,7 @@ export function RadarProfileView() {
           </div>
           {comparison ? (
             <section
+              ref={comparisonPanelRef}
               aria-label="Comparación de publicaciones"
               className="rounded-lg border border-border bg-surface p-4"
             >

@@ -12,13 +12,15 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
+import { SOCKET_CORS_CONFIG } from '../../../common/utils/cors-origins.js';
+import { extractSocketAccessToken } from '../../../common/utils/extract-socket-access-token.js';
 import { VisibilityChangedSchema } from '../requests/visibility-changed.schema.js';
 import { AppVisibilityService } from '../services/app-visibility.service.js';
 
 @WebSocketGateway({
   namespace: '/notifications',
   path: '/api/socket.io',
-  cors: { origin: '*' },
+  cors: SOCKET_CORS_CONFIG,
 })
 export class NotificationGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -37,7 +39,7 @@ export class NotificationGateway
   afterInit(server: Server) {
     server.use(async (socket: Socket, next: (error?: Error) => void) => {
       try {
-        const token = socket.handshake.auth?.token;
+        const token = extractSocketAccessToken(socket.handshake);
         if (!token) return next(new Error('unauthorized'));
 
         const payload = await this.jwtService.verifyAsync(token);

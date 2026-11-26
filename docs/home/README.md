@@ -20,4 +20,6 @@ sequenceDiagram
 
 ### Sprint 3
 
+The mentor card on the dashboard keeps its page gutters and wraps the explore link below the description when the two no longer fit side by side.
+
 The public landing page presents the community, workshops and access links. The authenticated dashboard provides navigation to areas available to the current role.
