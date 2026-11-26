@@ -54,8 +54,21 @@ export function RadarProfileView() {
     ? (historical.data ?? null)
     : null;
   const data = openedRadar ? mapPublishedRadar(openedRadar) : liveData;
-  const previous = openedRadar ? openedRadar.previous : livePrevious;
-  const variation = openedRadar ? openedRadar.variation : liveVariation;
+  const areas = data?.areas ?? [];
+  const previousCandidate = snapshotId ? openedRadar?.previous : livePrevious;
+  const previous =
+    data &&
+    previousCandidate &&
+    Number.isInteger(previousCandidate.version) &&
+    previousCandidate.version > 0 &&
+    previousCandidate.version < data.version &&
+    areas.length > 0 &&
+    areas.every(({ id }) => Number.isFinite(previousCandidate.scores?.[id]))
+      ? previousCandidate
+      : null;
+  const variation = previous
+    ? (openedRadar ? openedRadar.variation : liveVariation)
+    : null;
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
   const [projection, setProjection] = useState<{
     areaId: AreaId;
@@ -122,7 +135,6 @@ export function RadarProfileView() {
   };
 
   const comparison = isComparing ? previous : null;
-  const areas = data?.areas ?? [];
   const selected =
     areas.find((area) => area.id === selectedArea) ??
     areas.find(
@@ -319,7 +331,7 @@ export function RadarProfileView() {
               isComparisonEnabled={Boolean(comparison)}
               highlightedArea={comparison ? selected?.id : undefined}
               onComparisonChange={(enabled) => {
-                if (!comparisonKey) return;
+                if (!comparisonKey || !previous) return;
                 writeSessionStorage(comparisonKey, String(enabled));
                 setComparisonPreference({ key: comparisonKey, enabled });
                 setSelectedArea(null);
