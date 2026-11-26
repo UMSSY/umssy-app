@@ -134,3 +134,9 @@ The export dialog uses the shared outlined Cancel button. Cancelling closes the 
 - File preview and acknowledgement of version-specific results.
 - Shared mutations between the CV view and dashboard.
 - Integration of the `documents` to `cv` rename and public module imports.
+
+### Verification layout and refresh
+
+The two-column documents page activates at a content-container width of 56rem. Verification summaries, flow steps and detail rows adapt to their own container widths; filenames wrap and document actions remain visible. The generation card wraps its action below the text when space is limited.
+
+Upload/replacement and deletion invalidate the shared document-verification query immediately after success, while processing continues to use polling. File labels reflect the actual verification status. An empty result shows “Sin medición”; a measured OCR confidence of zero remains 0%. Review and rejection are explicit at the validation stage and do not mark validation or radar publication as completed. Radar completion requires an approved, synchronized verification with a publication version.

@@ -2,6 +2,8 @@ import { cleanup, screen, within } from '@testing-library/react';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it, vi } from 'vitest';
+import { VerificationFlow, VerificationResult } from './verification-result';
+import { verificationLabels } from '../constants/verification-labels.constants';
 import { VerificationDashboard } from './verification-dashboard';
 import { verificationApi } from '../services/document-verification.service';
 import { documentsService } from '../services/documents.service';
@@ -111,7 +113,7 @@ it('al eliminar el último archivo conserva su resultado solo en el historial', 
     noticeRead: false,
   };
   rerender(<VerificationDashboard rows={[removed]} {...props} />);
-  expect(screen.getByText('0%')).toBeInTheDocument();
+  expect(screen.getByText('Sin medición')).toBeInTheDocument();
   expect(screen.queryByText('Rechazado por administración')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Entendido' })).toBeNull();
   expect(
@@ -133,7 +135,7 @@ it('al eliminar el último archivo conserva su resultado solo en el historial', 
   await user.click(
     within(screen.getByRole('dialog')).getByRole('button', { name: 'Cerrar' }),
   );
-  expect(screen.getByText('0%')).toBeInTheDocument();
+  expect(screen.getByText('Sin medición')).toBeInTheDocument();
   expect(screen.queryByText('Rechazado por administración')).toBeNull();
 });
 
@@ -144,6 +146,58 @@ it('muestra el rechazo del archivo activo en su resultado sin el aviso superior'
       refresh={vi.fn()}
     />,
   );
-  expect(screen.getByText('Rechazado por administración')).toBeInTheDocument();
+  expect(
+    screen.getAllByText('Rechazado por administración').length,
+  ).toBeGreaterThan(0);
+  expect(screen.queryByText('Analizado automáticamente')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Entendido' })).toBeNull();
+});
+
+it.each([
+  'manual_approved',
+  'manual_rejected',
+  'review',
+  'low_confidence',
+] as const)('uses the actual %s decision in the file list', (status) => {
+  render(
+    <VerificationDashboard rows={[{ ...row, status }]} refresh={vi.fn()} />,
+  );
+  const files = screen.getAllByRole('list')[0];
+  expect(within(files).queryByText('Analizado automáticamente')).toBeNull();
+  expect(
+    within(files).getByText(verificationLabels[status]),
+  ).toBeInTheDocument();
+});
+it.each(['manual_rejected', 'review', 'low_confidence'] as const)(
+  'does not mark validation or publication complete for %s',
+  (status) => {
+    render(<VerificationFlow doc={{ ...row, status }} />);
+    const steps = screen.getAllByRole('listitem');
+    expect(within(steps[2]).queryByText('completado')).toBeNull();
+    expect(within(steps[3]).queryByText('completado')).toBeNull();
+    expect(
+      within(steps[2]).getByText(verificationLabels[status]),
+    ).toBeInTheDocument();
+  },
+);
+it('only marks publication complete after approval is synchronized with a radar version', () => {
+  const { rerender } = render(
+    <VerificationFlow
+      doc={{ ...row, status: 'manual_approved', synced: false }}
+    />,
+  );
+  expect(
+    within(screen.getAllByRole('listitem')[3]).queryByText('completado'),
+  ).toBeNull();
+  rerender(<VerificationFlow doc={{ ...row, status: 'manual_approved' }} />);
+  expect(
+    within(screen.getAllByRole('listitem')[3]).getByText('completado'),
+  ).toBeInTheDocument();
+});
+it('distinguishes a real OCR zero from missing measurement', () => {
+  render(
+    <VerificationResult doc={{ ...row, confidence: 0 }} details={vi.fn()} />,
+  );
+  expect(screen.getByText(/^0\s*%$/)).toBeInTheDocument();
+  expect(screen.queryByText('Sin medición')).toBeNull();
 });
