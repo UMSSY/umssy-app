@@ -4,7 +4,7 @@ import { JobApplicationsController } from './controllers/job-applications.contro
 import { CompanyJobApplicantsService } from './services/company-job-applicants.service.js';
 import { JobApplicationsService } from './services/job-applications.service.js';
 import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { EducationsModule } from '../educations/educations.module.js';
@@ -41,7 +41,7 @@ import { UsersModule } from '../users/users.module.js';
     PrismaModule,
     JwtAuthModule,
     SkillsModule,
-    JobOffersModule,
+    forwardRef(() => JobOffersModule),
     EducationsModule,
     WorkExperienceModule,
     UsersModule,
