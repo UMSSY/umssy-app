@@ -3,7 +3,7 @@ import { AttendanceOutsideWindowException } from '../exceptions/attendance-outsi
 
 type WorkshopSchedule = { eventDate: Date; startTime: Date; endTime: Date };
 
-const ATTENDANCE_OPEN_EARLY_MS = 2 * 60 * 60 * 1000;
+const ATTENDANCE_OPEN_EARLY_MS = 30 * 60 * 1000;
 
 function localScheduleInstant(eventDate: Date, time: Date): number {
   return (

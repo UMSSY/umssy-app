@@ -24,20 +24,20 @@ const workshop = {
 
 describe('attendance per session', () => {
   it.each([undefined, FIRST_ID])(
-    'opens a session two hours early with sessionId=%s',
+    'opens a session 30 minutes early with sessionId=%s',
     (sessionId) => {
       expect(
         resolveAttendanceSession(
           workshop,
           sessionId,
-          new Date('2026-12-12T11:00:00Z'),
+          new Date('2026-12-12T12:30:00Z'),
         ),
       ).toBe(FIRST_ID);
       expect(() =>
         resolveAttendanceSession(
           workshop,
           sessionId,
-          new Date('2026-12-12T10:59:59.999Z'),
+          new Date('2026-12-12T12:29:59.999Z'),
         ),
       ).toThrow(expect.objectContaining({ code: 'ATTENDANCE_OUTSIDE_WINDOW' }));
     },
@@ -50,14 +50,14 @@ describe('attendance per session', () => {
         resolveAttendanceSession(
           workshop,
           sessionId,
-          new Date('2026-12-19T11:00:00Z'),
+          new Date('2026-12-19T12:30:00Z'),
         ),
       ).toBe(SECOND_ID);
       expect(() =>
         resolveAttendanceSession(
           workshop,
           sessionId,
-          new Date('2026-12-19T10:59:59.999Z'),
+          new Date('2026-12-19T12:29:59.999Z'),
         ),
       ).toThrow(expect.objectContaining({ code: 'ATTENDANCE_OUTSIDE_WINDOW' }));
     },
@@ -94,7 +94,7 @@ describe('attendance per session', () => {
         resolveAttendanceSession(
           reported,
           undefined,
-          new Date('2026-11-23T21:39:59.999Z'),
+          new Date('2026-11-23T23:09:59.999Z'),
         ),
       ).toThrow(expect.objectContaining({ code: 'ATTENDANCE_OUTSIDE_WINDOW' }));
       expect(() =>
@@ -155,14 +155,14 @@ describe('attendance per session', () => {
       resolveAttendanceSession(
         single,
         undefined,
-        new Date('2026-12-12T02:15:00Z'),
+        new Date('2026-12-12T03:45:00Z'),
       ),
     ).toBe(FIRST_ID);
     expect(() =>
       resolveAttendanceSession(
         single,
         undefined,
-        new Date('2026-12-12T02:14:59.999Z'),
+        new Date('2026-12-12T03:44:59.999Z'),
       ),
     ).toThrow(expect.objectContaining({ code: 'ATTENDANCE_OUTSIDE_WINDOW' }));
   });
