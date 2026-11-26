@@ -52,7 +52,7 @@ describe('AccountActivationController', () => {
       activate: vi.fn().mockResolvedValue({ accessToken: 'jwt' }),
     };
     const sessionCookies = {
-      issueLoginCookies: vi.fn().mockResolvedValue(undefined),
+      issueLoginCookies: vi.fn().mockResolvedValue('jwt-with-session'),
     };
     const controller = new AccountActivationController(
       service as any,
@@ -60,7 +60,7 @@ describe('AccountActivationController', () => {
     );
     const response = { cookie: vi.fn() };
 
-    await controller.activate(
+    const result = await controller.activate(
       {
         email: 'ana@umss.test',
         code: '482719',
@@ -75,6 +75,7 @@ describe('AccountActivationController', () => {
       'jwt',
       'Mozilla/5.0',
     );
+    expect(result).toEqual({ accessToken: 'jwt-with-session' });
   });
 
   it('reenvía el código al correo recibido', async () => {

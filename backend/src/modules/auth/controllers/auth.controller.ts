@@ -120,19 +120,12 @@ export class AuthController {
   ) {
     return this.credentialLimits.run('login', body.email, async () => {
       const result = await this.authService.login(body);
-      const refresh = await this.refreshTokens.startFromLogin(
+      const session = await this.refreshTokens.startFromLogin(
         result.accessToken,
         userAgent,
       );
-      writeSessionCookies(response, {
-        accessToken: result.accessToken,
-        accessMaxAgeMs: this.authService.getAccessTokenMaxAgeMs(
-          result.accessToken,
-        ),
-        refreshToken: refresh.refreshToken,
-        refreshMaxAgeMs: refresh.refreshMaxAgeMs,
-      });
-      return result;
+      writeSessionCookies(response, session);
+      return { ...result, accessToken: session.accessToken };
     });
   }
 
@@ -170,20 +163,13 @@ export class AuthController {
         verifiedUser,
         body.roleTag,
       );
-      const refresh = await this.refreshTokens.startFromLogin(
+      const session = await this.refreshTokens.startFromLogin(
         result.accessToken,
         userAgent,
       );
-      writeSessionCookies(response, {
-        accessToken: result.accessToken,
-        accessMaxAgeMs: this.authService.getAccessTokenMaxAgeMs(
-          result.accessToken,
-        ),
-        refreshToken: refresh.refreshToken,
-        refreshMaxAgeMs: refresh.refreshMaxAgeMs,
-      });
+      writeSessionCookies(response, session);
 
-      return result;
+      return { ...result, accessToken: session.accessToken };
     });
   }
 
