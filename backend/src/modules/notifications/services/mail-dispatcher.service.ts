@@ -91,6 +91,12 @@ export class MailDispatcherService {
       }
     }
 
+    if (reservedDomainSkips > 0) {
+      this.logger.log(
+        `Correos omitidos por dominio de prueba: ${reservedDomainSkips} de ${userIds.length}`,
+      );
+    }
+
     return {
       status: summarizeChannelStatus(
         deliveries.filter((delivery) => delivery.status === 'sent').length,
