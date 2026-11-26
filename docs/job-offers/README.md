@@ -212,3 +212,4 @@ Tables `job_offers`, `job_offer_skills` and the catalogs `job_offer_statuses`, `
 - Closing date when publishing, automatic close every 5 minutes and manual close with confirmation.
 - Alert to the applicants who accept it when a vacancy is published, following each person's alert preference.
 - Active offer counts per company (`JobOffersService.countActiveOffersByCompany`) for the featured companies of the landing page.
+- The published-and-not-expired filter is defined once (`buildPublishedJobOfferWhere`) and shared by the published list, the matching source and the active offer counts.

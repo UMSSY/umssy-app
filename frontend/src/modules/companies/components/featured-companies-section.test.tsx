@@ -30,10 +30,10 @@ describe("FeaturedCompaniesSection", () => {
     expect(screen.getByText("AD")).toBeInTheDocument();
   });
 
-  it("links each card to the vacancies page", async () => {
+  it("links each card to the general vacancies page with a matching name", async () => {
     vi.spyOn(companiesService, "getFeaturedCompanies").mockResolvedValue([TECNOSOFT]);
     render(<FeaturedCompaniesSection />);
-    expect(await screen.findByRole("link", { name: "Ver vacantes de Tecnosoft S.R.L." })).toHaveAttribute("href", "/vacancies");
+    expect(await screen.findByRole("link", { name: "Ver vacantes" })).toHaveAttribute("href", "/vacancies");
   });
 
   it("shows an empty message", async () => {

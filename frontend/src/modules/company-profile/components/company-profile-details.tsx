@@ -31,7 +31,7 @@ export function CompanyProfileDetails({ profile }: CompanyProfileDetailsProps) {
           </Avatar>
           <div className="min-w-0">
             <h2 className="text-xl font-semibold wrap-anywhere text-foreground">{profile.name}</h2>
-            <p className="text-sm text-muted-foreground">{profile.sector ?? COMPANY_PROFILE_LABELS.emptyValue}</p>
+            <p className="text-sm wrap-anywhere text-muted-foreground">{profile.sector ?? COMPANY_PROFILE_LABELS.emptyValue}</p>
           </div>
         </CardContent>
       </Card>
