@@ -1,12 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '../../../prisma/client.js';
+import { Prisma } from '../../../prisma/client.js';
+import { RECORD_NOT_FOUND_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { COMPANY_CORRECTION_STATUSES } from '../constants/company-document-correction.constants.js';
+import { COMPANY_DOCUMENT_CORRECTION_SELECT } from '../constants/company-document-correction-select.constants.js';
+import { CompanyDocumentCorrectionConflictException } from '../exceptions/company-document-correction-conflict.exception.js';
+import type {
+  CompanyDocumentCorrectionResponse,
+  ReplaceCompanyDocumentOperation,
+} from '../types/company-document-correction.types.js';
 import { NAME_BLOCKING_REQUEST_STATUSES, COMPANY_ROLE_NAME } from '../constants/registration-name-uniqueness.constants.js';
 import { normalizeRegistrationName } from '../utils/normalize-registration-name.js';
 import type {
   CreateCompanyAccessRequestDto,
   ListCompanyAccessRequestsQuery,
 } from '../requests/create-company-access-request.schema.js';
+
+const NO_EXCLUDED_REQUEST_ID = '00000000-0000-0000-0000-000000000000';
 
 @Injectable()
 export class CompanyAccessRequestsRepository {
@@ -67,7 +77,12 @@ export class CompanyAccessRequestsRepository {
     });
   }
 
-  async findDuplicates(companyName: string, email: string, username: string) {
+  async findDuplicates(
+    companyName: string,
+    email: string,
+    username: string,
+    excludeRequestId: string = NO_EXCLUDED_REQUEST_ID,
+  ) {
     const normalizedCompanyName = normalizeRegistrationName(companyName);
     const normalizedUsername = normalizeRegistrationName(username);
     const blockingStatuses = [...NAME_BLOCKING_REQUEST_STATUSES];
@@ -91,6 +106,7 @@ export class CompanyAccessRequestsRepository {
             lower(btrim(regexp_replace(r.company_name, '\\s+', ' ', 'g'))) = ${normalizedCompanyName}
             OR r.email = ${email}
           )
+          AND r.id <> ${excludeRequestId}::uuid
         LIMIT 1`,
       this.prisma.$queryRaw<Array<{ source: string }>>`
         SELECT 'user' AS source
@@ -103,6 +119,7 @@ export class CompanyAccessRequestsRepository {
         FROM company_access_requests r
         JOIN access_request_statuses s ON s.id = r.status_id
         WHERE s.title = ANY(${blockingStatuses}::text[])
+          AND r.id <> ${excludeRequestId}::uuid
           AND lower(btrim(regexp_replace(r.username, '\\s+', ' ', 'g'))) = ${normalizedUsername}
         LIMIT 1`,
     ]);
@@ -412,6 +429,62 @@ export class CompanyAccessRequestsRepository {
         reviewedBy: { select: { id: true, firstName: true, lastName: true } },
       },
     });
+  }
+
+  findCorrectionSnapshotByCode(requestCode: string) {
+    return this.prisma.companyAccessRequest.findUnique({
+      where: { requestCode },
+      select: COMPANY_DOCUMENT_CORRECTION_SELECT,
+    });
+  }
+
+  async replaceDocumentAndReopen(
+    operation: ReplaceCompanyDocumentOperation,
+  ): Promise<CompanyDocumentCorrectionResponse> {
+    const { context, createFile } = operation;
+    try {
+      return await this.prisma.$transaction(
+        async (tx): Promise<CompanyDocumentCorrectionResponse> => {
+          await tx.companyAccessRequest.update({
+            where: {
+              id: context.requestId,
+              requestCode: context.requestCode,
+              status: { title: { in: [...COMPANY_CORRECTION_STATUSES] } },
+              AND: [{ documentFileId: context.previousFileId }],
+              reviewedAt: context.revision,
+            },
+            data: { status: { connect: { title: 'PENDING' } } },
+            select: { id: true },
+          });
+
+          const file = await createFile(tx);
+          await tx.companyAccessRequest.update({
+            where: { id: context.requestId },
+            data: {
+              documentFile: { connect: { id: file.id } },
+              rejectionReason: null,
+              reviewedAt: null,
+              reviewedBy: { disconnect: true },
+              openedAt: null,
+              openedBy: { disconnect: true },
+              ocrMatchScore: null,
+              ocrFieldResults: Prisma.DbNull,
+            },
+            select: { id: true },
+          });
+
+          return { requestCode: context.requestCode, status: 'PENDING' };
+        },
+      );
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
+        throw new CompanyDocumentCorrectionConflictException();
+      }
+      throw error;
+    }
   }
 
   findByCodeAndEmail(requestCode: string, email: string) {

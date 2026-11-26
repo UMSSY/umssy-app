@@ -48,13 +48,19 @@ describe('CompanyAccessRequestsService', () => {
     notify: vi.fn(),
   };
 
+  const correctionAuthorization = {
+    issueFor: vi.fn(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    correctionAuthorization.issueFor.mockReturnValue(`ccr1.${'A'.repeat(43)}`);
     service = new CompanyAccessRequestsService(
       repository as any,
       filesService as any,
       companyOcr as any,
       notificationsService as any,
+      correctionAuthorization as any,
     );
   });
 
