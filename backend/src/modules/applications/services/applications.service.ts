@@ -45,11 +45,12 @@ export class ApplicationsService {
       (record: ApplicationRecord) => record.jobOfferId,
     );
     const scoresMap = await this.matching.scoresForOffers(userId, offerIds);
+    const now = new Date();
 
     const responses: ApplicationItemResponse[] = records.map(
       (record: ApplicationRecord) => {
         const score = scoresMap.get(record.jobOfferId) ?? 0;
-        return this.mapper.toResponse(record, score);
+        return this.mapper.toResponse(record, score, now);
       },
     );
 

@@ -11,6 +11,7 @@ function buildApplication(overrides: Partial<Application>): Application {
     affinityPercentage: 80,
     status: "En revisión",
     appliedDate: "2026-11-10",
+    vacancyAvailable: true,
     ...overrides,
   };
 }
