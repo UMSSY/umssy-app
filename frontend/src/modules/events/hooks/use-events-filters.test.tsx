@@ -74,4 +74,22 @@ describe('useEventsFilters', () => {
 
     expect(result.current.filters.search).toBe('React');
   });
+
+  it('requests finished workshops only while the finished filter is active', () => {
+    const { result } = renderHook(() => useEventsFilters());
+
+    act(() => {
+      result.current.setIsFinished(true);
+    });
+
+    expect(result.current.isFinished).toBe(true);
+    expect(result.current.filters.scope).toBe('finished');
+    expect(result.current.filters.statusId).toBeUndefined();
+
+    act(() => {
+      result.current.setIsFinished(false);
+    });
+
+    expect(result.current.filters.scope).toBeUndefined();
+  });
 });

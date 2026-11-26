@@ -1,2 +1,2 @@
 
-export type EventDisplayStatus = 'voting' | 'expired' | 'published' | 'full';
+export type EventDisplayStatus = 'voting' | 'expired' | 'finished' | 'published' | 'full';

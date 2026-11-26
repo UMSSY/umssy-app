@@ -15,6 +15,7 @@ export function useEventsFilters() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [isPopular, setIsPopular] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
 
   const search = useDebouncedValue(searchInput, 300);
 
@@ -23,6 +24,8 @@ export function useEventsFilters() {
     categoryId,
     sort: isPopular ? POPULAR_EVENT_SORT : DEFAULT_EVENT_SORT,
     statusId: isExpired ? EXPIRED_STATUS_ID : undefined,
+    // Talleres que ya terminaron; dejan de mostrarse en el listado normal.
+    scope: isFinished ? 'finished' : undefined,
   };
 
   return {
@@ -34,6 +37,8 @@ export function useEventsFilters() {
     setIsPopular,
     isExpired,
     setIsExpired,
+    isFinished,
+    setIsFinished,
     filters,
   };
 }

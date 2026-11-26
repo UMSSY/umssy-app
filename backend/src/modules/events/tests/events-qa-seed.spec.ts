@@ -179,6 +179,8 @@ describe('Development event fixtures', () => {
       ['history-accessibility-2026-11-23', '2026-11-23', '18:30', '18:45'],
       ['history-visualization-2026-11-23', '2026-11-23', '18:45', '19:00'],
       ['history-projects-2026-11-26', '2026-11-26', '18:00', '19:00'],
+      ['advanced-architecture-2026-11-29', '2026-11-29', '06:00', '08:00'],
+      ['advanced-deployment-2026-11-30', '2026-11-30', '18:00', '20:00'],
     ];
     for (const [key, date, start, end] of scheduled) {
       const workshop = data.find(

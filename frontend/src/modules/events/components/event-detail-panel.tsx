@@ -3,7 +3,7 @@
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
-import { CalendarDays, Check, Clock3, MapPin, UserRound, X } from 'lucide-react';
+import { CalendarCheck, CalendarDays, Check, Clock3, MapPin, UserRound, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   calculateEventCapacityStatus,
@@ -84,6 +84,12 @@ export function EventDetailPanel({
             {displayStatus === "expired" && (
               <span className="rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">
                 Vencido
+              </span>
+            )}
+            {displayStatus === "finished" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">
+                <CalendarCheck className="size-3.5" aria-hidden="true" />
+                Finalizado
               </span>
             )}
             {displayStatus === "full" && (
