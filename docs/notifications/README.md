@@ -125,7 +125,7 @@ Tables `notifications`, `notification_types`, `notification_preferences` and `pu
 
 ## Frontend integration
 
-The frontend does not call `notify()`: the domain that owns the event does. Users choose their channel in **Perfil → Configuración** (see [profile](../profile/README.md)); `PushSubscriptionSync` registers the device subscription again after sign in when the saved channel is push. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/notifications?filter=SURVEYS` for the publication notice, `/surveys/:id` for reminders and `/backoffice/surveys/statistics/:id` for the creator.
+The frontend does not call `notify()`: the domain that owns the event does. Users choose their channel in **Perfil → Configuración** (see [profile](../profile/README.md)); `PushSubscriptionSync` registers the device subscription again after sign in when the saved channel is push. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/notifications?filter=SURVEYS` for the publication notice (a legacy link that the inbox redirects to `/notifications/surveys`), `/surveys/:id` for reminders and `/backoffice/surveys/statistics/:id` for the creator.
 
 ### Inbox extension points
 
@@ -147,7 +147,8 @@ The module exposes in `index.ts` the visual pieces of the inbox and the route of
 | `NotificationCard` | Card presentation: unread/pending dot, icon, title, description (`line-clamp-2`), date and an `action` slot. `NotificationItem` uses it with the "open and mark as read" button; surveys uses it with "Responder encuesta" |
 | `NotificationsInboxLoading` | Loading rows built with the shared `Skeleton` (`rows`, 4 by default) |
 | `NotificationsInboxEmpty` | Empty state with the `icon`, `title` and `description` of each section |
-| `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications?filter=SURVEYS`...), used by the sidebar, the filter tabs and surveys |
+| `NOTIFICATIONS_INBOX_PATH`, `getNotificationInboxPath(filter)` | Inbox route per filter (`/notifications`, `/notifications/surveys`...), used by the sidebar, the filter tabs and surveys |
+| `getNotificationInboxFilterFromSlug(slug)` | Filter of a route segment (`reminders` → `REMINDERS`), `null` when the segment is not a filter; used by the `/notifications/[filter]` page |
 | `NOTIFICATION_INBOX_FILTER_LABELS` | Filter labels; surveys keys its sidebar badge with `NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS`, so renaming the menu entry does not disconnect the counter |
 
 ### Inbox categories and filters
@@ -174,9 +175,11 @@ The inbox filters are defined in `notification-inbox-filters.constants.ts`. `NOT
 | Filter | Label | Route |
 | --- | --- | --- |
 | `ALL` | Todas | `/notifications` |
-| `SURVEYS` | Notificaciones de Encuestas | `/notifications?filter=SURVEYS` |
-| `REMINDERS` | Recordatorios | `/notifications?filter=REMINDERS` |
-| `SYSTEM` | Sistema | `/notifications?filter=SYSTEM` |
+| `SURVEYS` | Notificaciones de Encuestas | `/notifications/surveys` |
+| `REMINDERS` | Recordatorios | `/notifications/reminders` |
+| `SYSTEM` | Sistema | `/notifications/system` |
+
+Each filter except `ALL` has its own route segment (`NOTIFICATION_INBOX_FILTER_SLUGS`), served by `app/(app)/notifications/[filter]/page.tsx`; an unknown segment returns 404. Because the filter is part of the pathname, the sidebar highlights the active category with its usual nested-route rule. Legacy links with `?filter=` (for example the stored survey publication notices) open the same filter and are replaced with its route.
 
 The `CHAT` category has no filter of its own. `SURVEY_REMINDER` belongs to `REMINDERS`, so it is listed under the Recordatorios filter and not under the surveys one.
 
@@ -208,6 +211,8 @@ The general description that mentions surveys, reminders and account activity is
 - Push is sent with TTL and high urgency; push subscriptions are reassigned to the account that registers them.
 - Optional `filterSections` slot in `NotificationsView` and sub-item badges in the sidebar, so surveys shows its list and pending count inside the "Notificaciones de Encuestas" filter (single inbox).
 - Shared inbox components (`NotificationCard`, `NotificationsInboxLoading`, `NotificationsInboxEmpty`) and filter routes (`getNotificationInboxPath`) exported for the sections of other domains.
+- Inbox filters moved from `?filter=` to their own routes (`/notifications/surveys`, `/notifications/reminders`, `/notifications/system`), so the sidebar highlights the selected category; legacy `?filter=` links redirect to the new routes.
+- Chat message toasts (`CHAT_MESSAGE`, `CHAT_GROUP_MESSAGE`) use `ChatMessageToast`: UMSSY header with logo and site, "Ahora", close button, chat icon, sender or group name, message preview, "Nuevo mensaje de chat" and the "Ver mensaje" action. Other notification types keep the standard toast.
 
 - Central publication notices retain the exact Radar snapshot reference and support historical navigation.
 - Concurrent duplicate prevention per recipient and snapshot, with central ownership of listing and read state.

@@ -9,9 +9,15 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import { ChatMessageToast } from '../components/chat-message-toast';
+import {
+  CHAT_MESSAGE_TOAST_DURATION_MS,
+  CHAT_MESSAGE_TOAST_TYPES,
+} from '../constants/chat-message-toast.constants';
 import { NOTIFICATION_NEW_EVENT } from '../constants/notification-socket-events.constants';
 import { getNotificationsSocket } from '../services/notifications-socket';
 import type { NotificationNewSocketPayload } from '../types/notification-new-socket-payload.types';
+import { getChatToastTitle } from '../utils/get-chat-toast-title';
 import { getNotificationActionLabel } from '../utils/get-notification-action-label';
 import { getNotificationIcon } from '../utils/get-notification-icon';
 
@@ -84,24 +90,45 @@ export function useNotificationToasts(): void {
       }
 
       const actionLabel = getNotificationActionLabel(data.typeCode ?? '');
-      const toastIcon = getToastIcon(data.typeCode);
+      const openAction = () => {
+        if (!data.actionUrl) return;
+        if (router) {
+          router.push(data.actionUrl);
+        } else if (typeof window !== 'undefined') {
+          window.location.assign(data.actionUrl);
+        }
+      };
+
+      if (CHAT_MESSAGE_TOAST_TYPES.has(data.typeCode ?? '')) {
+        toast.custom(
+          (toastId) => (
+            <ChatMessageToast
+              title={getChatToastTitle(data.title)}
+              preview={data.body}
+              siteLabel={typeof window !== 'undefined' ? window.location.hostname : ''}
+              actionLabel={actionLabel}
+              onOpen={
+                data.actionUrl
+                  ? () => {
+                      toast.dismiss(toastId);
+                      openAction();
+                    }
+                  : undefined
+              }
+              onClose={() => toast.dismiss(toastId)}
+            />
+          ),
+          { duration: CHAT_MESSAGE_TOAST_DURATION_MS },
+        );
+        return;
+      }
 
       toast(data.title, {
         description: data.body,
-        icon: toastIcon,
+        icon: getToastIcon(data.typeCode),
         duration: 7000,
         action: data.actionUrl
-          ? {
-              label: actionLabel,
-              onClick: () => {
-                if (!data.actionUrl) return;
-                if (router) {
-                  router.push(data.actionUrl);
-                } else if (typeof window !== 'undefined') {
-                  window.location.assign(data.actionUrl);
-                }
-              },
-            }
+          ? { label: actionLabel, onClick: openAction }
           : undefined,
       });
     };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bell, CheckCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,13 +32,18 @@ function isValidInboxFilter(value: string | null): value is NotificationInboxFil
   return value !== null && (NOTIFICATION_INBOX_FILTERS as readonly string[]).includes(value);
 }
 
-export function NotificationsView({ filterSections }: NotificationsViewProps = {}) {
+export function NotificationsView({ filter, filterSections }: NotificationsViewProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filterParam = searchParams.get("filter");
-  const activeFilter: NotificationInboxFilter = isValidInboxFilter(filterParam)
-    ? filterParam
-    : "ALL";
+  const legacyFilter = isValidInboxFilter(filterParam) ? filterParam : null;
+  const activeFilter: NotificationInboxFilter = filter ?? legacyFilter ?? "ALL";
+
+  useEffect(() => {
+    if (!filter && legacyFilter && legacyFilter !== "ALL") {
+      router.replace(getNotificationInboxPath(legacyFilter));
+    }
+  }, [filter, legacyFilter, router]);
 
   const [page, setPage] = useState(1);
 
