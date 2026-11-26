@@ -39,9 +39,11 @@ describe("MentorDirectoryGrid", () => {
       "@container",
       "w-full",
     );
+    expect(container.querySelector("section > div")).not.toHaveClass("@min-[66rem]:grid-cols-3");
     expect(container.querySelector("section > div")).toHaveClass(
       "grid-cols-1",
       "@min-[50rem]:grid-cols-2",
+      "gap-5",
     );
   });
 

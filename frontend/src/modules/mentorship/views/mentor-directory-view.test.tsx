@@ -150,7 +150,8 @@ it.each([
   await screen.findByRole("heading", { name: "No hay mentores disponibles en Cloud/DevOps" });
   get.mockClear();
 
-  fireEvent.click(screen.getByRole("button", { name }));
+  await userEvent.click(screen.getByRole("combobox", { name: "Área técnica" }));
+  await userEvent.click(await screen.findByRole("option", { name }));
   const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
   expect(destination.searchParams.get("radarArea")).toBe(id);
   expect(destination.searchParams.has("areaId")).toBe(false);
@@ -423,7 +424,7 @@ describe("MentorDirectoryView", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Encuentra un mentor para tu próximo desafío",
+        name: "Encuentra un mentor",
       }),
     ).toBeInTheDocument();
   });
@@ -444,7 +445,8 @@ describe("MentorDirectoryView", () => {
     });
 
     const orientation = within(filters).getByRole("combobox", { name: "Orientación" });
-    expect(orientation.closest(".grid")).toHaveClass("grid-cols-2", "lg:flex");
+    expect(filters).toHaveClass("border", "rounded-lg", "flex-col", "lg:flex-row");
+    expect(within(filters).queryByRole("button", { name: "Todas las áreas" })).not.toBeInTheDocument();
 
     expect(
       within(filters).getByRole("searchbox", {
@@ -1166,10 +1168,54 @@ it("recibe el área del radar, mantiene disponibles y permite cambiar de compete
   }), expect.anything()));
   expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
   expect(screen.getByRole("checkbox", { name: "Solo disponibles" })).toHaveAttribute("aria-disabled", "true");
-  fireEvent.click(screen.getByRole("button", { name: "QA" }));
+  await userEvent.click(screen.getByRole("combobox", { name: "Área técnica" }));
+  await userEvent.click(await screen.findByRole("option", { name: "QA" }));
   applyNavigation(view.rerender);
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "area-qa", available: true }), expect.anything()));
-  fireEvent.click(screen.getByRole("button", { name: "Todas las áreas" }));
+  await userEvent.click(screen.getByRole("combobox", { name: "Área técnica" }));
+  await userEvent.click(await screen.findByRole("option", { name: "Todas" }));
   applyNavigation(view.rerender);
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "", available: true }), expect.anything()));
+});
+
+
+it("pagina ocho mentores de seis en seis y conserva filtros al navegar", async () => {
+  navigationMocks.search = "?search=Mentor&orientation=Orientación+técnica&sort=name_asc";
+  const candidates = Array.from({ length: 8 }, (_, index) => ({
+    ...mentors[0],
+    id: `mentor-${index + 1}`,
+    fullName: `Mentor ${index + 1}`,
+  }));
+  const query = vi.spyOn(directoryService, "getMentorDirectory").mockImplementation(async (params) =>
+    makeDirectoryPage(candidates.slice((params.page - 1) * 6, params.page * 6), {
+      page: params.page,
+      pageSize: 6,
+      totalItems: 8,
+      totalPages: 2,
+      effectiveSort: params.sort,
+    }),
+  );
+  const view = render(<MentorDirectoryView />);
+  expect(await screen.findAllByRole("link", { name: /Ver perfil de Mentor/ })).toHaveLength(6);
+  expect(screen.getByText("Mostrando 1–6 de 8 mentores")).toBeVisible();
+  await userEvent.click(screen.getByRole("button", { name: "Página siguiente" }));
+  applyNavigation(view.rerender);
+  await screen.findByText("Mostrando 7–8 de 8 mentores");
+  expect(screen.getAllByRole("link", { name: /Ver perfil de Mentor/ })).toHaveLength(2);
+  expect(query).toHaveBeenLastCalledWith(expect.objectContaining({
+    page: 2, search: "Mentor", orientation: "Orientación técnica", sort: "name_asc",
+  }), expect.any(AbortSignal));
+  await userEvent.click(screen.getByRole("button", { name: "Página anterior" }));
+  applyNavigation(view.rerender);
+  await screen.findByText("Mostrando 1–6 de 8 mentores");
+  await userEvent.click(screen.getByRole("button", { name: "Página siguiente" }));
+  applyNavigation(view.rerender);
+  await screen.findByText("Mostrando 7–8 de 8 mentores");
+  fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), {
+    target: { value: "name_desc" },
+  });
+  applyNavigation(view.rerender);
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({
+    page: 1, search: "Mentor", orientation: "Orientación técnica", sort: "name_desc",
+  }), expect.any(AbortSignal)));
 });
