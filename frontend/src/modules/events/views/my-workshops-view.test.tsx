@@ -14,11 +14,25 @@ const workshops = [
 
 beforeEach(() => {
   vi.useFakeTimers({ now: new Date('2026-11-13T12:00:00Z'), toFake: ['Date'] });
+  vi.mocked(toast.info).mockClear();
   vi.mocked(useManagedWorkshops).mockReturnValue({ workshops, isLoading: false, error: null, retry: vi.fn() });
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 describe('Mis talleres', () => {
+  it('opens attendance 30 minutes before the workshop and blocks earlier access', () => {
+    vi.setSystemTime(new Date('2027-06-24T17:29:59.999Z'));
+    render(<MyWorkshopsView />);
+    const link = screen.getByRole('link', { name: 'Registrar asistencias' });
+    fireEvent.click(link);
+    expect(toast.info).toHaveBeenCalledOnce();
+
+    vi.mocked(toast.info).mockClear();
+    vi.setSystemTime(new Date('2027-06-24T17:30:00.000Z'));
+    fireEvent.click(link);
+    expect(toast.info).not.toHaveBeenCalled();
+  });
+
   it('shows a fixed toast before the attendance window and hides the action for finished workshops', () => {
     render(<MyWorkshopsView />);
     expect(screen.getByRole('button', { name: 'Activos (1)' })).toHaveAttribute('aria-pressed', 'true');

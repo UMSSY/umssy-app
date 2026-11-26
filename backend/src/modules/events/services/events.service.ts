@@ -154,7 +154,8 @@ export class EventsService {
       skip: offset,
       take: limit,
       visibility: this.getCatalogVisibilityFilter(payload),
-      ...(payload.scope === 'finished' && { newestFirst: true }),
+      ...(payload.scope === 'finished' &&
+        payload.statusId === undefined && { newestFirst: true }),
     });
 
     return mapEventsToListResponse(items, total, page, limit);
