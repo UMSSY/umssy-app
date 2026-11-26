@@ -165,3 +165,9 @@ Review approval and rejection are decision actions and use non-destructive butto
 - Central publication notices, authorized historical access and return to the current radar.
 - Document verification results, administrative document/skill review and recoverable decisions.
 - Responsive radar interactions and evidence access on mobile.
+
+### HU3.3-1 — score-point touch targets
+
+Interactive score points use a transparent 48 × 48 SVG rectangle centered on the visible dot. The visible radius stays at 4.5; the parent group retains keyboard focus and Enter/Space activation. Non-interactive points have no hit rectangle, and missing coordinates do not create a target at the SVG origin. Comparison and projection series keep their existing behavior.
+
+For QA, repeat TC-15 at viewport widths 320, 360, 375, 390 and 430. Inspect `[data-testid^="radar-hit-"]` with `getBoundingClientRect()` to verify 48 × 48 CSS pixels in the rendered chart, then tap the outer portion of a target and check the selected area. Unit tests assert SVG geometry, not browser layout. Also check keyboard focus and low/zero scores: coincident points remain geometrically ambiguous for touch; use each axis label or the area breakdown to select an individual area without changing its score.
