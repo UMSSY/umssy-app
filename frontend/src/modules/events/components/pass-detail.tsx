@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useEventTiming } from '../hooks/use-event-finished';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRegistrationSession } from '@/modules/event-registrations';
+import { useCookieSession } from '@/shared/hooks/use-cookie-session';
 import { Button } from '@/components/ui/button';
 import { PassQr } from './pass-qr';
 import { formatEventLocation } from '../utils/format-event-location';
@@ -29,6 +30,8 @@ import { useOnlineStatus } from '../hooks/use-online-status';
 
 export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
   const accessToken = useRegistrationSession();
+  const cookieSession = useCookieSession();
+  const hasSession = Boolean(accessToken) || cookieSession;
   const queryClient = useQueryClient();
   const isOnline = useOnlineStatus();
   const pass = useQuery({
@@ -46,7 +49,7 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
       }
       return data;
     },
-    enabled: Boolean(accessToken) && isOnline,
+    enabled: hasSession && isOnline,
     retry: false,
   });
   const detail = pass.data ?? registration;

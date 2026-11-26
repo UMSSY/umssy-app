@@ -1,6 +1,7 @@
 import { BEARER_PREFIX } from '@/shared/constants/auth.constants';
 import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { AttendanceSessionRequiredError } from '../utils/attendance-session-required.error';
 import type { AttendanceCheckInOutcome } from '../types/attendance-check-in-outcome.types';
@@ -15,16 +16,15 @@ export const attendanceCheckInService = {
     accessToken: string | null = getAccessToken(),
     sessionId?: string,
   ): Promise<AttendanceCheckInOutcome> {
-    if (!accessToken) throw new AttendanceSessionRequiredError();
+    if (!accessToken && !hasCookieSession()) throw new AttendanceSessionRequiredError();
     if (!apiClient.defaults.baseURL)
       throw new Error('Attendance API unavailable');
 
     const response = await apiClient.post<unknown>(
       `/events/${encodeURIComponent(eventId)}/attendances/check-ins`,
-      // Sin sessionId el backend usa la sesión en curso.
       sessionId ? { reference, sessionId } : { reference },
       {
-        headers: { Authorization: `${BEARER_PREFIX}${accessToken}` },
+        ...(accessToken ? { headers: { Authorization: `${BEARER_PREFIX}${accessToken}` } } : {}),
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       },

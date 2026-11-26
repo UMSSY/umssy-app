@@ -129,6 +129,39 @@ describe('Radar personal integrado con Épica 2', () => {
     sessionStorage.clear();
   });
 
+  it('cambia de área sin volver al resaltado de Desarrollo al presionar otra opción', () => {
+    setRadar({
+      previous: {
+        version: 1,
+        updatedAt: '2026-10-20T08:00:00Z',
+        scores: {
+          desarrollo: 1,
+          'cloud-devops': 0,
+          'data-ai': 0,
+          qa: 0,
+          ciberseguridad: 0,
+          'gobernanza-ti': 0,
+        },
+      },
+    });
+    const { container } = renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole('switch', { name: 'Comparar con la anterior' }));
+    const highlighted = () =>
+      container.querySelector('[data-testid^="radar-dot-"] .stroke-gold')?.parentElement;
+    expect(highlighted()).toBe(screen.getByTestId('radar-dot-desarrollo'));
+
+    const qa = screen.getByRole('button', { name: 'QA' });
+    fireEvent.click(qa);
+    expect(highlighted()).toBe(screen.getByTestId('radar-dot-qa'));
+
+    const governance = screen.getByRole('button', { name: 'Gobernanza TI' });
+    fireEvent.pointerDown(governance);
+    expect(highlighted()).toBe(screen.getByTestId('radar-dot-qa'));
+    fireEvent.click(governance);
+    expect(highlighted()).toBe(screen.getByTestId('radar-dot-gobernanza-ti'));
+    expect(container.querySelectorAll('.stroke-gold')).toHaveLength(1);
+  });
+
   it.each([
     [0, 0, 'Sin cambio', 'font-semibold'],
     [2, 0, 'Bajó 2 puntos', 'text-destructive'],
@@ -190,7 +223,7 @@ describe('Radar personal integrado con Épica 2', () => {
           .querySelector('text'),
       ).toHaveClass('fill-accent', 'underline');
       expect(
-        screen.getByTestId('radar-dot-qa').querySelector('.stroke-accent'),
+        screen.getByTestId('radar-dot-qa').querySelector('.fill-accent.stroke-gold'),
       ).toBeInTheDocument();
       expect(
         screen.getByText(`Puntaje anterior: ${previousScore} / 10`),

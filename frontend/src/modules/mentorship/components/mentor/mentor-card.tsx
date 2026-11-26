@@ -28,13 +28,13 @@ export function MentorCard({
 
   return (
     <Card
-      className="relative h-full min-w-0 gap-4 rounded-none border border-border bg-surface py-[22px] shadow-none ring-0"
+      className="relative h-full min-w-0 gap-3 rounded-lg border border-border bg-surface py-4 shadow-none ring-0 sm:gap-4 sm:rounded-none sm:py-[22px]"
       aria-labelledby={`mentor-${mentor.id}`}
     >
-      <CardContent className="flex flex-1 flex-col gap-3 px-[22px]">
+      <CardContent className="flex flex-1 flex-col gap-3 px-4 sm:px-[22px]">
         <div className="flex flex-col items-start gap-2">
-          <div className="flex w-full min-w-0 flex-col items-start gap-5">
-            <Avatar className="size-[58px] shrink-0">
+          <div className="flex w-full min-w-0 items-center gap-3 sm:flex-col sm:items-start sm:gap-5">
+            <Avatar className="size-12 shrink-0 sm:size-[58px]">
               {mentor.photoUrl ? (
                 <AvatarImage
                   src={mentor.photoUrl}
@@ -73,7 +73,7 @@ export function MentorCard({
                 variant="outline"
                 aria-current={highlightAvailability ? 'true' : undefined}
                 className={cn(
-                  "absolute top-[22px] right-[22px] border-transparent bg-transparent px-0 text-[10px] whitespace-nowrap text-success",
+                  "border-transparent bg-transparent px-0 text-xs text-success sm:absolute sm:top-[22px] sm:right-[22px] sm:text-[10px]",
                   highlightAvailability && "font-semibold",
                 )}
               >
@@ -143,12 +143,12 @@ export function MentorCard({
         </div>
       </CardContent>
 
-      <CardFooter className="mx-[22px] mt-auto border-t border-border bg-surface px-0 pt-4">
+      <CardFooter className="mx-4 mt-auto border-t border-border bg-surface px-0 pt-4 sm:mx-[22px]">
         <Link
           href={profileHref}
           className={buttonVariants({
             variant: "outline",
-            className: "h-[38px] w-full gap-3 rounded-none border-accent! bg-surface text-xs text-accent hover:bg-accent hover:text-accent-foreground",
+            className: "h-11 w-full gap-3 sm:h-[38px] rounded-none border-accent! bg-surface text-xs text-accent hover:bg-accent hover:text-accent-foreground",
           })}
           aria-label={
             isOwnProfile

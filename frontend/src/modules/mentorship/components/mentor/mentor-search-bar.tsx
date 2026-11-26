@@ -48,7 +48,7 @@ export function MentorSearchBar({
 
   return (
     <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
-      <div className="relative min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1 basis-full sm:basis-0">
         <Search
           className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-text-secondary"
           aria-hidden="true"
@@ -57,7 +57,7 @@ export function MentorSearchBar({
           type="search"
           className="h-12 w-full rounded-sm border-border-strong bg-surface pr-4 pl-11 text-[13px]"
           aria-label="Buscar mentores por nombre"
-          placeholder="Buscar por nombre, cargo o palabra clave"
+          placeholder="Nombre, cargo o palabra clave"
           value={inputValue}
           onChange={(event) => {
             inputValueRef.current = event.target.value;

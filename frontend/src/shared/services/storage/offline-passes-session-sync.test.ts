@@ -72,4 +72,3 @@ afterEach(() => {
   vi.restoreAllMocks();
   localStorage.clear();
 });
-

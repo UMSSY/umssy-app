@@ -1,4 +1,4 @@
 export interface PushSyncSession {
-  token: string;
+  token?: string | null;
   signal: AbortSignal;
 }
