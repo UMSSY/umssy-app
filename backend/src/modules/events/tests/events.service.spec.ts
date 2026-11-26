@@ -239,5 +239,18 @@ describe('EventsService', () => {
         }),
       );
     });
+
+    it('keeps normal ordering when statusId overrides finished scope', async () => {
+      repositoryMock.findAndCount.mockResolvedValue({ items: [], total: 0 });
+      await service.findAll({
+        page: 1,
+        limit: 10,
+        scope: 'finished',
+        statusId: 'status-uuid',
+      });
+      expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
+        expect.not.objectContaining({ newestFirst: true }),
+      );
+    });
   });
 });

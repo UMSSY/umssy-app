@@ -15,6 +15,7 @@ interface ManagedWorkshopCardProps {
 export function ManagedWorkshopCard({ workshop, finished }: ManagedWorkshopCardProps) {
   const sessions = getSortedSessions(workshop);
   const isMultiSession = sessions.length > 1;
+  const earlyOpeningMs = 30 * 60 * 1000;
   return (
     <Card className="flex flex-col gap-4 rounded-lg border-border bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-2">
@@ -33,8 +34,8 @@ export function ManagedWorkshopCard({ workshop, finished }: ManagedWorkshopCardP
           const now = Date.now();
           const { startsAt, endsAt } = getScheduleBounds({ ...workshop, date: workshop.eventDate });
           const inWindow = sessions.length
-            ? sessions.some((session) => now >= Date.parse(session.startsAt) && now < Date.parse(session.endsAt))
-            : now >= startsAt && now < endsAt;
+            ? sessions.some((session) => now >= Date.parse(session.startsAt) - earlyOpeningMs && now < Date.parse(session.endsAt))
+            : now >= startsAt - earlyOpeningMs && now < endsAt;
           if (!inWindow) {
             event.preventDefault();
             toast.info('Taller fuera de horario. El registro se habilitará durante el horario de la sesión.');
