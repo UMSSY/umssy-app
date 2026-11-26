@@ -20,7 +20,7 @@ export class CompaniesRepository {
     companyIds: string[],
   ): Promise<FeaturedCompanyRecord[]> {
     return this.prisma.company.findMany({
-      where: { id: { in: companyIds } },
+      where: { id: { in: companyIds }, profile: { isNot: null } },
       select: FEATURED_COMPANY_SELECT,
     });
   }

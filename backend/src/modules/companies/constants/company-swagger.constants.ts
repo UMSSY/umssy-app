@@ -138,7 +138,7 @@ export const GET_COMPANY_PROFILE_ERROR_RESPONSES: ApiResponseOptions[] = [
 
 export const LIST_FEATURED_COMPANIES_OK_RESPONSE: ApiResponseOptions = {
   status: 200,
-  description: `Hasta ${FEATURED_COMPANIES_LIMIT} empresas con vacantes publicadas y vigentes, de la que tiene más vacantes a la que tiene menos; los empates se ordenan por nombre. Lista vacía si ninguna empresa tiene vacantes vigentes`,
+  description: `Hasta ${FEATURED_COMPANIES_LIMIT} empresas registradas en la plataforma (con perfil institucional) y con vacantes publicadas y vigentes, de la que tiene más vacantes a la que tiene menos; los empates se ordenan por nombre. Lista vacía si ninguna empresa tiene vacantes vigentes`,
   schema: {
     type: 'object',
     required: ['statusCode', 'ok', 'detail', 'data'],
