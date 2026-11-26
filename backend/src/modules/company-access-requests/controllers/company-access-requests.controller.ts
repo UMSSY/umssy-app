@@ -135,7 +135,8 @@ export class CompanyAccessRequestsController {
   })
   @ApiBadRequestResponse({ description: 'Datos de entrada inválidos.' })
   @ApiConflictResponse({
-    description: 'Ya existe una empresa, cuenta o solicitud activa equivalente.',
+    description:
+      'Conflicto de registro (COMPANY_REGISTRATION_CONFLICT). `data.field` indica el motivo: `companyName` (empresa ya registrada), `email` (correo ya usado), `activeRequest` (solicitud pendiente, en revisión, observada o aprobada con el mismo nombre o correo) o `username` (nombre de usuario no disponible, sin distinguir mayúsculas ni espacios sobrantes).',
   })
   create(
     @Body(new ZodValidationPipe(createCompanyAccessRequestSchema))
