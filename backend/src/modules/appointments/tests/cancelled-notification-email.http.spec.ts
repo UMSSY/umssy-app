@@ -63,7 +63,7 @@ const REASON = 'Me surgió una reunión de trabajo';
 
 const jwt = new JwtService({ secret: JWT_SECRET });
 
-const emailOf = (userId: string) => `${userId}@umssy.test`;
+const emailOf = (userId: string) => `${userId}@umssy.com`;
 
 // Correo «Cita cancelada» de punta a punta: NotificationsService y
 // MailDispatcherService reales; solo se simula el envío SMTP (MailService).

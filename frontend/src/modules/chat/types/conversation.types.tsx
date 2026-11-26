@@ -58,6 +58,7 @@ export interface DirectConversation {
   isBlockedByMe?: boolean;
   contextType?: string | null;
   contextId?: string | null;
+  contextTitle?: string | null;
 }
 
 export interface EventConversation extends Omit<DirectConversation, 'contact' | 'eventId'> {
@@ -68,6 +69,7 @@ export interface EventConversation extends Omit<DirectConversation, 'contact' | 
   contact?: never;
   contextType?: string | null;
   contextId?: string | null;
+  contextTitle?: string | null;
 }
 
 export type Conversation = DirectConversation | EventConversation;
