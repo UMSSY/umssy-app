@@ -13,11 +13,8 @@ const validBody = {
 };
 
 describe('createWorkExperienceSchema', () => {
-  it('trims the texts, converts the description to lowercase and converts the dates', () => {
-    const result = createWorkExperienceSchema.parse({
-      ...validBody,
-      description: ' BUILT User Interfaces ',
-    });
+  it('trims the texts and converts the dates', () => {
+    const result = createWorkExperienceSchema.parse(validBody);
 
     expect(result).toEqual({
       companyName: 'Synapse Labs',
@@ -25,7 +22,7 @@ describe('createWorkExperienceSchema', () => {
       startDate: new Date('2024-07-01'),
       endDate: new Date('2024-12-31'),
       isCurrent: false,
-      description: 'built user interfaces',
+      description: 'Built user interfaces',
     });
   });
 
@@ -129,22 +126,10 @@ describe('updateWorkExperienceSchema', () => {
     ).toBe(true);
   });
 
-  it('trims and converts a sent description to lowercase', () => {
+  it('trims a sent description', () => {
     expect(
-      updateWorkExperienceSchema.parse({
-        description: ' APIs con Node.js ',
-      }),
-    ).toEqual({ description: 'apis con node.js' });
-  });
-
-  it('preserves line breaks when converting a description to lowercase', () => {
-    expect(
-      updateWorkExperienceSchema.parse({
-        description: 'DESARROLLO DE APIs\nCON NODE.JS',
-      }),
-    ).toEqual({
-      description: 'desarrollo de apis\ncon node.js',
-    });
+      updateWorkExperienceSchema.parse({ description: ' APIs con Node.js ' }),
+    ).toEqual({ description: 'APIs con Node.js' });
   });
 
   it.each([null, '', '   '])(
