@@ -14,6 +14,7 @@ The **Company Access Requests Module** manages the end-to-end onboarding lifecyc
 | `POST`  | `/company-access-requests/:id/document`           | Public         | Uploads supporting legal/verification PDF or image document            |
 | `POST`  | `/company-access-requests/:id/submit`             | Public         | Submits draft, triggers OCR evaluation, generates tracking code        |
 | `GET`   | `/company-access-requests/status/:code`           | Public         | Checks request review status using its public tracking code            |
+| `POST`  | `/company-access-requests/:code/resubmit`         | Correction token | Replaces the document of an `OBSERVED` or `REJECTED` request and returns it to `PENDING` |
 | `GET`   | `/company-access-requests/activation-status`      | Public         | Verifies whether an approved company request is eligible for activation|
 | `POST`  | `/company-access-requests/report-inconsistency`   | Public         | Reports data inconsistency discovered during activation verification   |
 | `POST`  | `/company-access-requests/activate`               | Public         | Validates activation OTP and creates the active company & recruiter    |
@@ -85,6 +86,18 @@ The create (`POST /company-access-requests`) and update (`PATCH /company-access-
 `DRAFT`, `REJECTED` and cancelled requests do not hold a name. The approved account stores the username in `users.first_name` and the company name in `users.last_name`; activation only sets the password and `is_active`, so the checks run when the draft is created, not at activation.
 
 **Known limit:** there is no unique index (no schema or migration change was approved), so the check is not atomic. Two simultaneous requests with the same name or username can both pass it. Reviewers should keep checking duplicates when resolving a request.
+
+## Document Correction (HU18 CA17)
+
+After an observation or a rejection the applicant can upload a new letter without a session.
+
+- **Link:** the observed and rejected emails point to `/request-access/status?code=EMP-AAAA-NNNN&email=...#token=ccr1....`. The token travels in the URL fragment, so it never reaches server logs or the `Referer` header. The page reads it, removes it from the URL with `history.replaceState` and keeps it in memory only. It is not written to notifications: `actionUrl` and the in-app text carry no token.
+- **Token:** `ccr1.` plus an HMAC-SHA256 (keyed with `JWT_SECRET`) over the request id, the request code, the current document file id and `reviewed_at`. It has no time expiry (same as the student correction token); it stops matching as soon as the file or `reviewed_at` changes, so it is single use: replacing the document clears `reviewed_at`, and a new observation or rejection issues a new token and invalidates the previous one.
+- **Endpoint:** `POST /company-access-requests/:code/resubmit` (multipart `file`, header `Authorization: Bearer ccr1....`). `CompanyDocumentCorrectionGuard` validates the token; `FilesService` keeps the 10 MB and file signature checks. In one transaction the request goes from `OBSERVED` or `REJECTED` to `PENDING`, the new file is linked, the reason, reviewer and opening data are cleared and the OCR result is reset; the previous file is deleted afterwards and the letter OCR is evaluated again.
+- **Uniqueness:** before reopening, the checks of the previous section run again for the company name, username and email, excluding the request itself. A request that took the name in the meantime answers `409 COMPANY_REGISTRATION_CONFLICT` with `data.field`.
+- **Status:** `GET /company-access-requests/status/:code` now accepts only `EMP-AAAA-NNNN` codes and returns `reason` (observation or rejection reason) and `canResubmit` (`OBSERVED` or `REJECTED`). `rejectionReason` keeps its previous meaning (`REJECTED` only).
+- **Rate limit:** `status` (20 requests) and `resubmit` (10 requests) per 15 minutes for each client IP and request code, answered with `429 COMPANY_REQUEST_RATE_LIMIT`. The counters live in memory (`@nestjs/throttler` default storage): they work for a single backend instance, reset on restart and are not shared between instances. The IP is `request.ip`; behind a reverse proxy the application must set `trust proxy`, otherwise all clients share one counter per code.
+- **Backoffice:** the request returns to `PENDING` and shows up again in the review queue; no new notification type is created (that would need a catalog migration).
 
 ## Sprint History
 
