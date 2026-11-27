@@ -76,14 +76,23 @@ describe('authService', () => {
   it("refreshSession llama a POST /auth/refresh con credenciales", async () => {
     vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { ok: true } });
     const result = await authService.refreshSession();
-    expect(apiClient.post).toHaveBeenCalledWith("/auth/refresh");
+    expect(apiClient.post).toHaveBeenCalledWith("/auth/refresh", undefined, {
+      signal: expect.any(AbortSignal),
+    });
     expect(result).toEqual({ ok: true });
   });
 
   it("logout llama a POST /auth/logout para revocar sesión en servidor", async () => {
-    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { ok: true } });
-    const result = await authService.logout();
-    expect(apiClient.post).toHaveBeenCalledWith("/auth/logout");
-    expect(result).toEqual({ ok: true });
+    vi.mocked(apiClient.post).mockResolvedValueOnce({ status: 204 });
+
+    await expect(authService.logout()).resolves.toBeUndefined();
+    expect(apiClient.post).toHaveBeenCalledWith("/auth/logout", undefined, { timeout: 2_500 });
+  });
+
+  it("propaga un fallo del backend para que el cierre remoto no se dé por confirmado", async () => {
+    const error = new Error("Sin red");
+    vi.mocked(apiClient.post).mockRejectedValueOnce(error);
+
+    await expect(authService.logout()).rejects.toBe(error);
   });
 });
