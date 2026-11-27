@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { apiClient } from "@/shared/services/api-client";
 import { SessionInactivityGuard } from "./session-inactivity-guard";
 
 const mockReplace = vi.fn();
@@ -8,8 +9,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 
-const mockGetSession = vi.fn();
-const mockLogout = vi.fn();
 const mockEndSession = vi.fn();
 let mockBroadcastHandler: ((msg: { type: string; reason?: string }) => void) | null = null;
 const mockBroadcastAuthEvent = vi.fn();
@@ -21,11 +20,10 @@ vi.mock("../utils/auth-broadcast", () => ({
   },
 }));
 
-vi.mock("../services/auth.service", () => ({
-  authService: {
-    getSession: () => mockGetSession(),
-    refreshSession: () => Promise.resolve(),
-    logout: () => mockLogout(),
+vi.mock("@/shared/services/api-client", () => ({
+  apiClient: {
+    get: vi.fn(),
+    post: vi.fn(),
   },
 }));
 
@@ -63,6 +61,7 @@ vi.mock("../hooks/use-session-inactivity", () => ({
 describe("SessionInactivityGuard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(apiClient.post).mockResolvedValue({ status: 204 });
     capturedInactivityOptions = null;
     mockUseOptionalAuth.mockReturnValue({
       idleTimeoutSeconds: 900,
@@ -82,7 +81,7 @@ describe("SessionInactivityGuard", () => {
   it("reuses session timings from AuthContext without polling getSession", () => {
     render(<SessionInactivityGuard />);
 
-    expect(mockGetSession).not.toHaveBeenCalled();
+    expect(apiClient.get).not.toHaveBeenCalled();
     expect(capturedInactivityOptions?.idleTimeoutSeconds).toBe(900);
     expect(capturedInactivityOptions?.warningSeconds).toBe(180);
     expect(capturedInactivityOptions?.absoluteExpiresAt).toBe("2026-11-24T23:59:59.000Z");
@@ -138,7 +137,11 @@ describe("SessionInactivityGuard", () => {
     await user.click(screen.getByRole("button", { name: /cerrar sesión/i }));
 
     expect(mockEndSession).toHaveBeenCalledTimes(1);
-    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
+      "/auth/logout",
+      undefined,
+      { timeout: expect.any(Number) },
+    );
     expect(mockReplace).toHaveBeenCalledWith(
       expect.stringContaining("reason=SESSION_EXPIRED"),
     );
@@ -154,7 +157,11 @@ describe("SessionInactivityGuard", () => {
     ).triggerTimeout();
 
     expect(mockEndSession).toHaveBeenCalledTimes(1);
-    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
+      "/auth/logout",
+      undefined,
+      { timeout: expect.any(Number) },
+    );
     expect(mockBroadcastAuthEvent).toHaveBeenCalledWith({
       type: "SESSION_CLOSED",
       reason: "SESSION_EXPIRED",

@@ -20,6 +20,10 @@ import {
   subscribeCookieSession,
 } from "@/shared/services/storage/cookie-session-state";
 import { setCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
+import {
+  getSessionRestoreSignal,
+  hasRequestedManualLogout,
+} from "@/shared/utils/manual-logout";
 import { readAccessTokenSubject } from "@/shared/utils/read-access-token-subject";
 import { hasSessionMarker, setSessionMarker } from "@/shared/utils/session-marker";
 import type { AuthContextValue } from "@/shared/types/auth-context-value.types";
@@ -52,7 +56,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getServerFalse,
   );
 
-  const sessionEnabled = Boolean(accessToken) || cookieSession || hasMarker;
+  const sessionEnabled =
+    !hasRequestedManualLogout() && (Boolean(accessToken) || cookieSession || hasMarker);
   const sessionScopeKey = accessToken
     ? (readAccessTokenSubject(accessToken) ?? accessToken)
     : sessionEnabled
@@ -61,7 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const session = useQuery({
     queryKey: ["auth-session", sessionScopeKey],
-    queryFn: () => authService.getSession(accessToken),
+    queryFn: ({ signal }) => authService.getSession(accessToken, signal),
     enabled: sessionEnabled,
     networkMode: "offlineFirst",
     retry: false,
@@ -70,13 +75,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   });
 
   useEffect(() => {
-    if (isApiError(session.error) && session.error.response?.status === 401) {
+    if (
+      !hasRequestedManualLogout() &&
+      isApiError(session.error) &&
+      session.error.response?.status === 401
+    ) {
       endSession();
     }
   }, [session.error]);
 
   useEffect(() => {
-    if (session.data?.id) {
+    if (session.data?.id && !hasRequestedManualLogout()) {
       setCurrentSessionUserId(session.data.id);
       if (!accessToken && !cookieSession) {
         markCookieSessionActive();
@@ -90,10 +99,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function hydrateSession(): Promise<boolean> {
+    if (hasRequestedManualLogout()) return false;
     if (session.data?.id || accessToken || cookieSession) return true;
+    const signal = getSessionRestoreSignal();
     try {
-      const hydrated = await authService.getSession(null);
-      if (hydrated?.id) {
+      const hydrated = await authService.getSession(null, signal);
+      if (hydrated?.id && !signal.aborted) {
         queryClient.setQueryData(["auth-session", "cookie"], hydrated);
         setCurrentSessionUserId(hydrated.id);
         markCookieSessionActive();
@@ -106,9 +117,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const isAuthenticated = Boolean(
-    session.data?.id || accessToken || cookieSession,
-  );
+  const isAuthenticated =
+    sessionEnabled && Boolean(session.data?.id || accessToken || cookieSession);
 
   return (
     <AuthContext.Provider
