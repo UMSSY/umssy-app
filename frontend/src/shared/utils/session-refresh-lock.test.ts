@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import axios from "axios";
+import { clearManualLogout, runManualLogout } from "./manual-logout";
 import {
   executeSharedRefresh,
   REFRESH_LOCK_NAME,
@@ -15,6 +16,7 @@ describe("session-refresh-lock", () => {
   });
 
   afterEach(() => {
+    clearManualLogout();
     Object.defineProperty(navigator, "locks", {
       value: originalLocks,
       configurable: true,
@@ -43,7 +45,7 @@ describe("session-refresh-lock", () => {
     expect(postSpy).toHaveBeenCalledWith(
       expect.stringContaining("/auth/refresh"),
       {},
-      { withCredentials: true },
+      { withCredentials: true, signal: expect.any(AbortSignal) },
     );
     postSpy.mockRestore();
   });
@@ -66,6 +68,20 @@ describe("session-refresh-lock", () => {
     const [res1, res2] = await Promise.all([call1, call2]);
     expect(res1).toBe(true);
     expect(res2).toBe(true);
+  });
+
+  it("descarta una renovación iniciada antes del cierre incluso tras volver a iniciar sesión", async () => {
+    let finishRefresh!: () => void;
+    const refresh = executeSharedRefresh(
+      () => new Promise<void>((resolve) => { finishRefresh = resolve; }),
+    );
+
+    await runManualLogout(async () => {});
+    clearManualLogout();
+    finishRefresh();
+
+    await expect(refresh).resolves.toBe(false);
+    expect(localStorage.getItem(LAST_REFRESH_STORAGE_KEY)).toBeNull();
   });
 
   it("con wait=false: retorna false inmediatamente si otra pestaña tiene el candado", async () => {
