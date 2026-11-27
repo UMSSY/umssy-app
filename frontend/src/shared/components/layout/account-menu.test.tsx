@@ -1,13 +1,20 @@
 import "@/shared/testing/indexed-db.mock";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { apiClient } from "@/shared/services/api-client";
 import { saveAccessToken, getAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { clearManualLogout } from "@/shared/utils/manual-logout";
 import { AccountMenu } from "./account-menu";
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
-afterEach(() => { cleanup(); clearAccessToken(); vi.clearAllMocks(); });
+afterEach(() => {
+  cleanup();
+  clearManualLogout();
+  clearAccessToken();
+  vi.clearAllMocks();
+});
 describe("Account menu", () => {
   it("offers profile access without repeating area or section navigation", async () => {
     const user = userEvent.setup();
@@ -46,6 +53,10 @@ describe("Account menu", () => {
     expect(replace).not.toHaveBeenCalled();
   });
   it("closes the session and removes private cached data once confirmed", async () => {
+    const post = vi.spyOn(apiClient, "post").mockResolvedValue({ status: 204 });
+    onTestFinished(() => {
+      post.mockRestore();
+    });
     await saveAccessToken("test-token");
     const user = userEvent.setup();
     const { client } = renderWithQuery(<AccountMenu roles={["mentor"]} />);
@@ -53,8 +64,14 @@ describe("Account menu", () => {
     await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
     await user.click(await screen.findByRole("menuitem", { name: "Cerrar sesión" }));
     await user.click(await screen.findByRole("button", { name: "Cerrar sesión" }));
+
+    await waitFor(() => expect(replace).toHaveBeenCalledExactlyOnceWith("/login"));
+    expect(post).toHaveBeenCalledExactlyOnceWith(
+      "/auth/logout",
+      undefined,
+      { timeout: expect.any(Number) },
+    );
     expect(getAccessToken()).toBeNull();
     expect(client.getQueryCache().getAll()).toHaveLength(0);
-    expect(replace).toHaveBeenCalledWith("/login");
   });
 });

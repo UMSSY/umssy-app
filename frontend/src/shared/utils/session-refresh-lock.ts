@@ -1,5 +1,9 @@
 import axios from "axios";
 import { ENV_CONFIG } from "@/shared/config/env.config";
+import {
+  getSessionRestoreSignal,
+  hasRequestedManualLogout,
+} from "@/shared/utils/manual-logout";
 import { setSessionMarker } from "@/shared/utils/session-marker";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { markCookieSessionActive } from "@/shared/services/storage/cookie-session-state";
@@ -25,7 +29,12 @@ function notifySessionRefreshed(): void {
   }
 }
 
-export async function applyRefreshedSessionCredential(resData: unknown): Promise<void> {
+export async function applyRefreshedSessionCredential(
+  resData: unknown,
+  signal: AbortSignal,
+): Promise<void> {
+  if (signal.aborted) return;
+
   const payload = resData as {
     data?: { accessToken?: string };
     accessToken?: string;
@@ -33,26 +42,28 @@ export async function applyRefreshedSessionCredential(resData: unknown): Promise
   const newToken = payload?.data?.accessToken || payload?.accessToken;
   if (newToken) {
     await saveAccessToken(newToken);
-    setSessionMarker();
   } else {
     markCookieSessionActive();
-    setSessionMarker();
   }
+  if (!signal.aborted) setSessionMarker();
 }
 
-export async function performRefreshRequest(): Promise<void> {
+export async function performRefreshRequest(signal: AbortSignal): Promise<void> {
   const response = await axios.post(
     `${ENV_CONFIG.apiUrl || ""}/auth/refresh`,
     {},
-    { withCredentials: true },
+    { withCredentials: true, signal },
   );
-  await applyRefreshedSessionCredential(response.data);
+  await applyRefreshedSessionCredential(response.data, signal);
 }
 
 export async function executeSharedRefresh(
-  performRefresh?: () => Promise<unknown>,
+  performRefresh: (signal: AbortSignal) => Promise<unknown> = performRefreshRequest,
   options?: SharedRefreshOptions,
 ): Promise<boolean> {
+  if (hasRequestedManualLogout()) return false;
+
+  const signal = getSessionRestoreSignal();
   const shouldWait = options?.wait ?? false;
 
   if (inFlightRefreshPromise) {
@@ -64,12 +75,10 @@ export async function executeSharedRefresh(
   }
 
   const runRefresh = async (): Promise<boolean> => {
+    if (signal.aborted) return false;
     try {
-      if (performRefresh) {
-        await performRefresh();
-      } else {
-        await performRefreshRequest();
-      }
+      await performRefresh(signal);
+      if (signal.aborted) return false;
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(LAST_REFRESH_STORAGE_KEY, String(Date.now()));
@@ -95,7 +104,7 @@ export async function executeSharedRefresh(
         REFRESH_LOCK_NAME,
         lockOptions,
         async (lock) => {
-          if (!lock) {
+          if (!lock || signal.aborted) {
             resolve(false);
             return;
           }
