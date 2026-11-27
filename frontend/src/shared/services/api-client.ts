@@ -1,4 +1,4 @@
-import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
+import { AUTH_LOGOUT_PATH, BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import axios from "axios";
 import { toast } from "sonner";
 import { ENV_CONFIG } from "@/shared/config/env.config";
@@ -12,6 +12,7 @@ import {
   markCookieSessionActive,
 } from "@/shared/services/storage/cookie-session-state";
 import { broadcastAuthEvent } from "@/shared/utils/auth-broadcast";
+import { hasRequestedManualLogout } from "@/shared/utils/manual-logout";
 import { executeSharedRefresh } from "@/shared/utils/session-refresh-lock";
 
 function isJwtExpired(token: string): boolean {
@@ -81,11 +82,13 @@ apiClient.interceptors.request.use(async (config) => {
       toast.info(message);
     throw new axios.AxiosError(message, "ERR_NETWORK", config);
   }
+  if (config.url === AUTH_LOGOUT_PATH) return config;
+
   await initializeAccessTokenStorage();
   const accessToken = getAccessToken();
 
   if (accessToken && isJwtExpired(accessToken)) {
-    markCookieSessionActive();
+    if (!hasRequestedManualLogout()) markCookieSessionActive();
     if (config.headers.get("Authorization") === "") {
       config.headers.delete("Authorization");
     }
@@ -111,6 +114,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
+      if (error.config?.url === AUTH_LOGOUT_PATH || hasRequestedManualLogout()) {
+        return Promise.reject(error);
+      }
+
       const responseCode = (error.response?.data as { code?: string } | undefined)?.code;
 
       if (
@@ -135,8 +142,7 @@ apiClient.interceptors.response.use(
       const url = originalRequest?.url || "";
       const isAuthUrl =
         url.includes("/auth/login") ||
-        url.includes("/auth/refresh") ||
-        url.includes("/auth/logout");
+        url.includes("/auth/refresh");
 
       if (originalRequest && !originalRequest._retry && !isAuthUrl) {
         originalRequest._retry = true;
