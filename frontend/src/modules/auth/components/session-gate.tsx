@@ -13,6 +13,10 @@ import {
   hasCookieSession,
   subscribeCookieSession,
 } from "@/shared/services/storage/cookie-session-state";
+import {
+  hasRequestedManualLogout,
+  isManualLogoutInProgress,
+} from "@/shared/utils/manual-logout";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { endSession } from "../utils/session";
 import { setSessionMarker } from "../utils/session-cookie";
@@ -61,6 +65,7 @@ export function SessionGate({ children }: SessionGateProps) {
 
   const needsBackendProbe =
     rawState === "login" &&
+    !hasRequestedManualLogout() &&
     Boolean(hydrateSession) &&
     !hasOpenedOnce &&
     !backendProbeDone;
@@ -78,7 +83,7 @@ export function SessionGate({ children }: SessionGateProps) {
 
     let active = true;
     queueMicrotask(async () => {
-      if (!active) return;
+      if (!active || hasRequestedManualLogout()) return;
       try {
         await hydrate();
       } catch {
@@ -93,9 +98,10 @@ export function SessionGate({ children }: SessionGateProps) {
   }, [needsBackendProbe]);
 
   useEffect(() => {
+    if (isManualLogoutInProgress()) return;
     if (state === "login") {
       endSession();
-      const loginUrl = buildLoginUrl(currentPath());
+      const loginUrl = hasRequestedManualLogout() ? "/login" : buildLoginUrl(currentPath());
       if (navigator.onLine === false) {
         void waitForAccessTokenWrites().then(() => window.location.replace(loginUrl));
       } else {
