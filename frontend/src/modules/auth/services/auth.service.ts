@@ -1,5 +1,5 @@
 import { toAuthRequestError } from "../utils/auth-request-error";
-import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
+import { AUTH_LOGOUT_PATH, BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
 import {
@@ -18,6 +18,7 @@ import type {
 import { withOfflineSessionCopy } from "@/shared/services/storage/offline-session-copy";
 
 const LOGOUT_TIMEOUT_MS = 2_500;
+const LOGOUT_SUCCESS_STATUS = 204;
 
 function isLoginResponse(value: unknown): value is LoginResponse {
   if (typeof value !== "object" || value === null) return false;
@@ -68,10 +69,10 @@ export const authService = {
     return { ok: true };
   },
   logout: async (): Promise<void> => {
-    const response = await apiClient.post<void>("/auth/logout", undefined, {
+    const response = await apiClient.post<void>(AUTH_LOGOUT_PATH, undefined, {
       timeout: LOGOUT_TIMEOUT_MS,
     });
-    if (response.status !== 204) {
+    if (response.status !== LOGOUT_SUCCESS_STATUS) {
       throw new Error("El servidor no confirmó el cierre de sesión.");
     }
   },

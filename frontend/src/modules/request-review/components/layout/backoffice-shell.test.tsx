@@ -3,7 +3,7 @@ import { clearAccessToken, getAccessToken, saveAccessToken } from "@/shared/serv
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
-import { authService } from "@/modules/auth";
+import { apiClient } from "@/shared/services/api-client";
 import { clearManualLogout } from "@/shared/utils/manual-logout";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { requestReviewService } from "../../services/request-review.service";
@@ -83,8 +83,8 @@ describe("BackofficeShell", () => {
   );
 
   it("Cerrar sesión borra el token y va al login", async () => {
-    const logout = vi.spyOn(authService, "logout").mockResolvedValue(undefined);
-    onTestFinished(() => { logout.mockRestore(); });
+    const post = vi.spyOn(apiClient, "post").mockResolvedValue({ status: 204 });
+    onTestFinished(() => { post.mockRestore(); });
     expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
     renderWithQuery(
       <BackofficeShell>
@@ -95,7 +95,11 @@ describe("BackofficeShell", () => {
     fireEvent.click(screen.getByRole("button", { name: /Cerrar sesión/ }));
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
-    expect(logout).toHaveBeenCalledTimes(1);
+    expect(post).toHaveBeenCalledExactlyOnceWith(
+      "/auth/logout",
+      undefined,
+      { timeout: expect.any(Number) },
+    );
     expect(getAccessToken()).toBeNull();
     expect(replace).not.toHaveBeenCalledWith("/login?next=%2Fbackoffice%2Fsolicitudes");
   });

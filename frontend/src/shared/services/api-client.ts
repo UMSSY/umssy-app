@@ -1,4 +1,4 @@
-import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
+import { AUTH_LOGOUT_PATH, BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import axios from "axios";
 import { toast } from "sonner";
 import { ENV_CONFIG } from "@/shared/config/env.config";
@@ -82,8 +82,7 @@ apiClient.interceptors.request.use(async (config) => {
       toast.info(message);
     throw new axios.AxiosError(message, "ERR_NETWORK", config);
   }
-  // El cierre usa la cookie de refresh y no necesita cargar el token local.
-  if (config.url === "/auth/logout") return config;
+  if (config.url === AUTH_LOGOUT_PATH) return config;
 
   await initializeAccessTokenStorage();
   const accessToken = getAccessToken();
@@ -115,7 +114,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      if (error.config?.url === "/auth/logout" || hasRequestedManualLogout()) {
+      if (error.config?.url === AUTH_LOGOUT_PATH || hasRequestedManualLogout()) {
         return Promise.reject(error);
       }
 

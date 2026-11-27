@@ -1,5 +1,3 @@
-const MANUAL_LOGOUT_STORAGE_KEY = "umssy_manual_logout";
-
 let pendingLogout: Promise<void> | null = null;
 let isLoggedOutManually: boolean | undefined;
 let sessionRestoreController = new AbortController();
@@ -9,7 +7,7 @@ export function hasRequestedManualLogout(): boolean {
   if (isLoggedOutManually !== undefined) return isLoggedOutManually;
 
   try {
-    isLoggedOutManually = sessionStorage.getItem(MANUAL_LOGOUT_STORAGE_KEY) === "1";
+    isLoggedOutManually = sessionStorage.getItem("umssy_manual_logout") !== null;
   } catch {
     isLoggedOutManually = false;
   }
@@ -30,10 +28,8 @@ export function clearManualLogout(): void {
     sessionRestoreController = new AbortController();
   }
   try {
-    sessionStorage.removeItem(MANUAL_LOGOUT_STORAGE_KEY);
-  } catch {
-    // El estado en memoria cubre navegadores con almacenamiento restringido.
-  }
+    sessionStorage.removeItem("umssy_manual_logout");
+  } catch {}
 }
 
 export function runManualLogout(logout: () => Promise<void>): Promise<void> {
@@ -42,10 +38,8 @@ export function runManualLogout(logout: () => Promise<void>): Promise<void> {
   isLoggedOutManually = true;
   sessionRestoreController.abort();
   try {
-    sessionStorage.setItem(MANUAL_LOGOUT_STORAGE_KEY, "1");
-  } catch {
-    // El estado en memoria cubre navegadores con almacenamiento restringido.
-  }
+    sessionStorage.setItem("umssy_manual_logout", "");
+  } catch {}
   pendingLogout = Promise.resolve()
     .then(logout)
     .finally(() => {

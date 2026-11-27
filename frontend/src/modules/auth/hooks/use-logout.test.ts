@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useLogout } from './use-logout';
 import * as pushHookModule from '@/shared/hooks/use-push-notifications';
 import * as sessionModule from '../utils/session';
-import { authService } from '../services/auth.service';
+import { apiClient } from '@/shared/services/api-client';
 import { clearManualLogout } from '@/shared/utils/manual-logout';
 
 const mockReplace = vi.fn();
@@ -25,8 +25,8 @@ vi.mock('../utils/session', () => ({
   endSession: vi.fn(),
 }));
 
-vi.mock('../services/auth.service', () => ({
-  authService: { logout: vi.fn().mockResolvedValue(undefined) },
+vi.mock('@/shared/services/api-client', () => ({
+  apiClient: { post: vi.fn() },
 }));
 
 vi.mock('@/shared/hooks/use-push-notifications', () => ({
@@ -36,6 +36,7 @@ vi.mock('@/shared/hooks/use-push-notifications', () => ({
 describe('useLogout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(apiClient.post).mockResolvedValue({ status: 204 });
   });
 
   afterEach(() => {
@@ -55,8 +56,8 @@ describe('useLogout', () => {
     await result.current();
 
     expect(mockDeactivate).toHaveBeenCalledTimes(1);
-    expect(mockDeactivate).toHaveBeenCalledBefore(vi.mocked(authService.logout));
-    expect(authService.logout).toHaveBeenCalledBefore(vi.mocked(sessionModule.endSession));
+    expect(mockDeactivate).toHaveBeenCalledBefore(vi.mocked(apiClient.post));
+    expect(apiClient.post).toHaveBeenCalledBefore(vi.mocked(sessionModule.endSession));
     expect(sessionModule.endSession).toHaveBeenCalledTimes(1);
     expect(mockClear).toHaveBeenCalledTimes(1);
     expect(mockReplace).toHaveBeenCalledWith('/login');
@@ -99,7 +100,7 @@ describe('useLogout', () => {
     await Promise.resolve();
 
     expect(mockDeactivate).toHaveBeenCalledTimes(1);
-    expect(authService.logout).not.toHaveBeenCalled();
+    expect(apiClient.post).not.toHaveBeenCalled();
     expect(sessionModule.endSession).not.toHaveBeenCalled();
 
     resolveDeactivate();
@@ -131,14 +132,18 @@ describe('useLogout', () => {
     vi.mocked(pushHookModule.usePushNotifications).mockReturnValue({
       deactivate: vi.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof pushHookModule.usePushNotifications>);
-    vi.mocked(authService.logout).mockRejectedValueOnce(new Error('Sin red'));
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Sin red'));
     vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const first = renderHook(useLogout);
     const second = renderHook(useLogout);
     await Promise.all([first.result.current(), second.result.current()]);
 
-    expect(authService.logout).toHaveBeenCalledTimes(1);
+    expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
+      '/auth/logout',
+      undefined,
+      { timeout: expect.any(Number) },
+    );
     expect(sessionModule.endSession).toHaveBeenCalledTimes(1);
     expect(mockClear).toHaveBeenCalledTimes(1);
     expect(mockReplace).toHaveBeenCalledExactlyOnceWith('/login');
