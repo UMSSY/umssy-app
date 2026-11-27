@@ -2,6 +2,7 @@ export { LoginView } from "./views/login-view";
 export { ForgotPasswordView } from "./views/forgot-password-view";
 export { SessionClosedView } from "./views/session-closed-view";
 export { useLogin } from "./hooks/use-login";
+export { useLogout } from "./hooks/use-logout";
 export { authService } from "./services/auth.service";
 export { SessionGate } from "./components/session-gate";
 export { startSession, endSession } from "./utils/session";
