@@ -3,7 +3,11 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/shared/contexts/auth-context";
-import { buildLoginUrl, endSession } from "@/modules/auth";
+import { buildLoginUrl, endSession, useLogout } from "@/modules/auth";
+import {
+  hasRequestedManualLogout,
+  isManualLogoutInProgress,
+} from "@/shared/utils/manual-logout";
 
 import { hasCookieSession, subscribeCookieSession } from "@/shared/services/storage/cookie-session-state";
 import { getSessionToken } from "../utils/session";
@@ -18,6 +22,7 @@ function readSession(hasAdministrativeRole: boolean, isAuthenticated: boolean): 
 export function useBackofficeSession() {
   const router = useRouter();
   const pathname = usePathname();
+  const logout = useLogout();
   const { roles, isLoading, isAuthenticated } = useAuth();
   const state = useSyncExternalStore<BackofficeSessionState>(
     subscribeCookieSession,
@@ -26,17 +31,13 @@ export function useBackofficeSession() {
   );
 
   useEffect(() => {
+    if (isManualLogoutInProgress()) return;
     if (state === "login") {
       endSession();
-      router.replace(buildLoginUrl(pathname));
+      router.replace(hasRequestedManualLogout() ? "/login" : buildLoginUrl(pathname));
     }
     if (state === "forbidden") router.replace("/");
   }, [state, router, pathname]);
-
-  function logout() {
-    endSession();
-    router.replace("/login");
-  }
 
   return { state, logout };
 }
