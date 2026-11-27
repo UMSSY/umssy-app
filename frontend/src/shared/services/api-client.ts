@@ -12,6 +12,7 @@ import {
   markCookieSessionActive,
 } from "@/shared/services/storage/cookie-session-state";
 import { broadcastAuthEvent } from "@/shared/utils/auth-broadcast";
+import { hasRequestedManualLogout } from "@/shared/utils/manual-logout";
 import { executeSharedRefresh } from "@/shared/utils/session-refresh-lock";
 
 function isJwtExpired(token: string): boolean {
@@ -81,11 +82,14 @@ apiClient.interceptors.request.use(async (config) => {
       toast.info(message);
     throw new axios.AxiosError(message, "ERR_NETWORK", config);
   }
+  // El cierre usa la cookie de refresh y no necesita cargar el token local.
+  if (config.url === "/auth/logout") return config;
+
   await initializeAccessTokenStorage();
   const accessToken = getAccessToken();
 
   if (accessToken && isJwtExpired(accessToken)) {
-    markCookieSessionActive();
+    if (!hasRequestedManualLogout()) markCookieSessionActive();
     if (config.headers.get("Authorization") === "") {
       config.headers.delete("Authorization");
     }
@@ -111,6 +115,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
+      if (error.config?.url === "/auth/logout" || hasRequestedManualLogout()) {
+        return Promise.reject(error);
+      }
+
       const responseCode = (error.response?.data as { code?: string } | undefined)?.code;
 
       if (
@@ -135,8 +143,7 @@ apiClient.interceptors.response.use(
       const url = originalRequest?.url || "";
       const isAuthUrl =
         url.includes("/auth/login") ||
-        url.includes("/auth/refresh") ||
-        url.includes("/auth/logout");
+        url.includes("/auth/refresh");
 
       if (originalRequest && !originalRequest._retry && !isAuthUrl) {
         originalRequest._retry = true;
