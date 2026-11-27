@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useLogout } from './use-logout';
 import * as pushHookModule from '@/shared/hooks/use-push-notifications';
 import * as sessionModule from '../utils/session';
+import { authService } from '../services/auth.service';
+import { clearManualLogout } from '@/shared/utils/manual-logout';
 
 const mockReplace = vi.fn();
 const mockClear = vi.fn();
@@ -23,6 +25,10 @@ vi.mock('../utils/session', () => ({
   endSession: vi.fn(),
 }));
 
+vi.mock('../services/auth.service', () => ({
+  authService: { logout: vi.fn().mockResolvedValue(undefined) },
+}));
+
 vi.mock('@/shared/hooks/use-push-notifications', () => ({
   usePushNotifications: vi.fn(),
 }));
@@ -33,10 +39,12 @@ describe('useLogout', () => {
   });
 
   afterEach(() => {
+    clearManualLogout();
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
-  it('calls deactivate before cleaning session', async () => {
+  it('desactiva push y revoca la sesión antes de limpiar el navegador', async () => {
     const mockDeactivate = vi.fn().mockResolvedValue(undefined);
     vi.mocked(pushHookModule.usePushNotifications).mockReturnValue({
       deactivate: mockDeactivate,
@@ -47,6 +55,8 @@ describe('useLogout', () => {
     await result.current();
 
     expect(mockDeactivate).toHaveBeenCalledTimes(1);
+    expect(mockDeactivate).toHaveBeenCalledBefore(vi.mocked(authService.logout));
+    expect(authService.logout).toHaveBeenCalledBefore(vi.mocked(sessionModule.endSession));
     expect(sessionModule.endSession).toHaveBeenCalledTimes(1);
     expect(mockClear).toHaveBeenCalledTimes(1);
     expect(mockReplace).toHaveBeenCalledWith('/login');
@@ -89,6 +99,7 @@ describe('useLogout', () => {
     await Promise.resolve();
 
     expect(mockDeactivate).toHaveBeenCalledTimes(1);
+    expect(authService.logout).not.toHaveBeenCalled();
     expect(sessionModule.endSession).not.toHaveBeenCalled();
 
     resolveDeactivate();
@@ -114,5 +125,22 @@ describe('useLogout', () => {
     expect(sessionModule.endSession).toHaveBeenCalledTimes(1);
     expect(mockClear).toHaveBeenCalledTimes(1);
     expect(mockReplace).toHaveBeenCalledWith('/login');
+  });
+
+  it('comparte el cierre entre dos botones y termina el cierre local si falla la red', async () => {
+    vi.mocked(pushHookModule.usePushNotifications).mockReturnValue({
+      deactivate: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof pushHookModule.usePushNotifications>);
+    vi.mocked(authService.logout).mockRejectedValueOnce(new Error('Sin red'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const first = renderHook(useLogout);
+    const second = renderHook(useLogout);
+    await Promise.all([first.result.current(), second.result.current()]);
+
+    expect(authService.logout).toHaveBeenCalledTimes(1);
+    expect(sessionModule.endSession).toHaveBeenCalledTimes(1);
+    expect(mockClear).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledExactlyOnceWith('/login');
   });
 });

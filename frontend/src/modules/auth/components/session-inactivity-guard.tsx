@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useOptionalAuth } from "@/shared/contexts/auth-context";
+import { isManualLogoutInProgress } from "@/shared/utils/manual-logout";
 import { authService } from "../services/auth.service";
 import { endSession } from "../utils/session";
 import { buildLoginUrl } from "../utils/safe-next-path";
@@ -54,9 +55,12 @@ export function SessionInactivityGuard({
     broadcastReason: AuthCloseReason,
     redirectReason: AuthCloseReason,
   ) => {
+    if (isManualLogoutInProgress()) return;
     broadcastAuthEvent({ type: "SESSION_CLOSED", reason: broadcastReason });
     endSession();
-    void authService.logout();
+    void authService.logout().catch((error) => {
+      console.warn("No se pudo confirmar el cierre de sesión en el servidor.", error);
+    });
     if (typeof window !== "undefined") {
       const currentPath = `${window.location.pathname}${window.location.search}`;
       try {

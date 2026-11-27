@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockGetSession = vi.fn();
-const mockLogout = vi.fn();
+const mockLogout = vi.fn().mockResolvedValue(undefined);
 const mockEndSession = vi.fn();
 let mockBroadcastHandler: ((msg: { type: string; reason?: string }) => void) | null = null;
 const mockBroadcastAuthEvent = vi.fn();

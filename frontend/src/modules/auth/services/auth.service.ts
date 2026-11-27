@@ -2,7 +2,6 @@ import { toAuthRequestError } from "../utils/auth-request-error";
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
-import { broadcastAuthEvent } from "../utils/auth-broadcast";
 import {
   applyRefreshedSessionCredential,
   executeSharedRefresh,
@@ -17,6 +16,8 @@ import type {
   ResetPasswordPayload,
 } from "../types/forgot-password.types";
 import { withOfflineSessionCopy } from "@/shared/services/storage/offline-session-copy";
+
+const LOGOUT_TIMEOUT_MS = 2_500;
 
 function isLoginResponse(value: unknown): value is LoginResponse {
   if (typeof value !== "object" || value === null) return false;
@@ -52,11 +53,11 @@ export const authService = {
   },
   refreshSession: async (options?: SharedRefreshOptions): Promise<{ ok: boolean }> => {
     const refreshed = await executeSharedRefresh(
-      async () => {
+      async (signal) => {
         const response = await apiClient.post<
           ApiResponse<{ ok?: boolean; accessToken?: string }> | { ok?: boolean; accessToken?: string }
-        >("/auth/refresh");
-        await applyRefreshedSessionCredential(response.data);
+        >("/auth/refresh", undefined, { signal });
+        await applyRefreshedSessionCredential(response.data, signal);
         return response.data;
       },
       { wait: options?.wait ?? true },
@@ -66,17 +67,12 @@ export const authService = {
     }
     return { ok: true };
   },
-  logout: async (): Promise<{ ok: boolean }> => {
-    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
-    try {
-      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/logout");
-      const res = response.data;
-      if (res && typeof res === "object" && "data" in res && res.data) {
-        return res.data;
-      }
-      return (res as { ok: boolean }) ?? { ok: true };
-    } catch {
-      return { ok: true };
+  logout: async (): Promise<void> => {
+    const response = await apiClient.post<void>("/auth/logout", undefined, {
+      timeout: LOGOUT_TIMEOUT_MS,
+    });
+    if (response.status !== 204) {
+      throw new Error("El servidor no confirmó el cierre de sesión.");
     }
   },
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
