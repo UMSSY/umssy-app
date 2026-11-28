@@ -3,11 +3,24 @@ import {
   completeGithubOAuth,
   completePortfolioOAuth,
 } from './complete-portfolio-oauth';
+import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
+import { hasSessionMarker } from '@/shared/utils/session-marker';
+import { executeSharedRefresh } from '@/shared/utils/session-refresh-lock';
 import { portfolioAccountsService } from '../services/portfolio-accounts.service';
 
 vi.mock('@/shared/services/storage/access-token-storage', () => ({
   initializeAccessTokenStorage: vi.fn().mockResolvedValue(undefined),
   getAccessToken: vi.fn().mockReturnValue('session-token'),
+}));
+vi.mock('@/shared/utils/session-refresh-lock', () => ({
+  executeSharedRefresh: vi.fn().mockResolvedValue(true),
+}));
+vi.mock('@/shared/services/storage/cookie-session-state', () => ({
+  hasCookieSession: vi.fn().mockReturnValue(false),
+}));
+vi.mock('@/shared/utils/session-marker', () => ({
+  hasSessionMarker: vi.fn().mockReturnValue(false),
 }));
 vi.mock('../services/portfolio-accounts.service', () => ({
   portfolioAccountsService: {
@@ -18,6 +31,10 @@ vi.mock('../services/portfolio-accounts.service', () => ({
 describe('GitHub OAuth callback', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getAccessToken).mockReturnValue('session-token');
+    vi.mocked(executeSharedRefresh).mockResolvedValue(true);
+    vi.mocked(hasCookieSession).mockReturnValue(false);
+    vi.mocked(hasSessionMarker).mockReturnValue(false);
     sessionStorage.clear();
     sessionStorage.setItem(
       'umssy.github.oauth',
@@ -106,5 +123,64 @@ describe('GitHub OAuth callback', () => {
     expect(
       portfolioAccountsService.completeOAuthCallback,
     ).not.toHaveBeenCalled();
+  });
+
+  it('rehydrates the session when token is not in memory after external redirect', async () => {
+    vi.mocked(getAccessToken).mockReturnValueOnce(null).mockReturnValue('restored-token');
+    expect(
+      await completeGithubOAuth(
+        new URLSearchParams('code=code-1&state=state-1'),
+      ),
+    ).toBe('success');
+    expect(executeSharedRefresh).toHaveBeenCalledWith(undefined, { wait: true });
+    expect(portfolioAccountsService.completeOAuthCallback).toHaveBeenCalledWith(
+      'github',
+      { code: 'code-1', state: 'state-1', verifier: 'verifier-1' },
+    );
+  });
+
+  it('aborts with error when user has no active session and refresh fails', async () => {
+    vi.mocked(getAccessToken).mockReturnValue(null);
+    vi.mocked(executeSharedRefresh).mockResolvedValue(false);
+    vi.mocked(hasCookieSession).mockReturnValue(false);
+    vi.mocked(hasSessionMarker).mockReturnValue(false);
+
+    expect(
+      await completeGithubOAuth(
+        new URLSearchParams('code=code-1&state=state-1'),
+      ),
+    ).toBe('error');
+    expect(
+      portfolioAccountsService.completeOAuthCallback,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('allows connection when session marker is active even without in-memory token', async () => {
+    vi.mocked(getAccessToken).mockReturnValue(null);
+    vi.mocked(hasSessionMarker).mockReturnValue(true);
+
+    expect(
+      await completeGithubOAuth(
+        new URLSearchParams('code=code-1&state=state-1'),
+      ),
+    ).toBe('success');
+    expect(portfolioAccountsService.completeOAuthCallback).toHaveBeenCalledWith(
+      'github',
+      { code: 'code-1', state: 'state-1', verifier: 'verifier-1' },
+    );
+  });
+
+  it('returns conflict when the social account is already linked to another user (HTTP 409)', async () => {
+    const conflictError = Object.assign(new Error('Conflict'), {
+      isAxiosError: true,
+      response: { status: 409 },
+    });
+    vi.mocked(portfolioAccountsService.completeOAuthCallback).mockRejectedValueOnce(conflictError);
+
+    expect(
+      await completeGithubOAuth(
+        new URLSearchParams('code=code-1&state=state-1'),
+      ),
+    ).toBe('conflict');
   });
 });
