@@ -3,6 +3,9 @@ import {
   initializeAccessTokenStorage,
   getAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import { hasCookieSession } from '@/shared/services/storage/cookie-session-state';
+import { hasSessionMarker } from '@/shared/utils/session-marker';
+import { executeSharedRefresh } from '@/shared/utils/session-refresh-lock';
 import { portfolioAccountsService } from '../services/portfolio-accounts.service';
 import { takePortfolioOAuthAttempt } from './portfolio-oauth-storage';
 import type { PortfolioProviderName } from '../types/portfolio-provider-name.types';
@@ -31,7 +34,12 @@ export async function completePortfolioOAuth(
     if (error === 'access_denied') return 'cancelled';
     if (error || !code) return 'error';
     await initializeAccessTokenStorage();
-    if (!getAccessToken()) return 'error';
+    if (!getAccessToken()) {
+      await executeSharedRefresh(undefined, { wait: true });
+    }
+    if (!getAccessToken() && !hasCookieSession() && !hasSessionMarker()) {
+      return 'error';
+    }
     await portfolioAccountsService.completeOAuthCallback(provider, {
       code,
       state,
